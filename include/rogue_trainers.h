@@ -68,6 +68,8 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
 u16 Rogue_SelectTrainerReplacementSpecies(u16 trainerNum, struct Pokemon *party, u8 slot, u8 partyCount);
 
 #if TESTING
+void RogueTest_UseContentTrainers(bool8 enabled);
+void RogueTest_ApplyAscensionProfile(u16 trainerNum, struct Pokemon *mon, const struct RoguePokemonCompetitiveSet *preset, bool8 boss, bool8 ace);
 u8 RogueTest_CalculateMonFixedIV(u16 trainerNum);
 u8 RogueTest_PlanTrainerSpecies(u16 trainerNum, u16 *speciesBuffer, u8 monCount);
 #endif

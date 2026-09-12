@@ -271,12 +271,15 @@ TEST("Sacred Ash is not offered when the Final Quest preserves fainted Pokemon")
     BeginRecoveryTest();
     CreateRecoveryTestParty();
     AddBagItem(ITEM_SACRED_ASH, 1);
-    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ClearRunStartConfigOverride();
     RogueQuest_SetStateFlag(QUEST_ID_THE_FINAL_RUN, QUEST_STATE_UNLOCKED, TRUE);
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, TRUE);
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
+    gRogueSaveBlock->activeAdventureConfig = gRogueSaveBlock->adventureConfig;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(ROGUE_FINAL_CHAMP_DIFFICULTY);
 
     EXPECT(Rogue_UseFinalQuestEffects());

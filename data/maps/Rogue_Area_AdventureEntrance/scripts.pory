@@ -15,12 +15,12 @@ const VAR_RUN_START_USES_TEAM_CHOICE = VAR_TEMP_7
 
 const RUN_REVIEW_ACTION_BACK = 0
 const RUN_REVIEW_ACTION_START = 1
-const RUN_REVIEW_ACTION_EDIT = 2
+const RUN_REVIEW_ACTION_CHOOSE_TRIAL = 3
 
 const RUN_START_EDIT_SETTINGS = 0
 const RUN_START_EDIT_POKEDEX = 1
 const RUN_START_EDIT_TRIAL = 2
-const RUN_START_EDIT_DIFFICULTY = 3
+const RUN_START_EDIT_ASCENSION = 3
 const RUN_START_EDIT_TRIAL_POKEDEX = 4
 const RUN_START_EDIT_STARTING_TEAM = 5
 
@@ -31,7 +31,7 @@ const RUN_START_OUTCOME_EXIT = 0
 const RUN_START_OUTCOME_RETRY = 1
 
 const TRIAL_SETUP_STAGE_TRIAL = 0
-const TRIAL_SETUP_STAGE_DIFFICULTY = 1
+const TRIAL_SETUP_STAGE_ASCENSION = 1
 const TRIAL_SETUP_STAGE_POKEDEX = 2
 const TRIAL_SETUP_STAGE_REVIEW = 3
 const TRIAL_SETUP_STAGE_EXIT = 4
@@ -338,77 +338,39 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
     releaseall
 }
 
+script Rogue_Area_AdventureEntrance_IntroduceAscension
+{
+    if(flag(FLAG_IS_CHAMPION) && !flag(FLAG_ROGUE_ASCENSION_INTRODUCED))
+    {
+        msgbox(format("Welcome back, Champion!\pYou've cleared a full Adventure! Ready for a new challenge?\pAscension is now available in setup. Its 20 levels each add a rule on top of the earlier levels.\pAscension 0 keeps the original challenge. You can always choose it again.\pClear your highest unlocked level in a fresh, solo Standard Adventure to unlock the next.\pSingles, Doubles and Mixed progress separately. Trials, replays and imported Charms won't advance them.\pYou can read every level's rules before choosing."))
+        setflag(FLAG_ROGUE_ASCENSION_INTRODUCED)
+    }
+}
+
 script Rogue_Area_AdventureEntrance_StandardRunReview
 {
+    call(Rogue_Area_AdventureEntrance_IntroduceAscension)
     call(Rogue_ResetAdventureVars)
-    setvar(VAR_RUN_START_TEAM_PREFERENCE, RUN_START_TEAM_SOURCE_CURRENT_PARTY)
     callnative(RogueRunStart_PrepareStandard)
     setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-
     while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
     {
         closemessage
-        callnative(ScriptMenu_ShowRunReview)
+        special(Special_ViewAdventureSetup)
         waitstate
-
         if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
         {
             callnative(RogueRunStart_Clear)
             return
         }
-        elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_EDIT)
+        callnative(RogueRunStart_Commit)
+        if(var(VAR_RESULT) == YES)
         {
-            begindynamicmultichoice(32)
-            callnative(RogueRunStart_AppendStandardEditOptions)
-            enddynamicmultichoice(1, 0, 3, TRUE)
-            copyvar(VAR_RUN_REVIEW_STAGE, VAR_RESULT)
-
-            if(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_STARTING_TEAM)
+            call(Rogue_StartAdventureInternal)
+            if(var(VAR_RUN_START_OUTCOME) != RUN_START_OUTCOME_RETRY)
             {
-                begindynamicmultichoice(16)
-                callnative(RogueRunStart_AppendTeamSourceOptions)
-                enddynamicmultichoice(1, 0, 3, TRUE)
-                if(var(VAR_RESULT) != MULTI_B_PRESSED)
-                {
-                    copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
-                    copyvar(VAR_0x8007, VAR_RESULT)
-                    callnative(RogueRunStart_SetPreferredTeamSource)
-                }
-            }
-            elif(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_SETTINGS)
-            {
-                callnative(RogueRunStart_GetPreferredTeamSource)
-                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
                 callnative(RogueRunStart_Clear)
-                special(Special_ViewDifficultyConfigMenu)
-                waitstate
-                callnative(RogueRunStart_PrepareStandard)
-                copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
-                callnative(RogueRunStart_SetPreferredTeamSource)
-            }
-            elif(var(VAR_RUN_REVIEW_STAGE) == RUN_START_EDIT_POKEDEX)
-            {
-                callnative(RogueRunStart_GetPreferredTeamSource)
-                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
-                callnative(RogueRunStart_Clear)
-                special(Special_ViewRoguePokedex)
-                waitstate
-                callnative(RogueRunStart_PrepareStandard)
-                copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
-                callnative(RogueRunStart_SetPreferredTeamSource)
-            }
-        }
-        else
-        {
-            callnative(RogueRunStart_Commit)
-            if(var(VAR_RESULT) == YES)
-            {
-                call(Rogue_StartAdventureInternal)
-                if(var(VAR_RUN_START_OUTCOME) != RUN_START_OUTCOME_RETRY)
-                {
-                    callnative(RogueRunStart_Clear)
-                    return
-                }
+                return
             }
         }
     }
@@ -444,6 +406,7 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
         return
     }
 
+    call(Rogue_Area_AdventureEntrance_IntroduceAscension)
     special(RogueTrial_LoadLastSelection)
     if(var(VAR_RESULT) == YES)
     {
@@ -492,21 +455,22 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
 
             if(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
             {
-                special(RogueTrial_SelectForcedDifficulty)
+                special(RogueTrial_SelectFixedAscension)
                 if(var(VAR_RESULT) == YES)
                 {
                     setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_POKEDEX)
                 }
                 else
                 {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_ASCENSION)
                 }
             }
         }
-        elif(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_DIFFICULTY)
+        elif(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_ASCENSION)
         {
-            begindynamicmultichoice(8)
-            special(RogueTrial_AppendDifficultyOptions)
+            // All 21 ascensions plus Back.
+            begindynamicmultichoice(22)
+            special(RogueTrial_AppendAscensionOptions)
             enddynamicmultichoice(1, 0, 5, TRUE)
             if(var(VAR_RESULT) == MULTI_B_PRESSED)
             {
@@ -547,14 +511,14 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 }
                 else
                 {
-                    special(RogueTrial_SelectForcedDifficulty)
+                    special(RogueTrial_SelectFixedAscension)
                     if(var(VAR_RESULT) == YES)
                     {
                         setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
                     }
                     else
                     {
-                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_ASCENSION)
                     }
                 }
             }
@@ -565,7 +529,7 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
             copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
             callnative(RogueRunStart_SetPreferredTeamSource)
             closemessage
-            callnative(ScriptMenu_ShowRunReview)
+            special(Special_ViewAdventureSetup)
             waitstate
 
             if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
@@ -573,47 +537,12 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 callnative(RogueRunStart_Clear)
                 setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
             }
-            elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_EDIT)
+            elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_CHOOSE_TRIAL)
             {
-                begindynamicmultichoice(32)
-                callnative(RogueRunStart_AppendTrialEditOptions)
-                enddynamicmultichoice(1, 0, 4, TRUE)
-                copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
                 callnative(RogueRunStart_GetPreferredTeamSource)
                 copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
-
-                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_STARTING_TEAM)
-                {
-                    begindynamicmultichoice(16)
-                    callnative(RogueRunStart_AppendTeamSourceOptions)
-                    enddynamicmultichoice(1, 0, 3, TRUE)
-                    if(var(VAR_RESULT) != MULTI_B_PRESSED)
-                    {
-                        copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
-                    }
-                }
                 callnative(RogueRunStart_Clear)
-
-                if(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_STARTING_TEAM)
-                {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-                }
-                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL)
-                {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
-                }
-                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_DIFFICULTY)
-                {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_DIFFICULTY)
-                }
-                elif(var(VAR_TRIAL_MENU_CHOICE) == RUN_START_EDIT_TRIAL_POKEDEX)
-                {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_POKEDEX)
-                }
-                else
-                {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-                }
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
             }
             else
             {
@@ -876,6 +805,13 @@ script Rogue_StartAdventureInternal
             }
         }
 
+        callnative(RogueRunStart_Commit)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("These Adventure settings are no longer valid.\pPlease review your setup again."), MSGBOX_DEFAULT)
+            call(Rogue_Adventure_CancelRunStartAfterGate)
+            return
+        }
         special(RogueTrial_CanStartPendingSelection)
         if(var(VAR_RESULT) == NO)
         {
@@ -1115,11 +1051,11 @@ script Rogue_ReturnAdventureInternal
 
         if(var(VAR_0x8004) == 1)
         {
-            msgbox(format("I just wanted to remind you that you can adjust your Difficulty in the Config Lab to make it more of a Challenge if you'd like.\pYou can edit individual controls too, if you'd prefer to take smaller Difficulty steps rather than one giant leap."), MSGBOX_DEFAULT)
+            msgbox(format("You can try a higher unlocked Ascension in Set Up Adventure.\pEach level adds one rule. Singles, Doubles and Mixed unlock separately."), MSGBOX_DEFAULT)
         }
         else
         {
-            msgbox(format("I just wanted to remind you that you can adjust your Difficulty in the Config Lab to make it more manageable if you'd like.\pYou can edit individual controls too, if you'd prefer to take smaller Difficulty steps rather than one giant leap."), MSGBOX_DEFAULT)
+            msgbox(format("You can choose a lower Ascension in Set Up Adventure.\pRead the Base Rules and prepare your team before setting off again."), MSGBOX_DEFAULT)
         }
     }
 
@@ -1307,7 +1243,7 @@ script Rogue_Area_AdventureEntrance_MeetPokabbie
     msgbox(format("I upgraded the Config Lab to have new settings for you.\pHere, take a look."))
 
     waitse
-    special(Special_ViewDifficultyConfigMenu)
+    special(Special_ViewAdventureSetup)
     waitstate
 
     msgbox(format("Annnnddddd!\pFinally, I've added a new upgrade you may build for {POKEMON_HUB}, the Trial Area!"))

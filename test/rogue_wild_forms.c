@@ -2,6 +2,9 @@
 #include "test/test.h"
 #include "constants/species.h"
 #include "event_data.h"
+#include "constants/flags.h"
+#include "rogue_settings.h"
+#include "rogue.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_query.h"
@@ -239,10 +242,12 @@ TEST("Wild encounter Furfrou family is eligible only through Natural Form")
 TEST("Active run queries include Furfrou trims for their distinct types")
 {
 #if defined(ROGUE_EXPANSION)
-    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    struct RogueAdventureConfig config;
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
 
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    Rogue_CopyAdventureConfig(&config);
+    config.pokedexVariant = POKEDEX_VARIANT_NATIONAL_MAX;
+    Rogue_SetRunStartConfigOverride(&config);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     RogueMonQuery_InvalidateSpeciesActiveCache();
 
@@ -257,7 +262,7 @@ TEST("Active run queries include Furfrou trims for their distinct types")
 
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    RoguePokedex_SetDexVariant(originalDexVariant);
+    Rogue_ClearRunStartConfigOverride();
     RogueMonQuery_InvalidateSpeciesActiveCache();
 #else
     ASSUME(FALSE);
@@ -278,6 +283,9 @@ TEST("Pokedex family eligibility does not change canonical numbering")
 {
 #if defined(ROGUE_EXPANSION)
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 wasActive = Rogue_IsRunActive();
+    Rogue_ClearRunStartConfigOverride();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_RBY);
 
@@ -295,6 +303,7 @@ TEST("Pokedex family eligibility does not change canonical numbering")
     EXPECT_EQ(RoguePokedex_GetCurrentDexLimit(), 153);
 
     RoguePokedex_SetDexVariant(originalDexVariant);
+    if (wasActive) FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 #else
     ASSUME(FALSE);
 #endif
@@ -323,7 +332,12 @@ TEST("Mega forms inherit display eligibility from their base species")
 TEST("Pokedex family eligibility only permits appropriate regional forms")
 {
 #if defined(ROGUE_EXPANSION)
-    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 originalDexVariant;
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ClearRunStartConfigOverride();
+    originalDexVariant = RoguePokedex_GetDexVariant();
 
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_LETSGO);
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_RAICHU_ALOLAN));
@@ -361,6 +375,8 @@ TEST("Pokedex family eligibility only permits appropriate regional forms")
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_BASCULEGION_FEMALE));
 
     RoguePokedex_SetDexVariant(originalDexVariant);
+    if (wasRunActive)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 #else
     ASSUME(FALSE);
 #endif

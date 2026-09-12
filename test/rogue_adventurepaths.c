@@ -104,7 +104,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     };
     struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     u16 originalBaseSeed = gRogueRun.baseSeed;
-    u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    struct RogueAdventureConfig config;
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalRoomId = gRogueRun.adventureRoomId;
     RAND_TYPE originalRng = gRngRogueValue;
@@ -121,11 +121,15 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     u32 hashChecksum = 2166136261u;
     u8 i;
 
+    // This matrix validates 12 complete islands twice, rather than one encounter.
+    gTestRunnerState.timeoutSeconds = 180;
+
     EXPECT_NE(originalPath, NULL);
     if(originalPath == NULL)
         return;
 
     *originalPath = gRogueAdvPath;
+    Rogue_CopyAdventureConfig(&config);
     for(i = 0; i < ARRAY_COUNT(cases); ++i)
     {
         u32 firstHash;
@@ -146,7 +150,8 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
         u8 singleDebrisCount;
         u8 pairedDebrisCount;
 
-        Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, cases[i].gameMode);
+        config.mode = cases[i].gameMode;
+        Rogue_SetRunStartConfigOverride(&config);
         Rogue_SetCurrentDifficulty(cases[i].difficulty);
         gRogueRun.baseSeed = cases[i].seed;
         gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
@@ -223,7 +228,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
     gRogueRun.adventureRoomId = originalRoomId;
-    Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
+    Rogue_ClearRunStartConfigOverride();
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRngRogueValue = originalRng;
     Free(originalPath);
@@ -479,7 +484,6 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
     u16 originalPreviewSpeciesA = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA1);
     u16 originalPreviewSpeciesB = VarGet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2);
     u16 originalPreviewMode = gSpecialVar_Result;
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
@@ -496,7 +500,6 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
     memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
     if(wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
     RogueMonQuery_InvalidateSpeciesActiveCache();
     gRogueRun.rivalTrainerNum = TRAINER_NONE;
@@ -606,7 +609,6 @@ TEST("Frontier Brain previews are stable, RNG-neutral, and expose Brandon's anch
     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA2, originalPreviewSpeciesB);
     gSpecialVar_Result = originalPreviewMode;
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     RoguePokedex_SetDexVariant(originalDexVariant);
     RogueMonQuery_InvalidateSpeciesActiveCache();

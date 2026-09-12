@@ -1480,31 +1480,19 @@ SINGLE_BATTLE_TEST("Klutz suppresses Fated Crown")
 
 SINGLE_BATTLE_TEST("Chaos Charm has a 20 percent chance to follow a damaging move with Metronome")
 {
-    bool32 activates;
-
-    PARAMETRIZE { activates = TRUE; }
-    PARAMETRIZE { activates = FALSE; }
+    PASSES_RANDOMLY(1, 5, RNG_ROGUE_CHAOS_CHARM);
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Item(ITEM_CHAOS_CHARM); Moves(MOVE_TACKLE); }
-        PLAYER(SPECIES_WYNAUT);
         OPPONENT(SPECIES_WOBBUFFET) { HP(1000); MaxHP(1000); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_ROGUE_CHAOS_CHARM, activates)); MOVE(opponent, MOVE_CELEBRATE); }
+        // Keep the called move deterministic: random switching/escape moves
+        // can interrupt the scripted turn without testing the item's chance.
+        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_METRONOME, MOVE_SCRATCH)); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
-        if (activates)
-        {
-            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
-        }
-        else
-        {
-            NONE_OF {
-                ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
-                ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
-            }
-        }
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_METRONOME, player);
     }
 }
 

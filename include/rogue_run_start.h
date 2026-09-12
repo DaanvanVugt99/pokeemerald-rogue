@@ -20,6 +20,7 @@ enum RogueRunStartReadiness
     RUN_START_BLOCKED_PARTY,
     RUN_START_BLOCKED_DAY_CARE,
     RUN_START_WAITING_FOR_HOST,
+    RUN_START_BLOCKED_ASCENSION,
 };
 
 enum RogueRunStartReadinessReason
@@ -32,6 +33,8 @@ enum RogueRunStartReadinessReason
     RUN_START_REASON_SPECIES_CLAUSE,
     RUN_START_REASON_LEGENDARY_CLAUSE,
     RUN_START_REASON_TRIAL_REPLACES_PARTY,
+    RUN_START_REASON_ASCENSION_LOCKED,
+    RUN_START_REASON_INVALID_CONFIG,
 };
 
 enum RogueRunStartTeamPolicy
@@ -54,6 +57,7 @@ enum RogueRunReviewAction
     RUN_REVIEW_ACTION_BACK,
     RUN_REVIEW_ACTION_START,
     RUN_REVIEW_ACTION_EDIT,
+    RUN_REVIEW_ACTION_CHOOSE_TRIAL,
 };
 
 enum RogueRunStartEditOption
@@ -61,7 +65,7 @@ enum RogueRunStartEditOption
     RUN_START_EDIT_SETTINGS,
     RUN_START_EDIT_POKEDEX,
     RUN_START_EDIT_TRIAL,
-    RUN_START_EDIT_DIFFICULTY,
+    RUN_START_EDIT_ASCENSION,
     RUN_START_EDIT_TRIAL_POKEDEX,
     RUN_START_EDIT_STARTING_TEAM,
 };
@@ -69,7 +73,7 @@ enum RogueRunStartEditOption
 enum RogueTrialSetupStage
 {
     TRIAL_SETUP_STAGE_TRIAL,
-    TRIAL_SETUP_STAGE_DIFFICULTY,
+    TRIAL_SETUP_STAGE_ASCENSION,
     TRIAL_SETUP_STAGE_POKEDEX,
     TRIAL_SETUP_STAGE_REVIEW,
     TRIAL_SETUP_STAGE_EXIT,
@@ -77,12 +81,13 @@ enum RogueTrialSetupStage
 
 struct RogueRunStartContext
 {
-    struct RogueDifficultyConfig effectiveConfig;
+    struct RogueAdventureConfig effectiveConfig;
     u8 source;
     u8 readiness;
     u8 readinessReason;
+    u8 ascensionEligibility;
     u8 trialId;
-    u8 trialDifficulty;
+    u8 trialAscension;
     u8 pokedexVariant;
     u8 partyCapacity;
     u8 teamPolicy;
@@ -105,6 +110,7 @@ struct RogueRunStartContext
 void RogueRunStart_PrepareStandard(void);
 void RogueRunStart_PrepareTrial(void);
 void RogueRunStart_Refresh(void);
+void RogueRunStart_UpdateConfig(const struct RogueAdventureConfig *config);
 void RogueRunStart_Commit(void);
 void RogueRunStart_Clear(void);
 const struct RogueRunStartContext *RogueRunStart_GetContext(void);

@@ -34,7 +34,6 @@ struct RogueQuestReward
 {
     u8 type;
     u8 visiblity;
-    u8 requiredDifficulty;
     struct CustomPopup const* customPopup;
     union
     {
@@ -171,7 +170,8 @@ void RogueQuest_SetStateFlag(u16 questId, u32 flag, bool8 state);
 struct RogueQuestReward const* RogueQuest_GetReward(u16 questId, u16 i);
 u16 RogueQuest_GetRewardCount(u16 questId);
 
-u8 RogueQuest_GetHighestCompleteDifficulty(u16 questId);
+bool8 RogueQuest_IsRewardClaimed(u16 questId);
+u8 RogueQuest_GetBestAscension(u16 questId, u8 format);
 
 bool8 RogueQuest_IsQuestUnlocked(u16 questId);
 bool8 RogueQuest_TryUnlockQuest(u16 questId);
@@ -195,7 +195,6 @@ bool8 RogueQuest_IsQuestActive(u16 questId);
 void RogueQuest_CheckQuestRequirements();
 
 u16 RogueQuest_GetQuestCompletePercFor(u32 constFlag);
-u16 RogueQuest_GetQuestCompletePercAtDifficultyFor(u32 constFlag, u8 difficultyLevel);
 void RogueQuest_GetQuestCountsFor(u32 constFlag, u16* activeCount, u16* inactiveCount);
 u16 RogueQuest_GetQuestTotalCountFor(u32 constFlag, bool8 includeLocked);
 u16 RogueQuest_GetDisplayCompletePerc();

@@ -1,5 +1,7 @@
 #include "global.h"
 #include "constants/items.h"
+#include "constants/vars.h"
+#include "event_data.h"
 #include "constants/layouts.h"
 
 #include "berry.h"
@@ -45,7 +47,8 @@ struct RogueRunRestoreBlock
     struct Pokemon playerParty[PARTY_SIZE];
     struct ItemSlot bagItems[BAG_ITEM_CAPACITY];
     struct RogueDaycarePokemon daycarePokemon[DAYCARE_SLOT_COUNT];
-    struct RogueDifficultyConfig difficultyConfig;
+    struct RogueAdventureConfig adventureConfig;
+    u16 desiredCampaign;
     u32 money;
     u32 playTime;
 };
@@ -196,9 +199,17 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     // Daycare
     SerializeArray(stream, saveBlock->daycarePokemon, sizeof(saveBlock->daycarePokemon[0]), ARRAY_COUNT(saveBlock->daycarePokemon));
 
-    // Difficulty/Adventure Settings
-    SerializeArray(stream, saveBlock->difficultyConfig.toggleBits, sizeof(saveBlock->difficultyConfig.toggleBits[0]), ARRAY_COUNT(saveBlock->difficultyConfig.toggleBits));
-    SerializeArray(stream, saveBlock->difficultyConfig.rangeValues, sizeof(saveBlock->difficultyConfig.rangeValues[0]), ARRAY_COUNT(saveBlock->difficultyConfig.rangeValues));
+    // Remembered setup, committed rules and progression
+    SerializeData(stream, &saveBlock->adventureConfig, sizeof(saveBlock->adventureConfig));
+    SerializeData(stream, &saveBlock->activeAdventureConfig, sizeof(saveBlock->activeAdventureConfig));
+    SerializeData(stream, &saveBlock->bestAscension, sizeof(saveBlock->bestAscension));
+    SerializeData(stream, &saveBlock->selectedAscension, sizeof(saveBlock->selectedAscension));
+    SerializeData(stream, &saveBlock->bestModeAscension, sizeof(saveBlock->bestModeAscension));
+    SerializeData(stream, &saveBlock->bestTrialAscension, sizeof(saveBlock->bestTrialAscension));
+    SerializeData(stream, &saveBlock->activeRunSource, sizeof(saveBlock->activeRunSource));
+    SerializeData(stream, &saveBlock->ascensionEligibilityReason, sizeof(saveBlock->ascensionEligibilityReason));
+    SerializeData(stream, &saveBlock->ascensionEligible, sizeof(saveBlock->ascensionEligible));
+    SerializeData(stream, &saveBlock->ascensionRecorded, sizeof(saveBlock->ascensionRecorded));
 
     // Dynamic Unique Mons
     SerializeArray(stream, saveBlock->dynamicUniquePokemon, sizeof(saveBlock->dynamicUniquePokemon[0]), ARRAY_COUNT(saveBlock->dynamicUniquePokemon));
@@ -251,7 +262,7 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
 
     // Keep this appended so older hub saves read zeroed defaults here.
     SerializeData(stream, &saveBlock->lastTrialId, sizeof(saveBlock->lastTrialId));
-    SerializeData(stream, &saveBlock->lastTrialDifficulty, sizeof(saveBlock->lastTrialDifficulty));
+    SerializeData(stream, &saveBlock->lastTrialAscension, sizeof(saveBlock->lastTrialAscension));
     SerializeData(stream, &saveBlock->lastTrialPokedexVariant, sizeof(saveBlock->lastTrialPokedexVariant));
     SerializeData(stream, &saveBlock->hasLastTrialSelection, sizeof(saveBlock->hasLastTrialSelection));
 
@@ -482,6 +493,7 @@ void RogueSave_SaveHubStates()
     u16 bagItemIdx;
     u16 pocketId;
 
+    sRunRestoreBlock.desiredCampaign = VarGet(VAR_ROGUE_DESIRED_CAMPAIGN);
     sRunRestoreBlock.money = GetMoney(&gSaveBlock1Ptr->money);
     sRunRestoreBlock.playTime = 
         (u32)gSaveBlock2Ptr->playTimeSeconds +
@@ -502,8 +514,8 @@ void RogueSave_SaveHubStates()
         CopyMon(&sRunRestoreBlock.daycarePokemon[i], &gRogueSaveBlock->daycarePokemon[i], sizeof(struct RogueDaycarePokemon));
     }
 
-    // Remember the default difficulty settings, just incase the adventure overwrote anything
-    memcpy(&sRunRestoreBlock.difficultyConfig, &gRogueSaveBlock->difficultyConfig, sizeof(sRunRestoreBlock.difficultyConfig));
+    // Preserve remembered hub setup across special adventures.
+    memcpy(&sRunRestoreBlock.adventureConfig, &gRogueSaveBlock->adventureConfig, sizeof(sRunRestoreBlock.adventureConfig));
 
     // Put all items into a single big list
     bagItemIdx = 0;
@@ -524,6 +536,7 @@ void RogueSave_LoadHubStates()
     u16 bagItemIdx;
     u32 totalTime;
 
+    VarSet(VAR_ROGUE_DESIRED_CAMPAIGN, sRunRestoreBlock.desiredCampaign);
     SetMoney(&gSaveBlock1Ptr->money, sRunRestoreBlock.money);
 
     // Add previous run time to total time
@@ -566,8 +579,8 @@ void RogueSave_LoadHubStates()
         CopyMon(&gRogueSaveBlock->daycarePokemon[i], &sRunRestoreBlock.daycarePokemon[i], sizeof(struct RogueDaycarePokemon));
     }
 
-    // Restore the default difficulty settings, just incase the adventure overwrote anything
-    memcpy(&gRogueSaveBlock->difficultyConfig, &sRunRestoreBlock.difficultyConfig, sizeof(sRunRestoreBlock.difficultyConfig));
+    // Restore remembered setup without importing special-run choices.
+    memcpy(&gRogueSaveBlock->adventureConfig, &sRunRestoreBlock.adventureConfig, sizeof(sRunRestoreBlock.adventureConfig));
 
     // Restore the bag by just clearing and adding everything back to it
     ClearBag();

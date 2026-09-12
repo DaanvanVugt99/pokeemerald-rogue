@@ -69,6 +69,7 @@ bool8 IsCharmActive(u8 effectType);
 bool8 IsCurseActive(u8 effectType);
 
 bool8 AnyCharmsActive();
+bool8 AnyCharmsInBag(void);
 bool8 AnyCursesActive();
 
 u16 GetCharmValue(u8 effectType);

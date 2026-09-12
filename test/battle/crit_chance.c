@@ -224,7 +224,8 @@ SINGLE_BATTLE_TEST("Signature items Leek and Lucky Punch increase the critical h
         ASSUME(gItems[ITEM_LEEK].holdEffect == HOLD_EFFECT_LEEK);
         ASSUME(gItems[ITEM_LUCKY_PUNCH].holdEffect == HOLD_EFFECT_LUCKY_PUNCH);
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(species) { Item(item); }
+        // Isolate the item bonus from species defaults such as Super Luck.
+        OPPONENT(species) { Item(item); Ability(ABILITY_KEEN_EYE); }
     } WHEN {
         TURN { MOVE(opponent, MOVE_TACKLE); }
     } SCENE {

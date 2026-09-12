@@ -10,7 +10,7 @@ mode="check" # build | check | ui
 test_to_run_prefix="${TESTS:-}"
 test_suite="${TEST_SUITE:-}"
 check_all_suites=0
-all_suites=(core ai ability ability_unique moves items forms rogue)
+all_suites=(core ai ability ability_unique_a_m ability_unique_n_z moves items forms rogue)
 
 usage() {
     echo "Usage: $0 [--check-all-suites|--check|--build|--ui] [--suite SUITE] [--filter \"Test name prefix\"]"
@@ -89,6 +89,13 @@ if [ "$mode" = "check" ] && [ "$check_all_suites" -eq 0 ] && [ -z "$test_suite" 
     exit 2
 fi
 
+# Keep the public suite name useful for unfiltered checks without overflowing
+# the test ROM. Focused checks already compile only matching source files.
+if [ "$mode" = "check" ] && [ "$check_all_suites" -eq 0 ] && [ "$test_suite" = "ability_unique" ] && [ -z "$test_to_run_prefix" ]; then
+    check_all_suites=1
+    all_suites=(ability_unique_a_m ability_unique_n_z)
+fi
+
 if [ -n "${BUILD_JOBS:-}" ]; then
     num_cores="$BUILD_JOBS"
 else
@@ -139,7 +146,7 @@ parse_summary_count() {
 
     strip_ansi < "$log_file" \
         | awk -v label="$label" '
-            $0 ~ ("^[[:space:]]*(-[[:space:]]*)?" label ":[[:space:]]*") {
+            $0 ~ ("^[[:space:]]*(-[[:space:]]*)?" label "[[:space:]]*:[[:space:]]*") {
                 for (i = NF; i >= 1; i--) {
                     if ($i ~ /^[0-9]+$/) {
                         value = $i

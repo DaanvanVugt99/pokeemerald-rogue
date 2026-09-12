@@ -399,6 +399,7 @@ struct PokedexViewRequest
 EWRAM_DATA static u8 *sTilemapBufferPtr = NULL;
 EWRAM_DATA static struct PokedexMenu* sPokedexMenu = NULL;
 EWRAM_DATA static struct PokedexViewRequest sPokedexViewReq = {0};
+static EWRAM_DATA u8 sViewDexVariant;
 
 static void VBlankCB(void)
 {
@@ -504,8 +505,38 @@ static u32 GetHpAtSlot(u8 slot)
         return GetMonData(&gPlayerParty[slot], MON_DATA_MAX_HP);
 }
 
+static u16 GetSpeciesNumberInVariant(u16 species, u8 variant);
+static u16 GetViewSpeciesNum(u16 species) { return GetSpeciesNumberInVariant(species, sViewDexVariant); }
+
+// Pokedex browsing has its own pool; gameplay always reads adventure configuration.
+static u8 GetViewDexVariant(void)
+{
+    return sPokedexMenu != NULL ? sViewDexVariant : RoguePokedex_GetDexVariant();
+}
+
+static void SetViewDexVariant(u8 variant)
+{
+    sViewDexVariant = variant <= POKEDEX_DYNAMIC_VARIANT_END ? variant : POKEDEX_VARIANT_DEFAULT;
+}
+
+static u8 GetViewDexRegion(void)
+{
+    u8 region, i;
+    for (region = POKEDEX_REGION_START; region <= POKEDEX_REGION_END; ++region)
+        for (i = 0; i < gPokedexRegions[region].variantCount; ++i)
+            if (gPokedexRegions[region].variantList[i] == GetViewDexVariant()) return region;
+    return POKEDEX_REGION_START;
+}
+
+static void SetViewDexRegion(u8 region)
+{
+    if (region < POKEDEX_REGION_COUNT)
+        SetViewDexVariant(gPokedexRegions[region].variantList[gPokedexRegions[region].variantCount - 1]);
+}
+
 static void SetupPokedexViewDefault()
 {
+    sViewDexVariant = Rogue_GetConfigRange(CONFIG_RANGE_POKEDEX_VARIANT);
     sPokedexViewReq.view = DEX_VIEW_STANDARD;
     sPokedexViewReq.inBattleScreen = FALSE;
     sPokedexViewReq.dexVariantToRestore = POKEDEX_INVALID_VARIANT;
@@ -550,7 +581,7 @@ void Rogue_ShowPokedexForPartySlot(u8 slot)
 
 void Rogue_SelectPokemonInPokedexFromDex(bool8 requireSeen, bool8 requireCaught)
 {
-    Rogue_SelectPokemonInPokedexFromDexVariant(RoguePokedex_GetDexVariant(), requireSeen, requireCaught);
+    Rogue_SelectPokemonInPokedexFromDexVariant(GetViewDexVariant(), requireSeen, requireCaught);
 }
 
 void Rogue_SelectPokemonInPokedexFromDexVariant(u8 variant, bool8 requireSeen, bool8 requireCaught)
@@ -562,8 +593,8 @@ void Rogue_SelectPokemonInPokedexFromDexVariant(u8 variant, bool8 requireSeen, b
     sPokedexViewReq.perView.selectMon.requireSeen = requireSeen;
     sPokedexViewReq.perView.selectMon.requireCaught = requireCaught;
 
-    sPokedexViewReq.dexVariantToRestore = RoguePokedex_GetDexVariant();
-    RoguePokedex_SetDexVariant(variant);
+    sPokedexViewReq.dexVariantToRestore = GetViewDexVariant();
+    SetViewDexVariant(variant);
 }
 
 void Rogue_SelectPokemonInSafari()
@@ -738,7 +769,7 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             if(
                 Overview_IsSafariSelectView() &&
                 TryGetDexIndexForSafariIndex(
-                    RoguePokedex_GetDexVariant(),
+                    GetViewDexVariant(),
                     sPokedexViewReq.perView.selectMon.preferredSafariIndex,
                     &desiredIdx)
             )
@@ -747,7 +778,7 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             }
             else
             {
-                desiredIdx = RoguePokedex_GetSpeciesCurrentNum(sPokedexMenu->viewBaseSpecies);
+                desiredIdx = GetViewSpeciesNum(sPokedexMenu->viewBaseSpecies);
 
                 // Try and put the location on the mon we were just viewing
                 if(desiredIdx != 0) // invalid num
@@ -1057,7 +1088,7 @@ static void Task_PageFadeOutAndExit(u8 taskId)
     if (!gPaletteFade.active)
     {
         if(sPokedexViewReq.dexVariantToRestore != POKEDEX_INVALID_VARIANT)
-            RoguePokedex_SetDexVariant(sPokedexViewReq.dexVariantToRestore);
+            SetViewDexVariant(sPokedexViewReq.dexVariantToRestore);
 
         DestroyPageResources(sPokedexMenu->currentPage, PAGE_NONE);
 
@@ -1095,7 +1126,7 @@ static void Task_PageFadeOutExitAndRelaunch(u8 taskId)
     if (!gPaletteFade.active)
     {
         if(sPokedexViewReq.dexVariantToRestore != POKEDEX_INVALID_VARIANT)
-            RoguePokedex_SetDexVariant(sPokedexViewReq.dexVariantToRestore);
+            SetViewDexVariant(sPokedexViewReq.dexVariantToRestore);
 
         DestroyPageResources(sPokedexMenu->currentPage, PAGE_NONE);
 
@@ -1290,7 +1321,7 @@ static bool8 CheckDexCompletion(u8 caseID)
     u16 i;
     u16 species;
 
-    u8 dexVariant = RoguePokedex_GetDexVariant();
+    u8 dexVariant = GetViewDexVariant();
     u16 dexCount = GetVariantSpeciesCount(dexVariant);
     
     for (i = 0; i < dexCount; i++)
@@ -1326,7 +1357,7 @@ u16 RoguePokedex_CountCaughtMonsForVariant(u16 dexVariant, u8 caseID)
 
 u16 RoguePokedex_CountCurrentCaughtMons(u8 caseID)
 {
-    return RoguePokedex_CountCaughtMonsForVariant(RoguePokedex_GetDexVariant(), caseID);
+    return RoguePokedex_CountCaughtMonsForVariant(GetViewDexVariant(), caseID);
 }
 
 u16 RoguePokedex_CountNationalCaughtMons(u8 caseID)
@@ -1361,13 +1392,13 @@ static void DisplayTitleScreenCountersText(void)
 
 static const u8* GetDexRegionName()
 {
-    u8 region = RoguePokedex_GetDexRegion();
+    u8 region = GetViewDexRegion();
     return gPokedexRegions[region].displayName;
 }
 
 static const u8* GetDexVariantName()
 {
-    u8 variant = RoguePokedex_GetDexVariant();
+    u8 variant = GetViewDexVariant();
 
     if(variant <= POKEDEX_VARIANT_END)
         return gPokedexVariants[variant].displayName;
@@ -1410,7 +1441,7 @@ static void DisplayTitleDexVariantText(void)
 static void DisplayMonEntryText(void)
 {
     u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
-    u16 speciesNum = RoguePokedex_GetSpeciesCurrentNum(sPokedexMenu->viewBaseSpecies);
+    u16 speciesNum = GetViewSpeciesNum(sPokedexMenu->viewBaseSpecies);
     
     ConvertUIntToDecimalStringN(gStringVar1, speciesNum, STR_CONV_MODE_LEADING_ZEROS, speciesNum > 999 ? 4 : 3);
     StringExpandPlaceholders(gStringVar3, gText_NumberStr1);
@@ -2475,7 +2506,7 @@ static void TitleScreen_HandleInput(u8 taskId)
             // Edit region
             if(sPokedexMenu->titleScreenCursorIdx == 0)
             {
-                u8 region = RoguePokedex_GetDexRegion();
+                u8 region = GetViewDexRegion();
 
                 PlaySE(SE_SELECT);
 
@@ -2484,12 +2515,12 @@ static void TitleScreen_HandleInput(u8 taskId)
                 else
                     --region;
 
-                RoguePokedex_SetDexRegion(region);
+                SetViewDexRegion(region);
             }
             // Edit variant
             else
             {
-                u8 region = RoguePokedex_GetDexRegion();
+                u8 region = GetViewDexRegion();
 
                 if(region == POKEDEX_REGION_NONE)
                 {
@@ -2504,7 +2535,7 @@ static void TitleScreen_HandleInput(u8 taskId)
                 else
                 {
                     u8 idx;
-                    u8 variant = RoguePokedex_GetDexVariant();
+                    u8 variant = GetViewDexVariant();
 
                     for(idx = 0; idx < gPokedexRegions[region].variantCount; ++idx)
                     {
@@ -2521,7 +2552,7 @@ static void TitleScreen_HandleInput(u8 taskId)
                         else
                             --idx;
 
-                        RoguePokedex_SetDexVariant(gPokedexRegions[region].variantList[idx]);
+                        SetViewDexVariant(gPokedexRegions[region].variantList[idx]);
                     }
                     else
                     {
@@ -2540,7 +2571,7 @@ static void TitleScreen_HandleInput(u8 taskId)
             // Edit region
             if(sPokedexMenu->titleScreenCursorIdx == 0)
             {
-                u8 region = RoguePokedex_GetDexRegion();
+                u8 region = GetViewDexRegion();
 
                 PlaySE(SE_SELECT);
 
@@ -2551,12 +2582,12 @@ static void TitleScreen_HandleInput(u8 taskId)
                 else
                     ++region;
 
-                RoguePokedex_SetDexRegion(region);
+                SetViewDexRegion(region);
             }
             // Edit variant
             else
             {
-                u8 region = RoguePokedex_GetDexRegion();
+                u8 region = GetViewDexRegion();
 
                 if(region == POKEDEX_REGION_NONE)
                 {
@@ -2571,7 +2602,7 @@ static void TitleScreen_HandleInput(u8 taskId)
                 else
                 {
                     u8 idx;
-                    u8 variant = RoguePokedex_GetDexVariant();
+                    u8 variant = GetViewDexVariant();
 
                     for(idx = 0; idx < gPokedexRegions[region].variantCount; ++idx)
                     {
@@ -2584,7 +2615,7 @@ static void TitleScreen_HandleInput(u8 taskId)
                         PlaySE(SE_SELECT);
                         idx = (idx + 1) % gPokedexRegions[region].variantCount;
 
-                        RoguePokedex_SetDexVariant(gPokedexRegions[region].variantList[idx]);
+                        SetViewDexVariant(gPokedexRegions[region].variantList[idx]);
                     }
                     else
                     {
@@ -2818,7 +2849,7 @@ static bool32 CheckIfAnyEvosMatch(u16 species, u8 dexFlag)
 
 static bool32 GetSpeciesDisplayDexFlag(u16 species, u8 dexFlag)
 {
-    u8 dexVariant = RoguePokedex_GetDexVariant();
+    u8 dexVariant = GetViewDexVariant();
     
     // Daycare variant, we want to display based on if we have any data in the evo chain
     if(dexVariant == POKEDEX_DYNAMIC_VARIANT_EGG_SPECIES)
@@ -2848,7 +2879,7 @@ static bool8 Overview_TryGetSafariIndexForEntry(s8 entryX, s8 entryY, s8 deltaX,
         return FALSE;
 
     return TryGetSafariIndexForDexIndex(
-        RoguePokedex_GetDexVariant(),
+        GetViewDexVariant(),
         sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + idx,
         safariIndex);
 }
@@ -2959,7 +2990,7 @@ static u8 Overview_GetEntryType(s8 entryX, s8 entryY, s8 deltaX, s8 deltaY)
     // We don't care if we've seen this mon or not
     if(IsCurrentlySelectingMon())
     {
-        //u8 dexVariant = RoguePokedex_GetDexVariant();
+        //u8 dexVariant = GetViewDexVariant();
 //
         //if(dexVariant == POKEDEX_DYNAMIC_VARIANT_EGG_SPECIES)
         //{
@@ -3428,7 +3459,7 @@ static void Overview_HandleInput(u8 taskId)
                 if(sPokedexViewReq.view == DEX_VIEW_SELECT_SAFARI_MON)
                 {
                     // Return index for safari mon
-                    u16 dexVariant = RoguePokedex_GetDexVariant();
+                    u16 dexVariant = GetViewDexVariant();
                     u16 dexIndex = sPokedexMenu->pageScrollAmount * COLUMN_ENTRY_COUNT + sPokedexMenu->selectedIdx;
                     
                     switch (dexVariant)
@@ -3681,7 +3712,7 @@ static void Overview_SelectSpeciesToDiplay()
     u8 i;
     u16 num;
     u16 species;
-    u8 dexVariant = RoguePokedex_GetDexVariant();
+    u8 dexVariant = GetViewDexVariant();
     u16 dexCount = GetVariantSpeciesCount(dexVariant);
 
     for(i = 0; i < OVERVIEW_ENTRY_COUNT; ++i)
@@ -3724,7 +3755,7 @@ static u8 Overview_GetLastValidActiveIndex()
 
 static u8 Overview_GetMaxScrollAmount()
 {
-    u8 dexVariant = RoguePokedex_GetDexVariant();
+    u8 dexVariant = GetViewDexVariant();
     u16 dexCount = GetVariantSpeciesCount(dexVariant);
 
     return (dexCount / COLUMN_ENTRY_COUNT) - ROW_ENTRY_COUNT + 1;
@@ -3827,7 +3858,7 @@ static u16 MonStats_GetMonNeighbour(u16 currViewSpecies, s8 offset)
 {
     u16 i;
     u16 currViewIdx = (u16)-1;
-    u8 dexVariant = RoguePokedex_GetDexVariant();
+    u8 dexVariant = GetViewDexVariant();
     u16 dexCount = GetVariantSpeciesCount(dexVariant);
 
     // Loop through party when using L/R from that menu
@@ -4441,7 +4472,7 @@ u16 RoguePokedex_GetCurrentDexLimit()
 
 bool8 RoguePokedex_IsVariantEditUnlocked()
 {
-    return FlagGet(FLAG_ROGUE_MET_POKABBIE);
+    return FlagGet(FLAG_IS_CHAMPION) || FlagGet(FLAG_ROGUE_MET_POKABBIE);
 }
 
 bool8 RoguePokedex_IsVariantEditEnabled()
@@ -4494,28 +4525,22 @@ bool8 RoguePokedex_IsBaseSpeciesEnabled(u16 species)
     return TRUE;
 }
 
-u16 RoguePokedex_GetSpeciesCurrentNum(u16 species)
+static u16 GetSpeciesNumberInVariant(u16 species, u8 variant)
 {
-    if(!RoguePokedex_IsSpeciesEnabled(species))
-        return 0;
-
+    u16 i;
+    u16 dexCount = GetVariantSpeciesCount(variant);
+    if (!IsSpeciesEnabledForVariant(species, variant)) return 0;
 #ifdef ROGUE_EXPANSION
     species = GET_BASE_SPECIES_ID(species);
 #endif
-
-    {
-        u16 i;
-        u8 variant = RoguePokedex_GetDexVariant();
-        u16 dexCount = GetVariantSpeciesCount(variant);
-
-        for(i = 0; i < dexCount; ++i)
-        {
-            if(GetVariantSpeciesAt(variant, i) == species)
-                return i + 1;
-        }
-    }
-
+    for (i = 0; i < dexCount; ++i)
+        if (GetVariantSpeciesAt(variant, i) == species) return i + 1;
     return 0;
+}
+
+u16 RoguePokedex_GetSpeciesCurrentNum(u16 species)
+{
+    return GetSpeciesNumberInVariant(species, RoguePokedex_GetDexVariant());
 }
 
 u16 RoguePokedex_RedirectSpeciesGetSetFlag(u16 species)

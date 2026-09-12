@@ -1,4 +1,17 @@
 #include "global.h"
+#include "rogue_campaign.h"
+#include "rogue_run_start.h"
+#include "rogue_trials.h"
+static const u8 sAscensionText0[] = _("A");
+static const u8 sAscensionText1[] = _(" D");
+static const u8 sAscensionText2[] = _(" M");
+static const u8 sAscensionText3[] = _(" S");
+static const u8 sAscensionText4[] = _(" Trial");
+static const u8 sAscensionText5[] = _(" Gauntlet");
+static const u8 sAscensionText6[] = _(" Slow");
+static const u8 sAscensionText7[] = _(" Standard");
+static const u8 sAscensionText8[] = _(" (ladder)");
+static const u8 sAscensionText9[] = _(" (record)");
 #include "hall_of_fame.h"
 #include "task.h"
 #include "palette.h"
@@ -64,8 +77,14 @@ struct HallofFameMon
 struct HallofFameTeam
 {
     struct HallofFameMon mon[PARTY_SIZE];
-    u32 rewardDifficulty : 2;
-    u32 pad0 : 30;
+    u32 ascension : 5;
+    u32 format : 2;
+    u32 mode : 3;
+    u32 trial : 8;
+    u32 source : 3;
+    u32 qualifying : 1;
+    u32 campaign : 4;
+    u32 pad0 : 6;
 };
 
 STATIC_ASSERT(sizeof(struct HallofFameTeam) * HALL_OF_FAME_MAX_TEAMS <= SECTOR_DATA_SIZE * NUM_HOF_SECTORS, HallOfFameFreeSpace);
@@ -126,7 +145,7 @@ static void HallOfFame_PrintWelcomeText(u8 unusedPossiblyWindowId, u8 unused2);
 static void HallOfFame_PrintPlayerInfo(u8 unused1, u8 unused2);
 static void Task_DoDomeConfetti(u8 taskId);
 static void SpriteCB_HofConfetti(struct Sprite *sprite);
-static void CopyBgTilemapBufferForDifficulty(u8 rewardDifficulty);
+static void CopyBgTilemapBufferForAscension(u8 ascension);
 
 static const struct BgTemplate sHof_BgTemplates[] =
 {
@@ -496,7 +515,13 @@ static void Task_Hof_InitMonData(u8 taskId)
 
     gTasks[taskId].tMonNumber = 0; // valid pokes
 
-    sHofMonPtr->rewardDifficulty = Rogue_GetDifficultyRewardLevel();
+    sHofMonPtr->ascension = Rogue_GetAscension();
+    sHofMonPtr->format = Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT);
+    sHofMonPtr->mode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
+    sHofMonPtr->trial = gRogueRun.trialState.trialId;
+    sHofMonPtr->campaign = Rogue_GetActiveCampaign();
+    sHofMonPtr->source = gRogueSaveBlock->activeRunSource;
+    sHofMonPtr->qualifying = gRogueSaveBlock->ascensionEligible;
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
@@ -1125,7 +1150,7 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
         savedTeams++;
 
     // Swap out the bg
-    CopyBgTilemapBufferForDifficulty(savedTeams->rewardDifficulty);
+    CopyBgTilemapBufferForAscension(savedTeams->ascension);
 
     currMon = &savedTeams->mon[0];
     sHofBackgroundPalettes = 0;
@@ -1178,12 +1203,27 @@ static void Task_HofPC_DrawSpritesPrintText(u8 taskId)
     BlendPalettes(PALETTES_OBJECTS, 0xC, RGB_BACKGROUND);
 
     ConvertIntToDecimalStringN(gStringVar1, gTasks[taskId].tCurrPageNo, STR_CONV_MODE_RIGHT_ALIGN, 3);
-    StringExpandPlaceholders(gStringVar4, gText_HOFNumber);
+    {
+        u8 *end = ConvertIntToDecimalStringN(StringCopy(gStringVar4, sAscensionText0), savedTeams->ascension, STR_CONV_MODE_LEFT_ALIGN, 2);
+        end = StringAppend(end, savedTeams->format == BATTLE_FORMAT_DOUBLES ? sAscensionText1 : savedTeams->format == BATTLE_FORMAT_MIXED ? sAscensionText2 : sAscensionText3);
+        static const u8 sSpace[] = _(" ");
+        static const u8 sReplay[] = _(" (replay)");
+        static const u8 sMultiplayer[] = _(" (co-op)");
+        if (savedTeams->trial != ROGUE_TRIAL_NONE && RogueTrial_GetDefinition(savedTeams->trial) != NULL)
+            end = StringAppend(StringAppend(end, sSpace), RogueTrial_GetDefinition(savedTeams->trial)->name);
+        else if (savedTeams->campaign != ROGUE_CAMPAIGN_NONE)
+            end = StringAppend(StringAppend(end, sSpace), GetCampaignTitle(savedTeams->campaign));
+        else
+            end = StringAppend(end, savedTeams->mode == ROGUE_GAME_MODE_GAUNTLET ? sAscensionText5 : savedTeams->mode == ROGUE_GAME_MODE_SLOW_PATH ? sAscensionText6 : sAscensionText7);
+        if (savedTeams->source == RUN_START_SOURCE_REPLAY) end = StringAppend(end, sReplay);
+        else if (savedTeams->source == RUN_START_SOURCE_MULTIPLAYER_HOST || savedTeams->source == RUN_START_SOURCE_MULTIPLAYER_CLIENT) end = StringAppend(end, sMultiplayer);
+        if (savedTeams->source != RUN_START_SOURCE_REPLAY && savedTeams->source != RUN_START_SOURCE_MULTIPLAYER_HOST && savedTeams->source != RUN_START_SOURCE_MULTIPLAYER_CLIENT)
+            StringAppend(end, savedTeams->qualifying ? sAscensionText8 : sAscensionText9);
+        while (GetStringWidth(FONT_SMALL, gStringVar4, 0) > 232 && StringLength(gStringVar4))
+            gStringVar4[StringLength(gStringVar4) - 1] = EOS;
+    }
 
-    if (gTasks[taskId].tCurrTeamNo <= 0)
-        HofPCTopBar_PrintPair(gStringVar4, gText_PickCancel, FALSE, 0, TRUE);
-    else
-        HofPCTopBar_PrintPair(gStringVar4, gText_PickNextCancel, FALSE, 0, TRUE);
+    HofPCTopBar_PrintPair(gStringVar4, NULL, FALSE, 0, TRUE);
 
     gTasks[taskId].func = Task_HofPC_PrintMonInfo;
 }
@@ -1598,31 +1638,18 @@ enum
     HOF_TILE_SPARKLE_LG_BR = 11,
 };
 
-static void CopyBgTilemapBufferForDifficulty(u8 rewardDifficulty)
+static void CopyBgTilemapBufferForAscension(u8 ascension)
 {
-    switch (rewardDifficulty)
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Easy, 0, 0);
-        break;
-    
-    case DIFFICULTY_LEVEL_AVERAGE:
-        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Average, 0, 0);
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Hard, 0, 0);
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
+    if (ascension >= 20 && ascension <= ASCENSION_MAX)
         CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Brutal, 0, 0);
-        break;
-    
-    default:
-        // Default of old method i.e. no stars
+    else if (ascension >= 10 && ascension <= ASCENSION_MAX)
+        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Hard, 0, 0);
+    else if (ascension >= 5 && ascension <= ASCENSION_MAX)
+        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Average, 0, 0);
+    else if (ascension <= ASCENSION_MAX)
+        CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Easy, 0, 0);
+    else
         FillBgTilemapBufferRect_Palette0(3, HOF_TILE_BG, 0, 0, 32, 32);
-        break;
-    }
 
     CopyBgTilemapBufferToVram(3);
 }
@@ -1644,7 +1671,7 @@ static bool8 LoadHofBgs(bool8 inPC)
         FillBgTilemapBufferRect_Palette0(1, 1, 0, 14, 32, 6);
 
         // Apply default bg in PC for initial load
-        CopyBgTilemapBufferForDifficulty(inPC ? 255 : Rogue_GetDifficultyRewardLevel());
+        CopyBgTilemapBufferForAscension(inPC ? 255 : Rogue_GetAscension());
         break;
     case 3:
         InitStandardTextBoxWindows();

@@ -531,7 +531,7 @@ static const u8 sDebugText_Util_CheatStart[] =               _("CHEAT Start");
 static const u8 sDebugText_Util_ExpansionVersion[] =         _("Expansion Version");
 // Rogue Util Menu
 static const u8 sDebugText_RogueUtil_ConfigLab[] =           _("Config Lab…{CLEAR_TO 110}{RIGHT_ARROW}");
-static const u8 sDebugText_RogueUtil_NextDifficulty[] =      _("Next Difficulty");
+static const u8 sDebugText_RogueUtil_NextDifficulty[] =      _("Next Run Stage");
 static const u8 sDebugText_RogueUtil_GiveCommonItems[] =     _("Give Common Items");
 static const u8 sDebugText_RogueUtil_SetWeather[] =          _("Set Weather");
 static const u8 sDebugText_RogueUtil_ChangeOutfit[] =        _("Change Outfit");
@@ -2310,12 +2310,12 @@ static void DebugAction_Util_ExpansionVersion(u8 taskId)
     ScriptContext_SetupScript(Debug_ShowExpansionVersion);
 }
 
-void Special_ViewDifficultyConfigMenu(void);
+void Special_ViewAdventureSetup(void);
 
 static void DebugAction_RogueUtil_ConfigLab(u8 taskId)
 {
     Debug_DestroyMenu_Full(taskId);
-    Special_ViewDifficultyConfigMenu();
+    Special_ViewAdventureSetup();
 }
 
 void EnableRivalEncounterIfRequired();

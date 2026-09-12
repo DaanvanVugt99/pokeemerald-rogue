@@ -314,8 +314,16 @@ ifneq ($(strip $(TEST_SUITE)),)
 ifeq ($(TEST_SUITE),ability)
 TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/ability/%,$(TEST_CASE_SRCS))
 TEST_CASE_SRCS := $(filter-out $(TEST_SUBDIR)/battle/ability/unique/%,$(TEST_CASE_SRCS))
-else ifeq ($(TEST_SUITE),ability_unique)
+else ifneq ($(filter $(TEST_SUITE),ability_unique ability_unique_a_m ability_unique_n_z),)
 TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/ability/unique/%,$(TEST_CASE_SRCS))
+# The complete unique-Ability suite exceeds the GBA ROM limit. Partition by
+# filename, with the second batch taking the complement so no files are lost.
+TEST_UNIQUE_FIRST_SRCS := $(wildcard $(TEST_SUBDIR)/battle/ability/unique/[a-m]*.c)
+ifeq ($(TEST_SUITE),ability_unique_a_m)
+TEST_CASE_SRCS := $(filter $(TEST_UNIQUE_FIRST_SRCS),$(TEST_CASE_SRCS))
+else ifeq ($(TEST_SUITE),ability_unique_n_z)
+TEST_CASE_SRCS := $(filter-out $(TEST_UNIQUE_FIRST_SRCS),$(TEST_CASE_SRCS))
+endif
 else ifeq ($(TEST_SUITE),moves)
 TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/move.c $(TEST_SUBDIR)/battle/move_effect/% $(TEST_SUBDIR)/battle/move_flags/% $(TEST_SUBDIR)/battle/status1/% $(TEST_SUBDIR)/battle/terrain/% $(TEST_SUBDIR)/battle/weather/% $(TEST_SUBDIR)/battle/type_effectiveness_messages.c $(TEST_SUBDIR)/battle/crit_chance.c $(TEST_SUBDIR)/battle/damage_formula.c,$(TEST_CASE_SRCS))
 else ifeq ($(TEST_SUITE),items)
@@ -329,7 +337,7 @@ TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/battle/ai%.c $(TEST_SUBDIR)/battle/tra
 else ifeq ($(TEST_SUITE),core)
 TEST_CASE_SRCS := $(filter $(TEST_SUBDIR)/fpmath.c $(TEST_SUBDIR)/random.c $(TEST_SUBDIR)/sprite.c $(TEST_SUBDIR)/battle/exp.c,$(TEST_CASE_SRCS))
 else
-$(error Unknown TEST_SUITE '$(TEST_SUITE)'. Expected one of: ability ability_unique moves items forms rogue ai core)
+$(error Unknown TEST_SUITE '$(TEST_SUITE)'. Expected one of: ability ability_unique ability_unique_a_m ability_unique_n_z moves items forms rogue ai core)
 endif
 endif
 # TESTS is also used at runtime as a prefix filter. For focused runs, compile

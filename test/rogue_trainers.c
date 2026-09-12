@@ -74,58 +74,29 @@ static void SetMiniBossRewardTestParty(const u16 *species, u8 count)
     CalculateEnemyPartyCount();
 }
 
-TEST("Trainer IV curves reserve fixed IV advantages for key battles")
+TEST("Ascension trainer IV curves apply across every run stage")
 {
-    static const u8 sExpectedKeyTrainerIvs[4][ROGUE_MAX_BOSS_COUNT] =
+    u8 level, stage;
+    struct RogueAdventureConfig config;
+    u8 savedStage = Rogue_GetCurrentDifficulty();
+    u16 boss;
+    Rogue_CopyAdventureConfig(&config);
+    for (boss = 1; boss < gRogueTrainerCount; ++boss)
+        if (Rogue_IsMiniBossTrainer(boss)) break;
+    EXPECT_LT(boss, gRogueTrainerCount);
+    for (level = 0; level <= ASCENSION_MAX; ++level)
     {
-        [DIFFICULTY_LEVEL_EASY] =
+        config.ascension = level;
+        Rogue_SetRunStartConfigOverride(&config);
+        for (stage = 0; stage < ROGUE_MAX_BOSS_COUNT; ++stage)
         {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10,
-        },
-        [DIFFICULTY_LEVEL_AVERAGE] =
-        {
-            0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 15,
-        },
-        [DIFFICULTY_LEVEL_HARD] =
-        {
-            5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 25, 25, 31, 31,
-        },
-        [DIFFICULTY_LEVEL_BRUTAL] =
-        {
-            15, 15, 20, 20, 25, 25, 31, 31, 31, 31, 31, 31, 31, 31,
-        },
-    };
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
-    u8 originalRunDifficulty = Rogue_GetCurrentDifficulty();
-    u16 keyTrainer = TRAINER_NONE;
-    u8 trainerDifficulty;
-    u8 runDifficulty;
-    u16 i;
-
-    for(i = 1; i < gRogueTrainerCount; ++i)
-    {
-        if(gRogueTrainers[i].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS)
-        {
-            keyTrainer = i;
-            break;
+            Rogue_SetCurrentDifficulty(stage);
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(boss), RogueAscension_CalculateIV(level, stage, TRUE, FALSE));
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(TRAINER_NONE), RogueAscension_CalculateIV(level, stage, FALSE, FALSE));
         }
     }
-    EXPECT_NE(keyTrainer, TRAINER_NONE);
-    EXPECT(!Rogue_IsKeyTrainer(TRAINER_NONE));
-
-    for(trainerDifficulty = DIFFICULTY_LEVEL_EASY; trainerDifficulty <= DIFFICULTY_LEVEL_BRUTAL; ++trainerDifficulty)
-    {
-        Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, trainerDifficulty);
-        for(runDifficulty = 0; runDifficulty < ROGUE_MAX_BOSS_COUNT; ++runDifficulty)
-        {
-            Rogue_SetCurrentDifficulty(runDifficulty);
-            EXPECT_EQ(RogueTest_CalculateMonFixedIV(keyTrainer), sExpectedKeyTrainerIvs[trainerDifficulty][runDifficulty]);
-            EXPECT_EQ(RogueTest_CalculateMonFixedIV(TRAINER_NONE), 0);
-        }
-    }
-
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
-    Rogue_SetCurrentDifficulty(originalRunDifficulty);
+    Rogue_ClearRunStartConfigOverride();
+    Rogue_SetCurrentDifficulty(savedStage);
 }
 
 TEST("Rogue trainer items: Black Sludge converts to Leftovers with tera")
@@ -308,7 +279,6 @@ TEST("Frontier Brain rewards only offer Trial-legal team members")
 TEST("Frontier Brains use competitive movesets on the first Average path")
 {
     struct Pokemon originalEnemyParty[PARTY_SIZE];
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalLevelOffset = gRogueRun.currentLevelOffset;
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
@@ -321,7 +291,6 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
     u8 i;
 
     memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
     Rogue_SetCurrentDifficulty(0);
     gRogueRun.currentLevelOffset = 0;
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
@@ -358,7 +327,6 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
     memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
     CalculateEnemyPartyCount();
     gRogueRun.trialState.trialId = originalTrialId;
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRogueRun.currentLevelOffset = originalLevelOffset;
     RoguePokedex_SetDexVariant(originalDexVariant);
@@ -372,12 +340,10 @@ TEST("Frontier Brains use competitive movesets on the first Average path")
 TEST("Frontier Brains match the rival encounter level")
 {
     u8 originalGameMode = Rogue_GetConfigRange(CONFIG_RANGE_GAME_MODE_NUM);
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalLevelOffset = gRogueRun.currentLevelOffset;
 
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, ROGUE_GAME_MODE_STANDARD);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
     Rogue_SetCurrentDifficulty(6);
     gRogueRun.currentLevelOffset = 10;
 
@@ -386,7 +352,6 @@ TEST("Frontier Brains match the rival encounter level")
     EXPECT_EQ(Rogue_CalculateMiniBossMonLvl(), Rogue_CalculateRivalMonLvl());
 
     Rogue_SetConfigRange(CONFIG_RANGE_GAME_MODE_NUM, originalGameMode);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRogueRun.currentLevelOffset = originalLevelOffset;
 }
@@ -487,9 +452,8 @@ TEST("Frontier Brain trophies preserve their competitive echo and reset transien
 TEST("Frontier Brain generators retain canonical anchors and Legendary boundaries")
 {
     struct Pokemon originalEnemyParty[PARTY_SIZE];
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
-    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    struct RogueAdventureConfig config;
     u8 originalTrialId = gRogueRun.trialState.trialId;
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     RAND_TYPE originalRogueRng = gRngRogueValue;
@@ -502,9 +466,10 @@ TEST("Frontier Brain generators retain canonical anchors and Legendary boundarie
     memcpy(originalEnemyParty, gEnemyParty, sizeof(originalEnemyParty));
     gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
     Rogue_SetCurrentDifficulty(6);
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    Rogue_CopyAdventureConfig(&config);
+    config.pokedexVariant = POKEDEX_VARIANT_NATIONAL_MAX;
+    Rogue_SetRunStartConfigOverride(&config);
     RogueMonQuery_InvalidateSpeciesActiveCache();
 
     for(trainerNum = 0; trainerNum < gRogueTrainerCount; ++trainerNum)
@@ -589,9 +554,8 @@ TEST("Frontier Brain generators retain canonical anchors and Legendary boundarie
     memcpy(gEnemyParty, originalEnemyParty, sizeof(originalEnemyParty));
     CalculateEnemyPartyCount();
     gRogueRun.trialState.trialId = originalTrialId;
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
-    RoguePokedex_SetDexVariant(originalDexVariant);
+    Rogue_ClearRunStartConfigOverride();
     RogueMonQuery_InvalidateSpeciesActiveCache();
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
@@ -603,7 +567,6 @@ TEST("Frontier Brain curated pools fall back to the active Trial Pokedex when ex
 {
 #ifdef ROGUE_EXPANSION
     u16 plannedSpecies[PARTY_SIZE];
-    u8 originalTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 originalDifficulty = Rogue_GetCurrentDifficulty();
     u8 originalLevelOffset = gRogueRun.currentLevelOffset;
     u8 originalDexVariant = RoguePokedex_GetDexVariant();
@@ -627,7 +590,6 @@ TEST("Frontier Brain curated pools fall back to the active Trial Pokedex when ex
     EXPECT_NE(gretaTrainer, TRAINER_NONE);
 
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_BRUTAL);
     Rogue_SetCurrentDifficulty(6);
     gRogueRun.currentLevelOffset = 0;
     gRogueRun.trialState.trialId = ROGUE_TRIAL_REGION_JOHTO;
@@ -648,7 +610,6 @@ TEST("Frontier Brain curated pools fall back to the active Trial Pokedex when ex
     EXPECT(foundGenericSpecies);
 
     gRogueRun.trialState.trialId = originalTrialId;
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, originalTrainerDifficulty);
     Rogue_SetCurrentDifficulty(originalDifficulty);
     gRogueRun.currentLevelOffset = originalLevelOffset;
     RoguePokedex_SetDexVariant(originalDexVariant);
@@ -665,7 +626,6 @@ TEST("Frontier Brain curated pools fall back to the active Trial Pokedex when ex
 TEST("Rival roster planning caches species without constructing temporary mons")
 {
     u8 i;
-    u8 previousTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
     bool8 previousTrainerToggles[ARRAY_COUNT(sTrainerConfigToggles)];
     bool8 wasRunActive = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
@@ -678,7 +638,6 @@ TEST("Rival roster planning caches species without constructing temporary mons")
     CreateMon(&gEnemyParty[0], SPECIES_PIKACHU, 10, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
 
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
     SetBenchmarkTrainerConfig();
     Rogue_SetCurrentDifficulty(3);
     gRogueRun.baseSeed = 12345;
@@ -705,7 +664,6 @@ TEST("Rival roster planning caches species without constructing temporary mons")
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     gRngRogueValue = rngOriginal;
     Rogue_SetCurrentDifficulty(previousDifficulty);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, previousTrainerDifficulty);
     RestoreTrainerConfigToggles(previousTrainerToggles);
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);
@@ -752,7 +710,6 @@ TEST("Active species cache preserves results and avoids repeated dex scans")
 TEST("Run-start rival planning stays within its performance ceiling")
 {
     struct LongBenchmark rivalBase;
-    u8 previousTrainerDifficulty = Rogue_GetConfigRange(CONFIG_RANGE_TRAINER);
     u8 previousDifficulty = Rogue_GetCurrentDifficulty();
     u8 previousDexVariant = RoguePokedex_GetDexVariant();
     bool8 previousTrainerToggles[ARRAY_COUNT(sTrainerConfigToggles)];
@@ -761,10 +718,12 @@ TEST("Run-start rival planning stays within its performance ceiling")
 
     memset(&gRogueRun, 0, sizeof(gRogueRun));
     SaveTrainerConfigToggles(previousTrainerToggles);
-    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_AVERAGE);
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ClearRunStartConfigOverride();
     SetBenchmarkTrainerConfig();
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
+    gRogueSaveBlock->activeAdventureConfig = gRogueSaveBlock->adventureConfig;
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(0);
     gRogueRun.baseSeed = 12345;
     gRogueRun.rivalTrainerNum = 0;
@@ -783,7 +742,6 @@ TEST("Run-start rival planning stays within its performance ceiling")
     gRngRogueValue = rngOriginal;
     Rogue_SetCurrentDifficulty(previousDifficulty);
     RoguePokedex_SetDexVariant(previousDexVariant);
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, previousTrainerDifficulty);
     RestoreTrainerConfigToggles(previousTrainerToggles);
     if(!wasRunActive)
         FlagClear(FLAG_ROGUE_RUN_ACTIVE);

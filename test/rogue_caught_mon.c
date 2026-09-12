@@ -20,6 +20,7 @@
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
+#include "rogue_query.h"
 #include "rogue_save.h"
 #include "rogue_safari.h"
 #include "rogue_script.h"
@@ -27,6 +28,16 @@
 #include "rogue_trials.h"
 #include "string_util.h"
 #include "test/test.h"
+
+static void SetCaughtMonTestDex(u8 variant)
+{
+    if (Rogue_IsRunActive())
+    {
+        gRogueSaveBlock->activeAdventureConfig.pokedexVariant = variant;
+        RogueMonQuery_InvalidateSpeciesActiveCache();
+    }
+    else RoguePokedex_SetDexVariant(variant);
+}
 
 static void ResetCaughtMonTestState(void)
 {
@@ -40,8 +51,13 @@ static void ResetCaughtMonTestState(void)
     gPlayerPartyCount = 0;
     gEnemyPartyCount = 0;
     VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE);
+    Rogue_ClearRunStartConfigOverride();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ResetSettingsToDefaults();
+    memset(gRogueSaveBlock->bestAscension, ASCENSION_MAX, sizeof(gRogueSaveBlock->bestAscension));
+    SetCaughtMonTestDex(POKEDEX_VARIANT_NATIONAL_GEN9);
+    gRogueSaveBlock->activeAdventureConfig = gRogueSaveBlock->adventureConfig;
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_GEN9);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, TRUE);
@@ -65,6 +81,7 @@ static void ClearCaughtMonTestState(void)
     gEnemyPartyCount = 0;
     VarSet(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE);
     RogueTrial_ClearPendingSelection();
+    Rogue_ClearRunStartConfigOverride();
 }
 
 static void SetPartyMon(u8 slot, u16 species)
@@ -105,7 +122,7 @@ static void ActivateCaughtMonTestTrial(u8 trialId)
 static void SetPendingTrialSelection(u8 trialId, u8 pokedexVariant)
 {
     gSpecialVar_0x8004 = trialId;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = pokedexVariant;
     RogueTrial_SetPendingSelectionFromScript();
     EXPECT(gSpecialVar_Result);
@@ -233,7 +250,7 @@ TEST("Species Clause uses direct evolution lineages when entering a run")
     SetPartyMon(1, SPECIES_EEVEE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
     Rogue_CheckPartyHasDuplicateStartSpecies();
-    EXPECT(!gSpecialVar_Result);
+    EXPECT(gSpecialVar_Result); // The clause is fixed at every ascension.
 
     ClearCaughtMonTestState();
 }
@@ -263,7 +280,7 @@ TEST("Legendary Clause still rejects multiple Legendary Pokemon at run entry")
 
     Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
     Rogue_CheckPartyHasDuplicateStartSpecies();
-    EXPECT(!gSpecialVar_Result);
+    EXPECT(gSpecialVar_Result); // The entry clause cannot be disabled.
 
     ClearCaughtMonTestState();
 }
@@ -294,7 +311,7 @@ TEST("Defeating a Legendary den Pokemon adds it to the Safari")
     ClearCaughtMonTestState();
 }
 
-TEST("Species Clause off allows duplicate catches when the party has room")
+TEST("Species Clause remains enabled when an obsolete toggle is written")
 {
     struct Pokemon caughtMon;
 
@@ -303,7 +320,7 @@ TEST("Species Clause off allows duplicate catches when the party has room")
     SetPartyMon(0, SPECIES_METAPOD);
     caughtMon = CreateCaughtMon(SPECIES_BUTTERFREE);
 
-    EXPECT(Rogue_CanAddCaughtMonToParty(&caughtMon));
+    EXPECT(!Rogue_CanAddCaughtMonToParty(&caughtMon));
 
     ClearCaughtMonTestState();
 }
@@ -445,7 +462,7 @@ TEST("Regional Style Trial treats selected Pokedex as species legality")
     struct Pokemon caughtMon;
 
     ResetCaughtMonTestState();
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_HOENN_RSE);
     ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_HOENN);
 
     caughtMon = CreateCaughtMon(SPECIES_TREECKO);
@@ -541,7 +558,7 @@ TEST("Pending trial validates chosen partner instead of replaced party")
 TEST("Normal runs reject party and Day Care Pokemon outside the selected Pokedex")
 {
     ResetCaughtMonTestState();
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_HOENN_RSE);
 
     SetPartyMon(0, SPECIES_BULBASAUR);
     RogueTrial_CanUsePendingParty();
@@ -773,7 +790,7 @@ TEST("Normal and fallback starters stay inside the selected favorite-game Pokede
     u16 fallback;
 
     ResetCaughtMonTestState();
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_HOENN_RSE);
 
     Rogue_RandomiseStarters();
     for (i = 0; i < 3; ++i)
@@ -789,6 +806,7 @@ TEST("Normal and fallback starters stay inside the selected favorite-game Pokede
 TEST("Pre-partner Professor Pokedex changes update the pending gimmick reward")
 {
     ResetCaughtMonTestState();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE); // Professor edits remembered hub setup.
     VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, ITEM_Z_POWER_RING);
     VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_CATCH_MON);
     gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
@@ -809,6 +827,7 @@ TEST("Pre-partner Professor Pokedex changes update the pending gimmick reward")
 TEST("Post-partner Professor Pokedex changes do not alter the issued gimmick")
 {
     ResetCaughtMonTestState();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE); // Professor edits remembered hub setup.
     VarSet(VAR_ROGUE_INITIAL_GIMMICK_ITEM, ITEM_Z_POWER_RING);
     VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_REPORT_TO_PROF);
     gSpecialVar_0x8006 = POKEDEX_VARIANT_GALAR_FULLDLC;
@@ -882,7 +901,7 @@ TEST("Postgame direct Pokedex editing remains unrestricted")
     EXPECT(RoguePokedex_IsVariantEditUnlocked());
     EXPECT(RoguePokedex_IsVariantEditEnabled());
 
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_GALAR_ISLEOFARMOR);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_GALAR_ISLEOFARMOR);
     EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_GALAR_ISLEOFARMOR);
     EXPECT(!RoguePokedex_IsCuratedVariant(RoguePokedex_GetDexVariant()));
 
@@ -1011,14 +1030,14 @@ TEST("Pending regional trial randomizes starters from the selected Pokedex")
 TEST("Region Style Trial applies selected regional dex and trainer pool")
 {
     ResetCaughtMonTestState();
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_ROGUE_MODERN);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO, TRUE);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN, FALSE);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_REGION_HOENN;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_HOENN_RSE;
     RogueTrial_SetPendingSelectionFromScript();
     RogueTrial_ApplyPendingSelection();
@@ -1037,7 +1056,7 @@ TEST("Region Style Trial applies selected regional dex and trainer pool")
 TEST("Z-A Royale Trial applies Z-A dex, Rainbow order, Doubles, and regional trainer pools")
 {
     ResetCaughtMonTestState();
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_ROGUE_MODERN);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_ROGUE_MODERN);
     Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, TRAINER_ORDER_DEFAULT);
     Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE, TRUE);
@@ -1052,7 +1071,7 @@ TEST("Z-A Royale Trial applies Z-A dex, Rainbow order, Doubles, and regional tra
     Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_PALDEA, FALSE);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_Z_A_ROYALE;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_LEGENDS_ZA;
     RogueTrial_SetPendingSelectionFromScript();
     RogueTrial_ApplyPendingSelection();
@@ -1142,7 +1161,7 @@ TEST("Regional Style gimmick overrides are exclusive while ordinary Trials prese
     for (i = 0; i < ARRAY_COUNT(cases); ++i)
     {
         ActivateCaughtMonTestTrial(cases[i].trialId);
-        RoguePokedex_SetDexVariant(cases[i].pokedexVariant);
+        SetCaughtMonTestDex(cases[i].pokedexVariant);
         gRogueRun.megasEnabled = TRUE;
         gRogueRun.zMovesEnabled = TRUE;
         gRogueRun.dynamaxEnabled = TRUE;
@@ -1203,7 +1222,7 @@ TEST("Regional Style supplies only its active gimmick item and restores the hub 
         }
 
         ActivateCaughtMonTestTrial(cases[i].trialId);
-        RoguePokedex_SetDexVariant(cases[i].pokedexVariant);
+        SetCaughtMonTestDex(cases[i].pokedexVariant);
         RogueTrial_ApplyRunBagItems();
         RogueTrial_ApplyRunBagItems();
 
@@ -1218,7 +1237,7 @@ TEST("Regional Style supplies only its active gimmick item and restores the hub 
         EXPECT(AddBagItem(cases[i].item, 1));
     }
     ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_KANTO);
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KANTO_RBY);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_KANTO_RBY);
     RogueTrial_ApplyRunBagItems();
     for (i = 0; i < ARRAY_COUNT(cases); ++i)
         EXPECT_EQ(CountTotalItemQuantityInBag(cases[i].item), 0);
@@ -1256,7 +1275,7 @@ TEST("Regional Style completion does not require activating its gimmick")
 {
     ResetCaughtMonTestState();
     ActivateCaughtMonTestTrial(ROGUE_TRIAL_REGION_KALOS);
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_KALOS);
+    SetCaughtMonTestDex(POKEDEX_VARIANT_KALOS);
     gRogueRun.megasEnabled = TRUE;
     EXPECT(RogueTrial_IsCompleteForQuest(ROGUE_TRIAL_REGION_KALOS));
     ClearCaughtMonTestState();
@@ -1270,7 +1289,7 @@ TEST("Orre Style Trial supplies its partner duo with Doubles and Snag Curse")
     SetPartyMon(0, SPECIES_PIKACHU);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_ORRE_STYLE;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_ROGUE_CLASSICPLUS;
     RogueTrial_SetPendingSelectionFromScript();
 
@@ -1366,22 +1385,22 @@ TEST("Converted legality Trials enforce starter and Legendary rules")
     ClearCaughtMonTestState();
 }
 
-TEST("Insane Mode forces Hard difficulty")
+TEST("Insane Mode requires minimum A10 without forcing a fixed level")
 {
     ResetCaughtMonTestState();
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_INSANE_MODE;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_NATIONAL_GEN9;
-    RogueTrial_SelectForcedDifficulty();
-    EXPECT(gSpecialVar_Result);
-    EXPECT_EQ(gSpecialVar_0x8005, DIFFICULTY_LEVEL_HARD);
+    RogueTrial_SelectFixedAscension();
+    EXPECT(!gSpecialVar_Result);
+    gSpecialVar_0x8005 = 10;
 
     RogueTrial_SetPendingSelectionFromScript();
     EXPECT(gSpecialVar_Result);
 
     RogueTrial_ClearPendingSelection();
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_AVERAGE;
+    gSpecialVar_0x8005 = 0;
     RogueTrial_SetPendingSelectionFromScript();
     EXPECT(!gSpecialVar_Result);
 
@@ -1397,17 +1416,17 @@ TEST("Last Trial selection restores its exact setup")
 
     EXPECT(gRogueSaveBlock->hasLastTrialSelection);
     EXPECT_EQ(gRogueSaveBlock->lastTrialId, ROGUE_TRIAL_TYPE_NORMAL);
-    EXPECT_EQ(gRogueSaveBlock->lastTrialDifficulty, DIFFICULTY_LEVEL_AVERAGE);
+    EXPECT_EQ(gRogueSaveBlock->lastTrialAscension, 0);
     EXPECT_EQ(gRogueSaveBlock->lastTrialPokedexVariant, POKEDEX_VARIANT_NATIONAL_GEN9);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_NONE;
-    gSpecialVar_0x8005 = DIFFICULTY_LEVEL_EASY;
+    gSpecialVar_0x8005 = 0;
     gSpecialVar_0x8006 = POKEDEX_VARIANT_NONE;
     RogueTrial_LoadLastSelection();
 
     EXPECT(gSpecialVar_Result);
     EXPECT_EQ(gSpecialVar_0x8004, ROGUE_TRIAL_TYPE_NORMAL);
-    EXPECT_EQ(gSpecialVar_0x8005, DIFFICULTY_LEVEL_AVERAGE);
+    EXPECT_EQ(gSpecialVar_0x8005, 0);
     EXPECT_EQ(gSpecialVar_0x8006, POKEDEX_VARIANT_NATIONAL_GEN9);
 
     ClearCaughtMonTestState();

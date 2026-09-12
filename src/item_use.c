@@ -837,7 +837,7 @@ void ItemUseOutOfBattle_BattleChecker(u8 taskId)
 
 static void CB2_OpenCGearLogFromBag(void)
 {
-    Rogue_OpenDifficultyConfigMenu(CB2_ReturnToBagMenuPocket);
+    Rogue_OpenAdventureConfigMenu(CB2_ReturnToBagMenuPocket);
 }
 
 static void Task_OpenRegisteredCGear(u8 taskId)
@@ -845,7 +845,7 @@ static void Task_OpenRegisteredCGear(u8 taskId)
     if (!gPaletteFade.active)
     {
         CleanupOverworldWindowsAndTilemaps();
-        Rogue_OpenDifficultyConfigMenu(CB2_ReturnToField);
+        Rogue_OpenAdventureConfigMenu(CB2_ReturnToField);
         DestroyTask(taskId);
     }
 }

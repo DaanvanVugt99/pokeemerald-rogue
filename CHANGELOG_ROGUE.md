@@ -14,7 +14,57 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Fixed
+
+- Size the Trial ascension menu for A0-A20 plus Back. Add Choose Trial to setup
+  so remembered attempts never prevent selecting another Trial.
+- Preserve Trial replay status through run initialization, retaining the recorded
+  seed and excluding replay clears from quest rewards and Trial records.
+- Show nurse Ascension reminders only after its introduction and only when the
+  suggested higher or lower level is available.
+
 ### Changed
+
+- Put Begin Adventure first at the entrance. Keep the selected Pokédex visible
+  before its editing unlock, with locked help text; the first clear unlocks editing.
+
+- Clarify encounter setup help as "Overworld Pokemon or traditional grass."
+
+- Rename Pokemon pool to Pokédex throughout adventure setup and exclude Hisui
+  from the intro choices while retaining it for later editing.
+
+- Limit intro Pokemon pools to Regional and National. Remove the AI/weather and
+  gimmick-item notes from Base Rules and skip the now-empty early second page.
+
+- Share the adventure UI's Pokemon pool picker across the intro, hub editing,
+  professor and Trials. Organize pools by Regional (region/game), National
+  (generation), and Special roster, with species counts and single-choice fields
+  hidden. Intro setup includes the native regional starting gimmick or a chosen
+  National gimmick, and confirms all selections together.
+
+- Restore Gauntlet's postgame unlock and disable Slow Path for new adventures.
+  Hide the Adventure choice while only Standard is available. Rename Opponents
+  to Trainers and restore the same postgame unlock for trainer configuration.
+- Clarify that Base Rules cannot be changed and omit the disabled affection
+  bonuses from their display.
+
+- Reveal adventure setup choices as they unlock: Ascension after the first clear,
+  Pokemon pool after its unlock, and Starting team when both sources are available.
+  Hide Trial-fixed choices while keeping the full read-only rules view.
+- Introduce Ascension once at the adventure entrance after the first full clear.
+  Keep it out of opening text, setup help, base rules and read-only setup until
+  that conversation; early Trials silently use the base level. Opening setup
+  text reassures players that their selections can be changed later.
+
+- Replace freely configured difficulty with Ascension 0-20 adventures and separate
+  Singles, Doubles and Mixed progression. Add shared adventure setup, independent
+  profile upgrades, A19 supplies, and ascension records for Trials and alternate modes.
+- Trial rewards are one-time first-clear packages; remove Hard-only shiny bonuses
+  and include Orre Style's custom Lugia in its normal package.
+- Split full Unique Ability validation into two exhaustive batches to avoid the
+  32 MiB test ROM limit; focused suite commands remain unchanged.
+- Save format 10 requires a new save for ascension configuration and records.
+  Old saves are incompatible; local save files are not deleted or migrated.
 
 - Increased run catch bonuses to 8x at 0-4 badges earned, 4x at 5-7 badges,
   and 2x from the Elite Four onward to ease team rebuilding. Existing

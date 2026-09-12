@@ -92,6 +92,7 @@
 #include "rogue_safari.h"
 #include "rogue_save.h"
 #include "rogue_settings.h"
+#include "rogue_ascension.h"
 #include "rogue_timeofday.h"
 #include "rogue_trainers.h"
 
@@ -4738,24 +4739,8 @@ u16 Rogue_PostRunRewardMoney()
     {
         u16 i = gRogueRun.victoryLapTotalWins + gRogueRun.enteredRoomCounter - 1;
 
-        switch (Rogue_GetDifficultyRewardLevel())
-        {
-        case DIFFICULTY_LEVEL_EASY:
-            amount = i * 200;
-            break;
-
-        case DIFFICULTY_LEVEL_AVERAGE:
-            amount = i * 250;
-            break;
-
-        case DIFFICULTY_LEVEL_HARD:
-            amount = i * 300;
-            break;
-
-        case DIFFICULTY_LEVEL_BRUTAL:
-            amount = i * 350;
-            break;
-        }
+        // This payout runs in the hub, after remembered setup has been restored.
+        amount = i * (250 + 5 * gRogueSaveBlock->activeAdventureConfig.ascension);
     }
 
     AddMoney(&gSaveBlock1Ptr->money, amount);
@@ -5143,6 +5128,7 @@ static void SetupRogueRunBag()
     u16 itemId;
     u32 quantity;
     bool8 isBasicBagEnabled = Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE);
+    bool8 isExpedition = !isBasicBagEnabled && Rogue_GetAscension() >= 19;
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     u32 startClock = RogueDebug_SampleClock();
 #endif
@@ -5156,13 +5142,19 @@ static void SetupRogueRunBag()
         itemId = RogueSave_GetHubBagItemIdAt(i);
         quantity = RogueSave_GetHubBagItemQuantityAt(i);
 
-        if(itemId != ITEM_NONE && CanEnterWithItem(itemId, isBasicBagEnabled))
+        // Charms and curses occupy the key-item pocket, but are imported supplies.
+        if ((isBasicBagEnabled || isExpedition)
+            && ((itemId >= FIRST_ITEM_CHARM && itemId <= LAST_ITEM_CHARM)
+                || (itemId >= FIRST_ITEM_CURSE && itemId <= LAST_ITEM_CURSE)))
+            continue;
+
+        if(itemId != ITEM_NONE && CanEnterWithItem(itemId, isBasicBagEnabled || isExpedition))
         {
             AddBagItem(itemId, quantity);
         }
     }
 
-    if(!isBasicBagEnabled)
+    if(!isBasicBagEnabled && !isExpedition)
         SetMoney(&gSaveBlock1Ptr->money, GetAdventureFundStartMoney());
 
     // Give basic inventory
@@ -5172,11 +5164,23 @@ static void SetupRogueRunBag()
         AddBagItem(ITEM_POTION, 1);
     }
 
+    if (isExpedition)
+    {
+        AddBagItem(ITEM_POKE_BALL, 15);
+        AddBagItem(ITEM_POTION, 10);
+        AddBagItem(ITEM_FULL_HEAL, 3);
+        SetMoney(&gSaveBlock1Ptr->money, 10000);
+    }
+
     RecalcCharmCurseValues();
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     DebugPrintf("[Run Load] Bag setup: %d us", RogueDebug_ClockToDisplayUnits(RogueDebug_SampleClock() - startClock));
 #endif
 }
+
+#if TESTING
+void RogueTest_SetupRunBag(void) { SetupRogueRunBag(); }
+#endif
 
 enum
 {
@@ -5195,6 +5199,16 @@ enum
 
 static void BeginRogueRunPhase_Reset(void)
 {
+    const struct RogueRunStartContext *context = RogueRunStart_GetContext();
+    u8 source = context != NULL ? context->source
+        : RogueMP_IsActive() ? RUN_START_SOURCE_MULTIPLAYER_HOST
+        : FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) ? RUN_START_SOURCE_REPLAY
+        : RUN_START_SOURCE_NORMAL;
+    Rogue_CopyAdventureConfig(&gRogueSaveBlock->activeAdventureConfig);
+    gRogueSaveBlock->activeRunSource = source;
+    gRogueSaveBlock->ascensionEligibilityReason = RogueAscension_GetEligibility(&gRogueSaveBlock->activeAdventureConfig, source);
+    gRogueSaveBlock->ascensionEligible = gRogueSaveBlock->ascensionEligibilityReason == ASCENSION_ELIGIBLE;
+    gRogueSaveBlock->ascensionRecorded = FALSE;
     DebugPrint("BeginRogueRun");
 
     ClearRogueLocalData();
@@ -5208,6 +5222,16 @@ static void BeginRogueRunPhase_Reset(void)
     // Save before applying temporary Trial items so the exact hub inventory is restored after the run.
     RogueSave_SaveHubStates();
     RogueTrial_ApplyPendingSelection();
+    Rogue_CopyAdventureConfig(&gRogueSaveBlock->activeAdventureConfig);
+    if (RogueTrial_IsActive())
+    {
+        if (source != RUN_START_SOURCE_REPLAY)
+        {
+            gRogueSaveBlock->activeRunSource = RUN_START_SOURCE_TRIAL;
+            gRogueSaveBlock->ascensionEligibilityReason = ASCENSION_INELIGIBLE_TRIAL;
+        }
+        gRogueSaveBlock->ascensionEligible = FALSE;
+    }
     RogueTrial_ApplyRunBagItems();
     RogueMonQuery_InvalidateSpeciesActiveCache();
 
@@ -5248,6 +5272,8 @@ static void BeginRogueRunPhase_Reset(void)
     gRogueRun.victoryLapTotalWins = 0;
     Rogue_RefillDayCareCharges(FALSE);
 
+    if (source == RUN_START_SOURCE_REPLAY)
+        VarSet(VAR_ROGUE_DESIRED_CAMPAIGN, gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].campaignId);
     Rogue_PreActivateDesiredCampaign();
 
     if(RogueMP_IsActive() && RogueMP_IsClient())
@@ -5261,10 +5287,10 @@ static void BeginRogueRunPhase_Reset(void)
     {
         struct AdventureReplay const* replay = &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED];
 
-        if(RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_ADVENTURE_REPLAY) && FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && replay->isValid)
+        if(RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_ADVENTURE_REPLAY) && FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && replay->isValid && replay->rulesVersion == ASCENSION_RULES_VERSION)
         {
             gRogueRun.baseSeed = replay->baseSeed;
-            memcpy(&gRogueSaveBlock->difficultyConfig, &replay->difficultyConfig, sizeof(gRogueSaveBlock->difficultyConfig));
+            gRogueSaveBlock->activeAdventureConfig = replay->adventureConfig;
 
             Rogue_PushPopup_AdventureReplay();
         }
@@ -5279,12 +5305,12 @@ static void BeginRogueRunPhase_Reset(void)
     // Drop the temporary review override before deriving run rules from it.
     RogueRunStart_Clear();
 
-    if (Rogue_GetModeRules()->disableMainQuests || AnyCharmsActive())
+    if (Rogue_GetModeRules()->disableMainQuests || (Rogue_GetAscension() < 19 && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
         FlagSet(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
     else
         FlagClear(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
 
-    if (Rogue_GetModeRules()->disableTrialQuests || AnyCharmsActive())
+    if (Rogue_GetModeRules()->disableTrialQuests || (Rogue_GetAscension() < 19 && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
         FlagSet(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
     else
         FlagClear(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
@@ -5328,6 +5354,10 @@ static void BeginRogueRunPhase_Reset(void)
     VarSet(VAR_ROGUE_FLASK_HEALS_USED, 0);
     VarSet(VAR_ROGUE_FLASK_HEALS_MAX, 3);
 }
+
+#if TESTING
+void RogueTest_BeginRunReset(void) { BeginRogueRunPhase_Reset(); }
+#endif
 
 static void BeginRogueRunPhase_WorldState(void)
 {
@@ -5381,25 +5411,6 @@ static void BeginRogueRunPhase_PartyAndBag(void)
 
 static void BeginRogueRunPhase_SpecialClauses(void)
 {
-    if(Rogue_GetConfigRange(CONFIG_RANGE_LEGENDARY) == DIFFICULTY_LEVEL_BRUTAL)
-    {
-        bool8 weakSpeciesInDaycare;
-        bool8 strongSpeciesInDaycare;
-        u16 weakSpecies = GetActiveWeakLegendary(&weakSpeciesInDaycare);
-        u16 strongSpecies = GetActiveStrongLegendary(&strongSpeciesInDaycare);
-
-        if(weakSpecies != SPECIES_NONE)
-            FlagSet(FLAG_ROGUE_TRAINERS_WEAK_LEGENDARIES);
-
-        if(strongSpecies != SPECIES_NONE)
-            FlagSet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES);
-
-        if(strongSpecies != SPECIES_NONE)
-            Rogue_PushPopup_StrongPokemonClause(strongSpecies, strongSpeciesInDaycare);
-        else if(weakSpecies != SPECIES_NONE)
-            Rogue_PushPopup_WeakPokemonClause(weakSpecies, weakSpeciesInDaycare);
-    }
-
     GiveMonPartnerRibbon();
 }
 
@@ -5489,16 +5500,10 @@ static void BeginRogueRunPhase_Finalize(void)
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].isValid = TRUE;
     gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].baseSeed = gRogueRun.baseSeed;
 
-    if(RogueMP_IsActive() && RogueMP_IsClient())
-    {
-        AGB_ASSERT(gRogueMultiplayer != NULL);
-        AGB_ASSERT(gRogueMultiplayer->gameState.adventure.isRunActive);
-        memcpy(&gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].difficultyConfig, &gRogueMultiplayer->gameState.hub.difficultyConfig, sizeof(gRogueSaveBlock->difficultyConfig));
-    }
-    else
-    {
-        memcpy(&gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].difficultyConfig, &gRogueSaveBlock->difficultyConfig, sizeof(gRogueSaveBlock->difficultyConfig));
-    }
+    gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].adventureConfig = gRogueSaveBlock->activeAdventureConfig;
+    gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].rulesVersion = ASCENSION_RULES_VERSION;
+    gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].trialId = gRogueRun.trialState.trialId;
+    gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].campaignId = Rogue_GetActiveCampaign();
 
     RogueQuest_CheckQuestRequirements();
 }
@@ -6266,7 +6271,7 @@ void Rogue_PrepareShrineChallenge(void)
 {
     u8 i;
     // Keep this special encounter on the same level policy as rivals and
-    // Frontier Brains (player level on Standard, trainer cap on Brutal).
+    // Frontier Brains scale alongside the player.
     u8 level = Rogue_CalculateRivalMonLvl();
     u16 species = SPECIES_HO_OH;
     u16 customMoves[MAX_MON_MOVES];
@@ -8285,8 +8290,7 @@ void Rogue_OnSetWarpData(struct WarpData *warp)
 
                     VarSet(VAR_ROGUE_SPECIAL_ENCOUNTER_DATA, RogueRandom());
 
-                    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) != DIFFICULTY_LEVEL_EASY)
-                        VarSet(VAR_ROGUE_DESIRED_WEATHER, battleWeather[RogueRandomRange(ARRAY_COUNT(battleWeather), 0)]);
+                    VarSet(VAR_ROGUE_DESIRED_WEATHER, battleWeather[RogueRandomRange(ARRAY_COUNT(battleWeather), 0)]);
 
                     ResetTrainerBattles();
                     RandomiseEnabledTrainers();
@@ -9711,6 +9715,7 @@ void Rogue_Battle_EndTrainerBattle(u16 trainerNum)
 
                     FlagSet(FLAG_IS_CHAMPION);
                     FlagSet(FLAG_ROGUE_RUN_COMPLETED);
+                    RogueAscension_RecordWin();
                     RogueQuest_UnlockAllEvilTeamQuests();
 
                     if(!Rogue_ShouldDisableMainQuests())

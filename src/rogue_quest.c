@@ -195,15 +195,14 @@ u16 RogueQuest_GetRewardCount(u16 questId)
     return entry->rewardCount;
 }
 
-u8 RogueQuest_GetHighestCompleteDifficulty(u16 questId)
+bool8 RogueQuest_IsRewardClaimed(u16 questId)
 {
-    if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
-    {
-        struct RogueQuestState* questState = RogueQuest_GetState(questId);
-        return questState->highestCompleteDifficulty;
-    }
+    return RogueQuest_GetState(questId)->rewardClaimed;
+}
 
-    return DIFFICULTY_LEVEL_NONE;
+u8 RogueQuest_GetBestAscension(u16 questId, u8 format)
+{
+    return format <= BATTLE_FORMAT_MIXED ? RogueQuest_GetState(questId)->bestAscension[format] : ASCENSION_NONE;
 }
 
 static bool8 CanActivateQuest(u16 questId)
@@ -212,27 +211,20 @@ static bool8 CanActivateQuest(u16 questId)
         return FALSE;
 
     // Cannot start quests we have rewards for
-    if(RogueQuest_GetStateFlag(questId, QUEST_STATE_PENDING_REWARDS))
+    if(RogueQuest_GetStateFlag(questId, QUEST_STATE_PENDING_REWARDS)
+     && !RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
         return FALSE;
 
     // Masteries still work in the background, but Trials don't
     if(IsQuestSurpressed(questId) && !CanSurpressedQuestActivate(questId))
         return FALSE;
 
-    // Trials can be run again at a higher difficulty
+    // Trials allow repeat attempts; records and reward claims are independent.
     if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
     {
         if(Rogue_ShouldDisableTrialQuests())
             return FALSE;
 
-        if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
-        {
-            u8 difficultyLevel = Rogue_GetDifficultyRewardLevel();
-            struct RogueQuestState* questState = RogueQuest_GetState(questId);
-
-            if(questState->highestCompleteDifficulty != DIFFICULTY_LEVEL_NONE && difficultyLevel <= questState->highestCompleteDifficulty)
-                return FALSE;
-        }
     }
     else // Main quests, Achievements, and Masteries are completed once
     {
@@ -530,12 +522,6 @@ static bool8 IsHighPriorityReward(struct RogueQuestReward const* rewardInfo)
     return FALSE;
 }
 
-static bool8 ShouldSkipQuestReward(struct RogueQuestReward const* rewardInfo, u8 minRewardDifficulty, u8 maxRewardDifficulty)
-{
-    // Skip if outside of reward range
-    return !(rewardInfo->requiredDifficulty >= minRewardDifficulty && rewardInfo->requiredDifficulty <= maxRewardDifficulty);
-}
-
 bool8 RogueQuest_TryCollectRewards(u16 questId)
 {
     u16 i;
@@ -543,32 +529,13 @@ bool8 RogueQuest_TryCollectRewards(u16 questId)
     struct RogueQuestReward const* rewardInfo;
     struct RogueQuestState* questState = RogueQuest_GetState(questId);
     u16 rewardCount = RogueQuest_GetRewardCount(questId);
-    u8 minRewardDifficulty = questState->highestCollectedRewardDifficulty;
-    u8 maxRewardDifficulty = questState->highestCompleteDifficulty;
-
-    if(minRewardDifficulty == DIFFICULTY_LEVEL_NONE)
-    {
-        minRewardDifficulty = DIFFICULTY_LEVEL_EASY;
-    }
-    else
-    {
-        // We've already collected rewards for the highestCollectedRewardDifficulty so don't give them again
-        minRewardDifficulty++;
-        AGB_ASSERT(minRewardDifficulty <= maxRewardDifficulty);
-    }
-    
-
-    AGB_ASSERT(RogueQuest_HasPendingRewards(questId));
-    AGB_ASSERT(minRewardDifficulty < DIFFICULTY_PRESET_COUNT);
-    AGB_ASSERT(maxRewardDifficulty < DIFFICULTY_PRESET_COUNT);
+    if (!RogueQuest_HasPendingRewards(questId) || questState->rewardClaimed)
+        return FALSE;
 
     // Give high pri rewards
     for(i = 0; i < rewardCount; ++i)
     {
         rewardInfo = RogueQuest_GetReward(questId, i);
-
-        if(ShouldSkipQuestReward(rewardInfo, minRewardDifficulty, maxRewardDifficulty))
-            continue;
 
         if(IsHighPriorityReward(rewardInfo))
         {
@@ -586,9 +553,6 @@ bool8 RogueQuest_TryCollectRewards(u16 questId)
         {
             rewardInfo = RogueQuest_GetReward(questId, i);
 
-            if(ShouldSkipQuestReward(rewardInfo, minRewardDifficulty, maxRewardDifficulty))
-                continue;
-
             if(IsHighPriorityReward(rewardInfo))
                 RemoveRewardInternal(rewardInfo);
         }
@@ -599,9 +563,6 @@ bool8 RogueQuest_TryCollectRewards(u16 questId)
         for(i = 0; i < rewardCount; ++i)
         {
             rewardInfo = RogueQuest_GetReward(questId, i);
-
-            if(ShouldSkipQuestReward(rewardInfo, minRewardDifficulty, maxRewardDifficulty))
-                continue;
 
             if(!IsHighPriorityReward(rewardInfo))
             {
@@ -614,7 +575,7 @@ bool8 RogueQuest_TryCollectRewards(u16 questId)
         // Clear pending rewards
         RogueQuest_SetStateFlag(questId, QUEST_STATE_PENDING_REWARDS, FALSE);
 
-        questState->highestCollectedRewardDifficulty = questState->highestCompleteDifficulty;
+        questState->rewardClaimed = TRUE;
         return TRUE;
     }
 
@@ -814,29 +775,6 @@ u16 RogueQuest_GetQuestCompletePercFor(u32 constFlag)
     return (complete * 100) / total;
 }
 
-u16 RogueQuest_GetQuestCompletePercAtDifficultyFor(u32 constFlag, u8 difficultyLevel)
-{
-    u16 i;
-    u16 complete = 0;
-    u16 total = 0;
-
-    for(i = 0; i < QUEST_ID_COUNT; ++i)
-    {
-        if(RogueQuest_GetConstFlag(i, constFlag))
-        {
-            ++total;
-
-            if(RogueQuest_GetStateFlag(i, QUEST_STATE_HAS_COMPLETE))
-            {
-                if(RogueQuest_GetState(i)->highestCompleteDifficulty >= difficultyLevel)
-                    ++complete;
-            }
-        }
-    }
-
-    return (complete * 100) / total;
-}
-
 void RogueQuest_GetQuestCountsFor(u32 constFlag, u16* activeCount, u16* inactiveCount)
 {
     u16 i;
@@ -926,6 +864,11 @@ static void EnsureUnlockedDefaultQuests()
 void RogueQuest_OnNewGame()
 {
     memset(gRogueSaveBlock->questStates, 0, sizeof(gRogueSaveBlock->questStates));
+    {
+        u16 i;
+        for (i = 0; i < QUEST_ID_COUNT; ++i)
+            memset(gRogueSaveBlock->questStates[i].bestAscension, ASCENSION_NONE, 3);
+    }
     EnsureUnlockedDefaultQuests();
 }
 
@@ -936,41 +879,17 @@ void RogueQuest_OnLoadGame()
 
 static void CompleteQuest(u16 questId)
 {
-    u8 currentDifficulty = Rogue_GetDifficultyRewardLevel();
-    struct RogueQuestState* questState = RogueQuest_GetState(questId);
-
-    questState->highestCompleteDifficulty = currentDifficulty;
-    if(!RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
-    {
-        questState->highestCollectedRewardDifficulty = DIFFICULTY_LEVEL_NONE;
+    u8 level = Rogue_GetAscension();
+    u8 format = Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT);
+    struct RogueQuestState *questState = RogueQuest_GetState(questId);
+    if (format <= BATTLE_FORMAT_MIXED && (questState->bestAscension[format] == ASCENSION_NONE || level > questState->bestAscension[format]))
+        questState->bestAscension[format] = level;
+    if (!questState->rewardClaimed)
         RogueQuest_SetStateFlag(questId, QUEST_STATE_PENDING_REWARDS, TRUE);
-    }
-    else if(questState->highestCollectedRewardDifficulty == DIFFICULTY_LEVEL_NONE)
-    {
-        // Still have rewards to collect
-        RogueQuest_SetStateFlag(questId, QUEST_STATE_PENDING_REWARDS, TRUE);
-    }
-    else
-    {
-        // Only set pending rewards if we actually do have new rewards for this difficulty
-        u32 i;
-        u32 rewardCount = RogueQuest_GetRewardCount(questId);
-        struct RogueQuestReward const* rewardInfo;
-
-        for(i = 0; i < rewardCount; ++i)
-        {
-            rewardInfo = RogueQuest_GetReward(questId, i);
-
-            if(rewardInfo->requiredDifficulty > questState->highestCollectedRewardDifficulty && rewardInfo->requiredDifficulty <= questState->highestCompleteDifficulty)
-            {
-                RogueQuest_SetStateFlag(questId, QUEST_STATE_PENDING_REWARDS, TRUE);
-                break;
-            }
-        }
-    }
 
     RogueQuest_SetStateFlag(questId, QUEST_STATE_ACTIVE, FALSE);
     RogueQuest_SetStateFlag(questId, QUEST_STATE_HAS_COMPLETE, TRUE);
+    RogueTrial_OnQuestCompleted(questId);
 
     if(!IsQuestSurpressed(questId))
         Rogue_PushPopup_QuestComplete(questId);

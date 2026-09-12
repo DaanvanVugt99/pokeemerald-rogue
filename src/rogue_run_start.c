@@ -28,7 +28,7 @@ static const u8 sText_CurrentParty[] = _("Current Party");
 static const u8 sText_StarterBag[] = _("Starter Bag");
 static const u8 sText_Pokedex[] = _("Pokédex");
 static const u8 sText_Trial[] = _("Trial");
-static const u8 sText_Difficulty[] = _("Difficulty");
+static const u8 sText_Difficulty[] = _("Ascension");
 static const u8 sText_Back[] = _("Back");
 
 static bool8 HasPendingQuestRewards(void)
@@ -121,23 +121,26 @@ static void ResolveStandardConfig(void)
     {
         AGB_ASSERT(gRogueMultiplayer != NULL);
         memcpy(&sRunStartContext.effectiveConfig,
-               &gRogueMultiplayer->gameState.hub.difficultyConfig,
+               &gRogueMultiplayer->gameState.hub.adventureConfig,
                sizeof(sRunStartContext.effectiveConfig));
         sRunStartContext.source = RUN_START_SOURCE_MULTIPLAYER_CLIENT;
         sRunStartContext.canEdit = FALSE;
     }
     else if (FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE)
-          && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].isValid)
+          && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].isValid
+     && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].rulesVersion == ASCENSION_RULES_VERSION)
     {
         memcpy(&sRunStartContext.effectiveConfig,
-               &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].difficultyConfig,
+               &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].adventureConfig,
                sizeof(sRunStartContext.effectiveConfig));
         sRunStartContext.source = RUN_START_SOURCE_REPLAY;
         sRunStartContext.canEdit = FALSE;
     }
     else
     {
-        Rogue_CopyReadableDifficultyConfig(&sRunStartContext.effectiveConfig);
+        Rogue_CopyAdventureConfig(&sRunStartContext.effectiveConfig);
+        if (!Rogue_IsAdventureModeAvailable(sRunStartContext.effectiveConfig.mode))
+            sRunStartContext.effectiveConfig.mode = ROGUE_GAME_MODE_STANDARD;
         sRunStartContext.source = RogueMP_IsHost()
             ? RUN_START_SOURCE_MULTIPLAYER_HOST
             : RUN_START_SOURCE_NORMAL;
@@ -152,27 +155,31 @@ void RogueRunStart_PrepareStandard(void)
 
     sRunStartContext.isActive = TRUE;
     sRunStartContext.configRevision = 1;
-    sRunStartContext.trialId = ROGUE_TRIAL_NONE;
-    sRunStartContext.trialDifficulty = DIFFICULTY_LEVEL_CUSTOM;
-    sRunStartContext.pokedexVariant = sRunStartContext.effectiveConfig.rangeValues[CONFIG_RANGE_POKEDEX_VARIANT];
+    sRunStartContext.trialId = sRunStartContext.source == RUN_START_SOURCE_REPLAY
+        ? gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].trialId : ROGUE_TRIAL_NONE;
+    sRunStartContext.trialAscension = sRunStartContext.effectiveConfig.ascension;
+    sRunStartContext.preferredTeamSource = sRunStartContext.effectiveConfig.startingTeam;
+    sRunStartContext.pokedexVariant = sRunStartContext.effectiveConfig.pokedexVariant;
     Rogue_SetRunStartConfigOverride(&sRunStartContext.effectiveConfig);
+    if (sRunStartContext.source == RUN_START_SOURCE_REPLAY && sRunStartContext.trialId != ROGUE_TRIAL_NONE)
+        RogueTrial_CommitSelection(sRunStartContext.trialId, sRunStartContext.trialAscension, sRunStartContext.pokedexVariant);
     RogueRunStart_Refresh();
 }
 
 void RogueRunStart_PrepareTrial(void)
 {
-    struct RogueDifficultyConfig config;
+    struct RogueAdventureConfig config;
 
     RogueRunStart_Clear();
-    Rogue_CopyReadableDifficultyConfig(&config);
+    Rogue_CopyAdventureConfig(&config);
 
     sRunStartContext.trialId = gSpecialVar_0x8004;
-    sRunStartContext.trialDifficulty = gSpecialVar_0x8005;
+    sRunStartContext.trialAscension = gSpecialVar_0x8005;
     sRunStartContext.pokedexVariant = gSpecialVar_0x8006;
 
     if (!RogueTrial_BuildSelectionConfig(
             sRunStartContext.trialId,
-            sRunStartContext.trialDifficulty,
+            sRunStartContext.trialAscension,
             sRunStartContext.pokedexVariant,
             &config))
         return;
@@ -200,31 +207,69 @@ void RogueRunStart_Refresh(void)
     if (!sRunStartContext.isActive)
         return;
 
+    if (FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE)
+     && (!gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].isValid
+      || gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].rulesVersion != ASCENSION_RULES_VERSION))
+    {
+        sRunStartContext.readiness = RUN_START_BLOCKED_ASCENSION;
+        sRunStartContext.readinessReason = RUN_START_REASON_INVALID_CONFIG;
+        return;
+    }
+
     // Multiplayer settings may change while a client waits at the review.
     if (sRunStartContext.source == RUN_START_SOURCE_MULTIPLAYER_CLIENT
      && RogueMP_IsClient()
      && gRogueMultiplayer != NULL)
     {
         if (memcmp(&sRunStartContext.effectiveConfig,
-                   &gRogueMultiplayer->gameState.hub.difficultyConfig,
+                   &gRogueMultiplayer->gameState.hub.adventureConfig,
                    sizeof(sRunStartContext.effectiveConfig)) != 0)
         {
             memcpy(&sRunStartContext.effectiveConfig,
-                   &gRogueMultiplayer->gameState.hub.difficultyConfig,
+                   &gRogueMultiplayer->gameState.hub.adventureConfig,
                    sizeof(sRunStartContext.effectiveConfig));
-            sRunStartContext.pokedexVariant = sRunStartContext.effectiveConfig.rangeValues[CONFIG_RANGE_POKEDEX_VARIANT];
+            sRunStartContext.pokedexVariant = sRunStartContext.effectiveConfig.pokedexVariant;
             Rogue_SetRunStartConfigOverride(&sRunStartContext.effectiveConfig);
             ++sRunStartContext.configRevision;
         }
     }
 
+    if (sRunStartContext.effectiveConfig.ascension > ASCENSION_MAX
+     || sRunStartContext.effectiveConfig.battleFormat > BATTLE_FORMAT_MIXED
+     || sRunStartContext.effectiveConfig.mode >= ROGUE_GAME_MODE_COUNT
+     || (sRunStartContext.source != RUN_START_SOURCE_REPLAY
+      && sRunStartContext.effectiveConfig.mode == ROGUE_GAME_MODE_SLOW_PATH)
+     || ((sRunStartContext.source == RUN_START_SOURCE_NORMAL || sRunStartContext.source == RUN_START_SOURCE_MULTIPLAYER_HOST)
+      && !Rogue_IsAdventureModeAvailable(sRunStartContext.effectiveConfig.mode))
+     || sRunStartContext.effectiveConfig.pokedexVariant >= POKEDEX_VARIANT_COUNT
+     || sRunStartContext.effectiveConfig.startingTeam > RUN_START_TEAM_SOURCE_STARTER_BAG
+     || sRunStartContext.effectiveConfig.trainerRegions == 0
+     || (sRunStartContext.effectiveConfig.trainerRegions & ~0x3FF)
+     || sRunStartContext.trialId >= ROGUE_TRIAL_COUNT
+     || ((sRunStartContext.source == RUN_START_SOURCE_NORMAL || sRunStartContext.source == RUN_START_SOURCE_MULTIPLAYER_HOST)
+      && sRunStartContext.effectiveConfig.trialFreshStart)
+     || sRunStartContext.effectiveConfig.trainerOrder > TRAINER_ORDER_OFFICIAL)
+    {
+        sRunStartContext.readiness = RUN_START_BLOCKED_ASCENSION;
+        sRunStartContext.readinessReason = RUN_START_REASON_INVALID_CONFIG;
+        return;
+    }
+    if (sRunStartContext.source != RUN_START_SOURCE_REPLAY
+     && sRunStartContext.source != RUN_START_SOURCE_MULTIPLAYER_CLIENT
+     && !RogueAscension_IsUnlocked(sRunStartContext.effectiveConfig.ascension, sRunStartContext.effectiveConfig.battleFormat))
+    {
+        sRunStartContext.readiness = RUN_START_BLOCKED_ASCENSION;
+        sRunStartContext.readinessReason = RUN_START_REASON_ASCENSION_LOCKED;
+        return;
+    }
+    sRunStartContext.ascensionEligibility = RogueAscension_GetEligibility(&sRunStartContext.effectiveConfig, sRunStartContext.source);
     sRunStartContext.hasPendingQuestRewards = HasPendingQuestRewards();
     sRunStartContext.mainQuestsDisabled = sRunStartContext.source == RUN_START_SOURCE_REPLAY
         || Rogue_GetModeRules()->disableMainQuests
-        || AnyCharmsActive();
+        || (sRunStartContext.effectiveConfig.ascension < 19 && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
     sRunStartContext.trialQuestsDisabled = sRunStartContext.source == RUN_START_SOURCE_REPLAY
         || Rogue_GetModeRules()->disableTrialQuests
-        || AnyCharmsActive();
+        || (sRunStartContext.effectiveConfig.ascension < 19 && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
     sRunStartContext.requiresRandomPartner = FALSE;
     sRunStartContext.canUseCurrentParty = FALSE;
     sRunStartContext.readinessReason = RUN_START_REASON_NONE;
@@ -337,6 +382,30 @@ void RogueRunStart_Refresh(void)
     sRunStartContext.readiness = RUN_START_READY;
 }
 
+void RogueRunStart_UpdateConfig(const struct RogueAdventureConfig *config)
+{
+    struct RogueAdventureConfig validated = *config;
+    if (!sRunStartContext.isActive || !sRunStartContext.canEdit)
+        return;
+    if (sRunStartContext.source == RUN_START_SOURCE_TRIAL)
+    {
+        if (!RogueTrial_BuildSelectionConfig(sRunStartContext.trialId, config->ascension, config->pokedexVariant, &validated))
+            return;
+        sRunStartContext.trialAscension = validated.ascension;
+        gSpecialVar_0x8004 = sRunStartContext.trialId;
+        gSpecialVar_0x8005 = validated.ascension;
+        gSpecialVar_0x8006 = validated.pokedexVariant;
+    }
+    sRunStartContext.effectiveConfig = validated;
+    sRunStartContext.pokedexVariant = validated.pokedexVariant;
+    sRunStartContext.preferredTeamSource = validated.startingTeam;
+    Rogue_SetRunStartConfigOverride(&validated);
+    if (sRunStartContext.source == RUN_START_SOURCE_TRIAL)
+        RogueTrial_SetPreviewSelectionFromScript();
+    ++sRunStartContext.configRevision;
+    RogueRunStart_Refresh();
+}
+
 void RogueRunStart_Clear(void)
 {
     Rogue_ClearRunStartConfigOverride();
@@ -369,7 +438,20 @@ void RogueRunStart_Commit(void)
         return;
 
     if (sRunStartContext.source == RUN_START_SOURCE_TRIAL)
-        RogueTrial_SetPendingSelectionFromScript();
+    {
+        struct RogueAdventureConfig validated = sRunStartContext.effectiveConfig;
+        if (!RogueTrial_BuildSelectionConfig(sRunStartContext.trialId, sRunStartContext.trialAscension, sRunStartContext.pokedexVariant, &validated))
+        {
+            gSpecialVar_Result = FALSE;
+            return;
+        }
+        if (!RogueTrial_CommitSelection(sRunStartContext.trialId, sRunStartContext.trialAscension, sRunStartContext.pokedexVariant))
+        {
+            gSpecialVar_Result = FALSE;
+            return;
+        }
+    }
+    gRogueSaveBlock->activeAdventureConfig = sRunStartContext.effectiveConfig;
 }
 
 void RogueRunStart_RequiresRandomPartner(void)
@@ -443,8 +525,8 @@ void RogueRunStart_AppendTrialEditOptions(void)
         ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_StartingTeam, RUN_START_EDIT_STARTING_TEAM);
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Trial, RUN_START_EDIT_TRIAL);
 
-    if (trial != NULL && !trial->hasForcedDifficulty)
-        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Difficulty, RUN_START_EDIT_DIFFICULTY);
+    if (RogueAscension_IsRevealed() && trial != NULL && !trial->hasFixedAscension)
+        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Difficulty, RUN_START_EDIT_ASCENSION);
 
     RogueTrial_GetPokedexOptionCount();
     pokedexOptionCount = gSpecialVar_Result;

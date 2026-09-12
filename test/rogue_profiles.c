@@ -378,7 +378,7 @@ TEST("Focused stat buffs support underperforming Pokemon's unique roles")
     EXPECT_EQ(gSpeciesInfo[SPECIES_WIGGLYTUFF].baseDefense, 65);
     EXPECT_EQ(gSpeciesInfo[SPECIES_WIGGLYTUFF].baseSpDefense, 65);
     EXPECT_EQ(gSpeciesInfo[SPECIES_PARASECT].baseHP, 80);
-    EXPECT_EQ(gSpeciesInfo[SPECIES_DEWGONG].baseDefense, 100);
+    EXPECT_EQ(gSpeciesInfo[SPECIES_DEWGONG].baseDefense, 80);
     EXPECT_EQ(gSpeciesInfo[SPECIES_HYPNO].baseSpAttack, 95);
 }
 

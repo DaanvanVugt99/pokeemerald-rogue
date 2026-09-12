@@ -1,4 +1,9 @@
 #include "global.h"
+static const u8 sAscensionText0[] = _("One reward per Trial.\nBest clears per format.");
+static const u8 sAscensionText1[] = _("Best S/D/M: ");
+static const u8 sAscensionText2[] = _("/");
+static const u8 sAscensionText3[] = _("-");
+static const u8 sAscensionText4[] = _("Rewards claimed");
 #include "constants/songs.h"
 
 #include "palette.h"
@@ -35,6 +40,7 @@
 #include "rogue_popup.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
+#include "rogue_ascension.h"
 #include "rogue_questmenu.h"
 
 #define SCROLL_ITEMS_IN_VIEW 8
@@ -472,17 +478,11 @@ static u8 const sText_MarkerInProgress[] = _("{COLOR BLUE}·In Progress·");
 static u8 const sText_MarkerInactive[] = _("{COLOR RED}·Inactive·");
 static u8 const sText_MarkerPendingRewards[] = _("{COLOR GREEN}·Ready to Collect!·");
 static u8 const sText_MarkerComplete[] = _("{COLOR GREEN}·Complete·");
-static u8 const sText_MarkerCompleteEasy[] = _("{COLOR GREEN}·Complete {COLOR GREEN}{SHADOW LIGHT_GREEN}Easy{COLOR GREEN}{SHADOW LIGHT_GRAY}·");
-static u8 const sText_MarkerCompleteAverage[] = _("{COLOR GREEN}·Complete {COLOR GREEN}{SHADOW LIGHT_GRAY}Average{COLOR GREEN}{SHADOW LIGHT_GRAY}·");
-static u8 const sText_MarkerCompleteHard[] = _("{COLOR GREEN}·Complete {COLOR RED}{SHADOW LIGHT_GRAY}Hard{COLOR GREEN}{SHADOW LIGHT_GRAY}·");
-static u8 const sText_MarkerCompleteBrutal[] = _("{COLOR GREEN}·Complete {COLOR RED}{SHADOW LIGHT_RED}Brutal{COLOR GREEN}{SHADOW LIGHT_GRAY}·");
 static u8 const sText_MarkerRewards[] = _("{COLOR DARK_GRAY}Rewards");
 static u8 const sText_MarkerRewardDetails[] = _("{COLOR DARK_GRAY}Rewards:");
 static u8 const sText_RewardMystery[] = _("Mystery reward");
 static u8 const sText_RewardNoVisible[] = _("No visible rewards");
 static u8 const sText_RewardMore[] = _("...");
-static u8 const sText_RewardDifficultyHard[] = _("H+: ");
-static u8 const sText_RewardDifficultyBrutal[] = _("B+: ");
 static u8 const sText_RewardShopItem[] = _("Shop: ");
 static u8 const sText_RewardMoney[] = _("Money: ");
 static u8 const sText_RewardQuest[] = _("Qst: ");
@@ -511,14 +511,7 @@ static u8 const sText_Index_Mastery[] = _("Mastery");
 static u8 const sText_Index_Total[] = _("Total");
 static u8 const sText_Index_ActiveQuests[] = _("Active Quests");
 static u8 const sText_Index_TrialDifficulty[] = _("Trials");
-static u8 const sText_Index_Easy[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Easy");
-static u8 const sText_Index_Average[] = _("{COLOR GREEN}{SHADOW LIGHT_GRAY}Average");
-static u8 const sText_Index_Hard[] = _("{COLOR RED}{SHADOW LIGHT_GRAY}Hard");
-static u8 const sText_Index_Brutal[] = _("{COLOR RED}{SHADOW LIGHT_RED}Brutal");
-static u8 const sText_EasyStar[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}");
 static u8 const sText_AverageStar[] = _("{COLOR GREEN}{SHADOW LIGHT_GRAY}");
-static u8 const sText_HardStar[] = _("{COLOR RED}{SHADOW LIGHT_GRAY}");
-static u8 const sText_BrutalStar[] = _("{COLOR RED}{SHADOW LIGHT_RED}");
 static u8 const sText_Index_Quests[] = _("Quests");
 
 static u8 const sText_Index_PendingRewards[] = _("{COLOR GREEN}Rewards ready to\nbe Collected!");
@@ -1071,21 +1064,7 @@ static void DrawQuestScrollList()
             {
                 if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
                 {
-                    switch (RogueQuest_GetHighestCompleteDifficulty(questId))
-                    {
-                    case DIFFICULTY_LEVEL_EASY:
-                        strPtr = StringAppend(strPtr, sText_EasyStar);
-                        break;
-                    case DIFFICULTY_LEVEL_AVERAGE:
-                        strPtr = StringAppend(strPtr, sText_AverageStar);
-                        break;
-                    case DIFFICULTY_LEVEL_HARD:
-                        strPtr = StringAppend(strPtr, sText_HardStar);
-                        break;
-                    case DIFFICULTY_LEVEL_BRUTAL:
-                        strPtr = StringAppend(strPtr, sText_BrutalStar);
-                        break;
-                    }
+                    strPtr = StringAppend(strPtr, sText_AverageStar);
                 }
                 else
                 {
@@ -1559,37 +1538,7 @@ static void Draw_IndexPage()
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_TrialDifficulty);
             ++y;
 
-            // Easy
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Easy);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_EASY), 100);
-
-            x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
-            ++y;
-
-            // Average
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Average);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_AVERAGE), 100);
-
-            x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
-            ++y;
-
-            // Hard
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Hard);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_HARD), 100);
-
-            x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
-            ++y;
-
-            // Brutal
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sText_Index_Brutal);
-            BufferQuestPercValueFor(str, RogueQuest_GetQuestCompletePercAtDifficultyFor(QUEST_CONST_IS_TRIAL, DIFFICULTY_LEVEL_BRUTAL), 100);
-
-            x = GetStringRightAlignXOffset(FONT_SMALL_NARROW, str, sQuestWinTemplates[WIN_LEFT_PAGE].width * 8);
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, x, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, str);
-            ++y;
+            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 8 * y, 0, 0, color, TEXT_SKIP_DRAW, sAscensionText0);
         }
 
         // Pending rewards to collect
@@ -1945,17 +1894,6 @@ static u8* AppendDecimalNumber(u8* dest, u32 value)
     return ConvertUIntToDecimalStringN(dest, value, STR_CONV_MODE_LEFT_ALIGN, GetDecimalDigitCount(value));
 }
 
-static u8* AppendRewardDifficultyPrefix(u8* dest, struct RogueQuestReward const* reward)
-{
-    if(reward->requiredDifficulty >= DIFFICULTY_LEVEL_BRUTAL)
-        return StringCopy(dest, sText_RewardDifficultyBrutal);
-
-    if(reward->requiredDifficulty >= DIFFICULTY_LEVEL_HARD)
-        return StringCopy(dest, sText_RewardDifficultyHard);
-
-    return dest;
-}
-
 static u8* AppendVisibleRewardCountSuffix(u8* dest, struct RogueQuestReward const* reward)
 {
     dest = AppendDecimalNumber(dest, reward->perType.item.count);
@@ -1966,7 +1904,6 @@ static void BufferQuestRewardText(u8* dest, struct RogueQuestReward const* rewar
 {
     u8* str = dest;
 
-    str = AppendRewardDifficultyPrefix(str, reward);
 
     if(reward->visiblity == QUEST_REWARD_VISIBLITY_OBSCURED)
     {
@@ -2204,44 +2141,31 @@ static void Draw_QuestPage()
             AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16, 0, 0, color, TEXT_SKIP_DRAW, RogueQuest_GetDesc(questId));
 
 
-            if(RogueQuest_GetStateFlag(questId, QUEST_STATE_ACTIVE))
+            if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL) && RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
+            {
+                u8 format;
+                u8 *end = StringCopy(gStringVar4, sAscensionText1);
+                for (format = 0; format < 3; ++format)
+                {
+                    u8 best = RogueQuest_GetBestAscension(questId, format);
+                    if (format) end = StringAppend(end, sAscensionText2);
+                    if (best == ASCENSION_NONE) end = StringAppend(end, sAscensionText3);
+                    else end = ConvertIntToDecimalStringN(end, best, STR_CONV_MODE_LEFT_ALIGN, 2);
+                }
+                AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 93, 0, 0, color, TEXT_SKIP_DRAW, gStringVar4);
+            }
+            else if(RogueQuest_GetStateFlag(questId, QUEST_STATE_ACTIVE))
                 AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerInProgress);
 
             else if(RogueQuest_GetStateFlag(questId, QUEST_STATE_PENDING_REWARDS))
                 AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerPendingRewards);
 
             else if(RogueQuest_GetStateFlag(questId, QUEST_STATE_HAS_COMPLETE))
-            {
-                if(RogueQuest_GetConstFlag(questId, QUEST_CONST_IS_TRIAL))
-                {
-                    switch (RogueQuest_GetHighestCompleteDifficulty(questId))
-                    {
-                    case DIFFICULTY_LEVEL_EASY:
-                        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerCompleteEasy);
-                        break;
-                    case DIFFICULTY_LEVEL_AVERAGE:
-                        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerCompleteAverage);
-                        break;
-                    case DIFFICULTY_LEVEL_HARD:
-                        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerCompleteHard);
-                        break;
-                    case DIFFICULTY_LEVEL_BRUTAL:
-                        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerCompleteBrutal);
-                        break;
-                    default:
-                        AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerComplete);
-                        break;
-                    }
-                }
-                else
-                {
-                    AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerComplete);
-                }
-            }
+                AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 93, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerComplete);
             else if(Rogue_IsRunActive())
                 AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 9, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerInactive);
 
-            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 10, 0, 0, color, TEXT_SKIP_DRAW, sText_MarkerRewards);
+            AddTextPrinterParameterized4(WIN_LEFT_PAGE, FONT_SMALL_NARROW, 0, 5 + 16 + 8 * 10, 0, 0, color, TEXT_SKIP_DRAW, RogueQuest_IsRewardClaimed(questId) ? sAscensionText4 : sText_MarkerRewards);
 
             // Place sprites
             {
@@ -2273,24 +2197,6 @@ static void Draw_QuestPage()
                     currentSpriteGroup = groupedSpriteIndex[spriteIdx - 1] + 1;
                 else
                     currentSpriteGroup = 0;
-
-                // Attach difficulty tag above main sprite
-                {
-                    if(reward->requiredDifficulty >= DIFFICULTY_LEVEL_BRUTAL)
-                    {
-                        sQuestMenuData->sprites[spriteIdx] = AddIconSprite(TAG_REWARD_ICON_DIFFICULTY_BRUTAL, TAG_REWARD_ICON_DIFFICULTY_HARD, gItemIcon_RogueBrutalLock, gItemIconPalette_RogueStatusLock);
-                        groupedSpriteIndex[spriteIdx] = currentSpriteGroup;
-                        spriteLayering[spriteIdx] = 0;
-                        ++spriteIdx;
-                    }
-                    else if(reward->requiredDifficulty >= DIFFICULTY_LEVEL_HARD)
-                    {
-                        sQuestMenuData->sprites[spriteIdx] = AddIconSprite(TAG_REWARD_ICON_DIFFICULTY_HARD, TAG_REWARD_ICON_DIFFICULTY_HARD, gItemIcon_RogueHardLock, gItemIconPalette_RogueStatusLock);
-                        groupedSpriteIndex[spriteIdx] = currentSpriteGroup;
-                        spriteLayering[spriteIdx] = 0;
-                        ++spriteIdx;
-                    }
-                }
 
                 if(reward->visiblity == QUEST_REWARD_VISIBLITY_OBSCURED)
                 {

@@ -120,6 +120,9 @@ or validation workflows change.
   - `./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"`
 - Available suites: `core`, `ai`, `ability`, `ability_unique`, `moves`,
   `items`, `forms`, and `rogue`.
+- Unfiltered `ability_unique` checks and the full launcher use two exhaustive
+  filename batches (`ability_unique_a_m`, `ability_unique_n_z`) to stay below the
+  GBA test ROM limit. Focused unique-Ability checks keep the public suite name.
 - A focused run that prints `No tests found` did not validate the requested
   behavior even if the launcher exits successfully. Correct the suite/filter
   and rerun until the intended test name appears with `PASS`.

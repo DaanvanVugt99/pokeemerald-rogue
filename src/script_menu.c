@@ -1,4 +1,8 @@
 #include "global.h"
+static const u8 sAscensionText0[] = _("Ascension ");
+static const u8 sAscensionText1[] = _("Ascension rules");
+static const u8 sAscensionText2[] = _("Base rules");
+static const u8 sAscensionText3[] = _("Progression");
 #include "bg.h"
 #include "main.h"
 #include "battle_main.h"
@@ -1870,22 +1874,11 @@ static EWRAM_DATA u8 sRunReviewPageLineCounts[RUN_REVIEW_MAX_PAGES];
 static EWRAM_DATA const u8 *sRunReviewPageTitles[RUN_REVIEW_MAX_PAGES];
 static EWRAM_DATA const u8 *sRunReviewCurrentPageTitle;
 
-static const u8 *GetRunReviewDifficultyName(u8 difficulty)
+static const u8 *GetRunReviewDifficultyName(u8 level)
 {
-    static const u8 sText_Easy[] = _("Easy");
-    static const u8 sText_Average[] = _("Average");
-    static const u8 sText_Hard[] = _("Hard");
-    static const u8 sText_Brutal[] = _("Brutal");
-    static const u8 sText_Custom[] = _("Custom");
-
-    switch (difficulty)
-    {
-    case DIFFICULTY_LEVEL_EASY: return sText_Easy;
-    case DIFFICULTY_LEVEL_AVERAGE: return sText_Average;
-    case DIFFICULTY_LEVEL_HARD: return sText_Hard;
-    case DIFFICULTY_LEVEL_BRUTAL: return sText_Brutal;
-    default: return sText_Custom;
-    }
+    static u8 text[16];
+    ConvertIntToDecimalStringN(StringCopy(text, sAscensionText0), level, STR_CONV_MODE_LEFT_ALIGN, 2);
+    return text;
 }
 
 static const u8 *GetRunReviewBattleFormatName(u8 format)
@@ -2072,104 +2065,28 @@ static void AddWrappedRunReviewText(const u8 *src)
         AddRunReviewLine(line);
 }
 
-static bool8 GetRunReviewConfigToggle(const struct RogueDifficultyConfig *config, u16 toggle)
-{
-    return (config->toggleBits[toggle / 8] & (1 << (toggle % 8))) != 0;
-}
-
-static void AddRunReviewToggleDifference(const struct RogueDifficultyConfig *config,
-                                         const struct RogueDifficultyConfig *baseline,
-                                         u16 toggle, const u8 *label,
-                                         const u8 *enabled, const u8 *disabled)
-{
-    bool8 value = GetRunReviewConfigToggle(config, toggle);
-
-    if (value != GetRunReviewConfigToggle(baseline, toggle))
-        AddRunReviewSettingLine(label, value ? enabled : disabled);
-}
-
 static u8 BufferRunReviewPages(void)
 {
-    static const u8 sText_On[] = _("On");
-    static const u8 sText_Off[] = _("Off");
-    static const u8 sText_Allowed[] = _("Allowed");
-    static const u8 sText_Enforced[] = _("Enforced");
-    static const u8 sText_Release[] = _("Release");
-    static const u8 sText_Retain[] = _("Retain");
-    static const u8 sText_BallsOnly[] = _("Balls only");
-    static const u8 sText_AllItems[] = _("All items");
-    static const u8 sText_Fresh[] = _("Fresh Start");
-    static const u8 sText_HubBag[] = _("Hub Bag");
-    static const u8 sText_Switch[] = _("Switch");
-    static const u8 sText_Set[] = _("Set");
-    static const u8 sText_Specialists[] = _("Specialists");
-    static const u8 sText_Diverse[] = _("Diverse");
     const struct RogueRunStartContext *context = RogueRunStart_GetContext();
-
+    u8 i, text[RUN_REVIEW_LINE_LENGTH];
     sRunReviewLineCount = 0;
     sRunReviewPageCount = 0;
     sRunReviewCurrentPageTitle = NULL;
-    if (context == NULL)
-        return 0;
-
+    if (context == NULL) return 0;
+    BeginRunReviewPage(sAscensionText1);
+    for (i = 0; RogueAscension_GetConfigRuleLine(&context->effectiveConfig, i, text); ++i)
+        AddRunReviewLine(text);
+    BeginRunReviewPage(sAscensionText2);
+    for (i = 0; RogueAscension_GetBaseLine(i, text); ++i)
+        AddRunReviewLine(text);
+    BeginRunReviewPage(sAscensionText3);
+    AddWrappedRunReviewText(RogueAscension_EligibilityText(context->ascensionEligibility));
     if (context->source == RUN_START_SOURCE_TRIAL)
     {
-        u8 ruleIndex;
-        u8 ruleCount = RogueTrial_GetRuleCount(context->trialId, context->pokedexVariant);
-
-        if (ruleCount != 0)
-        {
-            BeginRunReviewPage(sText_RunReviewTrialRules);
-            for (ruleIndex = 0; ruleIndex < ruleCount; ++ruleIndex)
-                AddWrappedRunReviewText(RogueTrial_GetRuleText(context->trialId, context->pokedexVariant, ruleIndex));
-        }
+        BeginRunReviewPage(sText_RunReviewTrialRules);
+        for (i = 0; i < RogueTrial_GetRuleCount(context->trialId, context->pokedexVariant); ++i)
+            AddWrappedRunReviewText(RogueTrial_GetRuleText(context->trialId, context->pokedexVariant, i));
     }
-    else if (Rogue_GetDifficultyPreset() == DIFFICULTY_LEVEL_CUSTOM)
-    {
-        struct RogueDifficultyConfig baseline = context->effectiveConfig;
-        u8 rewardLevel = Rogue_GetDifficultyRewardLevel();
-        u8 firstLine = sRunReviewLineCount;
-
-        Rogue_ApplyDifficultyPresetToConfig(&baseline, rewardLevel);
-        BeginRunReviewPage(sText_RunReviewCustomRules);
-
-        if (context->effectiveConfig.rangeValues[CONFIG_RANGE_TRAINER]
-         != baseline.rangeValues[CONFIG_RANGE_TRAINER])
-            AddRunReviewSettingLine(sText_RunReviewTrainerStrengthLabel,
-                                    GetRunReviewDifficultyName(context->effectiveConfig.rangeValues[CONFIG_RANGE_TRAINER]));
-
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_OVER_LVL,
-                                     sText_RunReviewLevelCapLabel, sText_Allowed, sText_Enforced);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_EV_GAIN,
-                                     sText_RunReviewEvLabel, sText_On, sText_Off);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_BAG_WIPE,
-                                     sText_RunReviewStartingBagLabel, sText_Fresh, sText_HubBag);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_SWITCH_MODE,
-                                     sText_RunReviewBattleStyleLabel, sText_Switch, sText_Set);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_RELEASE_MONS,
-                                     sText_RunReviewFaintedLabel, sText_Release, sText_Retain);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_BAG_CLAUSE,
-                                     sText_RunReviewBattleBagLabel, sText_BallsOnly, sText_AllItems);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_SPECIES_CLAUSE,
-                                     sText_RunReviewSpeciesClauseLabel, sText_On, sText_Off);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_HELD_ITEM_CLAUSE,
-                                     sText_RunReviewHeldItemClauseLabel, sText_On, sText_Off);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_LEGENDARY_CLAUSE,
-                                     sText_RunReviewLegendaryClauseLabel, sText_On, sText_Off);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_AFFECTION,
-                                     sText_RunReviewAffectionLabel, sText_On, sText_Off);
-        AddRunReviewToggleDifference(&context->effectiveConfig, &baseline, CONFIG_TOGGLE_DIVERSE_TRAINERS,
-                                     sText_RunReviewTrainerTeamsLabel, sText_Diverse, sText_Specialists);
-
-        // A config can retain the Custom marker after being changed back to
-        // its reward preset. Do not create an empty details page in that case.
-        if (sRunReviewLineCount == firstLine)
-        {
-            sRunReviewPageCount = 0;
-            sRunReviewCurrentPageTitle = NULL;
-        }
-    }
-
     return sRunReviewPageCount;
 }
 
@@ -2288,8 +2205,8 @@ static void PrintRunReview(u8 taskId)
     if (gTasks[taskId].tRunReviewPage == 0)
     {
         u8 preset = context->source == RUN_START_SOURCE_TRIAL
-            ? context->trialDifficulty
-            : Rogue_GetDifficultyPreset();
+            ? context->trialAscension
+            : Rogue_GetAscension();
         u8 reasonBuffer[RUN_REVIEW_TEXT_LENGTH];
         const u8 *reasonText = GetRunReviewReasonText(context->readinessReason);
         u8 noticeY = 73;
@@ -2304,12 +2221,6 @@ static void PrintRunReview(u8 taskId)
 
         dest = StringCopy(text, sText_RunReviewBlueColor);
         dest = StringAppend(dest, GetRunReviewDifficultyName(preset));
-        if (preset == DIFFICULTY_LEVEL_CUSTOM)
-        {
-            dest = StringAppend(dest, sText_RunReviewRewardOpen);
-            dest = StringAppend(dest, GetRunReviewDifficultyName(Rogue_GetDifficultyRewardLevel()));
-            dest = StringAppend(dest, sText_RunReviewRewardClose);
-        }
         dest = StringAppend(dest, sText_RunReviewValueColor);
         dest = StringAppend(dest, sText_RunReviewSummarySeparator);
         StringAppend(dest, GetRunReviewBattleFormatName(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT)));

@@ -115,7 +115,7 @@ script Rogue_Interior_ConfigLab_TalkFennel
     }
 
     waitse
-    special(Special_ViewDifficultyConfigMenu)
+    special(Special_ViewAdventureSetup)
     waitstate
 
     if(!flag(FLAG_ROGUE_MET_FENNEL))
@@ -208,7 +208,7 @@ script Rogue_Interior_ConfigLab_TriggerMeetPokabbie
     msgbox(format("I upgraded the Config Lab to have new settings for you.\pHere, take a look."))
 
     waitse
-    special(Special_ViewDifficultyConfigMenu)
+    special(Special_ViewAdventureSetup)
     waitstate
 
     msgbox(format("Annnnddddd!\pFinally, I've added a new upgrade you may build for {POKEMON_HUB}, the Trial Area!"))

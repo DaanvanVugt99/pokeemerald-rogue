@@ -12,36 +12,14 @@
 #include "rogue_query.h"
 #include "rogue_save.h"
 #include "rogue_settings.h"
+#include "rogue_ascension.h"
+#include "constants/rogue_pokedex.h"
 #include "rogue_quest.h"
 #include "rogue_trials.h"
 
 #include "data/rogue/pokemon_nicknames.h"
 
 STATIC_ASSERT(ARRAY_COUNT(sNicknameTable_Global) != 0, sNicknameTable_Global_IsntEmpty);
-
-struct RogueDifficultyLocal
-{
-    u8 rewardLevel;
-    bool8 areLevelsValid;
-};
-
-struct RogueDifficultyPresetToggle
-{
-    u8 id;
-    bool8 value;
-};
-
-struct RogueDifficultyPresetRange
-{
-    u8 id;
-    u8 value;
-};
-
-struct RogueDifficultyPreset
-{
-    struct RogueDifficultyPresetToggle toggles[CONFIG_TOGGLE_COUNT + 1];
-    struct RogueDifficultyPresetRange ranges[CONFIG_RANGE_COUNT + 1];
-};
 
 static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] = 
 {
@@ -97,144 +75,63 @@ static const struct GameModeRules sGameModeRules[ROGUE_GAME_MODE_COUNT] =
     },
 };
 
-EWRAM_DATA struct RogueDifficultyLocal gRogueDifficultyLocal;
-static EWRAM_DATA struct RogueDifficultyConfig sRunStartConfigOverride;
+static EWRAM_DATA struct RogueAdventureConfig sRunStartConfigOverride;
 static EWRAM_DATA bool8 sRunStartConfigOverrideActive;
 
 #ifdef ROGUE_DEBUG
 EWRAM_DATA struct RogueDebugConfig gRogueDebug = {0};
 #endif
 
-const struct RogueDifficultyPreset gRogueDifficultyPresets[DIFFICULTY_PRESET_COUNT] = 
+static const struct RogueAdventureConfig *GetReadableAdventureConfig(void)
 {
-    // Easy difficulty can actually have ANYTHING set, these values are just the defaults, recommendations
-    // Easy difficulty provides all the default values
-    [DIFFICULTY_LEVEL_EASY] = 
-    {
-        .toggles = 
-        {
-            // no required toggles
-            { .id=CONFIG_TOGGLE_COUNT },
-        },
-        .ranges = 
-        {
-            { .id=CONFIG_RANGE_TRAINER, .value=DIFFICULTY_LEVEL_EASY },
-            { .id=CONFIG_RANGE_ITEM, .value=DIFFICULTY_LEVEL_EASY },
-            { .id=CONFIG_RANGE_LEGENDARY, .value=DIFFICULTY_LEVEL_EASY },
-            { .id=CONFIG_RANGE_COUNT },
-        }
-    },
-    [DIFFICULTY_LEVEL_AVERAGE] = 
-    {
-        .toggles = 
-        {
-            { .id=CONFIG_TOGGLE_SWITCH_MODE, .value=FALSE },
-            { .id=CONFIG_TOGGLE_AFFECTION, .value=FALSE },
-            { .id=CONFIG_TOGGLE_RELEASE_MONS, .value=TRUE },
-            { .id=CONFIG_TOGGLE_BAG_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_SPECIES_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_HELD_ITEM_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_LEGENDARY_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_COUNT },
-        },
-        .ranges = 
-        {
-            { .id=CONFIG_RANGE_TRAINER, .value=DIFFICULTY_LEVEL_AVERAGE },
-            { .id=CONFIG_RANGE_ITEM, .value=DIFFICULTY_LEVEL_AVERAGE },
-            { .id=CONFIG_RANGE_LEGENDARY, .value=DIFFICULTY_LEVEL_AVERAGE },
-            { .id=CONFIG_RANGE_COUNT },
-        }
-    },
-    [DIFFICULTY_LEVEL_HARD] = 
-    {
-        .toggles = 
-        {
-            { .id=CONFIG_TOGGLE_OVER_LVL, .value=FALSE },
-            { .id=CONFIG_TOGGLE_EV_GAIN, .value=FALSE },
-            { .id=CONFIG_TOGGLE_SWITCH_MODE, .value=FALSE },
-            { .id=CONFIG_TOGGLE_AFFECTION, .value=FALSE },
-            { .id=CONFIG_TOGGLE_RELEASE_MONS, .value=TRUE },
-            { .id=CONFIG_TOGGLE_BAG_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_SPECIES_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_HELD_ITEM_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_LEGENDARY_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_COUNT },
-        },
-        .ranges = 
-        {
-            { .id=CONFIG_RANGE_TRAINER, .value=DIFFICULTY_LEVEL_HARD },
-            { .id=CONFIG_RANGE_ITEM, .value=DIFFICULTY_LEVEL_HARD },
-            { .id=CONFIG_RANGE_LEGENDARY, .value=DIFFICULTY_LEVEL_HARD },
-            { .id=CONFIG_RANGE_COUNT },
-        }
-    },
-    [DIFFICULTY_LEVEL_BRUTAL] = 
-    {
-        .toggles = 
-        {
-            { .id=CONFIG_TOGGLE_OVER_LVL, .value=FALSE },
-            { .id=CONFIG_TOGGLE_EV_GAIN, .value=FALSE },
-            { .id=CONFIG_TOGGLE_SWITCH_MODE, .value=FALSE },
-            { .id=CONFIG_TOGGLE_AFFECTION, .value=FALSE },
-            { .id=CONFIG_TOGGLE_RELEASE_MONS, .value=TRUE },
-            { .id=CONFIG_TOGGLE_BAG_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_SPECIES_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_HELD_ITEM_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_LEGENDARY_CLAUSE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_BAG_WIPE, .value=TRUE },
-            { .id=CONFIG_TOGGLE_DIVERSE_TRAINERS, .value=TRUE },
-            { .id=CONFIG_TOGGLE_COUNT },
-        },
-        .ranges = 
-        {
-            { .id=CONFIG_RANGE_TRAINER, .value=DIFFICULTY_LEVEL_BRUTAL },
-            { .id=CONFIG_RANGE_ITEM, .value=DIFFICULTY_LEVEL_BRUTAL },
-            { .id=CONFIG_RANGE_LEGENDARY, .value=DIFFICULTY_LEVEL_BRUTAL },
-            { .id=CONFIG_RANGE_COUNT },
-        }
-    }
-};
-
-static struct RogueDifficultyConfig* GetWritableDifficultyConfig()
-{
-    return &gRogueSaveBlock->difficultyConfig;
-}
-
-static struct RogueDifficultyConfig const* GetReadableDifficultyConfig()
-{
-    if(sRunStartConfigOverrideActive)
+    if (sRunStartConfigOverrideActive)
         return &sRunStartConfigOverride;
+    if (Rogue_IsRunActive())
+        return &gRogueSaveBlock->activeAdventureConfig;
+    if (RogueMP_IsActive() && RogueMP_IsClient())
+        return &gRogueMultiplayer->gameState.hub.adventureConfig;
+    return &gRogueSaveBlock->adventureConfig;
+}
 
-    if(RogueMP_IsActive() && RogueMP_IsClient())
+bool8 Rogue_HasPostgameSettingsUnlocked(void)
+{
+    return FlagGet(FLAG_ROGUE_MET_POKABBIE)
+        || RogueQuest_HasCollectedRewards(QUEST_ID_ONE_LAST_QUEST);
+}
+
+bool8 Rogue_IsAdventureModeAvailable(u8 mode)
+{
+    switch (mode)
     {
-        AGB_ASSERT(gRogueMultiplayer != NULL);
-        return &gRogueMultiplayer->gameState.hub.difficultyConfig;
+    case ROGUE_GAME_MODE_STANDARD:
+    case ROGUE_GAME_MODE_RAINBOW:
+    case ROGUE_GAME_MODE_OFFICIAL:
+        return TRUE;
+    case ROGUE_GAME_MODE_GAUNTLET:
+    case ROGUE_GAME_MODE_RAINBOW_GAUNTLET:
+        return Rogue_HasPostgameSettingsUnlocked();
+    default:
+        // Slow Path is unavailable for new adventures for now.
+        return FALSE;
     }
-
-    return &gRogueSaveBlock->difficultyConfig;
 }
 
-void Rogue_CopyReadableDifficultyConfig(struct RogueDifficultyConfig *dest)
+void Rogue_CopyAdventureConfig(struct RogueAdventureConfig *dest)
 {
-    memcpy(dest, GetReadableDifficultyConfig(), sizeof(*dest));
+    *dest = *GetReadableAdventureConfig();
 }
 
-void Rogue_SetRunStartConfigOverride(const struct RogueDifficultyConfig *config)
+void Rogue_SetRunStartConfigOverride(const struct RogueAdventureConfig *config)
 {
-    memcpy(&sRunStartConfigOverride, config, sizeof(sRunStartConfigOverride));
+    sRunStartConfigOverride = *config;
     sRunStartConfigOverrideActive = TRUE;
-    gRogueDifficultyLocal.areLevelsValid = FALSE;
     RogueMonQuery_InvalidateSpeciesActiveCache();
 }
 
 void Rogue_ClearRunStartConfigOverride(void)
 {
-    if(sRunStartConfigOverrideActive)
-    {
-        sRunStartConfigOverrideActive = FALSE;
-        gRogueDifficultyLocal.areLevelsValid = FALSE;
-        RogueMonQuery_InvalidateSpeciesActiveCache();
-    }
+    sRunStartConfigOverrideActive = FALSE;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
 }
 
 bool8 Rogue_HasRunStartConfigOverride(void)
@@ -242,112 +139,119 @@ bool8 Rogue_HasRunStartConfigOverride(void)
     return sRunStartConfigOverrideActive;
 }
 
-static bool8 IsDifficultyToggle(u16 elem)
+void Rogue_SetConfigToggleFor(struct RogueAdventureConfig *config, u16 elem, bool8 value)
 {
+    if (elem >= CONFIG_TOGGLE_TRAINER_ROGUE && elem <= CONFIG_TOGGLE_TRAINER_PALDEA)
+    {
+        u16 bit = 1 << (elem - CONFIG_TOGGLE_TRAINER_ROGUE);
+        if (value) config->trainerRegions |= bit;
+        else config->trainerRegions &= ~bit;
+    }
+    else if (elem == CONFIG_TOGGLE_OVERWORLD_MONS)
+        config->overworldMons = value;
+    else if (elem == CONFIG_TOGGLE_BAG_WIPE)
+        config->trialFreshStart = value;
+    // Battle clauses and conveniences are fixed, not editable configuration.
+}
+
+bool8 Rogue_GetConfigToggleFor(const struct RogueAdventureConfig *config, u16 elem)
+{
+    if (elem >= CONFIG_TOGGLE_TRAINER_ROGUE && elem <= CONFIG_TOGGLE_TRAINER_PALDEA)
+        return (config->trainerRegions & (1 << (elem - CONFIG_TOGGLE_TRAINER_ROGUE))) != 0;
     switch (elem)
     {
-    case CONFIG_TOGGLE_OVER_LVL:
+    case CONFIG_TOGGLE_OVERWORLD_MONS: return config->overworldMons;
+    case CONFIG_TOGGLE_BAG_WIPE: return config->trialFreshStart;
+    case CONFIG_TOGGLE_DIVERSE_TRAINERS: return config->ascension >= 15;
+    case CONFIG_TOGGLE_EXP_ALL:
     case CONFIG_TOGGLE_EV_GAIN:
-    case CONFIG_TOGGLE_BAG_WIPE:
-    case CONFIG_TOGGLE_SWITCH_MODE:
-    case CONFIG_TOGGLE_DIVERSE_TRAINERS:
-    case CONFIG_TOGGLE_AFFECTION:
     case CONFIG_TOGGLE_RELEASE_MONS:
     case CONFIG_TOGGLE_BAG_CLAUSE:
     case CONFIG_TOGGLE_SPECIES_CLAUSE:
     case CONFIG_TOGGLE_HELD_ITEM_CLAUSE:
-    case CONFIG_TOGGLE_LEGENDARY_CLAUSE:
-        return TRUE;
+    case CONFIG_TOGGLE_LEGENDARY_CLAUSE: return TRUE;
+    default: return FALSE;
     }
-
-    return FALSE;
 }
 
-static bool8 IsDifficultyRange(u16 elem)
+void Rogue_SetConfigToggle(u16 elem, bool8 value)
 {
-    switch (elem)
-    {
-    case CONFIG_RANGE_TRAINER:
-    case CONFIG_RANGE_ITEM:
-    case CONFIG_RANGE_LEGENDARY:
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-void Rogue_SetConfigToggle(u16 elem, bool8 state)
-{
-    struct RogueDifficultyConfig* config = GetWritableDifficultyConfig();
-
-    Rogue_SetConfigToggleFor(config, elem, state);
-    gRogueDifficultyLocal.areLevelsValid = FALSE;
+    if (!Rogue_CanEditConfig()) return;
+    Rogue_SetConfigToggleFor(&gRogueSaveBlock->adventureConfig, elem, value);
     RogueMonQuery_InvalidateSpeciesActiveCache();
-}
-
-void Rogue_SetConfigToggleFor(struct RogueDifficultyConfig *config, u16 elem, bool8 state)
-{
-    u16 idx = elem / 8;
-    u16 bit = elem % 8;
-    u8 bitMask = 1 << bit;
-
-    AGB_ASSERT(elem < CONFIG_TOGGLE_COUNT);
-    AGB_ASSERT(idx < ARRAY_COUNT(config->toggleBits));
-
-    if(elem < CONFIG_TOGGLE_COUNT)
-    {
-        if(state)
-        {
-            config->toggleBits[idx] |= bitMask;
-        }
-        else
-        {
-            config->toggleBits[idx] &= ~bitMask;
-        }
-
-        if(IsDifficultyToggle(elem))
-            config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;
-    }
 }
 
 bool8 Rogue_GetConfigToggle(u16 elem)
 {
-    u16 idx = elem / 8;
-    u16 bit = elem % 8;
-    u8 bitMask = 1 << bit;
-    struct RogueDifficultyConfig const* config = GetReadableDifficultyConfig();
-
-    AGB_ASSERT(elem < CONFIG_TOGGLE_COUNT);
-    AGB_ASSERT(idx < ARRAY_COUNT(config->toggleBits));
-    return (config->toggleBits[idx] & bitMask) != 0;
+    return Rogue_GetConfigToggleFor(GetReadableAdventureConfig(), elem);
 }
 
-void Rogue_SetConfigRange(u16 elem, u8 value)
+void Rogue_SetConfigRangeFor(struct RogueAdventureConfig *config, u16 elem, u8 value)
 {
-    struct RogueDifficultyConfig* config = GetWritableDifficultyConfig();
-
-    Rogue_SetConfigRangeFor(config, elem, value);
-    gRogueDifficultyLocal.areLevelsValid = FALSE;
-    RogueMonQuery_InvalidateSpeciesActiveCache();
-}
-
-void Rogue_SetConfigRangeFor(struct RogueDifficultyConfig *config, u16 elem, u8 value)
-{
-    AGB_ASSERT(elem < CONFIG_RANGE_COUNT);
-
-    if(elem < CONFIG_RANGE_COUNT)
+    switch (elem)
     {
-        config->rangeValues[elem] = value;
-        if(IsDifficultyRange(elem))
-            config->rangeValues[CONFIG_RANGE_DIFFICULTY_PRESET] = DIFFICULTY_LEVEL_CUSTOM;
+    case CONFIG_RANGE_ASCENSION: config->ascension = min(value, ASCENSION_MAX); break;
+    case CONFIG_RANGE_BATTLE_FORMAT: config->battleFormat = min(value, BATTLE_FORMAT_MIXED); break;
+    case CONFIG_RANGE_POKEDEX_VARIANT: config->pokedexVariant = value; break;
+    case CONFIG_RANGE_GAME_MODE_NUM: config->mode = min(value, ROGUE_GAME_MODE_COUNT - 1); break;
+    case CONFIG_RANGE_TRAINER_ORDER: config->trainerOrder = min(value, TRAINER_ORDER_OFFICIAL); break;
     }
 }
 
 u8 Rogue_GetConfigRange(u16 elem)
 {
-    struct RogueDifficultyConfig const* config = GetReadableDifficultyConfig();
-    AGB_ASSERT(elem < CONFIG_RANGE_COUNT);
-    return config->rangeValues[elem];
+    const struct RogueAdventureConfig *config = GetReadableAdventureConfig();
+    switch (elem)
+    {
+    case CONFIG_RANGE_ASCENSION: return config->ascension;
+    case CONFIG_RANGE_BATTLE_FORMAT: return config->battleFormat;
+    case CONFIG_RANGE_POKEDEX_VARIANT: return config->pokedexVariant;
+    case CONFIG_RANGE_GAME_MODE_NUM: return config->mode;
+    case CONFIG_RANGE_TRAINER_ORDER: return config->trainerOrder;
+
+    }
+    return 0;
+}
+
+void Rogue_SetConfigRange(u16 elem, u8 value)
+{
+    struct RogueAdventureConfig *config = &gRogueSaveBlock->adventureConfig;
+    if (!Rogue_CanEditConfig()) return;
+    if (elem == CONFIG_RANGE_BATTLE_FORMAT && value <= BATTLE_FORMAT_MIXED)
+    {
+        gRogueSaveBlock->selectedAscension[config->battleFormat] = config->ascension;
+        config->ascension = min(gRogueSaveBlock->selectedAscension[value], RogueAscension_GetUnlocked(value));
+    }
+    Rogue_SetConfigRangeFor(config, elem, value);
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+}
+
+void Rogue_SetConfigAscension(struct RogueAdventureConfig *config, u8 ascension)
+{
+    config->ascension = min(ascension, ASCENSION_MAX);
+}
+
+void Rogue_ApplyAdventureConfig(const struct RogueAdventureConfig *config)
+{
+    if (Rogue_IsRunActive()) return;
+    gRogueSaveBlock->adventureConfig = *config;
+    gRogueSaveBlock->selectedAscension[config->battleFormat] = config->ascension;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
+}
+
+void Rogue_SetAscension(u8 ascension)
+{
+    struct RogueAdventureConfig *config = &gRogueSaveBlock->adventureConfig;
+    if (Rogue_CanEditConfig() && RogueAscension_IsUnlocked(ascension, config->battleFormat))
+    {
+        config->ascension = ascension;
+        gRogueSaveBlock->selectedAscension[config->battleFormat] = ascension;
+    }
+}
+
+u8 Rogue_GetAscension(void)
+{
+    return GetReadableAdventureConfig()->ascension;
 }
 
 bool8 Rogue_CanEditConfig()
@@ -507,219 +411,13 @@ u8 RogueDebug_GetConfigRange(u16 elem)
 
 #endif
 
-static void Rogue_ResetToDefaults(bool8 difficultySettingsOnly)
+void Rogue_ResetSettingsToDefaults(void)
 {
-    // Reset all values to the default prior to presets
-    // These should be the lowest of the low
-    gRogueDifficultyLocal.rewardLevel = DIFFICULTY_LEVEL_EASY;
-    gRogueDifficultyLocal.areLevelsValid = FALSE;
-
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_OVER_LVL, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_EV_GAIN, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_BAG_WIPE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_SWITCH_MODE, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_AFFECTION, TRUE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_BAG_CLAUSE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_DIVERSE_TRAINERS, FALSE);
-
-    // Set these all to the lowest
-    Rogue_SetConfigRange(CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_EASY);
-    Rogue_SetConfigRange(CONFIG_RANGE_ITEM, DIFFICULTY_LEVEL_EASY);
-    Rogue_SetConfigRange(CONFIG_RANGE_LEGENDARY, DIFFICULTY_LEVEL_EASY);
-
-    if(!difficultySettingsOnly)
-    {
-        Rogue_SetConfigToggle(CONFIG_TOGGLE_OVERWORLD_MONS, TRUE);
-        Rogue_SetConfigToggle(CONFIG_TOGGLE_EXP_ALL, TRUE);
-        Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_SINGLES);
-        Rogue_SetConfigRange(CONFIG_RANGE_TRAINER_ORDER, TRAINER_ORDER_DEFAULT);
-    }
-}
-
-static void Rogue_SetDifficultyPresetInternal(u8 preset)
-{
-    struct RogueDifficultyConfig config;
-
-    Rogue_CopyReadableDifficultyConfig(&config);
-    Rogue_ApplyDifficultyPresetToConfig(&config, preset);
-    Rogue_ApplyDifficultyConfig(&config);
-}
-
-void Rogue_ApplyDifficultyPresetToConfig(struct RogueDifficultyConfig *config, u8 preset)
-{
-    u8 i, j;
-    const struct RogueDifficultyPresetToggle* toggle;
-    const struct RogueDifficultyPresetRange* range;
-
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_OVER_LVL, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_EV_GAIN, TRUE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_BAG_WIPE, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_SWITCH_MODE, TRUE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_AFFECTION, TRUE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_RELEASE_MONS, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_BAG_CLAUSE, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_SPECIES_CLAUSE, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_HELD_ITEM_CLAUSE, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_LEGENDARY_CLAUSE, FALSE);
-    Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_DIVERSE_TRAINERS, FALSE);
-    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_TRAINER, DIFFICULTY_LEVEL_EASY);
-    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_ITEM, DIFFICULTY_LEVEL_EASY);
-    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_LEGENDARY, DIFFICULTY_LEVEL_EASY);
-
-    for(i = 0; i < DIFFICULTY_PRESET_COUNT; ++i)
-    {
-        for(j = 0; j < ARRAY_COUNT(gRogueDifficultyPresets[i].toggles); ++j)
-        {
-            toggle = &gRogueDifficultyPresets[i].toggles[j];
-
-            if(toggle->id == CONFIG_TOGGLE_COUNT)
-                break;
-
-            Rogue_SetConfigToggleFor(config, toggle->id, toggle->value);
-        }
-
-        for(j = 0; j < ARRAY_COUNT(gRogueDifficultyPresets[i].ranges); ++j)
-        {
-            range = &gRogueDifficultyPresets[i].ranges[j];
-
-            if(range->id == CONFIG_RANGE_COUNT)
-                break;
-
-            Rogue_SetConfigRangeFor(config, range->id, range->value);
-        }
-
-        // Have applied preset up until this point
-        if(i == preset)
-            break;
-    }
-
-    Rogue_SetConfigRangeFor(config, CONFIG_RANGE_DIFFICULTY_PRESET, preset);
-}
-
-void Rogue_ApplyDifficultyConfig(const struct RogueDifficultyConfig *config)
-{
-    memcpy(GetWritableDifficultyConfig(), config, sizeof(*config));
-    gRogueDifficultyLocal.areLevelsValid = FALSE;
-    RogueMonQuery_InvalidateSpeciesActiveCache();
-}
-
-static u8 Rogue_CalcRewardDifficultyPreset()
-{
-    u8 i, j, isValid;
-    u8 rewardLevel;
-    const struct RogueDifficultyPresetToggle* toggle;
-    const struct RogueDifficultyPresetRange* range;
-
-    rewardLevel = DIFFICULTY_LEVEL_EASY;
-
-    for(i = 0; i < DIFFICULTY_PRESET_COUNT; ++i)
-    {
-        isValid = TRUE;
-
-        for(j = 0; j < ARRAY_COUNT(gRogueDifficultyPresets[i].toggles); ++j)
-        {
-            toggle = &gRogueDifficultyPresets[i].toggles[j];
-
-            if(toggle->id == CONFIG_TOGGLE_COUNT)
-                break;
-
-            // We don't match
-            if(Rogue_GetConfigToggle(toggle->id) != toggle->value)
-            {
-                isValid = FALSE;
-                break;
-            }
-        }
-
-        if(isValid)
-        {
-            for(j = 0; j < ARRAY_COUNT(gRogueDifficultyPresets[i].ranges); ++j)
-            {
-                range = &gRogueDifficultyPresets[i].ranges[j];
-
-                if(range->id == CONFIG_RANGE_COUNT)
-                    break;
-
-                // We don't AT LEAST match
-                if(Rogue_GetConfigRange(range->id) < range->value)
-                {
-                    isValid = FALSE;
-                    break;
-                }
-            }
-        }
-
-        if(!isValid)
-            break;
-
-        rewardLevel = i;
-    }
-
-    return rewardLevel;
-}
-
-
-void Rogue_ResetSettingsToDefaults()
-{
-    Rogue_ResetToDefaults(FALSE);
-    Rogue_SetDifficultyPreset(DIFFICULTY_LEVEL_AVERAGE);
-
-    // Clear all here (Expect to be set later, if not will assert)
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KANTO,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_JOHTO,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_HOENN,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ROGUE,  FALSE);
-#ifdef ROGUE_EXPANSION
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_SINNOH, FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_UNOVA,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_KALOS,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_ALOLA,  FALSE);
-    Rogue_SetConfigToggle(CONFIG_TOGGLE_TRAINER_GALAR,  FALSE);
-#endif
-}
-
-void Rogue_SetDifficultyPreset(u8 preset)
-{
-    Rogue_SetDifficultyPresetInternal(preset);
-    Rogue_SetConfigRange(CONFIG_RANGE_DIFFICULTY_PRESET, preset);
-}
-
-static void EnsureLevelsAreValid()
-{
-    if(RogueMP_IsActive() && RogueMP_IsClient())
-    {
-        // Always assume we're invalid for now, as we don't have a nice way to tell when host changed the settings :/
-        gRogueDifficultyLocal.areLevelsValid = FALSE;
-    }
-
-    if(!gRogueDifficultyLocal.areLevelsValid)
-    {
-        gRogueDifficultyLocal.rewardLevel = Rogue_CalcRewardDifficultyPreset();
-        gRogueDifficultyLocal.areLevelsValid = TRUE;
-    }
-}
-
-u8 Rogue_GetDifficultyPreset()
-{
-    EnsureLevelsAreValid();
-
-    return Rogue_GetConfigRange(CONFIG_RANGE_DIFFICULTY_PRESET);
-}
-
-u8 Rogue_GetDifficultyRewardLevel()
-{
-    u8 preset;
-    EnsureLevelsAreValid();
-
-    preset = Rogue_GetDifficultyPreset();
-    if(preset != DIFFICULTY_LEVEL_CUSTOM)
-        return preset;
-
-    return gRogueDifficultyLocal.rewardLevel;
+    memset(&gRogueSaveBlock->adventureConfig, 0, sizeof(gRogueSaveBlock->adventureConfig));
+    gRogueSaveBlock->adventureConfig.overworldMons = TRUE;
+    gRogueSaveBlock->adventureConfig.trainerRegions = (1 << 1) | (1 << 2) | (1 << 3);
+    gRogueSaveBlock->adventureConfig.pokedexVariant = POKEDEX_VARIANT_HOENN_RSE;
+    RogueAscension_ResetProgress();
 }
 
 u8 Rogue_GetStartingMonCapacity()

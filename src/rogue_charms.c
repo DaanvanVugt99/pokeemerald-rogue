@@ -369,6 +369,16 @@ bool8 IsCurseActive(u8 effectType)
     return GetCurseValue(effectType) != 0;
 }
 
+// Run setup needs to inspect imported charms before their battle effects activate.
+bool8 AnyCharmsInBag(void)
+{
+    u8 effect;
+    for (effect = 0; effect < EFFECT_COUNT; ++effect)
+        if (CalcValueInternal(effect, GetItemCountForEffectItem(EffectToCharmItem(effect)), FALSE) != 0)
+            return TRUE;
+    return FALSE;
+}
+
 bool8 AnyCharmsActive()
 {
     u8 effectType;

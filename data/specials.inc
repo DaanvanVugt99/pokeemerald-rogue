@@ -268,8 +268,8 @@ gSpecials::
 	def_special RogueTrial_AppendTrialOptions
 	def_special RogueTrial_IsSelectedTrialGroup
 	def_special RogueTrial_AppendSelectedTrialGroupOptions
-	def_special RogueTrial_AppendDifficultyOptions
-	def_special RogueTrial_SelectForcedDifficulty
+	def_special RogueTrial_AppendAscensionOptions
+	def_special RogueTrial_SelectFixedAscension
 	def_special RogueTrial_AppendPokedexOptions
 	def_special RogueTrial_IsSelectedPokedexGroup
 	def_special RogueTrial_AppendSelectedPokedexGroupOptions
@@ -559,7 +559,9 @@ gSpecials::
 	def_special ScriptMenu_CreatePCMultichoice
 	def_special AccessHallOfFamePC
 	def_special Special_ShowDiploma
-	def_special Special_ViewDifficultyConfigMenu
+	def_special Special_ViewIntroAdventureSetup
+	def_special Special_ViewPokedexSelection
+	def_special Special_ViewAdventureSetup
 	def_special Special_ViewRoguePokedex
 	def_special Special_SelectMonInPokedex
 	def_special Special_SelectCaughtMonInPokedex

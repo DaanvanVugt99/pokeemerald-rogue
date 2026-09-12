@@ -52,6 +52,7 @@
 #include "rogue_quest.h"
 #include "rogue_questmenu.h"
 #include "rogue_settings.h"
+#include "rogue_ascension.h"
 #include "rogue_trials.h"
 
 void DoSpecialTrainerBattle(void);
@@ -3078,12 +3079,14 @@ void Rogue_FixPartyMonDetails()
 
 void Rogue_IsValidAdventureToRemember()
 {
-    gSpecialVar_Result = gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].isValid;
+    gSpecialVar_Result = gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].isValid
+        && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_MOST_RECENT].rulesVersion == ASCENSION_RULES_VERSION;
 }
 
 void Rogue_IsValidAdventureToReplay()
 {
-    gSpecialVar_Result = FlagGet(FLAG_ROGUE_MET_PEONIA) && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].isValid;
+    gSpecialVar_Result = FlagGet(FLAG_ROGUE_MET_PEONIA) && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].isValid
+        && gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED].rulesVersion == ASCENSION_RULES_VERSION;
 }
 
 void Rogue_RememberAdventure()
@@ -3098,12 +3101,16 @@ void Rogue_ShouldNursePromptConfigLabSettingsChange()
 
     gSpecialVar_Result = FALSE;
 
-    if(winStreak == 5 || winStreak == 15 || winStreak == 50)
+    if (!RogueAscension_IsRevealed())
+        return;
+
+    if ((winStreak == 5 || winStreak == 15 || winStreak == 50)
+        && Rogue_GetAscension() < RogueAscension_GetUnlocked(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT)))
     {
         gSpecialVar_0x8004 = 1;
         gSpecialVar_Result = TRUE;
     }
-    else if(lossStreak == 5 || lossStreak == 15 || lossStreak == 50)
+    else if ((lossStreak == 5 || lossStreak == 15 || lossStreak == 50) && Rogue_GetAscension() > 0)
     {
         gSpecialVar_0x8004 = 0;
         gSpecialVar_Result = TRUE;

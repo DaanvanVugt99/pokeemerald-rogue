@@ -200,12 +200,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    { "quest": "Chaos Master" },
-                    {
-                        "species": "SPECIES_CHIMECHO",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "quest": "Chaos Master" }
                 ]
             },
             {
@@ -218,12 +213,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "species": "SPECIES_ABSOL",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
             {
@@ -236,12 +226,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "species": "SPECIES_CLEFAIRY",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
             {
@@ -264,11 +249,6 @@
                         "#if": "defined(ROGUE_EXPANSION)",
                         "species": "SPECIES_PIKACHU_ORIGINAL_CAP",
                         "custom_mon_id": "CUSTOM_MON_EXOTIC_PIKACHU_ORIGINAL_CAP"
-                    },
-                    {
-                        "species": "SPECIES_PIKACHU",
-                        "shiny": true,
-                        "difficulty": "HARD"
                     }
                 ]
             },
@@ -309,12 +289,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "species": "SPECIES_ARCANINE",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
             {
@@ -383,19 +358,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "#if": "!defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_NINETALES",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    },
-                    {
-                        "#if": "defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_NINETALES_ALOLAN",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
 
@@ -409,19 +372,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "#if": "!defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_VOLTORB",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    },
-                    {
-                        "#if": "defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_VOLTORB_HISUIAN",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
 
@@ -440,12 +391,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "species": "SPECIES_SUNKERN",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" }
                 ]
             },
             {
@@ -463,12 +409,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "species": "SPECIES_TYROGUE",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" }
                 ]
             },
             {
@@ -486,12 +427,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "species": "SPECIES_DITTO",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" }
                 ]
             },
             {
@@ -504,12 +440,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    {
-                        "species": "SPECIES_SMEARGLE",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_HUGE_MONEY" }
                 ]
             },
 
@@ -523,12 +454,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "species": "SPECIES_BANETTE",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" }
                 ]
             },
             {
@@ -542,12 +468,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    { "quest": "Iron Kaizo" },
-                    {
-                        "species": "SPECIES_CHANSEY",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "quest": "Iron Kaizo" }
                 ]
             },
             {
@@ -560,19 +481,7 @@
                 ],
                 "rewards":
                 [
-                    { "money": "QUEST_REWARD_LARGEST_MONEY" },
-                    {
-                        "#if": "!defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_TOGEPI",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    },
-                    {
-                        "#if": "defined(ROGUE_EXPANSION)",
-                        "species": "SPECIES_KINGAMBIT",
-                        "shiny": true,
-                        "difficulty": "HARD"
-                    }
+                    { "money": "QUEST_REWARD_LARGEST_MONEY" }
                 ]
             },
 

@@ -599,7 +599,7 @@ script Rogue_Interior_TrialFrontier_TalkTrials
         special(Rogue_ShowNewQuests)
         waitstate
         
-        msgbox(format("Trial Quests track the highest Difficulty you have completed them on.\pSome even offer exclusive Rewards for higher difficulties!\pYou can now build a Trial Attendant upgrade near the Adventure entrance.\pSpeak with the attendant to choose a Trial, Difficulty, and Pokédex.\pShow me what you can do, {PLAYER}!"))
+        msgbox(format("Trials track your best Ascension for Singles, Doubles and Mixed.\pThe first clear earns one reward package. Repeat attempts can improve your records.\pTrials do not unlock Ascension levels.\pYou can now build a Trial Attendant upgrade near the Adventure entrance.\pSpeak with the attendant to choose a Trial, Ascension, and Pokédex.\pShow me what you can do, {PLAYER}!"))
     }
     else
     {

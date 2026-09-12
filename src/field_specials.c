@@ -158,10 +158,24 @@ void Special_ViewWallClock(void)
     LockPlayerFieldControls();
 }
 
-void Special_ViewDifficultyConfigMenu(void)
+void Special_ViewIntroAdventureSetup(void)
 {
     gMain.savedCallback = CB2_ReturnToFieldContinueScript;
-    SetMainCallback2(CB2_InitDifficultyConfigMenu);
+    SetMainCallback2(CB2_InitIntroAdventureConfigMenu);
+    LockPlayerFieldControls();
+}
+
+void Special_ViewPokedexSelection(void)
+{
+    gMain.savedCallback = CB2_ReturnToFieldContinueScript;
+    SetMainCallback2(CB2_InitPokedexSelectionMenu);
+    LockPlayerFieldControls();
+}
+
+void Special_ViewAdventureSetup(void)
+{
+    gMain.savedCallback = CB2_ReturnToFieldContinueScript;
+    SetMainCallback2(CB2_InitAdventureConfigMenu);
     LockPlayerFieldControls();
 }
 

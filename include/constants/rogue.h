@@ -648,17 +648,10 @@
 #define MON_FLAGS_GEN31V1                   MON_FLAG_SINGLES_STRONG
 #endif
 
-// Difficulty/Config lab settings
+// Internal Standard behavior references and adventure settings
 //
-#define DIFFICULTY_LEVEL_EASY       0
-#define DIFFICULTY_LEVEL_AVERAGE    1
-#define DIFFICULTY_LEVEL_HARD       2
-#define DIFFICULTY_LEVEL_BRUTAL     3
-#define DIFFICULTY_LEVEL_CUSTOM     4
 
-#define DIFFICULTY_PRESET_COUNT     4 // ignore custom
 
-#define DIFFICULTY_LEVEL_NONE       DIFFICULTY_PRESET_COUNT
 
 
 // CONFIG_TOGGLE_
@@ -691,13 +684,10 @@
 #define CONFIG_TOGGLE_BYTE_COUNT            (1 + CONFIG_TOGGLE_COUNT / 8)
 
 // CONFIG_RANGE_
-#define CONFIG_RANGE_TRAINER                0
-#define CONFIG_RANGE_ITEM                   1 // unused
-#define CONFIG_RANGE_LEGENDARY              2
 #define CONFIG_RANGE_BATTLE_FORMAT          3
 #define CONFIG_RANGE_POKEDEX_VARIANT        4
 #define CONFIG_RANGE_GAME_MODE_NUM          5
-#define CONFIG_RANGE_DIFFICULTY_PRESET      6
+#define CONFIG_RANGE_ASCENSION              6
 #define CONFIG_RANGE_TRAINER_ORDER          7
 #define CONFIG_RANGE_COUNT                  8
 

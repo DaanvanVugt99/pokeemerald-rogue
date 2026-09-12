@@ -620,10 +620,12 @@ static void Host_HandleHandshakeRequest()
         return;
     }
 
-    if(gRogueMultiplayer->pendingHandshake.saveVersionId != RogueSave_GetVersionId())
+    if(gRogueMultiplayer->pendingHandshake.saveVersionId != ROGUE_SAVE_VERSION
+     || gRogueMultiplayer->pendingHandshake.rulesVersion != ASCENSION_RULES_VERSION)
     {
         // Save version doesn't match
-        gRogueMultiplayer->pendingHandshake.saveVersionId = RogueSave_GetVersionId();
+        gRogueMultiplayer->pendingHandshake.saveVersionId = ROGUE_SAVE_VERSION;
+        gRogueMultiplayer->pendingHandshake.rulesVersion = ASCENSION_RULES_VERSION;
         gRogueMultiplayer->pendingHandshake.accepted = FALSE;
         gRogueMultiplayer->pendingHandshake.state = NET_HANDSHAKE_STATE_SEND_TO_CLIENT;
         return;
@@ -644,7 +646,8 @@ static void Client_SetupHandshakeRequest()
     CreatePlayerProfile(&gRogueMultiplayer->pendingHandshake.profile);
 
     // TODO - Setup versioning vars
-    gRogueMultiplayer->pendingHandshake.saveVersionId = RogueSave_GetVersionId();
+    gRogueMultiplayer->pendingHandshake.saveVersionId = ROGUE_SAVE_VERSION;
+    gRogueMultiplayer->pendingHandshake.rulesVersion = ASCENSION_RULES_VERSION;
     gRogueMultiplayer->pendingHandshake.isVersionEx = IsExVersion();
 
     gRogueMultiplayer->pendingHandshake.state = NET_HANDSHAKE_STATE_SEND_TO_HOST;
@@ -679,7 +682,7 @@ static void Host_UpdateGameState()
             break;
         
         case 1:
-            memcpy(&gRogueMultiplayer->gameState.hub.difficultyConfig, &gRogueSaveBlock->difficultyConfig, sizeof(gRogueSaveBlock->difficultyConfig));
+            memcpy(&gRogueMultiplayer->gameState.hub.adventureConfig, &gRogueSaveBlock->adventureConfig, sizeof(gRogueSaveBlock->adventureConfig));
             break;
         }
 
@@ -689,6 +692,7 @@ static void Host_UpdateGameState()
     }
     else
     {
+        gRogueMultiplayer->gameState.hub.adventureConfig = gRogueSaveBlock->activeAdventureConfig;
         gRogueMultiplayer->gameState.adventure.baseSeed = gRogueRun.baseSeed;
         gRogueMultiplayer->gameState.adventure.isRunActive = TRUE;
     }

@@ -39,8 +39,8 @@ SINGLE_BATTLE_TEST("Canopy Stalker forces out the target only at 3 qualifying al
         PLAYER(SPECIES_ODDISH) { Speed(40); }
         PLAYER(SPECIES_DRATINI) { Speed(40); }
         PLAYER(SPECIES_POOCHYENA) { Speed(40); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(60); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_WYNAUT) { Speed(60); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(60); HP(400); MaxHP(400); Defense(300); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(60); HP(400); MaxHP(400); Defense(300); Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_LEAF_BLADE); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_LEAF_BLADE); MOVE(opponent, MOVE_CELEBRATE); }

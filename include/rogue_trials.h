@@ -4,7 +4,7 @@
 #include "global.h"
 
 struct Pokemon;
-struct RogueDifficultyConfig;
+struct RogueAdventureConfig;
 
 enum RogueTrialId
 {
@@ -119,7 +119,8 @@ struct RogueTrialDefinition
     u8 battleLevel;
     u8 forcedTrainerOrder;
     u8 forcedBattleFormat;
-    u8 forcedDifficulty;
+    u8 fixedAscension;
+    u8 minimumAscension;
     u8 curseEffect;
     u8 extraCurseEffect;
     u8 curseCount;
@@ -145,14 +146,14 @@ struct RogueTrialDefinition
     u8 disableRandoman : 1;
     u8 enforceOpponentSpeciesLegality : 1;
     u8 disableTrainerBattleExp : 1;
-    u8 hasForcedDifficulty : 1;
+    u8 hasFixedAscension : 1;
     u8 unused : 5;
 };
 
 struct RogueTrialRunState
 {
     u8 trialId;
-    u8 difficulty;
+    u8 ascension;
     u8 initialPartyCount;
     u8 invalidated : 1;
     u8 initialPartyCountSet : 1;
@@ -168,7 +169,7 @@ bool8 RogueTrial_IsActiveTrial(u8 trialId);
 bool8 RogueTrial_IsInvalidated(void);
 void RogueTrial_Invalidate(void);
 void RogueTrial_ApplyPendingSelection(void);
-bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 difficulty, u8 pokedexVariant, struct RogueDifficultyConfig *config);
+bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 ascension, u8 pokedexVariant, struct RogueAdventureConfig *config);
 void RogueTrial_ApplyRunBagItems(void);
 void RogueTrial_ApplyBattleGimmickOverride(void);
 u8 RogueTrial_GetPendingForcedPokedexVariant(void);
@@ -208,14 +209,15 @@ void RogueTrial_OnTrainerBattleEnd(void);
 void RogueTrial_AppendTrialOptions(void);
 void RogueTrial_IsSelectedTrialGroup(void);
 void RogueTrial_AppendSelectedTrialGroupOptions(void);
-void RogueTrial_AppendDifficultyOptions(void);
-void RogueTrial_SelectForcedDifficulty(void);
+void RogueTrial_AppendAscensionOptions(void);
+void RogueTrial_SelectFixedAscension(void);
 void RogueTrial_AppendPokedexOptions(void);
 void RogueTrial_IsSelectedPokedexGroup(void);
 void RogueTrial_AppendSelectedPokedexGroupOptions(void);
 void RogueTrial_GetPokedexOptionCount(void);
 void RogueTrial_SelectDefaultPokedexOption(void);
 void RogueTrial_BufferTrialPreview(void);
+bool8 RogueTrial_CommitSelection(u8 trialId, u8 ascension, u8 pokedexVariant);
 void RogueTrial_SetPendingSelectionFromScript(void);
 void RogueTrial_SetPreviewSelectionFromScript(void);
 void RogueTrial_HasPendingSelection(void);
@@ -233,6 +235,7 @@ void RogueTrial_HasAvailableTrials(void);
 void RogueTrial_LoadLastSelection(void);
 void RogueTrial_CanUseAttendant(void);
 void RogueTrial_RecordInitialParty(void);
+void RogueTrial_OnQuestCompleted(u16 questId);
 bool8 RogueTrial_ApplyFixedStartingParty(u8 level);
 
 #endif // ROGUE_TRIALS_H

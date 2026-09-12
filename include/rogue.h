@@ -234,9 +234,9 @@ struct RogueAdventureSettings
 struct RogueQuestState
 {
     u32 stateFlags : 16;
-    u32 highestCompleteDifficulty : 3;
-    u32 highestCollectedRewardDifficulty : 3;
-    u32 unused : 12;
+    u32 rewardClaimed : 1;
+    u32 unused : 15;
+    u8 bestAscension[3];
 };
 
 struct RogueCampaignState
@@ -505,10 +505,17 @@ struct SpeciesTable
     const u16* trainerSpecies;
 };
 
-struct RogueDifficultyConfig
+struct RogueAdventureConfig
 {
-    u8 toggleBits[CONFIG_TOGGLE_BYTE_COUNT];
-    u8 rangeValues[CONFIG_RANGE_COUNT];
+    u16 trainerRegions;
+    u8 ascension;
+    u8 mode;
+    u8 battleFormat;
+    u8 pokedexVariant;
+    u8 trainerOrder;
+    u8 startingTeam;
+    bool8 overworldMons;
+    bool8 trialFreshStart;
 };
 
 struct RogueDebugConfig
@@ -522,7 +529,7 @@ struct RogueDebugConfig
 struct RogueNetHubState
 {
     struct RogueHubMap hubMap;
-    struct RogueDifficultyConfig difficultyConfig;
+    struct RogueAdventureConfig adventureConfig;
     u16 timeOfDay;
     u8 season;
 };
@@ -594,6 +601,7 @@ struct RogueNetHandshake
 {
     struct RogueNetPlayerProfile profile;
     u16 saveVersionId;
+    u8 rulesVersion;
     u8 state;
     u8 playerId;
     u8 accepted : 1;
@@ -732,8 +740,11 @@ struct RogueRideMonState
 
 struct AdventureReplay
 {
-    struct RogueDifficultyConfig difficultyConfig;
+    struct RogueAdventureConfig adventureConfig;
     u16 baseSeed;
+    u8 rulesVersion;
+    u8 trialId;
+    u8 campaignId;
     u8 isValid : 1;
 };
 
@@ -762,12 +773,21 @@ struct RogueSaveBlock
     u32 registeredRideMonCustomId;
     u8 monMasteryFlags[MON_MASTERY_BYTE_COUNT];
     struct RogueHubMap hubMap;
-    struct RogueDifficultyConfig difficultyConfig;
+    struct RogueAdventureConfig adventureConfig;
+    struct RogueAdventureConfig activeAdventureConfig;
+    u8 bestAscension[3];
+    u8 selectedAscension[3];
+    u8 bestModeAscension[ROGUE_GAME_MODE_COUNT][3];
+    u8 bestTrialAscension[ROGUE_TRIAL_COUNT][3];
+    u8 activeRunSource;
+    u8 ascensionEligibilityReason;
+    bool8 ascensionEligible;
+    bool8 ascensionRecorded;
     u16 timeOfDayMinutes;
     u16 lastKnownNumSpecies;
     u8 seasonCounter;
     u8 lastTrialId;
-    u8 lastTrialDifficulty;
+    u8 lastTrialAscension;
     u8 lastTrialPokedexVariant;
     bool8 hasLastTrialSelection;
 };

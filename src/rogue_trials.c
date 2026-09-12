@@ -25,15 +25,17 @@
 #include "rogue_query.h"
 #include "rogue_quest.h"
 #include "rogue_save.h"
+#include "rogue_run_start.h"
 #include "rogue_script.h"
 #include "rogue_settings.h"
+#include "rogue_ascension.h"
 #include "rogue_trainers.h"
 #include "rogue_trials.h"
 
 struct RogueTrialPendingSelection
 {
     u8 trialId;
-    u8 difficulty;
+    u8 ascension;
     u8 pokedexVariant;
     bool8 isPending;
 };
@@ -58,10 +60,7 @@ static EWRAM_DATA struct RogueTrialBattleMonBackup sEnemyBattleBackups[PARTY_SIZ
 static EWRAM_DATA bool8 sHasBattleBackups = FALSE;
 static EWRAM_DATA bool8 sCaughtMonPendingGive = FALSE;
 
-static const u8 sText_Easy[] = _("Easy");
-static const u8 sText_Average[] = _("Average");
-static const u8 sText_Hard[] = _("Hard");
-static const u8 sText_Brutal[] = _("Brutal");
+static const u8 sText_AscensionLocked[] = _("Minimum ascension locked");
 static const u8 sText_Back[] = _("Back");
 static const u8 sText_TypeNormal[] = _("Normal Trial");
 static const u8 sText_TypeFighting[] = _("Fighting Trial");
@@ -180,7 +179,7 @@ static const u8 sRule_FreshStart[] = _("Fresh Start removes the starting Bag.");
 static const u8 sRule_MixedBattles[] = _("Trainer battles use the Mixed format.");
 static const u8 sRule_Unaware[] = _("Unaware Curse is active.");
 static const u8 sRule_NoLegendaries[] = _("Legendary and Mythical {PKMN} are illegal.");
-static const u8 sRule_HardDifficulty[] = _("Difficulty is fixed to Hard.");
+static const u8 sRule_MinimumAscension[] = _("Requires Ascension 10 or higher.");
 static const u8 sRule_PartyOne[] = _("Party capacity is one {PKMN}.");
 static const u8 sRule_MaxShopPrices[] = _("99 Discount Curses maximize shop prices.");
 static const u8 sRule_BattleReroll[] = _("The full party rerolls before every Trainer battle.");
@@ -202,7 +201,7 @@ static const u8 *const sRules_Roguelocke[] = {sRule_RandomStarter, sRule_WildCur
 static const u8 *const sRules_CantPick[] = {sRule_StarterOnly};
 static const u8 *const sRules_CursedBody[] = {sRule_Snowball};
 static const u8 *const sRules_ProBuilding[] = {sRule_AutoMove};
-static const u8 *const sRules_InsaneMode[] = {sRule_HardDifficulty, sRule_FreshStart, sRule_MixedBattles, sRule_RandomStarter, sRule_Unaware, sRule_NoLegendaries};
+static const u8 *const sRules_InsaneMode[] = {sRule_MinimumAscension, sRule_FreshStart, sRule_MixedBattles, sRule_RandomStarter, sRule_Unaware, sRule_NoLegendaries};
 static const u8 *const sRules_IronMono[] = {sRule_PartyOne};
 static const u8 *const sRules_IronKaizo[] = {sRule_FreshStart, sRule_RandomStarter, sRule_PartyOne, sRule_MaxShopPrices};
 static const u8 *const sRules_ChaosMaster[] = {sRule_BattleReroll};
@@ -260,12 +259,29 @@ static const struct RogueTrialBattleGimmickProfile sGimmicks_Orre[] =
 };
 #endif
 
-static const u8 *const sDifficultyNames[DIFFICULTY_PRESET_COUNT] =
+static const u8 sAscensionNames[][13] =
 {
-    [DIFFICULTY_LEVEL_EASY] = sText_Easy,
-    [DIFFICULTY_LEVEL_AVERAGE] = sText_Average,
-    [DIFFICULTY_LEVEL_HARD] = sText_Hard,
-    [DIFFICULTY_LEVEL_BRUTAL] = sText_Brutal,
+    _("Ascension 0"),
+    _("Ascension 1"),
+    _("Ascension 2"),
+    _("Ascension 3"),
+    _("Ascension 4"),
+    _("Ascension 5"),
+    _("Ascension 6"),
+    _("Ascension 7"),
+    _("Ascension 8"),
+    _("Ascension 9"),
+    _("Ascension 10"),
+    _("Ascension 11"),
+    _("Ascension 12"),
+    _("Ascension 13"),
+    _("Ascension 14"),
+    _("Ascension 15"),
+    _("Ascension 16"),
+    _("Ascension 17"),
+    _("Ascension 18"),
+    _("Ascension 19"),
+    _("Ascension 20"),
 };
 
 static const u8 *const sPokedexRegionMenuNames[POKEDEX_REGION_COUNT] =
@@ -708,8 +724,7 @@ static const struct RogueTrialDefinition sTrialDefinitions[ROGUE_TRIAL_COUNT] =
         .requiredType = ROGUE_TRIAL_NO_TYPE,
         .forcedBattleFormat = BATTLE_FORMAT_MIXED,
         .hasForcedBattleFormat = TRUE,
-        .forcedDifficulty = DIFFICULTY_LEVEL_HARD,
-        .hasForcedDifficulty = TRUE,
+        .minimumAscension = 10,
         .curseEffect = EFFECT_UNAWARE_STATUS,
         .curseCount = 1,
         .hasCurseEffect = TRUE,
@@ -785,9 +800,9 @@ static bool8 IsValidTrialId(u8 trialId)
     return trialId > ROGUE_TRIAL_NONE && trialId < ROGUE_TRIAL_COUNT;
 }
 
-static bool8 IsValidDifficulty(u8 difficulty)
+static bool8 IsValidAscension(u8 ascension)
 {
-    return difficulty < DIFFICULTY_PRESET_COUNT;
+    return ascension <= ASCENSION_MAX;
 }
 
 static bool8 IsTypeTrialId(u8 trialId)
@@ -865,6 +880,23 @@ static u16 GetTrialQuestId(u8 trialId)
     case ROGUE_TRIAL_LIMITED_CAPTURE: return QUEST_ID_LIMITED_CAPTURE;
     default: return QUEST_ID_COUNT;
     }
+}
+
+void RogueTrial_OnQuestCompleted(u16 questId)
+{
+    u8 trial = gRogueRun.trialState.trialId;
+    u8 format = Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT);
+    u8 level = Rogue_GetAscension();
+    u8 *best;
+    // Quest success includes Trial-specific final conditions (for example,
+    // retaining both Orre starters or meeting Limited Capture's exact count).
+    if (!RogueTrial_IsActive() || GetTrialQuestId(trial) != questId
+        || RogueTrial_IsInvalidated() || Rogue_ShouldDisableTrialQuests()
+        || FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE)
+        || format > BATTLE_FORMAT_MIXED || level > ASCENSION_MAX)
+        return;
+    best = &gRogueSaveBlock->bestTrialAscension[trial][format];
+    if (*best == ASCENSION_NONE || level > *best) *best = level;
 }
 
 static bool8 IsTrialAvailableForMenu(u8 trialId)
@@ -1274,7 +1306,7 @@ u8 RogueTrial_GetPendingSpeciesEligibilityReason(u16 species, bool8 isDayCare, u
     if (!sPendingTrial.isPending)
         return ROGUE_TRIAL_ELIGIBILITY_OK;
 
-    if (!IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
+    if (!IsValidTrialId(sPendingTrial.trialId) || !IsValidAscension(sPendingTrial.ascension))
         return ROGUE_TRIAL_ELIGIBILITY_INVALID_SETUP;
 
     if (trial == NULL || !IsPokedexVariantAllowedForSet(trial->pokedexSet, sPendingTrial.pokedexVariant))
@@ -1322,7 +1354,7 @@ bool8 RogueTrial_PendingNeedsStarterFilter(void)
 {
     const struct RogueTrialDefinition *trial;
 
-    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
+    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidAscension(sPendingTrial.ascension))
         return FALSE;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
@@ -1367,7 +1399,7 @@ void RogueTrial_FilterPendingMonQuery(void)
     struct PendingTrialQueryFilterData filterData;
     u8 previousDexVariant;
 
-    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
+    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidAscension(sPendingTrial.ascension))
         return;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
@@ -1406,7 +1438,7 @@ static bool8 CurrentTrialRequiresSpeciesLegality(void)
     return DefinitionRequiresSpeciesLegality(trial);
 }
 
-static void SetOnlyTrainerToggleFor(struct RogueDifficultyConfig *config, u8 trainerToggle)
+static void SetOnlyTrainerToggleFor(struct RogueAdventureConfig *config, u8 trainerToggle)
 {
     if (trainerToggle == ROGUE_TRIAL_NO_TRAINER_TOGGLE)
         return;
@@ -1425,7 +1457,7 @@ static void SetOnlyTrainerToggleFor(struct RogueDifficultyConfig *config, u8 tra
 #endif
 }
 
-static void SetAllRegionalTrainerTogglesFor(struct RogueDifficultyConfig *config)
+static void SetAllRegionalTrainerTogglesFor(struct RogueAdventureConfig *config)
 {
     Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_ROGUE, FALSE);
     Rogue_SetConfigToggleFor(config, CONFIG_TOGGLE_TRAINER_KANTO, TRUE);
@@ -1638,55 +1670,66 @@ void RogueTrial_Invalidate(void)
 void RogueTrial_ApplyPendingSelection(void)
 {
     const struct RogueTrialDefinition *trial;
+    struct RogueAdventureConfig config;
 
     if (!sPendingTrial.isPending)
         return;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
+    Rogue_CopyAdventureConfig(&config);
 
     if (trial != NULL
-        && IsValidTrialId(sPendingTrial.trialId)
-        && IsValidDifficulty(sPendingTrial.difficulty)
-        && IsPokedexVariantAllowedForSet(trial->pokedexSet, sPendingTrial.pokedexVariant))
+        && RogueTrial_BuildSelectionConfig(sPendingTrial.trialId, sPendingTrial.ascension, sPendingTrial.pokedexVariant, &config))
     {
         gRogueRun.trialState.trialId = sPendingTrial.trialId;
-        gRogueRun.trialState.difficulty = sPendingTrial.difficulty;
+        gRogueRun.trialState.ascension = sPendingTrial.ascension;
         gRogueRun.trialState.initialPartyCount = CalculatePlayerPartyCount();
         gRogueRun.trialState.invalidated = FALSE;
         gRogueRun.trialState.initialPartyCountSet = TRUE;
 
         gRogueSaveBlock->lastTrialId = sPendingTrial.trialId;
-        gRogueSaveBlock->lastTrialDifficulty = sPendingTrial.difficulty;
+        gRogueSaveBlock->lastTrialAscension = sPendingTrial.ascension;
         gRogueSaveBlock->lastTrialPokedexVariant = sPendingTrial.pokedexVariant;
         gRogueSaveBlock->hasLastTrialSelection = TRUE;
 
-        {
-            struct RogueDifficultyConfig config;
+        Rogue_SetRunStartConfigOverride(&config);
 
-            Rogue_CopyReadableDifficultyConfig(&config);
-            if (RogueTrial_BuildSelectionConfig(sPendingTrial.trialId, sPendingTrial.difficulty, sPendingTrial.pokedexVariant, &config))
-                Rogue_ApplyDifficultyConfig(&config);
-        }
-
-        FlagClear(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
+        // Replays also apply a pending Trial before the run seed is restored.
+        if (RogueRunStart_GetContext() == NULL || RogueRunStart_GetContext()->source != RUN_START_SOURCE_REPLAY)
+            FlagClear(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
     }
 
     RogueTrial_ClearPendingSelection();
 }
 
-bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 difficulty, u8 pokedexVariant, struct RogueDifficultyConfig *config)
+static bool8 IsTrialAscensionAllowedForFormat(const struct RogueTrialDefinition *trial, u8 ascension, u8 format)
+{
+    if (trial->hasForcedBattleFormat) format = trial->forcedBattleFormat;
+    return ascension >= trial->minimumAscension
+        && (!trial->hasFixedAscension || ascension == trial->fixedAscension)
+        && RogueAscension_IsUnlocked(ascension, format);
+}
+
+static bool8 IsTrialAscensionAllowed(const struct RogueTrialDefinition *trial, u8 ascension)
+{
+    return IsTrialAscensionAllowedForFormat(trial, ascension, Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT));
+}
+
+bool8 RogueTrial_BuildSelectionConfig(u8 trialId, u8 ascension, u8 pokedexVariant, struct RogueAdventureConfig *config)
 {
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(trialId);
 
     if (trial == NULL
         || config == NULL
         || !IsValidTrialId(trialId)
-        || !IsValidDifficulty(difficulty)
-        || (trial->hasForcedDifficulty && trial->forcedDifficulty != difficulty)
+        || !IsValidAscension(ascension)
+        || !IsTrialAscensionAllowedForFormat(trial, ascension, config->battleFormat)
         || !IsPokedexVariantAllowedForSet(trial->pokedexSet, pokedexVariant))
         return FALSE;
 
-    Rogue_ApplyDifficultyPresetToConfig(config, difficulty);
+    config->trialFreshStart = FALSE;
+    config->mode = ROGUE_GAME_MODE_STANDARD;
+    Rogue_SetConfigAscension(config, ascension);
     Rogue_SetConfigRangeFor(config, CONFIG_RANGE_POKEDEX_VARIANT, pokedexVariant);
     SetOnlyTrainerToggleFor(config, trial->forcedTrainerToggle);
 
@@ -1754,7 +1797,7 @@ u8 RogueTrial_GetPendingForcedPokedexVariant(void)
 {
     const struct RogueTrialDefinition *trial;
 
-    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidDifficulty(sPendingTrial.difficulty))
+    if (!sPendingTrial.isPending || !IsValidTrialId(sPendingTrial.trialId) || !IsValidAscension(sPendingTrial.ascension))
         return POKEDEX_VARIANT_NONE;
 
     trial = RogueTrial_GetDefinition(sPendingTrial.trialId);
@@ -2338,25 +2381,34 @@ void RogueTrial_AppendSelectedTrialGroupOptions(void)
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Back, MULTI_B_PRESSED);
 }
 
-void RogueTrial_AppendDifficultyOptions(void)
+void RogueTrial_AppendAscensionOptions(void)
 {
     u8 i;
-
-    for (i = 0; i < ARRAY_COUNT(sDifficultyNames); ++i)
-        ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sDifficultyNames[i], i);
-
+    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
+    if (trial != NULL)
+    {
+        for (i = 0; i <= ASCENSION_MAX; ++i)
+            if (IsTrialAscensionAllowed(trial, i))
+                ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sAscensionNames[i], i);
+        if (!RogueAscension_IsUnlocked(trial->minimumAscension,
+            trial->hasForcedBattleFormat ? trial->forcedBattleFormat : Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT)))
+            ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_AscensionLocked, MULTI_B_PRESSED);
+    }
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Back, MULTI_B_PRESSED);
-    ScriptMenu_ScrollingMultichoiceDynamicSetDefault(
-        IsValidDifficulty(gSpecialVar_0x8005) ? gSpecialVar_0x8005 : DIFFICULTY_LEVEL_AVERAGE);
 }
 
-void RogueTrial_SelectForcedDifficulty(void)
+void RogueTrial_SelectFixedAscension(void)
 {
     const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
 
-    if (trial != NULL && trial->hasForcedDifficulty && IsValidDifficulty(trial->forcedDifficulty))
+    if (!RogueAscension_IsRevealed())
     {
-        gSpecialVar_0x8005 = trial->forcedDifficulty;
+        gSpecialVar_0x8005 = 0;
+        gSpecialVar_Result = TRUE;
+    }
+    else if (trial != NULL && trial->hasFixedAscension && IsValidAscension(trial->fixedAscension))
+    {
+        gSpecialVar_0x8005 = trial->fixedAscension;
         gSpecialVar_Result = TRUE;
     }
     else
@@ -2451,8 +2503,8 @@ void RogueTrial_BufferTrialPreview(void)
         StringCopy(gStringVar1, trial->name);
         StringCopy(gStringVar2, trial->description);
 
-        if (IsValidDifficulty(gSpecialVar_0x8005))
-            StringCopy(gStringVar4, sDifficultyNames[gSpecialVar_0x8005]);
+        if (IsValidAscension(gSpecialVar_0x8005))
+            StringCopy(gStringVar4, sAscensionNames[gSpecialVar_0x8005]);
         else
             StringCopy(gStringVar4, sText_Back);
     }
@@ -2469,28 +2521,23 @@ void RogueTrial_BufferTrialPreview(void)
         StringCopy(gStringVar3, sText_Back);
 }
 
+bool8 RogueTrial_CommitSelection(u8 trialId, u8 ascension, u8 pokedexVariant)
+{
+    struct RogueAdventureConfig config;
+    Rogue_CopyAdventureConfig(&config);
+    if (!RogueTrial_BuildSelectionConfig(trialId, ascension, pokedexVariant, &config)) return FALSE;
+    sPendingTrial.trialId = trialId;
+    sPendingTrial.ascension = ascension;
+    sPendingTrial.pokedexVariant = pokedexVariant;
+    sPendingTrial.isPending = TRUE;
+    Rogue_SetRunStartConfigOverride(&config);
+    return TRUE;
+}
+
 void RogueTrial_SetPendingSelectionFromScript(void)
 {
-    const struct RogueTrialDefinition *trial = RogueTrial_GetDefinition(gSpecialVar_0x8004);
-
-    if (trial != NULL
-        && IsValidTrialId(gSpecialVar_0x8004)
-        && IsValidDifficulty(gSpecialVar_0x8005)
-        && (!trial->hasForcedDifficulty || gSpecialVar_0x8005 == trial->forcedDifficulty)
-        && IsPokedexVariantAllowedForSet(trial->pokedexSet, gSpecialVar_0x8006))
-    {
-        sPendingTrial.trialId = gSpecialVar_0x8004;
-        sPendingTrial.difficulty = gSpecialVar_0x8005;
-        sPendingTrial.pokedexVariant = gSpecialVar_0x8006;
-        sPendingTrial.isPending = TRUE;
-        RoguePokedex_SetDexVariant(sPendingTrial.pokedexVariant);
-        gSpecialVar_Result = TRUE;
-    }
-    else
-    {
-        RogueTrial_ClearPendingSelection();
-        gSpecialVar_Result = FALSE;
-    }
+    gSpecialVar_Result = RogueTrial_CommitSelection(gSpecialVar_0x8004, gSpecialVar_0x8005, gSpecialVar_0x8006);
+    if (!gSpecialVar_Result) RogueTrial_ClearPendingSelection();
 }
 
 void RogueTrial_SetPreviewSelectionFromScript(void)
@@ -2499,12 +2546,12 @@ void RogueTrial_SetPreviewSelectionFromScript(void)
 
     if (trial != NULL
         && IsValidTrialId(gSpecialVar_0x8004)
-        && IsValidDifficulty(gSpecialVar_0x8005)
-        && (!trial->hasForcedDifficulty || gSpecialVar_0x8005 == trial->forcedDifficulty)
+        && IsValidAscension(gSpecialVar_0x8005)
+        && IsTrialAscensionAllowed(trial, gSpecialVar_0x8005)
         && IsPokedexVariantAllowedForSet(trial->pokedexSet, gSpecialVar_0x8006))
     {
         sPendingTrial.trialId = gSpecialVar_0x8004;
-        sPendingTrial.difficulty = gSpecialVar_0x8005;
+        sPendingTrial.ascension = gSpecialVar_0x8005;
         sPendingTrial.pokedexVariant = gSpecialVar_0x8006;
         sPendingTrial.isPending = TRUE;
         gSpecialVar_Result = TRUE;
@@ -2671,18 +2718,18 @@ void RogueTrial_LoadLastSelection(void)
     gSpecialVar_Result = FALSE;
     if (!gRogueSaveBlock->hasLastTrialSelection
         || !IsValidTrialId(gRogueSaveBlock->lastTrialId)
-        || !IsValidDifficulty(gRogueSaveBlock->lastTrialDifficulty))
+        || !IsValidAscension(gRogueSaveBlock->lastTrialAscension))
         return;
 
     trial = RogueTrial_GetDefinition(gRogueSaveBlock->lastTrialId);
     if (trial == NULL
         || !IsTrialAvailableForMenu(gRogueSaveBlock->lastTrialId)
         || !IsPokedexVariantAllowedForSet(trial->pokedexSet, gRogueSaveBlock->lastTrialPokedexVariant)
-        || (trial->hasForcedDifficulty && trial->forcedDifficulty != gRogueSaveBlock->lastTrialDifficulty))
+        || !IsTrialAscensionAllowed(trial, gRogueSaveBlock->lastTrialAscension))
         return;
 
     gSpecialVar_0x8004 = gRogueSaveBlock->lastTrialId;
-    gSpecialVar_0x8005 = gRogueSaveBlock->lastTrialDifficulty;
+    gSpecialVar_0x8005 = gRogueSaveBlock->lastTrialAscension;
     gSpecialVar_0x8006 = gRogueSaveBlock->lastTrialPokedexVariant;
     gSpecialVar_Result = TRUE;
 }

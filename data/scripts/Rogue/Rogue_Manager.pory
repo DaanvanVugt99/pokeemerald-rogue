@@ -1452,68 +1452,9 @@ script Rogue_Common_SelectTrialPokedex
 
 script Rogue_Common_SelectPokedex
 {
-    setvar(VAR_0x800A, MULTI_B_PRESSED)
-
-    while(var(VAR_0x800A) == MULTI_B_PRESSED)
-    {
-        begindynamicmultichoice(24)
-        if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
-        {
-            special(RogueTrial_AppendPokedexOptions)
-        }
-        else
-        {
-            special(RoguePokedex_AppendCuratedOptions)
-        }
-        enddynamicmultichoice(1, 0, 5, TRUE)
-
-        if(var(VAR_RESULT) == MULTI_B_PRESSED)
-        {
-            setvar(VAR_RESULT, NO)
-            return
-        }
-
-        copyvar(VAR_0x8007, VAR_RESULT)
-        if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
-        {
-            special(RogueTrial_IsSelectedPokedexGroup)
-        }
-        else
-        {
-            special(RoguePokedex_IsSelectedCuratedGroup)
-        }
-
-        if(var(VAR_RESULT) == YES)
-        {
-            begindynamicmultichoice(16)
-            if(var(VAR_0x8009) == POKEDEX_SELECTION_TRIAL)
-            {
-                special(RogueTrial_AppendSelectedPokedexGroupOptions)
-            }
-            else
-            {
-                special(RoguePokedex_AppendSelectedCuratedGroupOptions)
-            }
-            enddynamicmultichoice(1, 0, 5, TRUE)
-
-            if(var(VAR_RESULT) == MULTI_B_PRESSED)
-            {
-                setvar(VAR_0x800A, MULTI_B_PRESSED)
-            }
-            else
-            {
-                copyvar(VAR_0x8006, VAR_RESULT)
-                setvar(VAR_0x800A, YES)
-            }
-        }
-        else
-        {
-            copyvar(VAR_0x8006, VAR_0x8007)
-            setvar(VAR_0x800A, YES)
-        }
-    }
-
-    setvar(VAR_RESULT, YES)
+    closemessage
+    special(Special_ViewPokedexSelection)
+    waitstate
     return
 }
 

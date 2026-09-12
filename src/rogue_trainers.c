@@ -25,6 +25,7 @@
 #include "rogue_query_script.h"
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
+#include "rogue_ascension.h"
 #include "rogue_trials.h"
 
 #define TRAINER_SHINY_PERC 25
@@ -91,6 +92,7 @@ static bool8 SelectNextPreset(struct TrainerPartyScratch* scratch, u16 species, 
 static void ModifyTrainerMonPreset(u16 trainerNum, struct Pokemon* mon, struct RoguePokemonCompetitiveSet* preset, struct RoguePokemonCompetitiveSetRules* presetRules);
 static void ReorderPartyMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static void AssignAnySpecialMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
+static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static bool8 IsChoiceItem(u16 itemId);
 static bool8 IsGimmickItem(u16 itemId);
 static void ApplyBlackSludgeTeraOverride(struct TrainerHeldItemScratch* heldItems, struct RoguePokemonCompetitiveSet* preset, bool8 teraEnabled);
@@ -183,12 +185,17 @@ bool8 Rogue_IsBattleSimTrainer(u16 trainerNum)
     return (trainer->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL) != 0 && (trainer->classFlags & CLASS_FLAG_BATTLE_SIM) != 0;
 }
 
+#if TESTING
+static bool8 sUseContentTrainers;
+void RogueTest_UseContentTrainers(bool8 enabled) { sUseContentTrainers = enabled; }
+#endif
+
 const struct RogueTrainer* Rogue_GetTrainer(u16 trainerNum)
 {
 #if TESTING
     // Most battle tests inject trainer slot 0. Content-backed Frontier Brain
     // tests deliberately exercise the actual Frontier Brain definitions.
-    if(trainerNum >= gRogueTrainerCount || (gRogueTrainers[trainerNum].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) == 0)
+    if(!sUseContentTrainers && (trainerNum >= gRogueTrainerCount || (gRogueTrainers[trainerNum].trainerFlags & TRAINER_FLAG_CLASS_MINIBOSS) == 0))
         trainerNum = 0;
 #endif
     AGB_ASSERT(trainerNum < gRogueTrainerCount);
@@ -324,25 +331,9 @@ u8 Rogue_GetTrainerWeather(u16 trainerNum)
 
     if(Rogue_IsKeyTrainer(trainerNum) && trainer != NULL)
     {
-        switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-        {
-        case DIFFICULTY_LEVEL_EASY:
-            weatherType = WEATHER_NONE;
-            break;
-        
-        case DIFFICULTY_LEVEL_AVERAGE:
+        { // Standard baseline
             if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
                 weatherType = trainer->preferredWeather;
-            break;
-        
-        case DIFFICULTY_LEVEL_HARD:
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                weatherType = trainer->preferredWeather;
-            break;
-        
-        case DIFFICULTY_LEVEL_BRUTAL:
-            weatherType = trainer->preferredWeather;
-            break;
         }
     }
 
@@ -494,9 +485,8 @@ u8 Rogue_CalculateMiniBossMonLvl()
 u8 Rogue_CalculateRivalMonLvl()
 {
     // Divergence's Standard generator is the upstream Fast Path. Keep rivals
-    // alongside the player's level there, except on Brutal difficulty.
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD
-        && Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) != DIFFICULTY_LEVEL_BRUTAL)
+    // alongside the player's level there.
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
     {
         return Rogue_CalculatePlayerMonLvl();
     }
@@ -607,23 +597,7 @@ bool8 Rogue_IsValidTrainerShinySpecies(u16 trainerNum, u16 species)
 
 bool8 Rogue_ShouldTrainerSmartSwitch(u16 trainerNum)
 {
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-                return TRUE;
-            else
-                return FALSE;
-        }
-        else
-        {
-            return FALSE;
-        }
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
         {
             if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY - 1)
@@ -638,27 +612,6 @@ bool8 Rogue_ShouldTrainerSmartSwitch(u16 trainerNum)
             else
                 return FALSE;
         }
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                return TRUE;
-            else
-                return FALSE;
-        }
-        else
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                return TRUE;
-            else
-                return FALSE;
-        }
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 
     AGB_ASSERT(FALSE);
@@ -667,24 +620,12 @@ bool8 Rogue_ShouldTrainerSmartSwitch(u16 trainerNum)
 
 bool8 Rogue_ShouldTrainerBeDoubleAware(u16 trainerNum)
 {
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
         {
             if(gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
                 return TRUE;
         }
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-    case DIFFICULTY_LEVEL_BRUTAL:
-        if(gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
-            return TRUE;
-        break;
     }
 
     return FALSE;
@@ -693,29 +634,8 @@ bool8 Rogue_ShouldTrainerBeDoubleAware(u16 trainerNum)
 
 bool8 Rogue_ShouldTrainerTrySetup(u16 trainerNum)
 {
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2);
-        else
-            return FALSE;
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         return Rogue_IsKeyTrainer(trainerNum);
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return TRUE;
-        else
-            return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 1);
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
-        break;
     }
 
     return FALSE;
@@ -723,26 +643,11 @@ bool8 Rogue_ShouldTrainerTrySetup(u16 trainerNum)
 
 bool8 Rogue_ShouldTrainerBeSmart(u16 trainerNum)
 {
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2);
-        else
-            return FALSE;
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
             return TRUE;
         else
             return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1);
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-    case DIFFICULTY_LEVEL_BRUTAL:
-            return TRUE;
-        break;
     }
 
     return FALSE;
@@ -756,32 +661,9 @@ enum
 
 static bool8 ShouldBattleGimicBestSlot(u16 trainerNum, u8 gimic)
 {
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        // no special behaviour
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
             return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY);
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return (Rogue_GetCurrentDifficulty() > ROGUE_GYM_START_DIFFICULTY);
-        else
-            // Rando trainers will start doing this too
-            return (Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY);
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        // Everything will dynamax out of order
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return TRUE;
-        else
-            // Rando trainers will start doing this too
-            return (Rogue_GetCurrentDifficulty() > ROGUE_GYM_START_DIFFICULTY);
     }
 
     // Will gimic final slot
@@ -887,25 +769,9 @@ s32 Rogue_GetSwitchAISpeedDivisor(u16 trainerNum, u8 slot)
 static bool8 ShouldAllowParadoxMons(struct TrainerPartyScratch* scratch)
 {
 #ifdef ROGUE_EXPANSION
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY - 1)
-            return TRUE;
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
             return TRUE;
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-            return TRUE;
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 #endif
 
@@ -1763,10 +1629,7 @@ static void ConfigurePartyScratchSettings(u16 trainerNum, struct TrainerPartyScr
     }
 
     // Configure evos, strong presets and legend settings
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(difficulty >= ROGUE_ELITE_START_DIFFICULTY)
         {
             scratch->allowStrongLegends = TRUE;
@@ -1781,46 +1644,6 @@ static void ConfigurePartyScratchSettings(u16 trainerNum, struct TrainerPartyScr
         {
             scratch->allowItemEvos = TRUE;
         }
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(difficulty >= ROGUE_GYM_MID_DIFFICULTY + 1)
-        {
-            scratch->allowStrongLegends = TRUE;
-            scratch->preferStrongSpecies = TRUE;
-        }
-        else if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 2)
-        {
-            scratch->allowWeakLegends = TRUE;
-        }
-
-        if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 2)
-        {
-            scratch->allowItemEvos = TRUE;
-        }
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        if(difficulty >= ROGUE_GYM_MID_DIFFICULTY)
-        {
-            scratch->allowStrongLegends = TRUE;
-            scratch->preferStrongSpecies = TRUE;
-        }
-        else if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 3)
-        {
-            scratch->allowWeakLegends = TRUE;
-            scratch->preferStrongSpecies = TRUE;
-        }
-        else if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 2)
-        {
-            scratch->allowWeakLegends = TRUE;
-        }
-
-        if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 1)
-        {
-            scratch->allowItemEvos = TRUE;
-        }
-        break;
     }
 
     if(FlagGet(FLAG_ROGUE_TRAINERS_STRONG_LEGENDARIES))
@@ -1867,70 +1690,14 @@ static u8 ConfigureRivalBaseTeamSettings(u16 trainerNum, struct TrainerPartyScra
         scratch->allowWeakLegends = TRUE;
     }
 
-    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) == DIFFICULTY_LEVEL_BRUTAL)
-        return monCount - 2;
-
     return PARTY_SIZE - 1;
 }
 
 static u8 CalculateMonFixedIV(u16 trainerNum)
 {
-    u8 fixedIV = 0;
-
-    if(Rogue_IsKeyTrainer(trainerNum))
-    {
-        switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-        {
-        case DIFFICULTY_LEVEL_EASY:
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_FINAL_CHAMP_DIFFICULTY)
-                fixedIV = 10;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-                fixedIV = 5;
-            break;
-
-        case DIFFICULTY_LEVEL_AVERAGE:
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_FINAL_CHAMP_DIFFICULTY)
-                fixedIV = 15;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-                fixedIV = 10;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-                fixedIV = 5;
-            break;
-
-        case DIFFICULTY_LEVEL_HARD:
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-                fixedIV = 31;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-                fixedIV = 25;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                fixedIV = 20;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                fixedIV = 15;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                fixedIV = 10;
-            else
-                fixedIV = 5;
-            break;
-
-        case DIFFICULTY_LEVEL_BRUTAL:
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                fixedIV = 31;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                fixedIV = 25;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                fixedIV = 20;
-            else
-                fixedIV = 15;
-            break;
-        }
-    }
-
-    if(Rogue_IsBattleSimTrainer(trainerNum))
-    {
-        fixedIV = 31;
-    }
-
-    return fixedIV;
+    if (Rogue_IsBattleSimTrainer(trainerNum)) return 31;
+    if (Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL) return 0;
+    return RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), Rogue_IsKeyTrainer(trainerNum), FALSE);
 }
 
 #if TESTING
@@ -1949,16 +1716,7 @@ static u8 ShouldTrainerOptimizeCoverage(u16 trainerNum)
         difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
     }
 
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        // Rival is the only one who is allowed to spread out their coverage
-        if(Rogue_IsRivalTrainer(trainerNum))
-            return TRUE;
-        else
-            return FALSE;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsRivalTrainer(trainerNum))
             return TRUE;
         else if(Rogue_IsKeyTrainer(trainerNum))
@@ -1973,28 +1731,6 @@ static u8 ShouldTrainerOptimizeCoverage(u16 trainerNum)
             // Misc trainers just have any mons they can
             return FALSE;
         }
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsRivalTrainer(trainerNum))
-            return TRUE;
-        else if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(difficulty >= ROGUE_GYM_MID_DIFFICULTY + 1)
-                return TRUE;
-            else
-                return FALSE;
-        }
-        else
-        {
-            // Normal trainers start to optimize coverage from E4 onward
-            if(difficulty >= ROGUE_ELITE_START_DIFFICULTY)
-                return TRUE;
-            else
-                return FALSE;
-        }
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 
     // Should never get here
@@ -2014,11 +1750,11 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
 
     // Hack for EXP trainer
     if(monLevel == 1)
-        return 1;
+        return min(1, monCapacity);
 
     if(Rogue_GetModeRules()->forceEndGameTrainers || Rogue_IsBattleSimTrainer(trainerNum))
     {
-        return 6;
+        return min(PARTY_SIZE, monCapacity);
     }
 
     if(Rogue_IsKeyTrainer(trainerNum))
@@ -2027,22 +1763,7 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
             monCount = 6;
         else
         {
-            switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-            {
-            case DIFFICULTY_LEVEL_EASY:
-                if(difficulty == 0)
-                    monCount = Rogue_IsRivalTrainer(trainerNum) ? 2 : 3;
-                else if(difficulty <= 1)
-                    monCount = 3;
-                else if(difficulty <= ROGUE_GYM_MID_DIFFICULTY + 1)
-                    monCount = 4;
-                else if(difficulty <= ROGUE_CHAMP_START_DIFFICULTY)
-                    monCount = 5;
-                else
-                    monCount = 6;
-                break;
-
-            case DIFFICULTY_LEVEL_AVERAGE:
+            { // Standard baseline
                 if(difficulty == 0)
                     monCount = Rogue_IsRivalTrainer(trainerNum) ? 2 : 3;
                 else if(difficulty <= 1)
@@ -2053,28 +1774,10 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
                     monCount = 5;
                 else
                     monCount = 6;
-                break;
-            
-            case DIFFICULTY_LEVEL_HARD:
-                if(difficulty == 0)
-                    monCount = Rogue_IsRivalTrainer(trainerNum) ? 3 : 4;
-                else if(difficulty < ROGUE_ELITE_START_DIFFICULTY)
-                    monCount = 5;
-                else
-                    monCount = 6;
-                break;
-            
-            case DIFFICULTY_LEVEL_BRUTAL:
-                if(Rogue_GetCurrentDifficulty() == 0)
-                    monCount = Rogue_IsRivalTrainer(trainerNum) ? RIVAL_BASE_PARTY_SIZE : 6; // Haven't generate the rest of the party by this point
-                else
-                    monCount = 6;
-                break;
             }
         }
 
-        // Clamp team boss to 5 mons on easy and avg
-        if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) < DIFFICULTY_LEVEL_HARD)
+        // A0 team bosses have at most five Pokemon before ascension expansion.
         {
             if(Rogue_IsTeamBossTrainer(trainerNum))
                 monCount = min(5, monCount);
@@ -2132,7 +1835,7 @@ static u8 CalculatePartyMonCount(u16 trainerNum, u8 monCapacity, u8 monLevel)
     //    monCount = gPlayerPartyCount;
     //}
 
-    monCount = min(monCount, monCapacity);
+    monCount = RogueAscension_PartySize(Rogue_GetAscension(), monCount, monCapacity, Rogue_IsKeyTrainer(trainerNum));
 
 #if !defined(ROGUE_EXPANSION)
     if(gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
@@ -2156,20 +1859,7 @@ static bool8 ShouldTrainerUseValidHeldItems(u16 trainerNum, bool8 isGimmickItem)
         difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
     }
 
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(isGimmickItem && difficulty >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                return TRUE;
-
-            if(!isGimmickItem && difficulty >= ROGUE_FINAL_CHAMP_DIFFICULTY)
-                return TRUE;
-        }
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
         {
             if(isGimmickItem && difficulty >= ROGUE_GYM_MID_DIFFICULTY)
@@ -2184,21 +1874,6 @@ static bool8 ShouldTrainerUseValidHeldItems(u16 trainerNum, bool8 isGimmickItem)
                 return TRUE;
         }
         return FALSE;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            return TRUE;
-        }
-        else
-        {
-            if(difficulty >= ROGUE_GYM_MID_DIFFICULTY + 1)
-                return TRUE;
-        }
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 
     return FALSE;
@@ -2213,29 +1888,13 @@ static bool8 ShouldTrainerUseValidNatures(u16 trainerNum)
         difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
     }
 
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
         {
             if(difficulty >= ROGUE_ELITE_START_DIFFICULTY + 1)
                 return TRUE;
         }
         return FALSE;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(difficulty >= ROGUE_ELITE_START_DIFFICULTY - 1)
-                return TRUE;
-        }
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 
     return FALSE;
@@ -2250,34 +1909,13 @@ static bool8 ShouldTrainerUseValidTeraTypes(u16 trainerNum)
         difficulty = ROGUE_FINAL_CHAMP_DIFFICULTY;
     }
 
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(trainerNum))
         {
             if(difficulty >= ROGUE_GYM_MID_DIFFICULTY)
                 return TRUE;
         }
         return FALSE;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(difficulty >= ROGUE_GYM_START_DIFFICULTY + 1)
-                return TRUE;
-        }
-        else
-        {
-            if(difficulty >= ROGUE_GYM_MID_DIFFICULTY)
-                return TRUE;
-        }
-        return FALSE;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
     }
 
     return FALSE;
@@ -2291,6 +1929,12 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
         monCount = CreateRivalPartyInternal(trainerNum, party, monCapacity);
     else
         monCount = CreateTrainerPartyInternal(trainerNum, party, 0, monCapacity, firstTrainer, 0);
+
+    if (!(Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL))
+    {
+        u8 i;
+        for (i = 0; i < monCount; ++i) SetNature(&party[i], NATURE_HARDY);
+    }
 
     // Adjust mons
     {
@@ -2328,6 +1972,7 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
     }
 
     ReorderPartyMons(trainerNum, party, monCount);
+    ApplyAscensionParty(trainerNum, party, monCount);
     AssignAnySpecialMons(trainerNum, party, monCount);
     
     CalculateEnemyPartyCount();
@@ -2930,22 +2575,7 @@ static void SetupQueryScriptVars(struct QueryScriptContext* context, struct Trai
     u8 maxBoxLegends = 255;
     u8 maxNonBoxLegends = 255;
 
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    case DIFFICULTY_LEVEL_EASY:
-        if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        {
-            maxBoxLegends = 1;
-            maxNonBoxLegends = 1;
-        }
-        else
-        {
-            maxBoxLegends = 0;
-            maxNonBoxLegends = 1;
-        }
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
+    { // Standard baseline
         if(Rogue_IsKeyTrainer(scratch->trainerNum))
         {
             maxBoxLegends = 1;
@@ -2956,25 +2586,6 @@ static void SetupQueryScriptVars(struct QueryScriptContext* context, struct Trai
             maxBoxLegends = 1;
             maxNonBoxLegends = 1;
         }
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        {
-            maxBoxLegends = 2;
-            maxNonBoxLegends = 2;
-        }
-        else
-        {
-            maxBoxLegends = 1;
-            maxNonBoxLegends = 2;
-        }
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        maxBoxLegends = 6;
-        maxNonBoxLegends = 6;
-        break;
     }
 
     if(scratch->speciesBuffer != NULL)
@@ -3670,113 +3281,8 @@ static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch)
 
 static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monIdx, u8 totalMonCount)
 {
-    bool8 preferCompetitive = FALSE;
-    u8 difficultyLevel = Rogue_GetCurrentDifficulty();
-    u8 difficultyModifier = Rogue_GetEncounterDifficultyModifier();
-    bool8 isFirstMon = (monIdx == 0);
-    bool8 isLastMon = (monIdx == (totalMonCount - 1));
-
-    //if(sTrainerScratch->monGenerator.generatorFlags & TRAINER_GENERATOR_FLAG_MIRROR_EXACT)
-    //{
-    //    // Exact mirror force competitive set and we'll override it later
-    //    return TRUE;
-    //}
-
-    // Frontier Brains always use their competitive identities, including the
-    // first adventure path where Average normally disables competitive sets.
-    if(Rogue_IsMiniBossTrainer(scratch->trainerNum))
-        return TRUE;
-
-    if(gRogueAdvPath.currentRoomType == ADVPATH_ROOM_LEGENDARY || difficultyModifier == ADVPATH_SUBROOM_ROUTE_TOUGH)
-    {
-        // For regular trainers, Last and first mon can have competitive sets
-        preferCompetitive = (isFirstMon || isLastMon);
-    }
-
-#ifdef ROGUE_FEATURE_AUTOMATION
-    if(Rogue_AutomationGetFlag(AUTO_FLAG_TRAINER_FORCE_COMP_MOVESETS))
-    {
-        return TRUE;
-    }
-#endif
-
-    if(Rogue_IsBattleSimTrainer(scratch->trainerNum))
-    {
-        // All mons are competitive
-        return TRUE;
-    }
-
-    if(Rogue_GetModeRules()->forceEndGameTrainers)
-    {
-        return Rogue_IsKeyTrainer(scratch->trainerNum);
-    }
-
-    switch (Rogue_GetConfigRange(CONFIG_RANGE_TRAINER))
-    {
-    // Easy is going to attempt to use comp sets BUT we're going to modify the sets before appling them to make them fairer
-    case DIFFICULTY_LEVEL_EASY:
-        if(difficultyLevel == 0)
-            return FALSE;
-        else if(preferCompetitive)
-            return TRUE;
-        else if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-                return isFirstMon || isLastMon;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                return isLastMon;
-            else
-                return FALSE;
-        }
-        else
-            return FALSE;
-        break;
-
-    case DIFFICULTY_LEVEL_AVERAGE:
-        if(difficultyLevel == 0)
-            return FALSE;
-        else if(preferCompetitive)
-            return TRUE;
-        else if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-                return TRUE;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                return !isFirstMon;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                return isFirstMon || isLastMon;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                return isLastMon;
-            else
-                return FALSE;
-        }
-        else
-            return FALSE;
-        break;
-
-    case DIFFICULTY_LEVEL_HARD:
-        if(preferCompetitive)
-            return TRUE;
-        else if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY + 2)
-                return TRUE;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY)
-                return !isFirstMon;
-            else if(Rogue_GetCurrentDifficulty() >= ROGUE_GYM_START_DIFFICULTY + 2)
-                return isFirstMon || isLastMon;
-            else
-                return isLastMon;
-        }
-        else
-            return FALSE;
-        break;
-
-    case DIFFICULTY_LEVEL_BRUTAL:
-        return TRUE;
-    }
-
-    return FALSE;
+    // Adventure profiles are applied after ordering, once the ace is known.
+    return Rogue_IsBattleSimTrainer(scratch->trainerNum);
 }
 
 static bool8 HasDamagingMove(struct RoguePokemonCompetitiveSet const* preset)
@@ -3796,12 +3302,7 @@ static bool8 HasDamagingMove(struct RoguePokemonCompetitiveSet const* preset)
 
 static bool8 ShouldBoostBattleGimickItems(struct TrainerPartyScratch* scratch)
 {
-    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) == DIFFICULTY_LEVEL_BRUTAL)
-        return TRUE;
-    else if(Rogue_IsKeyTrainer(scratch->trainerNum))
-        return TRUE;
-    else
-        return FALSE;
+    return Rogue_IsKeyTrainer(scratch->trainerNum);
 }
 
 static bool8 SelectNextPreset(struct TrainerPartyScratch* scratch, u16 species, u8 monIdx, struct RoguePokemonCompetitiveSet* outPreset)
@@ -4217,53 +3718,6 @@ static void ModifyTrainerMonPreset(u16 trainerNum, struct Pokemon* mon, struct R
         presetRules->allowMissingMoves = TRUE;
 #endif
 
-    // For battle sim, we're not going to adjust anything
-    if(Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) == DIFFICULTY_LEVEL_EASY && !Rogue_IsBattleSimTrainer(trainerNum))
-    {
-        u8 i, j;
-        u8 dmgMoveCount = 0;
-        u16 originalPresetMoves[MAX_MON_MOVES];
-        memcpy(originalPresetMoves, preset->moves, sizeof(originalPresetMoves));
-
-        // Don't apply any abilities
-        presetRules->skipAbility = TRUE;
-
-        // Populate the preset with the current moves we know
-        for(i = 0; i < MAX_MON_MOVES; ++i)
-        {
-            preset->moves[i] = GetMonData(mon, MON_DATA_MOVE1 + i);
-
-            if(gBattleMoves[preset->moves[i]].power == 0)
-                ++dmgMoveCount;
-        }
-
-        // Attempt to give 3 damaging moves (prefer moves from level up moves)
-        for(i = 0; i < MAX_MON_MOVES && dmgMoveCount < 3; ++i)
-        {
-            if(gBattleMoves[preset->moves[i]].power == 0)
-            {
-                // Try to find a move to replace this move with
-                for(j = 0; j < MAX_MON_MOVES; ++j)
-                {
-                    if(gBattleMoves[originalPresetMoves[j]].power != 0 && !MonPresetContainsMove(preset, originalPresetMoves[j]))
-                        break;
-                }
-
-                if(j < MAX_MON_MOVES)
-                {
-                    preset->moves[i] = originalPresetMoves[j];
-                    ++dmgMoveCount;
-                }
-                else
-                {
-                    // No valid moved remaining :(
-                    break;
-                }
-            }
-        }
-
-    }
-
     if(!ShouldTrainerUseValidHeldItems(trainerNum, IsGimmickItem(preset->heldItem)))
         presetRules->skipHeldItem = TRUE;
 
@@ -4359,6 +3813,78 @@ static void SwapMons(u8 aIdx, u8 bIdx, struct Pokemon *party)
 }
 
 // + go to the front - go to the back
+static void ApplyAscensionProfile(u16 trainerNum, struct Pokemon *mon, struct RoguePokemonCompetitiveSet *preset, bool8 boss, bool8 ace)
+{
+    struct RogueAscensionRules rules;
+    struct RoguePokemonCompetitiveSetRules gates = {0};
+    RogueAscension_Resolve(Rogue_GetAscension(), &rules);
+    ModifyTrainerMonPreset(trainerNum, mon, preset, &gates);
+    gates.skipMoves = !RogueAscension_Applies(rules.moves, boss, ace);
+    gates.skipAbility = gates.skipMoves;
+    gates.skipNature = !RogueAscension_Applies(rules.natures, boss, ace);
+    gates.skipHeldItem = IsGimmickItem(preset->heldItem)
+        ? !ShouldTrainerUseValidHeldItems(trainerNum, TRUE)
+        : !RogueAscension_Applies(rules.items, boss, ace);
+    gates.skipHiddenPowerType = TRUE;
+    Rogue_ApplyMonCompetitiveSet(mon, GetMonData(mon, MON_DATA_LEVEL), preset, &gates);
+}
+
+#if TESTING
+void RogueTest_ApplyAscensionProfile(u16 trainerNum, struct Pokemon *mon, const struct RoguePokemonCompetitiveSet *preset, bool8 boss, bool8 ace)
+{
+    struct RoguePokemonCompetitiveSet copy = *preset;
+    ApplyAscensionProfile(trainerNum, mon, &copy, boss, ace);
+}
+#endif
+
+static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCount)
+{
+    struct RogueAscensionRules rules;
+    struct TrainerPartyScratch scratch;
+    bool8 boss = Rogue_IsKeyTrainer(trainerNum);
+    u8 i, stat;
+    u16 level = GetTrainerLevel(trainerNum);
+    if (Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL) return;
+    RogueAscension_Resolve(Rogue_GetAscension(), &rules);
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.trainerNum = trainerNum;
+    scratch.party = party;
+    scratch.partyCapacity = monCount;
+    scratch.targetPartyCount = monCount;
+    scratch.evoLevel = level;
+    ConfigurePartyScratchSettings(trainerNum, &scratch);
+    for (i = 0; i < monCount; ++i)
+    {
+        struct RoguePokemonCompetitiveSet preset;
+        struct TrainerHeldItemScratch heldBefore = scratch.heldItems;
+        bool8 ace = boss && i == monCount - 1;
+        u8 iv = RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), boss, ace);
+        u8 zero = 0;
+        scratch.partyCount = i;
+        if (SelectNextPreset(&scratch, GetMonData(&party[i], MON_DATA_SPECIES), i, &preset))
+        {
+            ApplyAscensionProfile(trainerNum, &party[i], &preset, boss, ace);
+            if (GetMonData(&party[i], MON_DATA_HELD_ITEM) == ITEM_NONE)
+                scratch.heldItems = heldBefore;
+        }
+        else
+            DebugPrintf("[Ascension] No profile for species %d", GetMonData(&party[i], MON_DATA_SPECIES));
+        for (stat = 0; stat < NUM_STATS; ++stat)
+        {
+            SetMonData(&party[i], MON_DATA_HP_IV + stat, &iv);
+            SetMonData(&party[i], MON_DATA_HP_EV + stat, &zero);
+        }
+        CalculateMonStats(&party[i]);
+    }
+}
+
+#if TESTING
+void RogueTest_ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 count)
+{
+    ApplyAscensionParty(trainerNum, party, count);
+}
+#endif
+
 s16 CalulcateMonSortScore(u16 trainerNum, struct Pokemon* mon)
 {
     s16 score = 0;
@@ -4543,7 +4069,7 @@ static void ReorderPartyMons(u16 trainerNum, struct Pokemon *party, u8 monCount)
 
     if(Rogue_IsKeyTrainer(trainerNum))
     {
-        if(!(Rogue_GetModeRules()->forceEndGameTrainers) && Rogue_GetConfigRange(CONFIG_RANGE_TRAINER) < DIFFICULTY_LEVEL_HARD && Rogue_GetCurrentDifficulty() < 8)
+        if(!(Rogue_GetModeRules()->forceEndGameTrainers) && Rogue_GetCurrentDifficulty() < 8)
         {
             // Prior to E4 we don't want to force forward the best lead mon
             // We just want to push final mons to the back

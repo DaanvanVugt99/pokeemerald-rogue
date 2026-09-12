@@ -170,8 +170,8 @@ script Rogue_Debug_TrainerSingle
 script Rogue_Debug_DisplayDifficultyConfigMenu
 {
     lock
-    msgbox(format("Difficulty menu"))
-    special(Special_ViewDifficultyConfigMenu)
+    msgbox(format("Adventure setup"))
+    special(Special_ViewAdventureSetup)
     waitstate
     //msgbox(format("closed")) <- this gets ignored?
     release
