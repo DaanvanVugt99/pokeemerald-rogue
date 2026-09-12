@@ -233,3 +233,9 @@ const u16 gMetatileAttributes_CaveAlt[] = INCBIN_U16("data/tilesets/secondary/ca
 
 const u16 gMetatiles_AdventurePaths[] = INCBIN_U16("data/tilesets/secondary/adventure_paths/metatiles.bin");
 const u16 gMetatileAttributes_AdventurePaths[] = INCBIN_U16("data/tilesets/secondary/adventure_paths/metatile_attributes.bin");
+
+const u16 gMetatiles_PortalRoom[] = INCBIN_U16("data/tilesets/primary/portal_room/metatiles.bin");
+const u16 gMetatileAttributes_PortalRoom[] = INCBIN_U16("data/tilesets/primary/portal_room/metatile_attributes.bin");
+
+const u16 gMetatiles_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatiles.bin");
+const u16 gMetatileAttributes_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatile_attributes.bin");

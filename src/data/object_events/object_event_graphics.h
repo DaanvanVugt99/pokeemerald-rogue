@@ -890,6 +890,7 @@ const u16 gObjectEventPal_MachinePart[] = INCBIN_U16("graphics/object_events/pal
 
 const u32 gObjectEventPic_PC[] = INCBIN_U32("graphics/object_events/pics/rogue/pc.4bpp");
 const u32 gObjectEventPic_PCStand[] = INCBIN_U32("graphics/object_events/pics/rogue/pc_stand.4bpp");
+const u32 gObjectEventPic_AdventureConsole[] = INCBIN_U32("graphics/object_events/pics/rogue/adventure_console.4bpp");
 const u32 gObjectEventPic_BattleStatue[] = INCBIN_U32("graphics/object_events/pics/rogue/battle_statue.4bpp");
 const u32 gObjectEventPic_PhoneBooth[] = INCBIN_U32("graphics/object_events/pics/rogue/phone_booth.4bpp");
 const u32 gObjectEventPic_PokeblockMixer[] = INCBIN_U32("graphics/object_events/pics/rogue/pokeblock_mixer.4bpp");

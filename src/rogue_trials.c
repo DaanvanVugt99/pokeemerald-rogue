@@ -2342,6 +2342,9 @@ void RogueTrial_OnTrainerBattleEnd(void)
 void RogueTrial_AppendTrialOptions(void)
 {
     u8 i;
+    static const u8 sText_NoTrial[] = _("None");
+
+    ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_NoTrial, ROGUE_TRIAL_NONE);
 
     if (HasTrialInMenuGroup(ROGUE_TRIAL_MENU_GROUP_TYPE))
         ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_TypeTrials, ROGUE_TRIAL_MENU_GROUP_TYPE);

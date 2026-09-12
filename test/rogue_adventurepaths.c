@@ -4,6 +4,8 @@
 #include "constants/event_objects.h"
 #include "constants/flags.h"
 #include "constants/layouts.h"
+#include "constants/portal_room_tiles.h"
+#include "constants/rogue_hub.h"
 #include "constants/map_types.h"
 #include "constants/metatile_labels.h"
 #include "constants/metatile_behaviors.h"
@@ -13,6 +15,7 @@
 #include "event_data.h"
 #include "fieldmap.h"
 #include "item.h"
+#include "load_save.h"
 #include "malloc.h"
 #include "pokemon.h"
 #include "random.h"
@@ -1203,4 +1206,147 @@ TEST("Claimed Item Room schedule slots cannot grant their reward twice")
         FlagSet(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
     else
         FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+}
+
+TEST("Portal room: all connection masks retain interior tiles and the departure route")
+{
+    const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE), MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE));
+    struct MapHeader oldHeader = gMapHeader;
+    struct BackupMapLayout oldBackup = gBackupMapLayout;
+    struct RogueHubMap *oldHub = Alloc(sizeof(*oldHub));
+    u16 *grid = Alloc((20 + MAP_OFFSET_W) * (16 + MAP_OFFSET_H) * sizeof(u16));
+    u8 mask, upgrade, x, y;
+    EXPECT(oldHub != NULL && grid != NULL);
+    if (oldHub == NULL || grid == NULL)
+    {
+        Free(oldHub); Free(grid); return;
+    }
+    *oldHub = gRogueSaveBlock->hubMap;
+    gMapHeader = *header;
+    gBackupMapLayout.width = 20 + MAP_OFFSET_W;
+    gBackupMapLayout.height = 16 + MAP_OFFSET_H;
+    gBackupMapLayout.map = grid;
+    for (mask = 0; mask < 8; ++mask)
+    {
+        memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
+        RogueHub_BuildArea(HUB_AREA_ADVENTURE_ENTRANCE, 0, 0);
+        if (mask & 1) RogueHub_BuildArea(HUB_AREA_LABS, -1, 0);
+        if (mask & 2) RogueHub_BuildArea(HUB_AREA_TOWN_SQUARE, 0, -1);
+        if (mask & 4) RogueHub_BuildArea(HUB_AREA_MARTS, 1, 0);
+        for (upgrade = 0; upgrade < 2; ++upgrade)
+        {
+            RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, upgrade);
+            for (y = 0; y < 16; ++y)
+                for (x = 0; x < 20; ++x)
+                    grid[(y + MAP_OFFSET) * gBackupMapLayout.width + x + MAP_OFFSET] = header->mapLayout->map[y * 20 + x];
+            RogueHub_ApplyMapMetatiles();
+            EXPECT_EQ(!!MapGridIsImpassableAt(MAP_OFFSET, 11 + MAP_OFFSET), !(mask & 1));
+            EXPECT_EQ(!!MapGridIsImpassableAt(MAP_OFFSET, 10 + MAP_OFFSET), !(mask & 1));
+            EXPECT(MapGridIsImpassableAt(MAP_OFFSET, 13 + MAP_OFFSET));
+            EXPECT_EQ(!!MapGridIsImpassableAt(9 + MAP_OFFSET, 15 + MAP_OFFSET), !(mask & 2));
+            EXPECT_EQ(!!MapGridIsImpassableAt(19 + MAP_OFFSET, 11 + MAP_OFFSET), !(mask & 4));
+            EXPECT_EQ(!!MapGridIsImpassableAt(19 + MAP_OFFSET, 10 + MAP_OFFSET), !(mask & 4));
+            EXPECT(MapGridIsImpassableAt(19 + MAP_OFFSET, 13 + MAP_OFFSET));
+            for (x = 0; x < 2; ++x)
+            {
+                if (mask & (x == 0 ? 1 : 4))
+                {
+                    struct WarpEvent upper = header->events->warps[7 + x];
+                    struct WarpEvent normal = header->events->warps[x == 0 ? 0 : 4];
+                    RogueHub_ModifyMapWarpEvent(&gMapHeader, 7 + x, &upper);
+                    RogueHub_ModifyMapWarpEvent(&gMapHeader, x == 0 ? 0 : 4, &normal);
+                    EXPECT_EQ(upper.mapGroup, normal.mapGroup);
+                    EXPECT_EQ(upper.mapNum, normal.mapNum);
+                    EXPECT_EQ(upper.warpId, normal.warpId);
+                }
+            }
+            EXPECT_EQ(!!MapGridIsImpassableAt(8 + MAP_OFFSET, 15 + MAP_OFFSET), !(mask & 2));
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(8 + MAP_OFFSET, 15 + MAP_OFFSET), mask & 2 ? MB_SOUTH_ARROW_WARP : MB_NORMAL);
+            if (mask & 2)
+            {
+                struct WarpEvent added = header->events->warps[9];
+                struct WarpEvent normal = header->events->warps[2];
+                RogueHub_ModifyMapWarpEvent(&gMapHeader, 9, &added);
+                RogueHub_ModifyMapWarpEvent(&gMapHeader, 2, &normal);
+                EXPECT_EQ(added.mapGroup, normal.mapGroup);
+                EXPECT_EQ(added.mapNum, normal.mapNum);
+                EXPECT_EQ(added.warpId, normal.warpId);
+            }
+            for (x = 4; x <= 15; ++x)
+                if (x < 7 || x > 11 || !(mask & 2))
+                {
+                    EXPECT(MapGridIsImpassableAt(x + MAP_OFFSET, 13 + MAP_OFFSET));
+                    EXPECT_EQ(MapGridGetMetatileIdAt(x + MAP_OFFSET, 13 + MAP_OFFSET), METATILE_PortalRoom_Void);
+                }
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(MAP_OFFSET, 11 + MAP_OFFSET), mask & 1 ? MB_WEST_ARROW_WARP : MB_NORMAL);
+            for (y = 4; y <= 7; ++y) EXPECT(!MapGridIsImpassableAt(11 + MAP_OFFSET, y + MAP_OFFSET));
+            for (x = 9; x <= 11; ++x)
+            {
+                EXPECT(!MapGridIsImpassableAt(x + MAP_OFFSET, 7 + MAP_OFFSET));
+                EXPECT(!MapGridIsImpassableAt(x + MAP_OFFSET, 4 + MAP_OFFSET));
+            }
+            EXPECT(!MapGridIsImpassableAt(9 + MAP_OFFSET, 3 + MAP_OFFSET));
+            EXPECT(MapGridIsImpassableAt(9 + MAP_OFFSET, 5 + MAP_OFFSET));
+            EXPECT_EQ(MapGridGetMetatileIdAt(9 + MAP_OFFSET, 7 + MAP_OFFSET), METATILE_PortalRoom_Lane);
+            EXPECT_EQ(MapGridGetMetatileIdAt(10 + MAP_OFFSET, 6 + MAP_OFFSET), METATILE_PortalRoom_ControlBase);
+            if (!(mask & 1))
+                for (y = 8; y <= 13; ++y) EXPECT_EQ(MapGridGetMetatileIdAt(2 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+            if (!(mask & 4))
+                for (y = 8; y <= 13; ++y) EXPECT_EQ(MapGridGetMetatileIdAt(16 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+        }
+    }
+    EXPECT_EQ(header->mapType, MAP_TYPE_INDOOR);
+    EXPECT_EQ(header->events->warps[6].x, 9);
+    EXPECT_EQ(header->events->warps[6].y, 7);
+    gRogueSaveBlock->hubMap = *oldHub;
+    gMapHeader = oldHeader;
+    gBackupMapLayout = oldBackup;
+    Free(grid); Free(oldHub);
+}
+
+TEST("Portal room: stale service positions trigger a real continue warp even when counts match")
+{
+    struct MapHeader header = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE), MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE));
+    struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
+    struct WarpData oldWarp = gSaveBlock1Ptr->continueGameWarp;
+    bool8 oldStatus = UseContinueGameWarp();
+    bool8 oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 count = header.events->objectEventCount;
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    objects[0].x = 9;
+    objects[0].y = 6;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapGroup, MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE));
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE));
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 9);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 7);
+
+    // Extra follower templates do not make a current service layout stale.
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    memset(&objects[count], 0, sizeof(*objects));
+    objects[count++].localId = 50;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+
+    // Replay staff also moved; an otherwise-current snapshot must refresh them.
+    objects[7].x = 15;
+    objects[7].y = 12;
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    objects[7] = header.events->objectEvents[7];
+    ClearContinueGameWarpStatus();
+
+    // An old snapshot without the console still needs rebuilding.
+    objects[10].localId = 51;
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+
+    gSaveBlock1Ptr->continueGameWarp = oldWarp;
+    if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
+    if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }

@@ -935,3 +935,25 @@ const struct Tileset gTileset_AdventurePaths =
     .metatileAttributes = gMetatileAttributes_AdventurePaths,
     .callback = InitTilesetAnim_AdventurePaths,
 };
+
+const struct Tileset gTileset_PortalRoom =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_PortalRoom,
+    .palettes = gTilesetPalettes_PortalRoom,
+    .metatiles = gMetatiles_PortalRoom,
+    .metatileAttributes = gMetatileAttributes_PortalRoom,
+    .callback = NULL,
+};
+
+const struct Tileset gTileset_PortalRoomGate =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_PortalRoomGate,
+    .palettes = gTilesetPalettes_PortalRoom,
+    .metatiles = gMetatiles_PortalRoomGate,
+    .metatileAttributes = gMetatileAttributes_PortalRoomGate,
+    .callback = InitTilesetAnim_PortalRoom,
+};

@@ -290,13 +290,11 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
         msgbox(format("Hi {PLAYER}!\pIt looks like you're almost ready to set off on an Adventure!\pBefore you set off, please take this."))
 
         giveitem(ITEM_QUEST_LOG)
-        msgbox(format("You can use that Quest Book to track Quests and Trials to complete during Adventures.\pIf you would please make your way over to the Quest Board to your left, there should be some initial Quests to get you started!"))
+        msgbox(format("You can use that Quest Book to track Quests and Trials to complete during Adventures.\pIf you would please check the Quest Board beside me, there should be some initial Quests to get you started!"))
 
         closemessage
         playbgm(MUS_RG_FOLLOW_ME, FALSE)
 
-        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_QuestTutorial_Player1)
-        waitmovement(0)
 
         msgbox(format("The board has some Quests posted on it!"))
         fadedefaultbgm()
@@ -332,7 +330,7 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
             }
         }
 
-        call(Rogue_Area_AdventureEntrance_StandardRunReview)
+        msgbox(format("Use the Adventure Console in front of the gateway when you are ready.\pIt can prepare an Adventure and send you through the portal."))
     }
 
     releaseall
@@ -347,77 +345,68 @@ script Rogue_Area_AdventureEntrance_IntroduceAscension
     }
 }
 
-script Rogue_Area_AdventureEntrance_StandardRunReview
+script Rogue_Area_AdventureEntrance_AdventureConsole
 {
-    call(Rogue_Area_AdventureEntrance_IntroduceAscension)
-    call(Rogue_ResetAdventureVars)
-    callnative(RogueRunStart_PrepareStandard)
-    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-    while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+    lockall
+    if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
     {
-        closemessage
-        special(Special_ViewAdventureSetup)
-        waitstate
-        if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
+        msgbox(format("ADVENTURE CONSOLE\pPlease speak to the nurse and complete your preparations first."))
+    }
+    elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
+    {
+        msgbox(format("The builder is waiting in the Town Square.\pVisit him before your next Adventure."))
+    }
+    else
+    {
+        call(Rogue_Area_AdventureEntrance_IntroduceAscension)
+        call(Rogue_ResetAdventureVars)
+        callnative(RogueRunStart_PrepareStandard)
+        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+        while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
         {
-            callnative(RogueRunStart_Clear)
-            return
-        }
-        callnative(RogueRunStart_Commit)
-        if(var(VAR_RESULT) == YES)
-        {
-            call(Rogue_StartAdventureInternal)
-            if(var(VAR_RUN_START_OUTCOME) != RUN_START_OUTCOME_RETRY)
+            closemessage
+            special(Special_ViewAdventureSetup)
+            waitstate
+            if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
             {
-                callnative(RogueRunStart_Clear)
-                return
+                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+            }
+            elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_CHOOSE_TRIAL)
+            {
+                call(Rogue_Area_AdventureEntrance_SelectConsoleTrial)
+            }
+            else
+            {
+                callnative(RogueRunStart_Commit)
+                if(var(VAR_RESULT) == YES)
+                {
+                    call(Rogue_StartAdventureInternal)
+                    if(var(VAR_RUN_START_OUTCOME) != RUN_START_OUTCOME_RETRY)
+                    {
+                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
+                    }
+                }
             }
         }
+        callnative(RogueRunStart_Clear)
     }
+    releaseall
 }
 
 script Rogue_Area_AdventureEntrance_TrialAttendant
 {
-    lockall
+    lock
     faceplayer
-    setvar(VAR_RUN_START_TEAM_PREFERENCE, RUN_START_TEAM_SOURCE_CURRENT_PARTY)
+    msgbox(format("Trials change the rules of an Adventure.\pChoose a Trial at the Adventure Console in front of the portal.\pThe console shows its setup and checks your team before departure. Select None to return to a regular Adventure."))
+    release
+}
 
-    special(RogueTrial_CanUseAttendant)
-    if(var(VAR_RESULT) == NO)
-    {
-        if(flag(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE))
-        {
-            msgbox(format("Trial runs can't be started while Adventure Replay is active.\pLower the Replay flag first."), MSGBOX_DEFAULT)
-        }
-        else
-        {
-            msgbox(format("Trial runs aren't available in multiplayer yet."), MSGBOX_DEFAULT)
-        }
-
-        releaseall
-        return
-    }
-
-    special(RogueTrial_HasAvailableTrials)
-    if(var(VAR_RESULT) == NO)
-    {
-        msgbox(format("No Trial runs are configured yet."), MSGBOX_DEFAULT)
-        releaseall
-        return
-    }
-
-    call(Rogue_Area_AdventureEntrance_IntroduceAscension)
-    special(RogueTrial_LoadLastSelection)
-    if(var(VAR_RESULT) == YES)
-    {
-        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-    }
-    else
-    {
-        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
-    }
-
-    while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+script Rogue_Area_AdventureEntrance_SelectConsoleTrial
+{
+    callnative(RogueRunStart_CanChooseTrialFromScript)
+    if(var(VAR_RESULT) == NO) { return }
+    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
+    while(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_REVIEW)
     {
         if(var(VAR_RUN_REVIEW_STAGE) == TRIAL_SETUP_STAGE_TRIAL)
         {
@@ -429,8 +418,14 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 enddynamicmultichoice(1, 0, 4, TRUE)
                 if(var(VAR_RESULT) == MULTI_B_PRESSED)
                 {
-                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
-                    break
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                    return
+                }
+                if(var(VAR_RESULT) == 0)
+                {
+                    callnative(RogueRunStart_PrepareStandard)
+                    setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
+                    return
                 }
                 copyvar(VAR_0x8004, VAR_RESULT)
                 copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
@@ -453,7 +448,7 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 }
             }
 
-            if(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_EXIT)
+            if(var(VAR_RUN_REVIEW_STAGE) != TRIAL_SETUP_STAGE_REVIEW)
             {
                 special(RogueTrial_SelectFixedAscension)
                 if(var(VAR_RESULT) == YES)
@@ -523,55 +518,8 @@ script Rogue_Area_AdventureEntrance_TrialAttendant
                 }
             }
         }
-        else
-        {
-            callnative(RogueRunStart_PrepareTrial)
-            copyvar(VAR_0x8007, VAR_RUN_START_TEAM_PREFERENCE)
-            callnative(RogueRunStart_SetPreferredTeamSource)
-            closemessage
-            special(Special_ViewAdventureSetup)
-            waitstate
-
-            if(var(VAR_RESULT) == RUN_REVIEW_ACTION_BACK)
-            {
-                callnative(RogueRunStart_Clear)
-                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
-            }
-            elif(var(VAR_RESULT) == RUN_REVIEW_ACTION_CHOOSE_TRIAL)
-            {
-                callnative(RogueRunStart_GetPreferredTeamSource)
-                copyvar(VAR_RUN_START_TEAM_PREFERENCE, VAR_RESULT)
-                callnative(RogueRunStart_Clear)
-                setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_TRIAL)
-            }
-            else
-            {
-                callnative(RogueRunStart_Commit)
-                if(var(VAR_RESULT) == YES)
-                {
-                    call(Rogue_ResetAdventureVars)
-                    call(Rogue_StartAdventureInternal)
-                    if(var(VAR_RUN_START_OUTCOME) == RUN_START_OUTCOME_RETRY)
-                    {
-                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_REVIEW)
-                    }
-                    else
-                    {
-                        callnative(RogueRunStart_Clear)
-                        setvar(VAR_RUN_REVIEW_STAGE, TRIAL_SETUP_STAGE_EXIT)
-                    }
-                }
-            }
-        }
     }
-
-    releaseall
-}
-
-movement Rogue_Adventure_QuestTutorial_Player1
-{
-    walk_left * 5
-    face_up
+    callnative(RogueRunStart_PrepareTrial)
 }
 
 script Rogue_ResetAdventureVars
@@ -584,6 +532,8 @@ script Rogue_ResetAdventureVars
 script Rogue_StartAdventureInternal
 {
     setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_EXIT)
+    callnative(RogueRunStart_CheckConsolePosition)
+    if(var(VAR_RESULT) == NO) { return }
 
     special(Rogue_IsMultiplayerClient)
     if(var(VAR_RESULT) == YES)
@@ -691,64 +641,17 @@ script Rogue_StartAdventureInternal
     call(Common_EventScript_SaveGame)
     if(var(VAR_RESULT) == YES)
     {
+        // Saving leaves its confirmation visible; close it before preparation or movement.
+        closemessage
         special(Rogue_PrepareFollowerForRunStart)
-
-        if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
-        {
-            addvar(VAR_ROGUE_INTRO_STATE, 1)
-        }
 
         special(Rogue_SeedRandomGenerators)
 
         setvar(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE)
 
-        special(RogueTrial_PendingReplacesStartingParty)
-        if(var(VAR_RESULT) == YES)
+        special(RogueTrial_PendingHasFixedStartingParty)
+        if(var(VAR_RESULT) == NO && var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
-            applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-
-            special(RogueTrial_PendingHasFixedStartingParty)
-            if(var(VAR_RESULT) == YES)
-            {
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayer)
-                waitmovement(0)
-            }
-            else
-            {
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
-                waitmovement(0)
-
-                special(ChooseStarter)
-                setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-                waitstate
-                clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-
-                if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
-                {
-                    call(Rogue_Adventure_CancelStarterSelection)
-                    return
-                }
-
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
-                waitmovement(0)
-            }
-        }
-        elif(var(VAR_ALLOW_STARTER_CHOICE) == YES)
-        {
-            special(RogueTrial_HasPendingSelection)
-            if(var(VAR_RESULT) == YES)
-            {
-                applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerTrialStarter)
-                waitmovement(0)
-            }
-            else
-            {
-                applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_WalkNurse)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter)
-                waitmovement(0)
-            }
-
             if(var(VAR_TRIAL_MENU_CHOICE) == YES)
             {
                 setvar(VAR_RESULT, YES)
@@ -758,38 +661,17 @@ script Rogue_StartAdventureInternal
                 msgbox(format("Take a random Partner Pokémon?"), MSGBOX_YESNO)
             }
             closemessage
-
             if(var(VAR_RESULT) == YES)
             {
                 special(ChooseStarter)
                 setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
                 waitstate
                 clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-
                 if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
                 {
                     call(Rogue_Adventure_CancelStarterSelection)
                     return
                 }
-            }
-
-            applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayerStarter1)
-            waitmovement(0)
-        }
-        else
-        {
-            special(RogueTrial_HasPendingSelection)
-            if(var(VAR_RESULT) == YES)
-            {
-                applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_WalkTrialAttendant)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayer)
-                waitmovement(0)
-            }
-            else
-            {
-                applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_WalkNurse)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkPlayer)
-                waitmovement(0)
             }
         }
 
@@ -820,9 +702,16 @@ script Rogue_StartAdventureInternal
             return
         }
 
-        special(RogueTrial_RecordInitialParty)
+        if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
+        {
+            addvar(VAR_ROGUE_INTRO_STATE, 1)
+        }
 
-        msgbox(format("Good luck {PLAYER}!"))
+        special(RogueTrial_RecordInitialParty)
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkIntoPortal)
+        waitmovement(0)
+
+        msgbox(format("Destination ready. Good luck, {PLAYER}!"))
         closemessage
 
         setflag(FLAG_ROGUE_LEFT_ON_RUN)
@@ -834,87 +723,21 @@ script Rogue_StartAdventureInternal
     }
     else
     {
-        msgbox(format("OK. Come speak to me once you're ready."), MSGBOX_DEFAULT)
+        msgbox(format("Use the Adventure Console when you are ready."), MSGBOX_DEFAULT)
     }
 }
 
-movement Rogue_Adventure_WalkNurse
+movement Rogue_Adventure_WalkIntoPortal
 {
-    walk_up
-    walk_right
-    face_up
-}
-
-movement Rogue_Adventure_WalkTrialAttendant
-{
-    walk_up
-    walk_right
-    face_up
-}
-
-movement Rogue_Adventure_WalkPlayer
-{
+    walk_right * 2
     walk_up * 3
-}
-
-movement Rogue_Adventure_WalkPlayerStarter
-{
-    walk_up * 2
-    face_left
-}
-
-movement Rogue_Adventure_WalkPlayerTrialStarter
-{
-    walk_up * 2
-    walk_left
-}
-
-movement Rogue_Adventure_WalkPlayerStarter1
-{
+    walk_left * 2
     walk_up
-}
-
-movement Rogue_Adventure_ReturnGateNpc
-{
-    walk_left
-    walk_down
-    face_down
-}
-
-movement Rogue_Adventure_ReturnPlayerFromStarter
-{
-    walk_down * 2
-    face_up
-}
-
-movement Rogue_Adventure_ReturnPlayerFromTrialStarter
-{
-    walk_right
-    walk_down * 2
-    face_up
-}
-
-movement Rogue_Adventure_ReturnPlayerFromGate
-{
-    walk_down * 3
-    face_up
 }
 
 script Rogue_Adventure_CancelStarterSelection
 {
-    special(RogueTrial_HasPendingSelection)
-    if(var(VAR_RESULT) == YES)
-    {
-        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromTrialStarter)
-        applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_ReturnGateNpc)
-    }
-    else
-    {
-        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromStarter)
-        applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_ReturnGateNpc)
-    }
-
-    waitmovement(0)
+    // Preparation happens at the console, so there is no gate movement to undo.
     if(var(VAR_RUN_START_USES_TEAM_CHOICE) == YES)
     {
         setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
@@ -924,20 +747,31 @@ script Rogue_Adventure_CancelStarterSelection
 
 script Rogue_Adventure_CancelRunStartAfterGate
 {
-    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnPlayerFromGate)
-
-    special(RogueTrial_HasPendingSelection)
-    if(var(VAR_RESULT) == YES)
-    {
-        applymovement(OBJ_EVENT_TRIAL_ATTENDANT, Rogue_Adventure_ReturnGateNpc)
-    }
-    else
-    {
-        applymovement(OBJ_EVENT_ADVENTURE_NURSE, Rogue_Adventure_ReturnGateNpc)
-    }
-
-    waitmovement(0)
+    // Kept as a shared failure target; departure has not started yet.
+    setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
     return
+}
+
+script Rogue_Area_AdventureEntrance_PortalInfo
+{
+    lockall
+    msgbox(format("The research gateway is online.\pUse the Adventure Console to set your destination and begin an Adventure."))
+    releaseall
+}
+
+script Rogue_Area_AdventureEntrance_PortalStep
+{
+    lockall
+    msgbox(format("Use the Adventure Console in front of the gateway to begin an Adventure."))
+    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_StepAwayFromPortal)
+    waitmovement(0)
+    releaseall
+}
+
+movement Rogue_Adventure_StepAwayFromPortal
+{
+    walk_down
+    face_up
 }
 
 script Rogue_ReturnAdventureInternal
@@ -1059,7 +893,7 @@ script Rogue_ReturnAdventureInternal
         }
     }
 
-    msgbox(format("Come speak to me, once you're ready for your next adventure."), MSGBOX_DEFAULT)
+    msgbox(format("Use the Adventure Console when you're ready for your next Adventure."), MSGBOX_DEFAULT)
 
     releaseall
 }

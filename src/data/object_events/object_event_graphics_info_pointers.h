@@ -469,6 +469,7 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Team_Rocket_Proton
 
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PC;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PCStand;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_AdventureConsole;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_BattleStatue;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_GoldLegendaryStatue;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_PhoneBooth;
@@ -1088,6 +1089,7 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
 
     [OBJ_EVENT_GFX_PC] =                       &gObjectEventGraphicsInfo_PC,
     [OBJ_EVENT_GFX_PC_STAND] =                 &gObjectEventGraphicsInfo_PCStand,
+    [OBJ_EVENT_GFX_ADVENTURE_CONSOLE] =         &gObjectEventGraphicsInfo_AdventureConsole,
     [OBJ_EVENT_GFX_BATTLE_STATUE] =            &gObjectEventGraphicsInfo_BattleStatue,
     [OBJ_EVENT_GFX_PHONE_BOOTH] =              &gObjectEventGraphicsInfo_PhoneBooth,
     [OBJ_EVENT_GFX_POKEBLOCK_MIXER] =          &gObjectEventGraphicsInfo_PokeblockMixer,

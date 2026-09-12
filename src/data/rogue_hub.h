@@ -90,7 +90,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
     [HUB_AREA_ADVENTURE_ENTRANCE] = 
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_ADVENTURE_ENTRANCE),
-        .areaName = _("Town Exit"),
+        .areaName = _("Adventure Gate"),
         .descText = gHubAreaDesc_Todo,
         .requiredUpgrades = { HUB_UPGRADE_NONE },
         .connectionWarps = 

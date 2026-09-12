@@ -16,6 +16,12 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Close the save confirmation after saving at the Adventure Console, before
+  preparation and the automatic walk into the portal.
+
+- Rebuild stale Adventure Gate service snapshots on continue, including same-count
+  snapshots with old positions. Enable the continue-warp flag as well as its destination.
+
 - Size the Trial ascension menu for A0-A20 plus Back. Add Choose Trial to setup
   so remembered attempts never prevent selecting another Trial.
 - Preserve Trial replay status through run initialization, retaining the recorded
@@ -24,6 +30,41 @@ Format follows Keep a Changelog loosely:
   suggested higher or lower level is available.
 
 ### Changed
+
+- Center the Adventure Gate walls and south passage on the portal, preserving
+  hand-edited floor markings. Keep the Porymap-authored layout intact when regenerating assets.
+
+- Give the Adventure Console its own dark grey casing and black setup-menu
+  display, match both side devices to its dark grey casing, and describe its position
+  as in front of the gateway.
+
+- Use Galactic HQ-style black-backed lower walls in the Adventure Gate and fade
+  its west/east/south exit floors into shadow to clearly mark hub transitions.
+
+- Compact the Adventure Gate chamber by bringing both side walls inward, reducing
+  open floor area by 25%. Reposition services to fit and reuse the Poke Ball Factory
+  floor markings at the console while retaining hub connection and story routes.
+
+- Group portal-room services by purpose: nearby team storage, a nurse/quest/hub-upgrade
+  area on the left, and paired replay services with Trial guidance on the right.
+  Keep the arrival and story routes clear and refresh moved services on continue.
+
+- Animate the Adventure Gate with contracting purple rings and rotating red arcs
+  around a dark center, replacing the vertical cyan pattern.
+
+- Refine the portal room with a solid black exterior, straight corridor floors,
+  continuous walls at closed exits, and a centered console with matching controls.
+  Match control-base flooring and route departure around the centered equipment.
+
+- Rebuild the Adventure Gate as an underground research portal room, with private
+  facility/cavern tiles, animated gateway, indoor lighting, and sealed unused tunnels.
+  Copy verified Galactic HQ wall, passage and complete machinery assemblies; include
+  inhabited previews and visible corridor-seam checks in the asset generator.
+- Start Adventures and select Trials at a dedicated Adventure Console. Keep the
+  storage PC separate, preserve ordinary settings when switching Trials, and perform
+  preparation before a shared automatic walk into the gateway. The nurse and Trial
+  attendant now guide players to the console. Existing entrance saves reload the room
+  when they lack its new console or retain stale service positions; the save format is unchanged.
 
 - Give Unique Dens a dedicated grey-stone chamber with a muted purple exit,
   retaining the encounter layout and leaving ordinary leafy dens unchanged.

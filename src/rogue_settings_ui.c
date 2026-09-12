@@ -59,8 +59,9 @@ static const u8 sAscensionText56[] = _("Select at least one trainer region.");
 static const u8 sAscensionText57[] = _("Check starting team and requirements.");
 static const u8 sAscensionText58[] = _("Clear the preceding level to unlock.");
 static const u8 sAscensionText59[] = _("Clear an adventure to edit this.");
-static const u8 sChooseTrial[] = _("Choose Trial");
-static const u8 sChooseTrialHelp[] = _("Return to the Trial selection list.");
+static const u8 sNone[] = _("None");
+static const u8 sChooseTrial[] = _("Trial");
+static const u8 sChooseTrialHelp[] = _("Choose a Trial, or None for a normal run.");
 #include "main.h"
 #include "malloc.h"
 #include "menu.h"
@@ -245,7 +246,7 @@ static bool8 SetupRowAvailable(u8 row)
     }
     if (row == ROW_ASCENSION && !RogueAscension_IsRevealed()) return FALSE;
     if (row == ROW_TRIAL)
-        return !sMenu->readOnly && sMenu->entrance && context != NULL && context->source == RUN_START_SOURCE_TRIAL;
+        return !sMenu->readOnly && sMenu->entrance && RogueRunStart_CanChooseTrial();
     if (sMenu->readOnly) return TRUE;
     switch (row)
     {
@@ -343,13 +344,17 @@ static void BuildRows(u8 page)
     sMenu->page = page;
     sMenu->row = sMenu->top = sMenu->rowCount = 0;
     if (page == PAGE_SETUP && sMenu->entrance)
+    {
         sMenu->rows[sMenu->rowCount++] = ROW_DONE;
+        if (SetupRowAvailable(ROW_TRIAL))
+            sMenu->rows[sMenu->rowCount++] = ROW_TRIAL;
+    }
     for (row = 0; row < (page == PAGE_SETUP ? ROW_COUNT : ARRAY_COUNT(sRegions) + 1); ++row)
     {
         bool8 available = page == PAGE_SETUP ? SetupRowAvailable(row)
             : sMenu->readOnly || trial == NULL || (row == 0 ? !trial->hasForcedTrainerOrder
                 : trial->forcedTrainerToggle == ROGUE_TRIAL_NO_TRAINER_TOGGLE && !trial->enableAllRegionalTrainers);
-        if (available && !(page == PAGE_SETUP && sMenu->entrance && row == ROW_DONE))
+        if (available && !(page == PAGE_SETUP && sMenu->entrance && (row == ROW_DONE || row == ROW_TRIAL)))
             sMenu->rows[sMenu->rowCount++] = row;
     }
 }
@@ -411,6 +416,9 @@ static void ValueForRow(u8 row, u8 *text)
         StringCopy(text, sMenu->config.pokedexVariant < POKEDEX_VARIANT_COUNT ? gPokedexVariants[sMenu->config.pokedexVariant].displayName : sAscensionText38); break;
     case ROW_TRAINERS: StringCopy(text, sOrders[sMenu->config.trainerOrder]); break;
     case ROW_ENCOUNTERS: StringCopy(text, sMenu->config.overworldMons ? sAscensionText39 : sAscensionText40); break;
+    case ROW_TRIAL:
+        StringCopy(text, MenuTrial() != NULL ? MenuTrial()->name : sNone);
+        break;
     case ROW_TEAM:
         if (MenuTrial() != NULL && MenuTrial()->fixedStartingPartyCount) StringCopy(text, sTrialTeam);
         else if (MenuTrial() != NULL && MenuTrial()->forceRandomStarter) StringCopy(text, sAscensionText41);
@@ -507,6 +515,8 @@ static void Draw(void)
     {
         u8 count = sMenu->rowCount;
         Print(0, 0, sMenu->readOnly ? sAscensionText47 : sMenu->page == PAGE_TRAINERS ? sAscensionText48 : sAscensionText49, TRUE);
+        if (sMenu->page == PAGE_SETUP && MenuTrial() != NULL)
+            Print(0, 10, MenuTrial()->name, FALSE);
         if (sMenu->row < sMenu->top) sMenu->top = sMenu->row;
         if (sMenu->row >= sMenu->top + 6) sMenu->top = sMenu->row - 5;
         for (i = 0; i < 6 && i + sMenu->top < count; ++i)
@@ -712,7 +722,19 @@ static void Task_Input(u8 taskId)
     else if (row == ROW_TRAINERS) { BuildRows(PAGE_TRAINERS); }
     else if (row == ROW_TRIAL)
     {
-        if (JOY_NEW(A_BUTTON)) CloseMenu(RUN_REVIEW_ACTION_CHOOSE_TRIAL);
+        if (JOY_NEW(A_BUTTON) && RogueRunStart_CanChooseTrial())
+        {
+            if (!TrialAllowsConfig(&sMenu->config) || sMenu->config.trainerRegions == 0)
+            { sMenu->message = sTrialRestriction; Draw(); return; }
+            RogueRunStart_UpdateConfig(&sMenu->config);
+            if (MenuTrial() == NULL)
+            {
+                Rogue_ApplyAdventureConfig(&sMenu->config);
+                memcpy(gRogueSaveBlock->selectedAscension, sMenu->remembered, sizeof(sMenu->remembered));
+                gRogueSaveBlock->selectedAscension[sMenu->config.battleFormat] = sMenu->config.ascension;
+            }
+            CloseMenu(RUN_REVIEW_ACTION_CHOOSE_TRIAL);
+        }
         return;
     }
     else if (row == ROW_DONE)

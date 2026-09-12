@@ -1228,3 +1228,28 @@ static void BlendAnimPalette_BattleDome_FloorLightsNoBlend(u16 timer)
             sSecondaryTilesetAnimCallback = NULL;
     }
 }
+
+// The gate occupies the first 36 secondary tiles; its machinery is static.
+static const u16 sPortalRoomFrame0[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/0.4bpp");
+static const u16 sPortalRoomFrame1[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/1.4bpp");
+static const u16 sPortalRoomFrame2[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/2.4bpp");
+static const u16 sPortalRoomFrame3[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/3.4bpp");
+static const u16 sPortalRoomFrame4[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/4.4bpp");
+static const u16 sPortalRoomFrame5[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/5.4bpp");
+static const u16 sPortalRoomFrame6[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/6.4bpp");
+static const u16 sPortalRoomFrame7[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/7.4bpp");
+static void TilesetAnim_PortalRoom(u16 timer)
+{
+    static const u16 *const frames[] = {sPortalRoomFrame0, sPortalRoomFrame1, sPortalRoomFrame2, sPortalRoomFrame3,
+        sPortalRoomFrame4, sPortalRoomFrame5, sPortalRoomFrame6, sPortalRoomFrame7};
+    if (timer % 8 == 0)
+        AppendTilesetAnimToBuffer(frames[(timer / 8) % ARRAY_COUNT(frames)],
+            (u16 *)(BG_VRAM + TILE_OFFSET_4BPP(NUM_TILES_IN_PRIMARY)), 36 * TILE_SIZE_4BPP);
+}
+
+void InitTilesetAnim_PortalRoom(void)
+{
+    sSecondaryTilesetAnimCounter = 0;
+    sSecondaryTilesetAnimCounterMax = 64;
+    sSecondaryTilesetAnimCallback = TilesetAnim_PortalRoom;
+}

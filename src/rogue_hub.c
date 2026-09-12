@@ -1,4 +1,5 @@
 #include "global.h"
+#include "constants/portal_room_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1006,6 +1007,15 @@ void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct 
 {
     u8 area = GetAreaForLayout(mapHeader->mapLayoutId);
 
+    // The portal room adds upper side lanes and a third south lane.
+    // Keep the original six connection indices and return index unchanged.
+    if (area == HUB_AREA_ADVENTURE_ENTRANCE)
+    {
+        if (warpId == 7) warpId = 0;
+        else if (warpId == 8) warpId = 4;
+        else if (warpId == 9) warpId = 2;
+    }
+
     if(area != HUB_AREA_NONE)
     {
         u8 dir;
@@ -1074,6 +1084,7 @@ void RogueHub_ApplyMapMetatiles()
         RogueHub_UpdateLabsAreaMetatiles();
         break;
     case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateAdventureEntranceAreaMetatiles();
         break;
 
@@ -1212,30 +1223,22 @@ static void RogueHub_UpdateLabsAreaMetatiles()
 
 static void RogueHub_UpdateAdventureEntranceAreaMetatiles()
 {
-    if(RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT))
-        MetatileSet_Tile(10, 6, METATILE_General_Grass | MAPGRID_COLLISION_MASK);
-
-    // Remove connectionss
+    // No outdoor path fixups: these tile IDs belong to the private base tileset.
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(18, 9);
-
-        MetatileFill_CommonPathRemoval(12, 10, 17, 12);
+        MetatileFill_Tile(17, 8, 19, 15, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 8, 16, 13, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
     }
-
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitVertical(8, 14);
-        MetatileFill_TreeCaps(8, 15, 11);
-
-        MetatileFill_CommonPathRemoval(8, 13, 11, 13);
+        MetatileFill_Tile(7, 13, 11, 13, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(7, 14, 11, 14, METATILE_PortalRoom_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(7, 15, 11, 15, METATILE_PortalRoom_WallBase | MAPGRID_COLLISION_MASK);
     }
-
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(0, 9);
-
-        MetatileFill_CommonPathRemoval(2, 10, 7, 12);
+        MetatileFill_Tile(0, 8, 1, 15, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(2, 8, 2, 13, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
     }
 }
 

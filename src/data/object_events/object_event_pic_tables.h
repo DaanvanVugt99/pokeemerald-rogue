@@ -5312,6 +5312,10 @@ static const struct SpriteFrameImage sPicTable_PCStand[] = {
     obj_frame_tiles(gObjectEventPic_PCStand),
 };
 
+static const struct SpriteFrameImage sPicTable_AdventureConsole[] = {
+    obj_frame_tiles(gObjectEventPic_AdventureConsole),
+};
+
 static const struct SpriteFrameImage sPicTable_BattleStatue[] = {
     obj_frame_tiles(gObjectEventPic_BattleStatue),
 };

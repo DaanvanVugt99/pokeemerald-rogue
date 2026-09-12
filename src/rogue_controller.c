@@ -8388,10 +8388,47 @@ static bool8 ShouldAdjustRouteObjectEvents()
     return gRogueAdvPath.currentRoomType == ADVPATH_ROOM_ROUTE || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_TEAM_HIDEOUT || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BOSS || gRogueAdvPath.currentRoomType == ADVPATH_ROOM_BATTLE_TOWER;
 }
 
+static bool8 HasStaleAdventureEntranceServices(const struct MapHeader *mapHeader, const struct ObjectEventTemplate *objects, u8 count)
+{
+    // Compare fixed services, not counts: follower templates can make an older
+    // snapshot's count equal to the new map's, while its positions remain stale.
+    static const u8 serviceIds[] = {1, 2, 3, 4, 7, 8, 10, 11};
+    u8 i, j, k;
+
+    for (i = 0; i < ARRAY_COUNT(serviceIds); ++i)
+    {
+        for (j = 0; j < mapHeader->events->objectEventCount; ++j)
+            if (mapHeader->events->objectEvents[j].localId == serviceIds[i])
+                break;
+        if (j == mapHeader->events->objectEventCount)
+            continue;
+        for (k = 0; k < count; ++k)
+            if (objects[k].localId == serviceIds[i])
+                break;
+        if (k == count
+            || objects[k].x != mapHeader->events->objectEvents[j].x
+            || objects[k].y != mapHeader->events->objectEvents[j].y
+            || objects[k].graphicsId != mapHeader->events->objectEvents[j].graphicsId)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave, struct ObjectEventTemplate *objectEvents, u8* objectEventCount, u8 objectEventCapacity)
 {
     bool8 isLoadingSameMap = (gRogueLocal.recentObjectEventLoadedLayout == mapHeader->mapLayoutId);
     gRogueLocal.recentObjectEventLoadedLayout = mapHeader->mapLayoutId;
+
+    // Old entrance snapshots have no console and cache the outdoor NPC positions.
+    // Reload through the existing continue warp so live objects and the camera are
+    // rebuilt together; no serialized layout changes or save migration are needed.
+    if (loadingFromSave && !Rogue_IsRunActive()
+        && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE
+        && HasStaleAdventureEntranceServices(mapHeader, objectEvents, *objectEventCount))
+    {
+        SetContinueGameWarpToHealLocation(HEAL_LOCATION_ROGUE_HUB);
+        SetContinueGameWarpStatus();
+    }
 
     // If we're in run and not trying to exit (gRogueAdvPath.currentRoomType isn't wiped at this point)
     if(Rogue_IsRunActive() && !IsHubMapGroup())

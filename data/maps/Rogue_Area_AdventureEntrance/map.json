@@ -6,7 +6,7 @@
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
-  "map_type": "MAP_TYPE_ROUTE",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,17 +14,17 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_PORTAL_CORRIDOR_HORIZONTAL",
       "offset": 8,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
+      "map": "MAP_ROGUE_PORTAL_CORRIDOR_VERTICAL",
       "offset": 6,
       "direction": "down"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_PORTAL_CORRIDOR_HORIZONTAL",
       "offset": 8,
       "direction": "right"
     }
@@ -32,8 +32,8 @@
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_UNION_ROOM_NURSE",
-      "x": 9,
-      "y": 6,
+      "x": 7,
+      "y": 8,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -45,8 +45,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 12,
-      "y": 7,
+      "x": 5,
+      "y": 11,
       "elevation": 0,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -58,8 +58,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_PC_STAND",
-      "x": 6,
-      "y": 6,
+      "x": 5,
+      "y": 5,
       "elevation": 0,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -71,8 +71,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QUEST_BOARD",
-      "x": 4,
-      "y": 6,
+      "x": 5,
+      "y": 8,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -97,8 +97,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BIRCHS_BAG",
-      "x": 8,
-      "y": 5,
+      "x": 6,
+      "y": 4,
       "elevation": 0,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -110,8 +110,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FLAG_ADVENTURE",
-      "x": 15,
-      "y": 6,
+      "x": 14,
+      "y": 5,
       "elevation": 0,
       "movement_type": "MOVEMENT_TYPE_WALK_IN_PLACE_LEFT",
       "movement_range_x": 0,
@@ -123,8 +123,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MISC_PEONIA",
-      "x": 14,
-      "y": 6,
+      "x": 12,
+      "y": 5,
       "elevation": 0,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -149,8 +149,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SCIENTIST_2",
-      "x": 10,
-      "y": 6,
+      "x": 12,
+      "y": 8,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
@@ -159,6 +159,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_AdventureEntrance_TrialAttendant",
       "flag": "FLAG_TEMP_5"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ADVENTURE_CONSOLE",
+      "x": 9,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_AdventureEntrance_AdventureConsole",
+      "flag": "0"
     }
   ],
   "warp_events": [
@@ -210,6 +223,27 @@
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 0,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
+      "dest_warp_id": "0"
     }
   ],
   "coord_events": [
@@ -239,9 +273,59 @@
       "var": "VAR_TEMP_2",
       "var_value": "2",
       "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacWest"
+    },
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 3,
+      "elevation": 3,
+      "var": "VAR_ROGUE_ALWAYS_ZERO",
+      "var_value": "0",
+      "script": "Rogue_Area_AdventureEntrance_PortalStep"
+    },
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 3,
+      "elevation": 3,
+      "var": "VAR_ROGUE_ALWAYS_ZERO",
+      "var_value": "0",
+      "script": "Rogue_Area_AdventureEntrance_PortalStep"
+    },
+    {
+      "type": "trigger",
+      "x": 8,
+      "y": 3,
+      "elevation": 3,
+      "var": "VAR_ROGUE_ALWAYS_ZERO",
+      "var_value": "0",
+      "script": "Rogue_Area_AdventureEntrance_PortalStep"
     }
   ],
   "bg_events": [
-
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 3,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Rogue_Area_AdventureEntrance_PortalInfo"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 3,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Rogue_Area_AdventureEntrance_PortalInfo"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 3,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Rogue_Area_AdventureEntrance_PortalInfo"
+    }
   ]
 }

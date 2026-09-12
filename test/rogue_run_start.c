@@ -1,5 +1,7 @@
 #include "global.h"
 #include "constants/flags.h"
+#include "constants/layouts.h"
+#include "fieldmap.h"
 #include "constants/game_stat.h"
 #include "constants/rogue.h"
 #include "constants/rogue_hub.h"
@@ -833,30 +835,86 @@ TEST("Adventure setup: Gauntlet unlocks postgame and Slow Path cannot start new 
     FinishRunReviewTest();
 }
 
-TEST("Run review: remembered Trials expose Choose Trial only in editable Trial setup")
+TEST("Portal room: Trial choice is unlocked at the console and hidden for replays")
 {
-    bool8 hadTrials = FlagGet(FLAG_SYS_TRIALS_UNLOCKED);
+    bool8 hadUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT);
     ResetRunReviewTestState();
-    FlagSet(FLAG_SYS_TRIALS_UNLOCKED);
-    RogueQuest_TryUnlockQuest(QUEST_ID_ORRE_STYLE);
-    EXPECT(RogueTrial_CommitSelection(ROGUE_TRIAL_ORRE_STYLE, 5, POKEDEX_VARIANT_NATIONAL_GEN9));
-    RogueTrial_ApplyPendingSelection();
-    RogueRunStart_Clear();
-    RogueTrial_LoadLastSelection();
-    EXPECT(gSpecialVar_Result);
-    RogueRunStart_PrepareTrial();
-    EXPECT_EQ(RogueRunStart_GetContext()->trialId, ROGUE_TRIAL_ORRE_STYLE);
-    EXPECT(SetupHasOption(COMPOUND_STRING("Choose Trial"), FALSE));
-    EXPECT(!SetupHasOption(COMPOUND_STRING("Choose Trial"), TRUE));
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, FALSE);
+    RogueRunStart_PrepareStandard();
+    EXPECT(!RogueRunStart_CanChooseTrial());
+    EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, TRUE);
+    EXPECT(RogueRunStart_CanChooseTrial());
+    EXPECT(SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
+    EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), TRUE));
     EXPECT_EQ(StringCompare(RogueTest_AdventureSetupOption(0, FALSE), COMPOUND_STRING("Begin Adventure")), 0);
-    RogueRunStart_Clear();
+    SelectRunReviewTrial(ROGUE_TRIAL_ORRE_STYLE, 0, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueRunStart_PrepareTrial();
+    EXPECT(RogueRunStart_CanChooseTrial());
+    EXPECT(SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
+    FlagSet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
+    EXPECT(!RogueRunStart_CanChooseTrial());
+    EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, hadUpgrade);
+    FinishRunReviewTest();
+}
+
+TEST("Portal room: choosing None and cancelling Trials preserve ordinary setup")
+{
+    struct RogueAdventureConfig ordinary;
+    ResetRunReviewTestState();
+    Rogue_SetConfigRange(CONFIG_RANGE_BATTLE_FORMAT, BATTLE_FORMAT_DOUBLES);
+    Rogue_SetConfigRange(CONFIG_RANGE_ASCENSION, 4);
+    Rogue_CopyAdventureConfig(&ordinary);
+    RogueRunStart_PrepareStandard();
+    SelectRunReviewTrial(ROGUE_TRIAL_INSANE_MODE, 10, POKEDEX_VARIANT_NATIONAL_GEN9);
+    RogueRunStart_PrepareTrial();
+    EXPECT_EQ(RogueRunStart_GetContext()->effectiveConfig.battleFormat, BATTLE_FORMAT_MIXED);
+    EXPECT(RogueRunStart_GetContext()->effectiveConfig.trialFreshStart);
+    EXPECT_EQ(memcmp(&ordinary, &gRogueSaveBlock->adventureConfig, sizeof(ordinary)), 0);
+    // The console's None choice uses the standard context constructor.
+    RogueRunStart_PrepareStandard();
+    EXPECT_EQ(RogueRunStart_GetContext()->trialId, ROGUE_TRIAL_NONE);
+    EXPECT_EQ(memcmp(&ordinary, &RogueRunStart_GetContext()->effectiveConfig, sizeof(ordinary)), 0);
+    RogueTrial_HasPendingSelection();
+    EXPECT(!gSpecialVar_Result);
     SelectRunReviewTrial(ROGUE_TRIAL_LITTLE_CUP, 0, POKEDEX_VARIANT_NATIONAL_GEN9);
     RogueRunStart_PrepareTrial();
-    EXPECT_EQ(RogueRunStart_GetContext()->trialId, ROGUE_TRIAL_LITTLE_CUP);
     RogueRunStart_Clear();
+    EXPECT(!Rogue_HasRunStartConfigOverride());
+    EXPECT(RogueRunStart_GetContext() == NULL);
+    RogueTrial_HasPendingSelection();
+    EXPECT(!gSpecialVar_Result);
+    EXPECT_EQ(memcmp(&ordinary, &gRogueSaveBlock->adventureConfig, sizeof(ordinary)), 0);
+    FinishRunReviewTest();
+}
+
+TEST("Portal room: departure requires an active console interaction")
+{
+    u16 oldLayout = gMapHeader.mapLayoutId;
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 oldX = player->currentCoords.x, oldY = player->currentCoords.y;
+    ResetRunReviewTestState();
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE;
+    player->currentCoords.x = 9 + MAP_OFFSET;
+    player->currentCoords.y = 7 + MAP_OFFSET;
+    RogueRunStart_CheckConsolePosition();
+    EXPECT(!gSpecialVar_Result);
     RogueRunStart_PrepareStandard();
-    EXPECT(!SetupHasOption(COMPOUND_STRING("Choose Trial"), FALSE));
-    if (!hadTrials) FlagClear(FLAG_SYS_TRIALS_UNLOCKED);
+    RogueRunStart_CheckConsolePosition();
+    EXPECT(gSpecialVar_Result);
+    player->currentCoords.x = 9 + MAP_OFFSET;
+    player->currentCoords.y = 3 + MAP_OFFSET;
+    RogueRunStart_CheckConsolePosition();
+    EXPECT(!gSpecialVar_Result);
+    player->currentCoords.x = 9 + MAP_OFFSET;
+    player->currentCoords.y = 7 + MAP_OFFSET;
+    gMapHeader.mapLayoutId = LAYOUT_ROGUE_AREA_LABS;
+    RogueRunStart_CheckConsolePosition();
+    EXPECT(!gSpecialVar_Result);
+    player->currentCoords.x = oldX;
+    player->currentCoords.y = oldY;
+    gMapHeader.mapLayoutId = oldLayout;
     FinishRunReviewTest();
 }
 

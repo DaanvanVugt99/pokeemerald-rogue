@@ -1,4 +1,7 @@
 #include "global.h"
+#include "constants/layouts.h"
+#include "field_player_avatar.h"
+#include "fieldmap.h"
 #include "constants/flags.h"
 #include "constants/rogue.h"
 #include "constants/rogue_hub.h"
@@ -534,4 +537,26 @@ void RogueRunStart_AppendTrialEditOptions(void)
         ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Pokedex, RUN_START_EDIT_TRIAL_POKEDEX);
 
     ScriptMenu_ScrollingMultichoiceDynamicAppendOption(sText_Back, MULTI_B_PRESSED);
+}
+
+bool8 RogueRunStart_CanChooseTrial(void)
+{
+    return sRunStartContext.isActive
+        && (sRunStartContext.source == RUN_START_SOURCE_NORMAL || sRunStartContext.source == RUN_START_SOURCE_TRIAL)
+        && RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT)
+        && !FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && !RogueMP_IsActive();
+}
+
+void RogueRunStart_CanChooseTrialFromScript(void)
+{
+    gSpecialVar_Result = RogueRunStart_CanChooseTrial();
+}
+
+void RogueRunStart_CheckConsolePosition(void)
+{
+    s16 x, y;
+    PlayerGetDestCoords(&x, &y);
+    gSpecialVar_Result = !Rogue_IsRunActive() && sRunStartContext.isActive
+        && gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE
+        && x == 9 + MAP_OFFSET && y == 7 + MAP_OFFSET;
 }

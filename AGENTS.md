@@ -52,6 +52,10 @@ or validation workflows change.
 ## Sources of Truth and Generated Data
 
 - Edit `.pory` sources rather than generated `.inc` files when both exist.
+- The Adventure Gate layout/border are authored in Porymap.
+  `scripts/generate_portal_room.py` reads them for previews and validation; it
+  generates only private assets and corridor facades. Keep changed exit geometry
+  synchronized with `src/rogue_hub.c` and map events.
 - Do not hand-edit `src/data/rogue_pokemon_profiles.h`. See
   `docs/pokemon_profile_pipeline.md` and use:
   - `./scripts/generate_pokemon_profiles.sh refresh`

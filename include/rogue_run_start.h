@@ -107,6 +107,9 @@ struct RogueRunStartContext
     bool8 trialQuestsDisabled;
 };
 
+bool8 RogueRunStart_CanChooseTrial(void);
+void RogueRunStart_CanChooseTrialFromScript(void);
+void RogueRunStart_CheckConsolePosition(void);
 void RogueRunStart_PrepareStandard(void);
 void RogueRunStart_PrepareTrial(void);
 void RogueRunStart_Refresh(void);

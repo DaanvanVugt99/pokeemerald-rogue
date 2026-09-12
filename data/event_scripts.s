@@ -789,6 +789,8 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Special_Lugia/scripts.inc"
 
 	.include "data/maps/Rogue_HallwayFacade_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_PortalCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_PortalCorridor_Vertical/scripts.inc"
 
 	.include "data/maps/Rogue_HallwayFacade_Vertical/scripts.inc"
 
