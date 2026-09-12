@@ -54,4 +54,6 @@ u8 const* RogueHub_GetDecorVariantName(u16 decorVariantId);
 
 void RogueHub_ReloadObjectsAndTiles();
 
+void RogueHub_CheckUniqueLabOpen(void);
+
 #endif

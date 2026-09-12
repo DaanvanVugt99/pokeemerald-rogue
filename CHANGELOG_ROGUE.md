@@ -31,6 +31,14 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Rebuild the Labs hub district as a compact underground research junction with
+  matching animated wing doors, four shaded access passages, and concealed
+  unlock/debug entrances. Preserve lab interiors, progression, and warp indices;
+  update Birch's routes and recover old outdoor save positions safely. Place its
+  builder workbench against the back wall of the left side recess.
+- Keep all underground lab-junction hub passages three tiles wide, including
+  their shadow fades and corridor continuations, with working warps on every lane.
+
 - Center the Adventure Gate walls and south passage on the portal, preserving
   hand-edited floor markings. Keep the Porymap-authored layout intact when regenerating assets.
 

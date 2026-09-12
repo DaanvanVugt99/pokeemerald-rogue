@@ -1,0 +1,447 @@
+{
+  "metatiles": [
+    {
+      "name": "Floor",
+      "source": "galactic",
+      "metatile": "0x33F",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 4
+      }
+    },
+    {
+      "name": "FloorShadow",
+      "source": "galactic",
+      "metatile": "0x337",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 4
+      }
+    },
+    {
+      "name": "Void",
+      "source": "galactic",
+      "metatile": "0x001",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 0
+      }
+    },
+    {
+      "name": "PillarCap",
+      "source": "galactic",
+      "metatile": "0x2E1",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "name": "PillarJoin",
+      "source": "galactic",
+      "metatile": "0x211",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 1
+      }
+    },
+    {
+      "name": "Pillar",
+      "source": "galactic",
+      "metatile": "0x20A",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "name": "PillarEnd",
+      "source": "galactic",
+      "metatile": "0x209",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "name": "Wall",
+      "source": "galactic",
+      "metatile": "0x219",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 4,
+        "y": 1
+      }
+    },
+    {
+      "name": "WallBase",
+      "source": "galactic",
+      "metatile": "0x221",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 4,
+        "y": 2
+      }
+    },
+    {
+      "name": "InnerJoin",
+      "source": "galactic",
+      "metatile": "0x210",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 12
+      }
+    },
+    {
+      "name": "InnerBase",
+      "source": "galactic",
+      "metatile": "0x220",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 13
+      }
+    },
+    {
+      "name": "InnerFoot",
+      "source": "galactic",
+      "metatile": "0x333",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 14
+      }
+    },
+    {
+      "name": "FrameTopLeft",
+      "source": "galactic",
+      "metatile": "0x2C3",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameTop",
+      "source": "galactic",
+      "metatile": "0x2C4",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameTopRight",
+      "source": "galactic",
+      "metatile": "0x2C5",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameLeft",
+      "source": "galactic",
+      "metatile": "0x2CB",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 13
+      }
+    },
+    {
+      "name": "FrameRight",
+      "source": "galactic",
+      "metatile": "0x2CD",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 13
+      }
+    },
+    {
+      "name": "Door",
+      "source": "galactic",
+      "metatile": "0x2CC",
+      "behavior": 105,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 13
+      }
+    },
+    {
+      "name": "SignTop",
+      "source": "galactic",
+      "metatile": "0x21B",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 11,
+        "y": 1
+      }
+    },
+    {
+      "name": "SignBase",
+      "source": "galactic",
+      "metatile": "0x223",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 11,
+        "y": 2
+      }
+    },
+    {
+      "name": "SpecimenBank_0_0",
+      "source": "galactic",
+      "metatile": "0x280",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 1
+      }
+    },
+    {
+      "name": "SpecimenBank_1_0",
+      "source": "galactic",
+      "metatile": "0x281",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 1
+      }
+    },
+    {
+      "name": "SpecimenBank_0_1",
+      "source": "galactic",
+      "metatile": "0x288",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 2
+      }
+    },
+    {
+      "name": "SpecimenBank_1_1",
+      "source": "galactic",
+      "metatile": "0x289",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 2
+      }
+    },
+    {
+      "name": "SpecimenBank_0_2",
+      "source": "galactic",
+      "metatile": "0x290",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 3
+      }
+    },
+    {
+      "name": "SpecimenBank_1_2",
+      "source": "galactic",
+      "metatile": "0x291",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 3
+      }
+    },
+    {
+      "name": "ComputerBench_0_0",
+      "source": "lab",
+      "metatile": "0x212",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_LAB",
+        "x": 3,
+        "y": 0
+      }
+    },
+    {
+      "name": "ComputerBench_1_0",
+      "source": "lab",
+      "metatile": "0x213",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_LAB",
+        "x": 4,
+        "y": 0
+      }
+    },
+    {
+      "name": "ComputerBench_0_1",
+      "source": "lab",
+      "metatile": "0x21A",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_LAB",
+        "x": 3,
+        "y": 1
+      }
+    },
+    {
+      "name": "ComputerBench_1_1",
+      "source": "lab",
+      "metatile": "0x21B",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_LAB",
+        "x": 4,
+        "y": 1
+      }
+    },
+    {
+      "assembly": "ComputerBench",
+      "background": "HQ WallBase above Floor; original monitor/worktop foreground unchanged"
+    },
+    {
+      "name": "ApproachLeft",
+      "source": "factory",
+      "metatile": "0x385",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_POKE_BALL_FACTORY",
+        "x": 1,
+        "y": 2
+      }
+    },
+    {
+      "name": "ApproachRight",
+      "source": "factory",
+      "metatile": "0x384",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_POKE_BALL_FACTORY",
+        "x": 12,
+        "y": 2
+      }
+    }
+  ],
+  "assemblies": [
+    {
+      "name": "SpecimenBank",
+      "source_layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+      "source": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "destination": [
+        5,
+        3
+      ],
+      "cells": [
+        [
+          [
+            "SpecimenBank_0_0",
+            true
+          ],
+          [
+            "SpecimenBank_1_0",
+            true
+          ]
+        ],
+        [
+          [
+            "SpecimenBank_0_1",
+            true
+          ],
+          [
+            "SpecimenBank_1_1",
+            true
+          ]
+        ],
+        [
+          [
+            "SpecimenBank_0_2",
+            true
+          ],
+          [
+            "SpecimenBank_1_2",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ComputerBench",
+      "source_layout": "LAYOUT_ROGUE_ENCOUNTER_LAB",
+      "source": [
+        3,
+        0,
+        2,
+        2
+      ],
+      "destination": [
+        21,
+        4
+      ],
+      "cells": [
+        [
+          [
+            "ComputerBench_0_0",
+            true
+          ],
+          [
+            "ComputerBench_1_0",
+            true
+          ]
+        ],
+        [
+          [
+            "ComputerBench_0_1",
+            true
+          ],
+          [
+            "ComputerBench_1_1",
+            true
+          ]
+        ]
+      ]
+    }
+  ],
+  "tiles": 77,
+  "palettes": 12,
+  "door": "HQ shutter with two retracting leaves; frame remains fixed"
+}

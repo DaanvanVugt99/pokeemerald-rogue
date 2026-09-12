@@ -957,3 +957,25 @@ const struct Tileset gTileset_PortalRoomGate =
     .metatileAttributes = gMetatileAttributes_PortalRoomGate,
     .callback = InitTilesetAnim_PortalRoom,
 };
+
+const struct Tileset gTileset_LabJunction =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_LabJunction,
+    .palettes = gTilesetPalettes_LabJunction,
+    .metatiles = gMetatiles_LabJunction,
+    .metatileAttributes = gMetatileAttributes_LabJunction,
+    .callback = NULL,
+};
+
+const struct Tileset gTileset_LabJunctionSecondary =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_LabJunctionSecondary,
+    .palettes = gTilesetPalettes_LabJunction,
+    .metatiles = gMetatiles_LabJunctionSecondary,
+    .metatileAttributes = gMetatileAttributes_LabJunctionSecondary,
+    .callback = NULL,
+};

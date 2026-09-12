@@ -239,3 +239,9 @@ const u16 gMetatileAttributes_PortalRoom[] = INCBIN_U16("data/tilesets/primary/p
 
 const u16 gMetatiles_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatiles.bin");
 const u16 gMetatileAttributes_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatile_attributes.bin");
+
+const u16 gMetatiles_LabJunction[] = INCBIN_U16("data/tilesets/primary/lab_junction/metatiles.bin");
+const u16 gMetatileAttributes_LabJunction[] = INCBIN_U16("data/tilesets/primary/lab_junction/metatile_attributes.bin");
+
+const u16 gMetatiles_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatiles.bin");
+const u16 gMetatileAttributes_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatile_attributes.bin");

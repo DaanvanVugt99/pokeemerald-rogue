@@ -1,5 +1,6 @@
 #include "global.h"
 #include "constants/portal_room_tiles.h"
+#include "constants/lab_junction_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1016,6 +1017,14 @@ void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct 
         else if (warpId == 9) warpId = 2;
     }
 
+    if (area == HUB_AREA_LABS)
+    {
+        if (warpId == 15) warpId = 6;
+        else if (warpId == 16) warpId = 2;
+        else if (warpId == 17) warpId = 0;
+        else if (warpId == 18) warpId = 4;
+    }
+
     if(area != HUB_AREA_NONE)
     {
         u8 dir;
@@ -1081,6 +1090,7 @@ void RogueHub_ApplyMapMetatiles()
     switch (gMapHeader.mapLayoutId)
     {
     case LAYOUT_ROGUE_AREA_LABS:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateLabsAreaMetatiles();
         break;
     case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
@@ -1169,55 +1179,56 @@ u8 RogueHub_GetStatueLevel()
     return GetActiveHubMap()->statueLevel;
 }
 
+void RogueHub_CheckUniqueLabOpen(void)
+{
+    gSpecialVar_Result = RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB);
+}
+
+static void SetLabJunctionDoor(s16 x, s16 y)
+{
+    MetatileSet_Tile(x - 1, y - 1, METATILE_LabJunction_FrameTopLeft | MAPGRID_COLLISION_MASK);
+    MetatileSet_Tile(x, y - 1, METATILE_LabJunction_FrameTop | MAPGRID_COLLISION_MASK);
+    MetatileSet_Tile(x + 1, y - 1, METATILE_LabJunction_FrameTopRight | MAPGRID_COLLISION_MASK);
+    MetatileSet_Tile(x - 1, y, METATILE_LabJunction_FrameLeft | MAPGRID_COLLISION_MASK);
+    MetatileSet_Tile(x, y, METATILE_LabJunction_Door);
+    MetatileSet_Tile(x + 1, y, METATILE_LabJunction_FrameRight | MAPGRID_COLLISION_MASK);
+}
+
 static void RogueHub_UpdateLabsAreaMetatiles()
 {
-    // Remove connectionss
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(11, 0, 16, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(11, 1, 16, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(12, 2, 15, 7);
+        MetatileFill_Tile(12, 0, 16, 2, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 3, 16, 3, METATILE_LabJunction_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 4, 16, 4, METATILE_LabJunction_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 5, 16, 5, METATILE_LabJunction_FloorShadow);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(26, 7);
-
-        MetatileFill_CommonPathRemoval(22, 8, 25, 10);
+        MetatileFill_Tile(25, 6, 27, 13, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 6, 24, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitVertical(12, 12);
-        MetatileFill_TreeCaps(12, 13, 15);
-        
-        MetatileFill_TreesOverlapping(12, 14, 15, 23, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(12, 11, 15, 11);
+        MetatileFill_Tile(12, 16, 16, 16, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 17, 16, 17, METATILE_LabJunction_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 18, 16, 18, METATILE_LabJunction_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 19, 16, 23, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(0, 7);
-
-        MetatileFill_CommonPathRemoval(2, 8, 5, 10);
+        MetatileFill_Tile(0, 6, 3, 13, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 6, 4, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-    // Remove unique mon lab
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB))
+    // Hidden wings are blank structural walls until their existing gate opens.
+    if (RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB))
     {
-        MetatileFill_TreesOverlapping(0, 12, 9, 19, TREE_TYPE_DENSE);
-
-        MetatileFill_TreesOverlapping(9, 12, 9, 12, TREE_TYPE_SPARSE);
-
-        MetatileFill_TreeCaps(8, 11, 9);
-
-        MetatileFill_Tile(10, 11, 10, 11, METATILE_General_Grass);
+        SetLabJunctionDoor(8, 13);
+        MetatileSet_Tile(10, 12, METATILE_LabJunction_SignTop | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(10, 13, METATILE_LabJunction_SignBase | MAPGRID_COLLISION_MASK);
     }
-
 #ifdef ROGUE_DEBUG
-    MetatileSet_Tile(23, 6, METATILE_Petalburg_Door_BirchsLab);
+    SetLabJunctionDoor(20, 13);
 #endif
 }
 

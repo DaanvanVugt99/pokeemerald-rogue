@@ -1576,8 +1576,8 @@
       "name": "Rogue_Area_Labs_Layout",
       "width": 28,
       "height": 24,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Petalburg",
+      "primary_tileset": "gTileset_LabJunction",
+      "secondary_tileset": "gTileset_LabJunctionSecondary",
       "border_filepath": "data/layouts/Rogue_Area_Labs/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_Labs/map.bin"
     },
@@ -2220,6 +2220,26 @@
       "secondary_tileset": "gTileset_PortalRoomGate",
       "border_filepath": "data/layouts/Rogue_PortalCorridor_Vertical/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_PortalCorridor_Vertical/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_LAB_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_LabCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_LabJunction",
+      "secondary_tileset": "gTileset_LabJunctionSecondary",
+      "border_filepath": "data/layouts/Rogue_LabCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_LabCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_LAB_CORRIDOR_VERTICAL",
+      "name": "Rogue_LabCorridor_Vertical_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_LabJunction",
+      "secondary_tileset": "gTileset_LabJunctionSecondary",
+      "border_filepath": "data/layouts/Rogue_LabCorridor_Vertical/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_LabCorridor_Vertical/map.bin"
     }
   ]
 }

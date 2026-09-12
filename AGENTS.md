@@ -56,6 +56,13 @@ or validation workflows change.
   `scripts/generate_portal_room.py` reads them for previews and validation; it
   generates only private assets and corridor facades. Keep changed exit geometry
   synchronized with `src/rogue_hub.c` and map events.
+- The Labs junction uses the same editing workflow with
+  `scripts/generate_lab_junction.py` (`--check` verifies private assets, routes,
+  corridor seams, returns, and all connection/service states). Normal generation
+  reads its Porymap layout/border; `--init-layout` is a guarded one-time converter,
+  not a regeneration command. See `docs/design/lab_junction.md`.
+- Underground hub passages use three walkable tiles across, including shadow
+  fades and corridor facades. Give every walkable exit lane a working warp.
 - Do not hand-edit `src/data/rogue_pokemon_profiles.h`. See
   `docs/pokemon_profile_pipeline.md` and use:
   - `./scripts/generate_pokemon_profiles.sh refresh`

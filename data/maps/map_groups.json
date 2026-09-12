@@ -50,7 +50,9 @@
     "Rogue_Area_DayCare",
     "Rogue_Area_Market",
     "Rogue_PortalCorridor_Horizontal",
-    "Rogue_PortalCorridor_Vertical"
+    "Rogue_PortalCorridor_Vertical",
+    "Rogue_LabCorridor_Horizontal",
+    "Rogue_LabCorridor_Vertical"
   ],
   "gMapGroup_RogueHubInteriors": [
     "Rogue_Interior_Home",

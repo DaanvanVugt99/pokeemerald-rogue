@@ -8414,6 +8414,27 @@ static bool8 HasStaleAdventureEntranceServices(const struct MapHeader *mapHeader
     return FALSE;
 }
 
+static bool8 HasStaleLabJunctionSnapshot(const struct MapHeader *header, const struct ObjectEventTemplate *objects, u8 count)
+{
+    u8 i, j;
+    u16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+    // Birch moves during the introduction; only the workbench is a fixed anchor.
+    for (i = 0; i < header->events->objectEventCount; ++i)
+    {
+        const struct ObjectEventTemplate *expected = &header->events->objectEvents[i];
+        if (expected->localId != 1)
+            continue;
+        for (j = 0; j < count; ++j)
+            if (objects[j].localId == 1)
+                break;
+        if (j == count || objects[j].x != expected->x || objects[j].y != expected->y || objects[j].graphicsId != expected->graphicsId)
+            return TRUE;
+    }
+    if (x >= header->mapLayout->width || y >= header->mapLayout->height)
+        return TRUE;
+    return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
+}
+
 void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave, struct ObjectEventTemplate *objectEvents, u8* objectEventCount, u8 objectEventCapacity)
 {
     bool8 isLoadingSameMap = (gRogueLocal.recentObjectEventLoadedLayout == mapHeader->mapLayoutId);
@@ -8427,6 +8448,25 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
         && HasStaleAdventureEntranceServices(mapHeader, objectEvents, *objectEventCount))
     {
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_ROGUE_HUB);
+        SetContinueGameWarpStatus();
+    }
+
+    if (loadingFromSave && !Rogue_IsRunActive() && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_LABS
+        && HasStaleLabJunctionSnapshot(mapHeader, objectEvents, *objectEventCount))
+    {
+        u16 intro = VarGet(VAR_ROGUE_INTRO_STATE);
+        s8 x = 14, y = 11;
+        if (intro == ROGUE_INTRO_STATE_SPAWN)
+        {
+            x = 9;
+            y = 7;
+        }
+        else if (intro == ROGUE_INTRO_STATE_LEAVE_LAB)
+        {
+            x = 9;
+            y = 5;
+        }
+        SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_LABS), MAP_NUM(ROGUE_AREA_LABS), WARP_ID_NONE, x, y);
         SetContinueGameWarpStatus();
     }
 

@@ -1,6 +1,8 @@
 #include "global.h"
 #include "event_data.h"
 #include "field_door.h"
+#include "constants/layouts.h"
+#include "constants/lab_junction_tiles.h"
 #include "field_camera.h"
 #include "fieldmap.h"
 #include "metatile_behavior.h"
@@ -421,8 +423,23 @@ static const struct DoorAnimFrame *GetLastDoorFrame(const struct DoorAnimFrame *
     return frame - 1;
 }
 
+// Private tileset IDs overlap other maps; select this door only in the lab hub.
+static const u8 sDoorAnimTiles_LabJunction[] = INCBIN_U8("graphics/door_anims/lab_junction.4bpp");
+// BuildDoorTiles reads eight entries starting at offsets 0 and 4.
+static const u8 sDoorAnimPalettes_LabJunction[] = {
+    LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE,
+    LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE,
+    LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE, LAB_JUNCTION_DOOR_PALETTE
+};
+static const struct DoorGraphics sDoorGraphics_LabJunction = {
+    METATILE_LabJunction_Door, DOOR_SOUND_SLIDING, 1, sDoorAnimTiles_LabJunction, sDoorAnimPalettes_LabJunction
+};
+
 static const struct DoorGraphics *GetDoorGraphics(const struct DoorGraphics *gfx, u16 metatileNum)
 {
+    if (gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_LABS)
+        return metatileNum == METATILE_LabJunction_Door ? &sDoorGraphics_LabJunction : NULL;
+
     while (gfx->tiles != NULL)
     {
         if (gfx->metatileNum == metatileNum)

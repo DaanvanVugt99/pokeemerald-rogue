@@ -46,6 +46,8 @@
 #define MAP_ROGUE_AREA_MARKET                (13 | (2 << 8))
 #define MAP_ROGUE_PORTAL_CORRIDOR_HORIZONTAL (14 | (2 << 8))
 #define MAP_ROGUE_PORTAL_CORRIDOR_VERTICAL   (15 | (2 << 8))
+#define MAP_ROGUE_LAB_CORRIDOR_HORIZONTAL    (16 | (2 << 8))
+#define MAP_ROGUE_LAB_CORRIDOR_VERTICAL      (17 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

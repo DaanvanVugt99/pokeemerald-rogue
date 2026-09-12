@@ -1842,3 +1842,22 @@ const u16 gTilesetPalettes_PortalRoom[][16] =
     INCBIN_U16("data/tilesets/secondary/portal_room/palettes/11.gbapal"),
     INCBIN_U16("data/tilesets/secondary/portal_room/palettes/12.gbapal"),
 };
+
+const u32 gTilesetTiles_LabJunction[] = INCBIN_U32("data/tilesets/primary/lab_junction/tiles.4bpp.lz");
+const u32 gTilesetTiles_LabJunctionSecondary[] = INCBIN_U32("data/tilesets/secondary/lab_junction/tiles.4bpp.lz");
+const u16 gTilesetPalettes_LabJunction[][16] =
+{
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/00.gbapal"),
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/01.gbapal"),
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/02.gbapal"),
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/03.gbapal"),
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/04.gbapal"),
+    INCBIN_U16("data/tilesets/primary/lab_junction/palettes/05.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/06.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/07.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/08.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/09.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/10.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/11.gbapal"),
+    INCBIN_U16("data/tilesets/secondary/lab_junction/palettes/12.gbapal"),
+};

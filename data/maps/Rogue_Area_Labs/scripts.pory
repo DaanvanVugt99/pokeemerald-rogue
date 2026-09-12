@@ -22,7 +22,7 @@ script Rogue_Area_Labs_OnMapLoad
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEAVE_LAB)
     {
         clearflag(FLAG_HIDE_BIRCH)
-        setobjectxyperm(OBJ_EVENT_BIRCH, 7, 9)
+        setobjectxyperm(OBJ_EVENT_BIRCH, 9, 6)
         setobjectmovementtype(OBJ_EVENT_BIRCH, MOVEMENT_TYPE_FACE_UP)
     }
     else
@@ -52,13 +52,13 @@ script Rogue_Area_Labs_StartGame
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerStartGame0)
     waitmovement(0)
 
-    msgbox(format("BIRCH: There you are!\nBack on your feet already—excellent!\pYou look all right, but take a walk around {POKEMON_HUB} and see if anything feels familiar.\pWhen you're ready, come find me at the lab."))
+    msgbox(format("BIRCH: There you are!\nBack on your feet already—excellent!\pYou look all right, but take a walk around {POKEMON_HUB} and see if anything feels familiar.\pWhen you're ready, come find me in the left research wing."))
     closemessage
 
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame1)
     waitmovement(0)
 
-    opendoor(7, 6)
+    opendoor(9, 4)
     waitdooranim
 
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame2)
@@ -66,7 +66,7 @@ script Rogue_Area_Labs_StartGame
     hideobjectat(OBJ_EVENT_BIRCH, MAP_ROGUE_AREA_LABS)
     setflag(FLAG_HIDE_BIRCH)
 
-    closedoor(7, 6)
+    closedoor(9, 4)
     waitdooranim
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
@@ -85,8 +85,8 @@ movement PlayerStartGame0
 
 movement BirchStartGame1
 {
-    walk_left
     walk_up * 2
+    walk_right
 }
 
 movement BirchStartGame2
@@ -137,37 +137,45 @@ script Rogue_Area_Labs_TutorialGuide
 
 movement BirchTutorialGuideNorth
 {
-    walk_fast_right * 6
+    walk_fast_down * 3
+    walk_fast_right * 5
     walk_fast_up * 9
 }
 
 movement BirchTutorialGuideEast
 {
-    walk_fast_right * 9
+    walk_fast_down * 3
+    walk_fast_right * 18
 }
 
 movement BirchTutorialGuideSouth
 {
-    walk_fast_right * 6
-    walk_fast_down * 4
+    walk_fast_down * 3
+    walk_fast_right * 5
+    walk_fast_down * 14
 }
 
 movement BirchTutorialGuideWest
 {
-    walk_fast_left * 7
+    walk_fast_down * 3
+    walk_fast_left * 9
 }
 
 script Rogue_Area_Labs_LabSign
 {
-    msgbox(format("Professor Birch's Lab"), MSGBOX_SIGN)
+    msgbox(format("Professor Birch's Lab\nResearch Wing"), MSGBOX_SIGN)
 }
 
 script Rogue_Area_Labs_ConfigSign
 {
-    msgbox(format("Config Lab"), MSGBOX_SIGN)
+    msgbox(format("Config Lab\nSystems Wing"), MSGBOX_SIGN)
 }
 
 script Rogue_Area_Labs_UniqueMonSign
 {
-    msgbox(format("The sign is worse for wear…\nOnly a few words can be made out.\p???'s Lab"), MSGBOX_SIGN)
+    callnative(RogueHub_CheckUniqueLabOpen)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("Unique Pokémon Research\n???'s Lab"), MSGBOX_SIGN)
+    }
 }
