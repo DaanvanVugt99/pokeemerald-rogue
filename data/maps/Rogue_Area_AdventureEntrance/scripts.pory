@@ -75,7 +75,7 @@ script Rogue_Area_AdventureEntrance_MapLoad
         switch(var(VAR_RESULT))
         {
             case HUB_AREA_CONN_EAST:
-                setobjectxyperm(OBJ_EVENT_RUIN_MANIAC, 19, 11)
+                setobjectxyperm(OBJ_EVENT_RUIN_MANIAC, 18, 11)
                 setobjectmovementtype(OBJ_EVENT_RUIN_MANIAC, MOVEMENT_TYPE_FACE_RIGHT)
                 break
 

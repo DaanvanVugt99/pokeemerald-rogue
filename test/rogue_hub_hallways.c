@@ -1,0 +1,105 @@
+#include "global.h"
+#include "constants/layouts.h"
+#include "constants/metatile_behaviors.h"
+#include "constants/rogue_hub.h"
+#include "overworld.h"
+#include "rogue_hub.h"
+#include "test/test.h"
+
+TEST("Hub hallways: every lane arrives centered at the same shaded threshold")
+{
+    static const struct {u8 mapNum, warp, x, y, behavior;} lanes[] = {
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),0,0,11,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),1,0,11,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),7,0,11,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),4,18,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),5,18,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),8,18,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),2,9,15,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),3,9,15,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),9,9,15,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),0,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),1,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),17,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),2,26,9,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),3,26,9,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),16,26,9,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),4,14,20,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),5,14,20,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),18,14,20,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),6,2,9,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),7,2,9,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_LABS),15,2,9,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),0,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),1,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),8,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),4,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),5,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),9,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),2,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),3,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),10,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),0,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),1,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),6,4,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),4,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),5,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),7,32,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),2,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),3,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),8,18,27,MB_SOUTH_ARROW_WARP},
+    };
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(lanes); ++i)
+    {
+        const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_LABS), lanes[i].mapNum);
+        const struct WarpEvent *warp = &header->events->warps[lanes[i].warp];
+        u16 tile = header->mapLayout->map[warp->y * header->mapLayout->width + warp->x] & MAPGRID_METATILE_ID_MASK;
+        s16 x = -1, y = -1;
+        EXPECT(RogueHub_GetWarpArrivalPosition(header, lanes[i].warp, &x, &y));
+        EXPECT_EQ(x, lanes[i].x); EXPECT_EQ(y, lanes[i].y);
+        EXPECT_EQ(header->mapLayout->primaryTileset->metatileAttributes[tile] & 0xFF, lanes[i].behavior);
+        // One inward step must leave the warp strip on a traversable tile.
+        if (lanes[i].behavior == MB_NORTH_ARROW_WARP) ++y;
+        else if (lanes[i].behavior == MB_SOUTH_ARROW_WARP) --y;
+        else if (lanes[i].behavior == MB_WEST_ARROW_WARP) ++x;
+        else --x;
+        tile = header->mapLayout->map[y * header->mapLayout->width + x];
+        EXPECT(!(tile & MAPGRID_COLLISION_MASK));
+        EXPECT_EQ(header->mapLayout->primaryTileset->metatileAttributes[tile & MAPGRID_METATILE_ID_MASK] & 0xFF, MB_NORMAL);
+    }
+}
+
+TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recover old corridor saves")
+{
+    static const struct {u8 mapNum, warp;} special[] = {
+        {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),6},
+        {MAP_NUM(ROGUE_AREA_LABS),8},{MAP_NUM(ROGUE_AREA_LABS),9},{MAP_NUM(ROGUE_AREA_LABS),10},
+        {MAP_NUM(ROGUE_AREA_LABS),11},{MAP_NUM(ROGUE_AREA_LABS),12},{MAP_NUM(ROGUE_AREA_LABS),13},{MAP_NUM(ROGUE_AREA_LABS),14},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
+        {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
+        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),4},
+    };
+    const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
+    u8 i;
+    s16 x, y;
+    for (i = 0; i < ARRAY_COUNT(special); ++i)
+    {
+        const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_LABS), special[i].mapNum);
+        x = 100; y = 100;
+        EXPECT(!RogueHub_GetWarpArrivalPosition(header, special[i].warp, &x, &y));
+        EXPECT_EQ(x, 100); EXPECT_EQ(y, 100);
+    }
+    x = 36; y = 16;
+    EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, 32); EXPECT_EQ(y, 15);
+    x = 1; y = 14;
+    EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, 4); EXPECT_EQ(y, 15);
+    x = 17; y = 30;
+    EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, 18); EXPECT_EQ(y, 27);
+    x = 18; y = 18;
+    EXPECT(!RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, 18); EXPECT_EQ(y, 18);
+}

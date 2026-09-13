@@ -16,6 +16,13 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Align Adventure Gate, Labs and Safari hub exits with the second shaded hallway
+  tile, and center arrivals regardless of the exit lane used. Update tutorial
+  guards and recover saves beyond the old thresholds; outdoor exits stay unchanged.
+
+- Draw Safari enclosure plinths behind the player and follower when they walk
+  along the aisle, instead of clipping their heads under the front glass tiles.
+
 - Close the save confirmation after saving at the Adventure Console, before
   preparation and the automatic walk into the portal.
 
@@ -30,6 +37,13 @@ Format follows Keep a Changelog loosely:
   suggested higher or lower level is available.
 
 ### Changed
+
+- Rebuild the Safari hub as an underground containment lab with glass habitats,
+  specimen capsules, a dark Safari PC, and three-wide shaded hub passages.
+  Display up to four actual regular-buffer entries while keeping the legendary
+  cave and existing purchase rules. Reframe the first catch as a broken-glass
+  containment accident, seal all tutorial exit lanes, and recover old outdoor
+  saves without replaying completed introduction scenes.
 
 - Rebuild the Labs hub district as a compact underground research junction with
   matching animated wing doors, four shaded access passages, and concealed

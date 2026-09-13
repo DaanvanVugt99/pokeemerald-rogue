@@ -144,14 +144,14 @@ Route121_SafariZoneEntrance_EventScript_PokeblockSign::
 
 Route121_SafariZoneEntrance_Text_UseHubSafari:
 	.string "The old Safari game is closed.\p"
-	.string "Visit the Safari Area sign to offer\n"
+	.string "Visit the Safari Lab PC to offer\n"
 	.string "{POKEBLOCK} to Pokémon from your Adventures.$"
 
 Route121_SafariZoneEntrance_Text_PokeblockInfo:
-	.string "The Safari Area keeps track of Pokémon\n"
+	.string "The Safari Lab keeps track of Pokémon\n"
 	.string "from your Adventures now.\p"
-	.string "Offer {POKEBLOCK} at the Safari Area\n"
-	.string "sign to bring one home.$"
+	.string "Offer {POKEBLOCK} at the Safari Lab\n"
+	.string "PC to bring one home.$"
 
 Route121_SafariZoneEntrance_Text_PokeblockSign:
 	.string "Safari Area Pokémon can be brought\n"

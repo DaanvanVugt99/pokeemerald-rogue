@@ -63,6 +63,14 @@ or validation workflows change.
   not a regeneration command. See `docs/design/lab_junction.md`.
 - Underground hub passages use three walkable tiles across, including shadow
   fades and corridor facades. Give every walkable exit lane a working warp.
+  Put the warp strip on the second shaded tile, immediately after the initial
+  fade. Center arrivals via `RogueHub_GetWarpArrivalPosition`; keep special
+  interior/portal/teleport arrivals separate. See `docs/design/hub_hallways.md`.
+- Both Safari lab layouts/borders are Porymap-authored. Run
+  `python3 scripts/generate_safari_lab.py --check` to verify private assets,
+  containment bounds, service approaches, and corridor seams across 64 states.
+  Normal generation reads the layouts and writes previews under `build/safari_lab`;
+  do not rerun the guarded `--init-layout` converter. See `docs/design/safari_lab.md`.
 - Do not hand-edit `src/data/rogue_pokemon_profiles.h`. See
   `docs/pokemon_profile_pipeline.md` and use:
   - `./scripts/generate_pokemon_profiles.sh refresh`

@@ -1563,7 +1563,7 @@ script RogueSafari_PurchaseSelectedMon
         }
         else
         {
-            msgbox(format("Dismiss {STR_VAR_1} from the Safari Area?"), MSGBOX_YESNO)
+            msgbox(format("Dismiss {STR_VAR_1} from the Safari Lab?"), MSGBOX_YESNO)
         }
 
         if(var(VAR_RESULT) == YES)
@@ -1579,7 +1579,7 @@ script RogueSafari_PurchaseSelectedMon
                 }
                 else
                 {
-                    msgbox(format("{STR_VAR_1} left the Safari Area."))
+                    msgbox(format("{STR_VAR_1} left the Safari Lab."))
                 }
 
                 special(ReloadWarpSilent)

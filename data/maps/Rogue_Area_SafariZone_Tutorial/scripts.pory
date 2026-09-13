@@ -32,21 +32,23 @@ script Rogue_Area_SafariZone_Tutorial_OnMapLoad
         switch(var(VAR_CONN_DIR))
         {
             case HUB_AREA_CONN_EAST:
-                setobjectxyperm(OBJ_EVENT_BIRCH, 34, 15)
+                setobjectxyperm(OBJ_EVENT_BIRCH, 30, 15)
                 break
 
             case HUB_AREA_CONN_SOUTH:
-                setobjectxyperm(OBJ_EVENT_BIRCH, 17, 28)
+                setobjectxyperm(OBJ_EVENT_BIRCH, 18, 25)
                 break
 
             case HUB_AREA_CONN_WEST:
-                setobjectxyperm(OBJ_EVENT_BIRCH, 3, 15)
+                setobjectxyperm(OBJ_EVENT_BIRCH, 6, 15)
                 break
         }
     }
     else
     {
-        turnobject(OBJ_EVENT_BIRCH, DIR_SOUTH)
+        setflag(FLAG_HIDE_MONS)
+        setobjectxyperm(OBJ_EVENT_BIRCH, 18, 17)
+        setobjectmovementtype(OBJ_EVENT_BIRCH, MOVEMENT_TYPE_FACE_DOWN)
     }
 }
 
@@ -80,20 +82,33 @@ script Rogue_Area_SafariZone_Tutorial_FrameEnter
 {
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_REPORT_TO_PROF)
     {
-        lock
+        lockall
+        getplayerxy(VAR_0x8004, VAR_0x8005)
+        if(var(VAR_0x8004) != 18)
+        {
+            warpsilent(MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL, 9)
+            releaseall
+            end
+        }
+        if(var(VAR_0x8005) != 18)
+        {
+            warpsilent(MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL, 9)
+            releaseall
+            end
+        }
         turnobject(OBJ_EVENT_BIRCH, DIR_SOUTH)
         turnobject(OBJ_EVENT_ID_PLAYER, DIR_NORTH)
-        msgbox(format("BIRCH: Excellent work, {PLAYER}!\pAnd look—they weren't attacking at all.\pThey seem more confused than dangerous.\pSo much for a Pokémon invasion!\nHa-ha-ha!\pCome on, let's get back to the lab.\pI want to hear exactly what you observed."))
+        msgbox(format("BIRCH: Excellent work, {PLAYER}!\pYour new partner is safe, and I've secured the other two.\pWe'll have the glass repaired before this lab opens again.\pCome on, let's get back to my lab!"))
         warp(MAP_ROGUE_INTERIOR_PROF_LAB, 2)
-        release
+        releaseall
     }
     elif(flag(FLAG_HAS_ENTERED) == FALSE)
     {
         lock
-        msgbox(format("BIRCH: All right, {PLAYER}!\pThese Pokémon are far outside their usual habitats.\pI need a closer look—but first, we'll have to calm things down.\pHere, take this Poké Ball!"))
+        msgbox(format("BIRCH: The habitat glass broke!\pThese three got out, and they're frightened. Help me get them to safety.\pHere, take this Poké Ball!"))
         giveitem(ITEM_POKE_BALL)
 
-        msgbox(format("Try to catch one.\nI'll keep an eye on the rest!"))
+        msgbox(format("Try to catch one.\nI'll secure the other two!"))
         setflag(FLAG_HAS_ENTERED)
         release
     }
@@ -120,7 +135,7 @@ script Rogue_Area_SafariZone_Tutorial_InteractWildFollowMon
 script Rogue_Area_SafariZone_TryExitEast
 {
     lock
-    msgbox(format("(You can't leave whilst there are still Pokémon about!)"))
+    msgbox(format("(Help secure a Pokémon before leaving!)"))
     closemessage
 
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerLeft)
@@ -132,7 +147,7 @@ script Rogue_Area_SafariZone_TryExitEast
 script Rogue_Area_SafariZone_TryExitSouth
 {
     lock
-    msgbox(format("(You can't leave whilst there are still Pokémon about!)"))
+    msgbox(format("(Help secure a Pokémon before leaving!)"))
     closemessage
 
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerUp)
@@ -144,7 +159,7 @@ script Rogue_Area_SafariZone_TryExitSouth
 script Rogue_Area_SafariZone_TryExitWest
 {
     lock
-    msgbox(format("(You can't leave whilst there are still Pokémon about!)"))
+    msgbox(format("(Help secure a Pokémon before leaving!)"))
     closemessage
 
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerRight)
@@ -157,14 +172,14 @@ script Rogue_Area_SafariZone_Tutorial_TalkBirch
 {
     lock
     faceplayer
-    msgbox(format("BIRCH: Go on, {PLAYER}!\pWatch how it moves, then make your throw.\pI'll handle the others!"))
+    msgbox(format("BIRCH: Go on, {PLAYER}!\pWatch how it moves, then make your throw.\pI'll secure the others!"))
     release
 }
 
 script Rogue_Area_SafariZone_Tutorial_TalkRuinManiac
 {
     lock
-    msgbox(format("Oh gosh!\nWhat are we gonna do!?"))
+    msgbox(format("The glass just gave way!\pPlease help Birch catch the escaped Pokémon!"))
     release
 }
 
@@ -180,5 +195,10 @@ movement PlayerLeft
 
 movement PlayerUp
 {
-    walk_left
+    walk_up
+}
+
+script Rogue_Area_SafariZone_Tutorial_InteractPC
+{
+    msgbox(format("Containment alert!\pSecure the escaped Pokémon first."))
 }

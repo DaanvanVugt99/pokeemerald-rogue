@@ -55,17 +55,17 @@ TEST("Lab junction: all connections preserve doors, seal unused lanes and redire
             RogueHub_ApplyMapMetatiles();
             for (x = 13; x <= 15; ++x)
             {
-                EXPECT_EQ(!!MapGridIsImpassableAt(x + MAP_OFFSET, MAP_OFFSET), !(mask & 1));
-                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, MAP_OFFSET), mask & 1 ? MB_NORTH_ARROW_WARP : MB_NORMAL);
-                EXPECT_EQ(!!MapGridIsImpassableAt(x + MAP_OFFSET, 23 + MAP_OFFSET), !(mask & 4));
-                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 23 + MAP_OFFSET), mask & 4 ? MB_SOUTH_ARROW_WARP : MB_NORMAL);
+                EXPECT_EQ(!!MapGridIsImpassableAt(x + MAP_OFFSET, 1 + MAP_OFFSET), !(mask & 1));
+                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 1 + MAP_OFFSET), mask & 1 ? MB_NORTH_ARROW_WARP : MB_NORMAL);
+                EXPECT_EQ(!!MapGridIsImpassableAt(x + MAP_OFFSET, 20 + MAP_OFFSET), !(mask & 4));
+                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 20 + MAP_OFFSET), mask & 4 ? MB_SOUTH_ARROW_WARP : MB_NORMAL);
             }
             for (y = 8; y <= 10; ++y)
             {
-                EXPECT_EQ(!!MapGridIsImpassableAt(MAP_OFFSET, y + MAP_OFFSET), !(mask & 8));
-                EXPECT_EQ(MapGridGetMetatileBehaviorAt(MAP_OFFSET, y + MAP_OFFSET), mask & 8 ? MB_WEST_ARROW_WARP : MB_NORMAL);
-                EXPECT_EQ(!!MapGridIsImpassableAt(27 + MAP_OFFSET, y + MAP_OFFSET), !(mask & 2));
-                EXPECT_EQ(MapGridGetMetatileBehaviorAt(27 + MAP_OFFSET, y + MAP_OFFSET), mask & 2 ? MB_EAST_ARROW_WARP : MB_NORMAL);
+                EXPECT_EQ(!!MapGridIsImpassableAt(2 + MAP_OFFSET, y + MAP_OFFSET), !(mask & 8));
+                EXPECT_EQ(MapGridGetMetatileBehaviorAt(2 + MAP_OFFSET, y + MAP_OFFSET), mask & 8 ? MB_WEST_ARROW_WARP : MB_NORMAL);
+                EXPECT_EQ(!!MapGridIsImpassableAt(26 + MAP_OFFSET, y + MAP_OFFSET), !(mask & 2));
+                EXPECT_EQ(MapGridGetMetatileBehaviorAt(26 + MAP_OFFSET, y + MAP_OFFSET), mask & 2 ? MB_EAST_ARROW_WARP : MB_NORMAL);
             }
             for (x = 9; x <= 19; x += 10)
             {

@@ -181,3 +181,7 @@ cancellation, return rewards, followers, postgame scenes and each tunnel directi
   tile/palette bounds. The animation-only revision needs no battle-suite rerun.
 - No native emulator UI was available to this task. Preview inspection uses the
   actual assembled tiles, not a claim of completed in-game scene verification.
+
+Hallway threshold and centered-arrival updates are documented in
+[hub_hallways.md](hub_hallways.md); its coordinates supersede earlier edge-warp
+positions in this design history.

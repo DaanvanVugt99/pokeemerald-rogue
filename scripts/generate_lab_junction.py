@@ -87,9 +87,9 @@ def main():
             shaded(base+suffix,base,levels)
     shaded('FloorFadeNorth','Floor',(60,60,80,80))
     shaded('FloorFadeSouth','Floor',(80,80,60,60))
-    for name,base,behavior in [('WarpWest','FloorDim20',0x63),('WarpEast','FloorDim20',0x62),
-                              ('WarpNorth','FloorDim20',0x64),('WarpSouth','FloorDim20',0x65),
-                              ('WarpWestUpper','FloorShadowDim20',0x63),('WarpEastUpper','FloorShadowDim20',0x62)]:
+    for name,base,behavior in [('WarpWest','FloorDim40',0x63),('WarpEast','FloorDim40',0x62),
+                              ('WarpNorth','FloorDim40',0x64),('WarpSouth','FloorDim40',0x65),
+                              ('WarpWestUpper','FloorShadowDim40',0x63),('WarpEastUpper','FloorShadowDim40',0x62)]:
         b.alias(name,base,behavior)
 
     # Animate the HQ's existing shutter by retracting its two leaves. The frame
@@ -157,8 +157,8 @@ def main():
                 distance=x if x<4 else 28-x
                 a[y][x]=tile(base+('FadeWest' if x<4 else 'FadeEast') if distance==3 else base+('Dim40' if distance==2 else 'Dim20'))
         for x in (13,14,15):
-            for y,name in [(0,'WarpNorth'),(1,'FloorDim40'),(2,'FloorFadeNorth'),(19,'FloorFadeSouth'),(20,'FloorDim40'),(21,'FloorDim20'),(22,'FloorDim20'),(23,'WarpSouth')]:a[y][x]=tile(name)
-        for y in (8,9,10):a[y][0]=tile('WarpWestUpper' if y==8 else 'WarpWest');a[y][27]=tile('WarpEastUpper' if y==8 else 'WarpEast')
+            for y,name in [(0,'FloorDim20'),(1,'WarpNorth'),(2,'FloorFadeNorth'),(19,'FloorFadeSouth'),(20,'WarpSouth'),(21,'FloorDim20'),(22,'FloorDim20'),(23,'FloorDim20')]:a[y][x]=tile(name)
+        for y in (8,9,10):a[y][2]=tile('WarpWestUpper' if y==8 else 'WarpWest');a[y][26]=tile('WarpEastUpper' if y==8 else 'WarpEast')
         for x1,x2 in ((5,10),(18,23)):
             for y,name in [(11,'Void'),(12,'Wall'),(13,'WallBase')]:fill(a,x1,y,x2,y,name,True)
         for x in (11,17):
@@ -274,7 +274,7 @@ def main():
         return x,y
     workbench={(e['x'],e['y']) for e in events['object_events'] if e['graphics_id']=='OBJ_EVENT_GFX_WORK_TABLE'}
     workbench_approaches=[(x,y+1) for x,y in workbench]
-    for direction,bit,end in [('North',1,(14,0)),('East',2,(27,9)),('South',4,(14,23)),('West',8,(0,9))]:
+    for direction,bit,end in [('North',1,(14,1)),('East',2,(26,9)),('South',4,(14,20)),('West',8,(2,9))]:
         assert walk('BirchTutorialGuide'+direction,(9,6),effective(bit),workbench|{(9,5)})==end
     assert walk('BirchStartGame1',(8,7),effective(0),workbench|{(9,7)})==(9,5)
     assert walk('BirchStartGame2',(9,5),effective(0),workbench)==(9,4)
@@ -300,9 +300,9 @@ def main():
                             if 0<=nx<W and 0<=ny<H and not grid[ny][nx]&0xC00 and (nx,ny) not in occupied and (nx,ny) not in seen:seen.add((nx,ny));q.append((nx,ny))
                     for point in [(9,4),(19,4),(11,5),(17,5),(9,7),(14,11)]+workbench_approaches:assert point in seen,('Service unreachable',mask,unique,debug,workbench,point)
                     assert ((8,13) in seen)==unique and ((20,13) in seen)==debug
-                    for bit,points in [(1,[(x,0) for x in (13,14,15)]),(2,[(27,y) for y in (8,9,10)]),(4,[(x,23) for x in (13,14,15)]),(8,[(0,y) for y in (8,9,10)])]:
+                    for bit,points in [(1,[(x,1) for x in (13,14,15)]),(2,[(26,y) for y in (8,9,10)]),(4,[(x,20) for x in (13,14,15)]),(8,[(2,y) for y in (8,9,10)])]:
                         assert all((point in seen)==bool(mask&bit) for point in points),('Exit',mask,points)
-                    boundary={(x,y) for x,y in seen if x in (0,W-1) or y in (0,H-1)}
+                    boundary=({(x,y) for x in (13,14,15) for y in (1,20)} | {(x,y) for x in (2,26) for y in (8,9,10)}) & seen
                     warps={(w['x'],w['y']) for w in events['warp_events']}
                     assert boundary<=warps,('Uncovered exit lane',mask,boundary-warps)
     print(f'Lab junction {"verified" if args.check else "generated"}: {len(b.tiles)} tiles, {len(b.pals)} palettes; 128 connectivity/service states pass.')

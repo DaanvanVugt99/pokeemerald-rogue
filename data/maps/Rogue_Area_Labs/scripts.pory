@@ -139,26 +139,26 @@ movement BirchTutorialGuideNorth
 {
     walk_fast_down * 3
     walk_fast_right * 5
-    walk_fast_up * 9
+    walk_fast_up * 8
 }
 
 movement BirchTutorialGuideEast
 {
     walk_fast_down * 3
-    walk_fast_right * 18
+    walk_fast_right * 17
 }
 
 movement BirchTutorialGuideSouth
 {
     walk_fast_down * 3
     walk_fast_right * 5
-    walk_fast_down * 14
+    walk_fast_down * 11
 }
 
 movement BirchTutorialGuideWest
 {
     walk_fast_down * 3
-    walk_fast_left * 9
+    walk_fast_left * 7
 }
 
 script Rogue_Area_Labs_LabSign

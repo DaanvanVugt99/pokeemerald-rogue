@@ -245,3 +245,9 @@ const u16 gMetatileAttributes_LabJunction[] = INCBIN_U16("data/tilesets/primary/
 
 const u16 gMetatiles_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatiles.bin");
 const u16 gMetatileAttributes_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatile_attributes.bin");
+
+const u16 gMetatiles_SafariLab[] = INCBIN_U16("data/tilesets/primary/safari_lab/metatiles.bin");
+const u16 gMetatileAttributes_SafariLab[] = INCBIN_U16("data/tilesets/primary/safari_lab/metatile_attributes.bin");
+
+const u16 gMetatiles_SafariLabSecondary[] = INCBIN_U16("data/tilesets/secondary/safari_lab/metatiles.bin");
+const u16 gMetatileAttributes_SafariLabSecondary[] = INCBIN_U16("data/tilesets/secondary/safari_lab/metatile_attributes.bin");

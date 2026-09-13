@@ -48,6 +48,8 @@
 #define MAP_ROGUE_PORTAL_CORRIDOR_VERTICAL   (15 | (2 << 8))
 #define MAP_ROGUE_LAB_CORRIDOR_HORIZONTAL    (16 | (2 << 8))
 #define MAP_ROGUE_LAB_CORRIDOR_VERTICAL      (17 | (2 << 8))
+#define MAP_ROGUE_SAFARI_CORRIDOR_HORIZONTAL (18 | (2 << 8))
+#define MAP_ROGUE_SAFARI_CORRIDOR_VERTICAL   (19 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

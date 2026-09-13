@@ -1,0 +1,219 @@
+{
+  "rock": [
+    {
+      "name": "Rock_0_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_0",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_0_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_1",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_0_2",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_2",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_2",
+      "metatile": 588,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_2",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_2",
+      "metatile": 580,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_2",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_2",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_0_3",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_3",
+      "metatile": 588,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_3",
+      "metatile": 587,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_3",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_3",
+      "metatile": 589,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_3",
+      "metatile": 580,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_3",
+      "metatile": 613,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_0_4",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_4",
+      "metatile": 587,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_4",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_4",
+      "metatile": 520,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_4",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_4",
+      "metatile": 589,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_4",
+      "metatile": 577,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_0_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_1_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_2_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_3_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_4_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_5_5",
+      "metatile": 585,
+      "behavior": 0
+    },
+    {
+      "name": "Rock_6_5",
+      "metatile": 588,
+      "behavior": 0
+    }
+  ],
+  "hardware": "Galactic HQ complete specimen machinery (1,1), 2x3; lab junction structural metatiles",
+  "containment": "Private glass frames and expanded capsule housing; normal floor below transparent windows",
+  "pc": "Existing dark Adventure Console sprite",
+  "tiles": 173,
+  "palettes": 13
+}

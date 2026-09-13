@@ -39,6 +39,8 @@ void RogueHub_UpdateWarpStates();
 u16 RogueHub_GetWeatherState();
 void RogueHub_UpdateWanderMons();
 
+bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y);
+bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x, s16 *y);
 void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct WarpEvent *warp);
 bool8 RogueHub_AcceptMapConnection(struct MapHeader *mapHeader, const struct MapConnection *connection);
 void RogueHub_ApplyMapMetatiles();

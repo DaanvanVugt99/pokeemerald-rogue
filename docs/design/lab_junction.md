@@ -119,3 +119,7 @@ Interactive emulator verification is still required for door animation timing,
 follower movement, the complete opening conversation/entry/return sequence,
 teleport animation, and real save/reload. Rendered camera crops and automated
 checks do not substitute for those playthrough checks.
+
+Hallway threshold and centered-arrival updates are documented in
+[hub_hallways.md](hub_hallways.md); its coordinates supersede earlier edge-warp
+positions in this design history.

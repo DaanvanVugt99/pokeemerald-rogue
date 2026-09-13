@@ -1626,8 +1626,8 @@
       "name": "Rogue_Area_SafariZone_Layout",
       "width": 38,
       "height": 32,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Fallarbor",
+      "primary_tileset": "gTileset_SafariLab",
+      "secondary_tileset": "gTileset_SafariLabSecondary",
       "border_filepath": "data/layouts/Rogue_Area_SafariZone/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_SafariZone/map.bin"
     },
@@ -1676,8 +1676,8 @@
       "name": "Rogue_Area_SafariZone_Tutorial_Layout",
       "width": 38,
       "height": 32,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Fallarbor",
+      "primary_tileset": "gTileset_SafariLab",
+      "secondary_tileset": "gTileset_SafariLabSecondary",
       "border_filepath": "data/layouts/Rogue_Area_SafariZone_Tutorial/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_SafariZone_Tutorial/map.bin"
     },
@@ -2240,6 +2240,26 @@
       "secondary_tileset": "gTileset_LabJunctionSecondary",
       "border_filepath": "data/layouts/Rogue_LabCorridor_Vertical/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_LabCorridor_Vertical/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_SAFARI_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_SafariCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_SafariLab",
+      "secondary_tileset": "gTileset_SafariLabSecondary",
+      "border_filepath": "data/layouts/Rogue_SafariCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_SafariCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_SAFARI_CORRIDOR_VERTICAL",
+      "name": "Rogue_SafariCorridor_Vertical_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_SafariLab",
+      "secondary_tileset": "gTileset_SafariLabSecondary",
+      "border_filepath": "data/layouts/Rogue_SafariCorridor_Vertical/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_SafariCorridor_Vertical/map.bin"
     }
   ]
 }

@@ -5,8 +5,8 @@
   "music": "MUS_LITTLEROOT",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
-  "weather": "WEATHER_SHADE",
-  "map_type": "MAP_TYPE_ROUTE",
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,27 +14,27 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_HORIZONTAL",
       "offset": 12,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_HORIZONTAL",
       "offset": 12,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 14,
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_VERTICAL",
+      "offset": 15,
       "direction": "down"
     }
   ],
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 4,
-      "y": 14,
-      "elevation": 0,
+      "x": 9,
+      "y": 20,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -45,9 +45,9 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 34,
-      "y": 14,
-      "elevation": 0,
+      "x": 27,
+      "y": 20,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -55,18 +55,83 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_InteractWithWorkbench",
       "flag": "FLAG_ROGUE_HIDE_WORKBENCHES"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ADVENTURE_CONSOLE",
+      "x": 14,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_InteractPC",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_0",
+      "x": 10,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_DisplayMon",
+      "flag": "FLAG_TEMP_1"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_1",
+      "x": 26,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_DisplayMon",
+      "flag": "FLAG_TEMP_2"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_2",
+      "x": 10,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_DisplayMon",
+      "flag": "FLAG_TEMP_3"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_3",
+      "x": 26,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_DisplayMon",
+      "flag": "FLAG_TEMP_4"
     }
   ],
   "warp_events": [
     {
-      "x": 0,
+      "x": 4,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
+      "x": 4,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
@@ -74,27 +139,27 @@
     },
     {
       "x": 17,
-      "y": 31,
+      "y": 27,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
       "dest_warp_id": "0"
     },
     {
       "x": 18,
-      "y": 31,
+      "y": 27,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
       "dest_warp_id": "0"
     },
     {
-      "x": 37,
+      "x": 32,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
       "dest_warp_id": "0"
     },
     {
-      "x": 37,
+      "x": 32,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
@@ -102,30 +167,40 @@
     },
     {
       "x": 18,
-      "y": 5,
+      "y": 7,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_INTERIOR_SAFARI_CAVE",
       "dest_warp_id": "0"
     },
     {
       "x": 18,
-      "y": 19,
+      "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_INTERIOR_SAFARI_CAVE",
       "dest_warp_id": "0"
-    }
-  ],
-  "coord_events": [
-
-  ],
-  "bg_events": [
+    },
     {
-      "type": "sign",
-      "x": 20,
-      "y": 11,
+      "x": 4,
+      "y": 14,
       "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "Rogue_Area_SafariZone_TalkSign"
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 32,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE",
+      "dest_warp_id": "0"
     }
-  ]
+  ],
+  "coord_events": [],
+  "bg_events": []
 }

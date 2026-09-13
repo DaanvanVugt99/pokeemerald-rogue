@@ -183,8 +183,8 @@ def main():
         shaded(base+'Dim20',base,(20,20,20,20))
     shaded('FloorFadeSouth','Floor',(80,80,60,60))
     shaded('FloorDeepSouth','Floor',(40,40,20,20))
-    for name,base in [('WarpWest','FloorDim40'),('WarpEast','FloorDim20'),
-                      ('WarpWestUpper','FloorShadowDim40'),('WarpEastUpper','FloorShadowDim20'),
+    for name,base in [('WarpWest','FloorDim40'),('WarpEast','FloorDim40'),
+                      ('WarpWestUpper','FloorShadowDim40'),('WarpEastUpper','FloorShadowDim40'),
                       ('WarpSouth','FloorDeepSouth')]:
         b.metas[b.names[name]]=b.metas[b.names[base]][:]
     # The side controls share the console's dark grey casing. Recolor their private

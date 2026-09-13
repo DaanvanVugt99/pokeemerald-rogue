@@ -242,12 +242,12 @@ script Rogue_Interior_ProfLab_TriggerIntroInternal
     applymovement(OBJ_EVENT_RUIN_MANIAC, RuinManiacIntro0)
     waitmovement(0)
 
-    msgbox(format("P- P- Pokémon are invading!"))
+    msgbox(format("The habitat glass broke!\nThe Pokémon got out!"))
 
     applymovement(OBJ_EVENT_BIRCH, BirchIntro0)
     waitmovement(0)
 
-    msgbox(format("BIRCH: Pokémon are invading?!\pMy, my—that doesn't sound right.\pCome on, {PLAYER}!\nWe'd better take a look!"))
+    msgbox(format("BIRCH: The containment lab?\pWe need to get those Pokémon to safety.\pCome on, {PLAYER}!\nI could use your help!"))
     closemessage
 
     applymovement(OBJ_EVENT_RUIN_MANIAC, RuinManiacIntro1)

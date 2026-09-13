@@ -8,6 +8,10 @@ void RogueSafari_PushBoxMon(struct BoxPokemon* mon);
 void RogueSafari_PushLowPriorityMon(struct Pokemon* mon);
 
 void RogueSafari_ResetSpawns();
+void RogueSafari_SetupLabDisplays(void);
+u8 RogueSafari_GetLabDisplayIndex(u8 slot);
+bool8 RogueSafari_IsLabDisplay(struct ObjectEvent *object);
+void RogueSafari_PositionTutorialBirch(void);
 
 void RogueSafari_CopyFromSafariMon(struct RogueSafariMon* fromMon, struct BoxPokemon* toMon);
 void RogueSafari_CopyToSafariMon(struct BoxPokemon* fromMon, struct RogueSafariMon* toMon);

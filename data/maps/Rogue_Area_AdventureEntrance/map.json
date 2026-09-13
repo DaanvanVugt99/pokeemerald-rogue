@@ -204,14 +204,14 @@
       "dest_warp_id": "0"
     },
     {
-      "x": 19,
+      "x": 18,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
       "dest_warp_id": "0"
     },
     {
-      "x": 19,
+      "x": 18,
       "y": 12,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
@@ -232,7 +232,7 @@
       "dest_warp_id": "0"
     },
     {
-      "x": 19,
+      "x": 18,
       "y": 10,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_ADVENTURE_ENTRANCE",
@@ -249,8 +249,26 @@
   "coord_events": [
     {
       "type": "trigger",
-      "x": 19,
+      "x": 18,
       "y": 12,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "3",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacEast"
+    },
+    {
+      "type": "trigger",
+      "x": 18,
+      "y": 10,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "3",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacEast"
+    },
+    {
+      "type": "trigger",
+      "x": 18,
+      "y": 11,
       "elevation": 0,
       "var": "VAR_TEMP_2",
       "var_value": "3",
@@ -267,8 +285,44 @@
     },
     {
       "type": "trigger",
+      "x": 8,
+      "y": 15,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "0",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacSouth"
+    },
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 15,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "0",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacSouth"
+    },
+    {
+      "type": "trigger",
       "x": 0,
       "y": 12,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "2",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacWest"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 10,
+      "elevation": 0,
+      "var": "VAR_TEMP_2",
+      "var_value": "2",
+      "script": "Rogue_Area_AdventureEntrance_TriggerRuinManiacWest"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 11,
       "elevation": 0,
       "var": "VAR_TEMP_2",
       "var_value": "2",

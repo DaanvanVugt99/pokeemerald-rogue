@@ -738,7 +738,7 @@
                         {
                             "item_icon": "ITEM_TOWN_MAP",
                             "title": "Safari Area",
-                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}Mountains shift…",
+                            "subtitle": "{COLOR LIGHT_BLUE}{SHADOW BLUE}A passage opens…",
                             "fanfare": "MUS_RG_OBTAIN_KEY_ITEM"
                         }
                     }

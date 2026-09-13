@@ -7795,6 +7795,12 @@ void Rogue_StartRunPortalTransition(void)
 
 void Rogue_OnWarpIntoMap(void)
 {
+    // Center any lane-based hub arrival, including script and continue warps.
+    // The ordinary warp arrival animation then walks inward from the threshold.
+    if (gSaveBlock1Ptr->location.warpId >= 0)
+        RogueHub_GetWarpArrivalPosition(&gMapHeader, gSaveBlock1Ptr->location.warpId,
+            &gSaveBlock1Ptr->pos.x, &gSaveBlock1Ptr->pos.y);
+
     if(sPendingRoomEntrySetup)
     {
         struct WarpData deferredWarp = {};
@@ -7862,8 +7868,11 @@ void Rogue_OnWarpIntoMap(void)
     {
         EndRogueRun();
     }
-    else if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL)
+    else if(gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL
+        && VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON
+        && VarGet(VAR_ROGUE_STARTER0) == SPECIES_NONE)
     {
+        // Select once; saved choices and their follow graphics survive retries.
         // Generate starters now (Do it now, so config/pokedex settings can be used to limit starters moreso)
         struct StarterSelectionData starters = SelectStarterMons(FALSE);
         VarSet(VAR_ROGUE_STARTER0, starters.species[0]);
@@ -8440,6 +8449,16 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
     bool8 isLoadingSameMap = (gRogueLocal.recentObjectEventLoadedLayout == mapHeader->mapLayoutId);
     gRogueLocal.recentObjectEventLoadedLayout = mapHeader->mapLayoutId;
 
+    if (loadingFromSave && !Rogue_IsRunActive())
+    {
+        s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+        if (RogueHub_RecoverHallwayPosition(mapHeader, &x, &y))
+        {
+            SetContinueGameWarp(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE, x, y);
+            SetContinueGameWarpStatus();
+        }
+    }
+
     // Old entrance snapshots have no console and cache the outdoor NPC positions.
     // Reload through the existing continue warp so live objects and the camera are
     // rebuilt together; no serialized layout changes or save migration are needed.
@@ -8468,6 +8487,34 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
         }
         SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_LABS), MAP_NUM(ROGUE_AREA_LABS), WARP_ID_NONE, x, y);
         SetContinueGameWarpStatus();
+    }
+
+    if (loadingFromSave && !Rogue_IsRunActive()
+        && (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE || mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL))
+    {
+        u8 i;
+        bool8 hasConsole = FALSE;
+        s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+        for (i = 0; i < *objectEventCount; ++i)
+            if (objectEvents[i].graphicsId == OBJ_EVENT_GFX_ADVENTURE_CONSOLE && objectEvents[i].x == 14 && objectEvents[i].y == 8)
+                hasConsole = TRUE;
+        if (!hasConsole || x < 0 || y < 0 || x >= mapHeader->mapLayout->width || y >= mapHeader->mapLayout->height
+            || (mapHeader->mapLayout->map[y * mapHeader->mapLayout->width + x] & MAPGRID_COLLISION_MASK))
+        {
+            u16 intro = VarGet(VAR_ROGUE_INTRO_STATE);
+            if (intro == ROGUE_INTRO_STATE_CATCH_MON)
+            {
+                u8 warp = 0;
+                if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_EAST) == HUB_AREA_ADVENTURE_ENTRANCE) warp = 4;
+                else if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_SOUTH) == HUB_AREA_ADVENTURE_ENTRANCE) warp = 2;
+                SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE_TUTORIAL), MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL), warp, 0, 0);
+            }
+            else if (intro == ROGUE_INTRO_STATE_REPORT_TO_PROF)
+                SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE_TUTORIAL), MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL), 9, 0, 0);
+            else
+                SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE), 7, 0, 0);
+            SetContinueGameWarpStatus();
+        }
     }
 
     // If we're in run and not trying to exit (gRogueAdvPath.currentRoomType isn't wiped at this point)
@@ -10042,18 +10089,15 @@ void Rogue_Safari_EndWildBattle(void)
             for(i = 0; i < gSaveBlock1Ptr->objectEventTemplatesCount; ++i)
             {
                 // Hide all the mons and the NPC
-                if(gSaveBlock1Ptr->objectEventTemplates[i].graphicsId == OBJ_EVENT_GFX_MISC_RUIN_MANIAC || (gSaveBlock1Ptr->objectEventTemplates[i].graphicsId >= OBJ_EVENT_GFX_FOLLOW_MON_FIRST && gSaveBlock1Ptr->objectEventTemplates[i].graphicsId <= OBJ_EVENT_GFX_FOLLOW_MON_LAST))
+                if(gSaveBlock1Ptr->objectEventTemplates[i].graphicsId == OBJ_EVENT_GFX_MISC_BACKPACKER_F || (gSaveBlock1Ptr->objectEventTemplates[i].graphicsId >= OBJ_EVENT_GFX_FOLLOW_MON_FIRST && gSaveBlock1Ptr->objectEventTemplates[i].graphicsId <= OBJ_EVENT_GFX_FOLLOW_MON_LAST))
                 {
                     RemoveObjectEventByLocalIdAndMap(gSaveBlock1Ptr->objectEventTemplates[i].localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
                     FlagSet(gSaveBlock1Ptr->objectEventTemplates[i].flagId);
                 }
 
-                // Move prof just above the player
+                // Gather at the clear central station after the catch.
                 if(gSaveBlock1Ptr->objectEventTemplates[i].graphicsId == OBJ_EVENT_GFX_PROF_BIRCH)
-                {
-                    SetObjEventTemplateCoords(gSaveBlock1Ptr->objectEventTemplates[i].localId, gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y - 2);
-                    TryMoveObjectEventToMapCoords(gSaveBlock1Ptr->objectEventTemplates[i].localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y - 2);
-                }
+                    RogueSafari_PositionTutorialBirch();
             }
 
             // Prof may not have been in view, so force it to spawn

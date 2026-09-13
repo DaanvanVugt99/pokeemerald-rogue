@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/portal_room_tiles.h"
 #include "constants/lab_junction_tiles.h"
+#include "constants/safari_lab_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1004,7 +1005,7 @@ u8 RogueHub_GetHubVariantNumber()
     return gSaveBlock2Ptr->playerTrainerId[0];
 }
 
-void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct WarpEvent *warp)
+static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpId)
 {
     u8 area = GetAreaForLayout(mapHeader->mapLayoutId);
 
@@ -1025,20 +1026,104 @@ void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct 
         else if (warpId == 18) warpId = 4;
     }
 
-    if(area != HUB_AREA_NONE)
+    if (area == HUB_AREA_SAFARI_ZONE)
+    {
+        if (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL)
+        {
+            if (warpId == 6) warpId = 0;
+            else if (warpId == 7) warpId = 4;
+            else if (warpId == 8) warpId = 2;
+        }
+        else
+        {
+            if (warpId == 8) warpId = 0;
+            else if (warpId == 9) warpId = 4;
+            else if (warpId == 10) warpId = 2;
+        }
+    }
+
+    if (area != HUB_AREA_NONE)
     {
         u8 dir;
+        for (dir = HUB_AREA_CONN_SOUTH; dir <= HUB_AREA_CONN_EAST; ++dir)
+            if (CanAreaConnect(area, dir)
+                && (gRogueHubAreas[area].connectionWarps[dir][0] == warpId
+                    || gRogueHubAreas[area].connectionWarps[dir][1] == warpId))
+                return dir;
+    }
+    return HUB_AREA_CONN_COUNT;
+}
+
+bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y)
+{
+    u8 i, dir;
+    s16 minX, maxX, minY, maxY;
+    switch (mapHeader->mapLayoutId)
+    {
+    case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
+    case LAYOUT_ROGUE_AREA_LABS:
+    case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
+    case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
+        break;
+    default:
+        return FALSE;
+    }
+    if (mapHeader->events == NULL || warpId >= mapHeader->events->warpCount)
+        return FALSE;
+    dir = GetConnectionWarpDirection(mapHeader, warpId);
+    if (dir > HUB_AREA_CONN_EAST)
+        return FALSE; // Interior doors, portal returns and teleport arrivals.
+    minX = maxX = mapHeader->events->warps[warpId].x;
+    minY = maxY = mapHeader->events->warps[warpId].y;
+    for (i = 0; i < mapHeader->events->warpCount; ++i)
+        if (GetConnectionWarpDirection(mapHeader, i) == dir)
+        {
+            const struct WarpEvent *lane = &mapHeader->events->warps[i];
+            if (lane->x < minX) minX = lane->x;
+            if (lane->x > maxX) maxX = lane->x;
+            if (lane->y < minY) minY = lane->y;
+            if (lane->y > maxY) maxY = lane->y;
+        }
+    *x = (minX + maxX) / 2;
+    *y = (minY + maxY) / 2;
+    return TRUE;
+}
+
+bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x, s16 *y)
+{
+    u8 i;
+    if (mapHeader->events == NULL)
+        return FALSE;
+    // Old saves may be standing beyond a threshold that has moved inward.
+    for (i = 0; i < mapHeader->events->warpCount; ++i)
+    {
+        s16 centerX, centerY;
+        u8 dir;
+        if (!RogueHub_GetWarpArrivalPosition(mapHeader, i, &centerX, &centerY))
+            continue;
+        dir = GetConnectionWarpDirection(mapHeader, i);
+        if ((dir == HUB_AREA_CONN_WEST && *x < centerX && *y >= centerY - 1 && *y <= centerY + 1)
+            || (dir == HUB_AREA_CONN_EAST && *x > centerX && *y >= centerY - 1 && *y <= centerY + 1)
+            || (dir == HUB_AREA_CONN_NORTH && *y < centerY && *x >= centerX - 1 && *x <= centerX + 1)
+            || (dir == HUB_AREA_CONN_SOUTH && *y > centerY && *x >= centerX - 1 && *x <= centerX + 1))
+        {
+            *x = centerX;
+            *y = centerY;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct WarpEvent *warp)
+{
+    u8 area = GetAreaForLayout(mapHeader->mapLayoutId);
+
+    if(area != HUB_AREA_NONE)
+    {
+        u8 dir = GetConnectionWarpDirection(mapHeader, warpId);
         u8 warpArea = HUB_AREA_NONE;
         u8 enterDir = HUB_AREA_CONN_SOUTH;
-
-        for(dir = HUB_AREA_CONN_SOUTH; dir <= HUB_AREA_CONN_EAST; ++dir)
-        {
-            if(CanAreaConnect(area, dir))
-            {
-                if(gRogueHubAreas[area].connectionWarps[dir][0] == warpId || gRogueHubAreas[area].connectionWarps[dir][1] == warpId)
-                    break;
-            }
-        }
 
         // We're trying to warp out into a valid direction
         if(dir <= HUB_AREA_CONN_EAST)
@@ -1113,6 +1198,7 @@ void RogueHub_ApplyMapMetatiles()
 
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateSafariAreaMetatiles();
         break;
 
@@ -1575,28 +1661,28 @@ static void RogueHub_UpdateFarmingAreaMetatiles()
 
 static void RogueHub_UpdateSafariAreaMetatiles()
 {
-    // Remove connectionss
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(36, 13);
+        MetatileFill_Tile(0, 12, 5, 19, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(6, 12, 6, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitVertical(16, 31);
-        MetatileFill_TreeCaps(16, 31, 19);
+        MetatileFill_Tile(31, 12, 37, 19, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(30, 12, 30, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(0, 13);
+        MetatileFill_Tile(16, 23, 20, 23, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 24, 20, 24, METATILE_SafariLab_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 25, 20, 25, METATILE_SafariLab_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 26, 20, 31, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
     }
-
-    // Open cave
-    if(RogueHub_HasUpgrade(HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE))
+    if (gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
+        && RogueHub_HasUpgrade(HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE))
     {
-        MetatileSet_Tile(18, 4, METATILE_Fallarbor_BrownCaveEntrance_Top);
-        MetatileSet_Tile(18, 5, METATILE_Fallarbor_BrownCaveEntrance_Bottom);
+        MetatileSet_Tile(18, 6, METATILE_SafariLab_CaveTop | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(18, 7, METATILE_SafariLab_CaveDoor);
     }
 }
 

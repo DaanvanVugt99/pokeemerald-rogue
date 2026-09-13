@@ -5,8 +5,8 @@
   "music": "MUS_LITTLEROOT",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
-  "weather": "WEATHER_SHADE",
-  "map_type": "MAP_TYPE_ROUTE",
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,17 +14,17 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 14,
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_VERTICAL",
+      "offset": 15,
       "direction": "down"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_HORIZONTAL",
       "offset": 12,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_SAFARI_CORRIDOR_HORIZONTAL",
       "offset": 12,
       "direction": "right"
     }
@@ -32,12 +32,12 @@
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_0",
-      "x": 12,
-      "y": 16,
+      "x": 16,
+      "y": 11,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
-      "movement_range_x": 2,
-      "movement_range_y": 2,
+      "movement_range_x": 1,
+      "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_SafariZone_Tutorial_InteractWildFollowMon",
@@ -45,12 +45,12 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_1",
-      "x": 24,
-      "y": 17,
+      "x": 20,
+      "y": 14,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
-      "movement_range_x": 2,
-      "movement_range_y": 2,
+      "movement_range_x": 1,
+      "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_SafariZone_Tutorial_InteractWildFollowMon",
@@ -58,12 +58,12 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_2",
-      "x": 16,
-      "y": 23,
+      "x": 18,
+      "y": 21,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
-      "movement_range_x": 2,
-      "movement_range_y": 2,
+      "movement_range_x": 1,
+      "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_SafariZone_Tutorial_InteractWildFollowMon",
@@ -72,7 +72,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_PROF_BIRCH",
       "x": 18,
-      "y": 13,
+      "y": 18,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -84,28 +84,41 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MISC_BACKPACKER_F",
-      "x": 16,
-      "y": 19,
+      "x": 21,
+      "y": 20,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_WALK_SEQUENCE_UP_RIGHT_DOWN_LEFT",
-      "movement_range_x": 3,
-      "movement_range_y": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Rogue_Area_SafariZone_Tutorial_TalkRuinManiac",
       "flag": "FLAG_TEMP_1"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_ADVENTURE_CONSOLE",
+      "x": 14,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Rogue_Area_SafariZone_Tutorial_InteractPC",
+      "flag": "0"
     }
   ],
   "warp_events": [
     {
-      "x": 1,
+      "x": 4,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"
     },
     {
-      "x": 1,
+      "x": 4,
       "y": 16,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
@@ -113,29 +126,57 @@
     },
     {
       "x": 17,
-      "y": 30,
+      "y": 27,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"
     },
     {
       "x": 18,
-      "y": 30,
+      "y": 27,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"
     },
     {
-      "x": 36,
+      "x": 32,
       "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"
     },
     {
-      "x": 36,
+      "x": 32,
       "y": 16,
       "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 4,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 32,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 18,
+      "elevation": 3,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"
     }
@@ -143,60 +184,85 @@
   "coord_events": [
     {
       "type": "trigger",
-      "x": 0,
+      "x": 4,
       "y": 15,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "2",
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitWest"
     },
     {
       "type": "trigger",
-      "x": 0,
+      "x": 4,
       "y": 16,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "2",
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitWest"
     },
     {
       "type": "trigger",
       "x": 17,
-      "y": 31,
+      "y": 27,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "0",
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitSouth"
     },
     {
       "type": "trigger",
       "x": 18,
-      "y": 31,
+      "y": 27,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "0",
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitSouth"
     },
     {
       "type": "trigger",
-      "x": 37,
+      "x": 32,
       "y": 15,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
+      "var": "VAR_ROGUE_INTRO_STATE",
       "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitEast"
     },
     {
       "type": "trigger",
-      "x": 37,
+      "x": 32,
       "y": 16,
       "elevation": 0,
-      "var": "VAR_TEMP_0",
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
+      "script": "Rogue_Area_SafariZone_TryExitEast"
+    },
+    {
+      "type": "trigger",
+      "x": 4,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
+      "script": "Rogue_Area_SafariZone_TryExitWest"
+    },
+    {
+      "type": "trigger",
+      "x": 19,
+      "y": 27,
+      "elevation": 0,
+      "var": "VAR_ROGUE_INTRO_STATE",
+      "var_value": "3",
+      "script": "Rogue_Area_SafariZone_TryExitSouth"
+    },
+    {
+      "type": "trigger",
+      "x": 32,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_ROGUE_INTRO_STATE",
       "var_value": "3",
       "script": "Rogue_Area_SafariZone_TryExitEast"
     }
   ],
-  "bg_events": [
-
-  ]
+  "bg_events": []
 }

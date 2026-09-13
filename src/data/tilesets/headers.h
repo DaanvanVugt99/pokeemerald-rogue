@@ -979,3 +979,25 @@ const struct Tileset gTileset_LabJunctionSecondary =
     .metatileAttributes = gMetatileAttributes_LabJunctionSecondary,
     .callback = NULL,
 };
+
+const struct Tileset gTileset_SafariLab =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_SafariLab,
+    .palettes = gTilesetPalettes_SafariLab,
+    .metatiles = gMetatiles_SafariLab,
+    .metatileAttributes = gMetatileAttributes_SafariLab,
+    .callback = NULL,
+};
+
+const struct Tileset gTileset_SafariLabSecondary =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_SafariLabSecondary,
+    .palettes = gTilesetPalettes_SafariLab,
+    .metatiles = gMetatiles_SafariLabSecondary,
+    .metatileAttributes = gMetatileAttributes_SafariLabSecondary,
+    .callback = NULL,
+};

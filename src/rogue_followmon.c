@@ -625,6 +625,9 @@ bool8 FollowMon_IsCollisionExempt(struct ObjectEvent* obstacle, struct ObjectEve
 {
     struct ObjectEvent* player = &gObjectEvents[gPlayerAvatar.objectEventId];
 
+    if(RogueSafari_IsLabDisplay(obstacle) || RogueSafari_IsLabDisplay(collider))
+        return FALSE;
+
     if(FollowMon_IsItemRoomSableyeObject(obstacle) || FollowMon_IsItemRoomSableyeObject(collider))
         return FALSE;
 
@@ -1296,6 +1299,10 @@ void FollowMon_RecountActiveObjects()
 
 void FollowMon_OnObjectEventSpawned(struct ObjectEvent *objectEvent)
 {
+    // Containment objects may enter/leave the camera, but are not wild spawns.
+    if(RogueSafari_IsLabDisplay(objectEvent))
+        return;
+
     if(PlaySpawnAnims())
     {
         u16 spawnSlot = objectEvent->graphicsId - OBJ_EVENT_GFX_FOLLOW_MON_0;
@@ -1309,6 +1316,9 @@ void FollowMon_OnObjectEventSpawned(struct ObjectEvent *objectEvent)
 
 void FollowMon_OnObjectEventRemoved(struct ObjectEvent *objectEvent)
 {
+    if(RogueSafari_IsLabDisplay(objectEvent))
+        return;
+
     if(PlaySpawnAnims())
     {
         u16 spawnSlot = objectEvent->graphicsId - OBJ_EVENT_GFX_FOLLOW_MON_0;

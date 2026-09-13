@@ -4,9 +4,15 @@
 #include "constants/pokemon.h"
 #include "constants/rogue.h"
 #include "constants/species.h"
+#include "constants/event_objects.h"
+#include "constants/flags.h"
+#include "constants/vars.h"
+#include "constants/event_object_movement.h"
 
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "fieldmap.h"
+#include "overworld.h"
 #include "pokemon.h"
 #include "random.h"
 #include "string_util.h"
@@ -120,6 +126,58 @@ void RogueSafari_ResetSpawns()
     {
         sSafariData.slotToIndexMap[i] = INVALID_SAFARI_MON_IDX;
     }
+}
+
+bool8 RogueSafari_IsLabDisplay(struct ObjectEvent *object)
+{
+    return gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
+        && object->localId >= 4 && object->localId <= 7;
+}
+
+u8 RogueSafari_GetLabDisplayIndex(u8 slot)
+{
+    return slot < 4 ? sSafariData.slotToIndexMap[slot] : INVALID_SAFARI_MON_IDX;
+}
+
+void RogueSafari_SetupLabDisplays(void)
+{
+    u8 slot, i, index = sSafariData.spawnIndex % ROGUE_SAFARI_LEGENDS_START_INDEX;
+    // Fixed, bounded map objects use the regular buffer only. The PC still
+    // lists entries whose unusually large overworld art cannot fit the glass.
+    for (slot = 0; slot < 4; ++slot)
+    {
+        FlagSet(FLAG_TEMP_1 + slot);
+        sSafariData.slotToIndexMap[slot] = INVALID_SAFARI_MON_IDX;
+    }
+    for (slot = 0, i = 0; i < ROGUE_SAFARI_LEGENDS_START_INDEX && slot < 4; ++i)
+    {
+        struct RogueSafariMon *mon = &gRogueSaveBlock->safariMons[index];
+        if (mon->species != SPECIES_NONE && FollowMon_IsSlotEnabled(slot))
+        {
+            u32 customId = mon->customMonLookup == 0 ? 0 : gRogueSaveBlock->safariMonCustomIds[mon->customMonLookup - 1];
+            const struct ObjectEventGraphicsInfo *gfx;
+            FollowMon_SetGraphics(slot, Rogue_GetEggSpecies(mon->species), mon->shinyFlag != 0, customId);
+            gfx = GetFollowMonObjectEventInfo(OBJ_EVENT_GFX_FOLLOW_MON_0 + slot);
+            if (gfx->width <= 32 && gfx->height <= 32)
+            {
+                sSafariData.slotToIndexMap[slot] = index;
+                FlagClear(FLAG_TEMP_1 + slot);
+                ++slot;
+            }
+        }
+        index = (index + 1) % ROGUE_SAFARI_LEGENDS_START_INDEX;
+    }
+    for (; slot < 4; ++slot)
+        FollowMon_SetGraphics(slot, SPECIES_NONE, FALSE, 0);
+}
+
+void RogueSafari_PositionTutorialBirch(void)
+{
+    // Gather at a known clear dialogue station after the catch. Arbitrary
+    // player-relative coordinates can put Birch inside a habitat wall.
+    SetObjEventTemplateCoords(4, 18, 17);
+    TryMoveObjectEventToMapCoords(4, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, 18, 17);
+    VarSet(VAR_TEMP_2, 0);
 }
 
 #define COPY_MON_DATA(param, data) \

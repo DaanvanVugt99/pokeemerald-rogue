@@ -3,13 +3,21 @@ const VAR_SAFARI_PURCHASE_CONTEXT = VAR_0x8000
 const SAFARI_PURCHASE_CONTEXT_AREA = 0
 const SAFARI_SELECTED_BACK = 12
 
-mapscripts Rogue_Area_SafariZone_MapScripts {}
-
-script Rogue_Area_SafariZone_TalkSign
+mapscripts Rogue_Area_SafariZone_MapScripts
 {
-    lock
+    MAP_SCRIPT_ON_LOAD: Rogue_Area_SafariZone_OnLoad
+}
 
-    msgbox(format("It's a sign which lists all of the Pokémon that have been recently sighted in the Safari Area!\pYou can offer {POKEBLOCK} to bring one back with you."))
+script Rogue_Area_SafariZone_OnLoad
+{
+    callnative(RogueSafari_SetupLabDisplays)
+}
+
+script Rogue_Area_SafariZone_InteractPC
+{
+    lockall
+
+    msgbox(format("Safari Lab terminal.\pView the Pokémon housed here, or offer {POKEBLOCK} to take one with you."))
 
     begindynamicmultichoice
     appenddynamicmultichoice("View Pokémon", 0)
@@ -37,14 +45,20 @@ script Rogue_Area_SafariZone_TalkSign
             }
 
         case 1:
-            msgbox(format("This will dismiss any Pokémon currently roaming in the Safari Area.\pAre you sure you want to do this?"), MSGBOX_YESNO)
+            msgbox(format("This will dismiss any Pokémon currently housed in the Safari Lab.\pAre you sure you want to do this?"), MSGBOX_YESNO)
 
             if(var(VAR_RESULT) == YES)
             {
                 special(RogueSafari_ResetAllRegularEntries)
-                special(ReloadWarpSilent)
             }
     }
 
-    release
+    closemessage
+    special(ReloadWarpSilent)
+    releaseall
+}
+
+script Rogue_Area_SafariZone_DisplayMon
+{
+    msgbox(format("Use the Safari PC to view the Pokémon housed here."))
 }
