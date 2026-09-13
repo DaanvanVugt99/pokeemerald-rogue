@@ -8569,12 +8569,21 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
     if (loadingFromSave && !Rogue_IsRunActive()
         && (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE || mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL))
     {
-        u8 i;
+        u8 i, j;
         bool8 hasConsole = FALSE;
         s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
-        for (i = 0; i < *objectEventCount; ++i)
-            if (objectEvents[i].graphicsId == OBJ_EVENT_GFX_ADVENTURE_CONSOLE && objectEvents[i].x == 14 && objectEvents[i].y == 8)
-                hasConsole = TRUE;
+        // Follow the authored console so map edits do not invalidate current saves.
+        for (i = 0; i < mapHeader->events->objectEventCount; ++i)
+        {
+            const struct ObjectEventTemplate *expected = &mapHeader->events->objectEvents[i];
+            if (expected->graphicsId != OBJ_EVENT_GFX_ADVENTURE_CONSOLE)
+                continue;
+            for (j = 0; j < *objectEventCount; ++j)
+                if (objectEvents[j].localId == expected->localId && objectEvents[j].graphicsId == expected->graphicsId
+                    && objectEvents[j].x == expected->x && objectEvents[j].y == expected->y)
+                    hasConsole = TRUE;
+            break;
+        }
         if (!hasConsole || x < 0 || y < 0 || x >= mapHeader->mapLayout->width || y >= mapHeader->mapLayout->height
             || (mapHeader->mapLayout->map[y * mapHeader->mapLayout->width + x] & MAPGRID_COLLISION_MASK))
         {

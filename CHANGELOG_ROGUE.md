@@ -45,6 +45,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Match Safari save recovery against the authored console position so valid
+  saves resume where the player stopped, while obsolete layouts still recover.
+
 - Anchor the Main Hall builder above the authored workbench for his tutorial.
   Update the player approach, demonstration movement, and saved-scene recovery
   to follow the current station instead of its obsolete northwest coordinates.
