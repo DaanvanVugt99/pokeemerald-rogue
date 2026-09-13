@@ -1298,26 +1298,25 @@ static void RogueHub_UpdateLabsAreaMetatiles()
     if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(25, 6, 27, 13, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(24, 6, 24, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 5, 24, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_Tile(12, 16, 16, 16, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(12, 17, 16, 17, METATILE_LabJunction_Wall | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(12, 18, 16, 18, METATILE_LabJunction_WallBase | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(12, 19, 16, 23, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 15, METATILE_LabJunction_Floor);
+        MetatileSet_Tile(16, 15, METATILE_LabJunction_Floor);
+        MetatileFill_Tile(12, 16, 16, 23, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_LABS, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(0, 6, 3, 13, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(4, 6, 4, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 5, 4, 11, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
     }
     // Hidden wings are blank structural walls until their existing gate opens.
     if (RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB))
     {
         SetLabJunctionDoor(8, 13);
-        MetatileSet_Tile(10, 12, METATILE_LabJunction_SignTop | MAPGRID_COLLISION_MASK);
-        MetatileSet_Tile(10, 13, METATILE_LabJunction_SignBase | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(10, 12, METATILE_HubFurnishings_DoorSignTop | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(10, 13, METATILE_HubFurnishings_DoorSignBase | MAPGRID_COLLISION_MASK);
     }
 #ifdef ROGUE_DEBUG
     SetLabJunctionDoor(20, 13);
@@ -1326,22 +1325,24 @@ static void RogueHub_UpdateLabsAreaMetatiles()
 
 static void RogueHub_UpdateAdventureEntranceAreaMetatiles()
 {
-    // No outdoor path fixups: these tile IDs belong to the private base tileset.
+    // Close the authored indoor edges using the shared hub tileset aliases.
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(17, 8, 19, 15, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 8, 16, 13, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 8, 16, 11, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(16, 12, METATILE_PortalRoom_PillarEnd | MAPGRID_COLLISION_MASK);
     }
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_Tile(7, 13, 11, 13, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(7, 14, 11, 14, METATILE_PortalRoom_Wall | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(7, 15, 11, 15, METATILE_PortalRoom_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(7, 12, METATILE_PortalRoom_Floor);
+        MetatileSet_Tile(11, 12, METATILE_PortalRoom_Floor);
+        MetatileFill_Tile(7, 13, 11, 15, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
     }
     if(RogueHub_GetAreaAtConnection(HUB_AREA_ADVENTURE_ENTRANCE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(0, 8, 1, 15, METATILE_PortalRoom_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(2, 8, 2, 13, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(2, 8, 2, 11, METATILE_PortalRoom_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(2, 12, METATILE_PortalRoom_PillarEnd | MAPGRID_COLLISION_MASK);
     }
 }
 
@@ -1670,19 +1671,19 @@ static void RogueHub_UpdateSafariAreaMetatiles()
     if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(0, 12, 5, 19, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(6, 12, 6, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(6, 11, 6, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(31, 12, 37, 19, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(30, 12, 30, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(30, 11, 30, 17, METATILE_SafariLab_Pillar | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_Tile(16, 23, 20, 23, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 24, 20, 24, METATILE_SafariLab_Wall | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 25, 20, 25, METATILE_SafariLab_WallBase | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 26, 20, 31, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
+        // Continue the authored floor edge; remove the corridor and its caps.
+        MetatileSet_Tile(16, 22, METATILE_SafariLab_Floor);
+        MetatileSet_Tile(20, 22, METATILE_SafariLab_Floor);
+        MetatileFill_Tile(16, 23, 20, 31, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
     }
     if (gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
         && RogueHub_HasUpgrade(HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE))
@@ -1820,10 +1821,7 @@ static void RogueHub_UpdateTownSquareAreaMetatiles()
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_Tile(16, 25, 20, 25, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 26, 20, 26, METATILE_MainHall_Wall | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 27, 20, 27, METATILE_MainHall_WallBase | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(16, 28, 20, 29, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 25, 20, 29, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {

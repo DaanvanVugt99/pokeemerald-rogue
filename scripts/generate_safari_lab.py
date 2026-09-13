@@ -17,6 +17,11 @@ HABITATS=((8,9),(23,9))
 CAPSULES=((9,5),(25,5))
 
 def main():
+    # Converted districts share one asset pipeline. Retain the original
+    # composition recipes below as provenance for the immutable source art.
+    if (ROOT/'tools/data/hub_tiles.json').exists():
+        from generate_hub_tiles import main as generate_shared_hub
+        return generate_shared_hub()
     ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');ap.add_argument('--init-layout',action='store_true');args=ap.parse_args()
     assert not(args.check and args.init_layout)
     b=Builder();b.sources['junction']=Source('lab_junction','lab_junction');b.sources['safari']=Source('general_hub','fallarbor');b.sources['lab']=Source('building','lab')
@@ -199,10 +204,10 @@ def main():
         a=[r[:] for r in a]
         for bit,x1,x2,pillar in ((1,0,5,6),(4,31,37,30)):
             if not mask&bit:
-                fill(a,x1,12,x2,19,'Void',True);fill(a,pillar,12,pillar,17,'Pillar',True)
+                fill(a,x1,12,x2,19,'Void',True);fill(a,pillar,11,pillar,17,'Pillar',True)
         if not mask&2:
-            for y,n in ((23,'Void'),(24,'Wall'),(25,'WallBase')):fill(a,16,y,20,y,n,True)
-            fill(a,16,26,20,31,'Void',True)
+            a[22][16]=t('Floor');a[22][20]=t('Floor')
+            fill(a,16,23,20,31,'Void',True)
         if cave:a[6][18]=t('CaveTop',True);a[7][18]=t('CaveDoor')
         return a
     def render(a):

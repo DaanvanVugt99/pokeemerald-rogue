@@ -274,7 +274,7 @@ movement FaceRight
 
 script Rogue_Area_AdventureEntrance_SpeakNurse
 {
-    lockall
+    lock
     faceplayer
 
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)
@@ -333,7 +333,7 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
         msgbox(format("Use the Adventure Console in front of the gateway when you are ready.\pIt can prepare an Adventure and send you through the portal."))
     }
 
-    releaseall
+    release
 }
 
 script Rogue_Area_AdventureEntrance_IntroduceAscension

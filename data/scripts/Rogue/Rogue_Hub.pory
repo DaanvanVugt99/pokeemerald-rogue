@@ -13,13 +13,9 @@ script Rogue_Area_InteractWithWorkbench
     }
     elif(var(VAR_ROGUE_INTRO_STATE) > ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
-        specialvar(VAR_RESULT, GetPlayerFacingDirection)
-        if(var(VAR_RESULT) != DIR_SOUTH) // Can't interact from the top
-        {
-            lock
-            call(Rogue_Area_WorkbenchOptions)
-            release
-        }
+        lock
+        call(Rogue_Area_WorkbenchOptions)
+        release
     }
     else
     {

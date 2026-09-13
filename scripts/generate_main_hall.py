@@ -19,6 +19,11 @@ W, H = 36, 30
 
 
 def main():
+    # Converted districts share one asset pipeline. Retain the original
+    # composition recipes below as provenance for the immutable source art.
+    if (ROOT/'tools/data/hub_tiles.json').exists():
+        from generate_hub_tiles import main as generate_shared_hub
+        return generate_shared_hub()
     ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');ap.add_argument('--init-layout',action='store_true');args=ap.parse_args()
     assert not(args.check and args.init_layout)
     b=Builder();b.sources['silph']=Source('general','facility_rocket','facility')
@@ -240,7 +245,7 @@ def validate_and_preview(b,a,tile,fill,render,check):
             fill(grid,16,0,20,2,'Void',True,5);fill(grid,16,3,20,3,'Wall',True,5);fill(grid,16,4,20,4,'WallBase',True,5);fill(grid,16,5,20,5,'FloorShadow',elev=5)
         if not mask&2:fill(grid,34,14,35,21,'Void',True);fill(grid,33,14,33,19,'Pillar',True)
         if not mask&4:
-            fill(grid,16,25,20,25,'Void',True);fill(grid,16,26,20,26,'Wall',True);fill(grid,16,27,20,27,'WallBase',True);fill(grid,16,28,20,29,'Void',True)
+            fill(grid,16,25,20,29,'Void',True)
         if not mask&8:fill(grid,0,14,2,21,'Void',True);fill(grid,3,14,3,19,'Pillar',True)
         if not school:grid[4][9]=tile('ClosedDoor',True,5)
         return grid

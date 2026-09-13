@@ -1238,6 +1238,8 @@ static const u16 sPortalRoomFrame4[] = INCBIN_U16("data/tilesets/secondary/porta
 static const u16 sPortalRoomFrame5[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/5.4bpp");
 static const u16 sPortalRoomFrame6[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/6.4bpp");
 static const u16 sPortalRoomFrame7[] = INCBIN_U16("data/tilesets/secondary/portal_room/anim/7.4bpp");
+#include "data/terrarium_anims.h"
+
 static void TilesetAnim_PortalRoom(u16 timer)
 {
     static const u16 *const frames[] = {sPortalRoomFrame0, sPortalRoomFrame1, sPortalRoomFrame2, sPortalRoomFrame3,
@@ -1245,6 +1247,13 @@ static void TilesetAnim_PortalRoom(u16 timer)
     if (timer % 8 == 0)
         AppendTilesetAnimToBuffer(frames[(timer / 8) % ARRAY_COUNT(frames)],
             (u16 *)(BG_VRAM + TILE_OFFSET_4BPP(NUM_TILES_IN_PRIMARY)), 36 * TILE_SIZE_4BPP);
+    if (timer % 16 == 0)
+    {
+        static const u16 *const flowers[] = {sTerrariumFlowerFrame0, sTerrariumFlowerFrame1,
+            sTerrariumFlowerFrame0, sTerrariumFlowerFrame2};
+        AppendTilesetAnimToBuffer(flowers[(timer / 16) % ARRAY_COUNT(flowers)],
+            (u16 *)(BG_VRAM + TILE_OFFSET_4BPP(TERRARIUM_FLOWER_TILE_START)), 4 * TILE_SIZE_4BPP);
+    }
 }
 
 void InitTilesetAnim_PortalRoom(void)

@@ -186,8 +186,11 @@ remain outside this rework.
 - Both 38 × 32 maps retain their identities. The central axis is x18; side walls
   are x6/x30. Side exits occupy y14–16 and the south exit x17–19. The private
   horizontal and vertical facade offsets are 12 and 15 respectively.
-- Habitat frames start at (8,9) and (23,9); occupants pace between x9–11 and
-  x25–27 at y12. Capsules start at (9,5)/(25,5), with occupants at (10,7)/(26,7).
+- Habitat frames start at (8,9) and (23,9); occupants wander randomly across the
+  full 4×3 interiors x9–12/x24–27, y10–12, starting at (10,11)/(26,11).
+  Horizontal range 2 includes a solid frame column, which collision excludes;
+  vertical range 1 keeps movement within the three interior rows.
+  Capsules start at (9,5)/(25,5), with occupants at (10,7)/(26,7).
   The tutorial instead places its three existing choices on the public floor,
   with broken front panels at y13 and rear-wall warning indicators.
 - The Safari PC is at (14,8), accessible from (14,9). Workbenches at (9,20) and

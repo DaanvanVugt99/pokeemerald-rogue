@@ -16,6 +16,32 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Reveal the matching two-tile door-description sign beside Bill's lab when
+  the hidden lab unlocks, replacing the older sign artwork.
+
+- Clear the Adventure Gate nurse's facing action after conversations so she
+  turns toward the player on subsequent interactions. Allow hub workbench use
+  from above as well as the other sides.
+
+- Extend terrarium grass beneath the top rim to remove the exposed lab-floor strip.
+
+- Correct terrarium flower palettes: blend their backgrounds into the grass and
+  keep leaves green and petals cream/red throughout the animation.
+
+- Place the Adventure Gate nurse on the covered machine-base variant so the
+  machine no longer draws over her sprite, preserving her position.
+
+- Align closed Adventure Gate, Labs and Main Hall south exits with their edited
+  floor edges; repair side-pillar joins in the Gate, Labs and both Safari maps.
+  Audit all 56 hub connection combinations against runtime closure patches.
+
+- Close the Safari's south hallway flush with the authored floor edge, removing
+  the detached wall and replacing the hallway's pillar caps with normal floor.
+
+- Match the hub's off-map corridor facades to the authored wall and black-space
+  edges. Check all 17 seams during shared-asset verification to catch stale
+  exterior walls after Porymap edits.
+
 - Track authored map and border binaries as build dependencies so incremental
   ROM/test builds pick up Porymap layout edits without a map JSON change.
 
@@ -40,6 +66,26 @@ Format follows Keep a Changelog loosely:
   suggested higher or lower level is available.
 
 ### Changed
+
+- Let the Safari terrarium Pokémon wander randomly in all four directions
+  within their enclosures instead of pacing only left and right.
+
+- Plant grass and gently animated flowers beneath the Safari terrarium glass,
+  including the tutorial's damaged habitats. Preserve frames and Pokémon paths.
+
+- Add a framed door-description sign variant to the shared hub tiles and
+  Porymap prefabs, keeping the original small wall display.
+
+- Label both halves of the small hub wall panel and provide a complete Porymap
+  prefab so its upper half is easy to find.
+
+- Add wall-backed couch tops and a matching shared-hub Porymap prefab, alongside
+  the existing floor-backed couch.
+
+- Share one architecture/furnishings tileset pair across all four underground
+  hub districts. Preserve authored map visuals and collision, add the complete
+  Lab catalogue and used HQ/Factory/Silph assemblies, and provide reusable
+  Porymap furniture prefabs.
 
 - Keep the Safari capsule Pokémon facing down while glass-habitat Pokémon
   continue roaming.

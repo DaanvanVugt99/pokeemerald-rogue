@@ -51,6 +51,11 @@ or validation workflows change.
 
 ## Sources of Truth and Generated Data
 
+- Underground hub maps share `HubArchitecture` + `HubFurnishings`. Use
+  `python3 scripts/generate_hub_tiles.py` and `--check`; normal generation must
+  never rewrite Porymap map/border files or `data/tilesets/hub_prefabs.json`.
+  The four previous private tilesets are immutable source inputs. See
+  `docs/design/shared_hub_tiles.md` for the catalogue and ID-migration guard.
 - Edit `.pory` sources rather than generated `.inc` files when both exist.
 - The Adventure Gate layout/border are authored in Porymap.
   `scripts/generate_portal_room.py` reads them for previews and validation; it

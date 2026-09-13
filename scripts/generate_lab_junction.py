@@ -18,6 +18,11 @@ W, H = 28, 24
 
 
 def main():
+    # Converted districts share one asset pipeline. Retain the original
+    # composition recipes below as provenance for the immutable source art.
+    if (ROOT/'tools/data/hub_tiles.json').exists():
+        from generate_hub_tiles import main as generate_shared_hub
+        return generate_shared_hub()
     ap = argparse.ArgumentParser()
     ap.add_argument('--check', action='store_true')
     ap.add_argument('--init-layout', action='store_true', help='One-time conversion of the outdoor map; never used for regeneration.')
@@ -196,11 +201,12 @@ def main():
         result=[row[:] for row in a]
         for bit,x1,x2,pillar in [(8,0,3,4),(2,25,27,24)]:
             if not mask&bit:
-                fill(result,x1,6,x2,13,'Void',True);fill(result,pillar,6,pillar,11,'Pillar',True)
+                fill(result,x1,6,x2,13,'Void',True);fill(result,pillar,5,pillar,11,'Pillar',True)
         if not mask&1:
             fill(result,12,0,16,2,'Void',True);fill(result,12,3,16,3,'Wall',True);fill(result,12,4,16,4,'WallBase',True);fill(result,12,5,16,5,'FloorShadow')
         if not mask&4:
-            fill(result,12,16,16,16,'Void',True);fill(result,12,17,16,17,'Wall',True);fill(result,12,18,16,18,'WallBase',True);fill(result,12,19,16,23,'Void',True)
+            result[15][12]=tile('Floor');result[15][16]=tile('Floor')
+            fill(result,12,16,16,23,'Void',True)
         if unique:
             doorway(result,8,13)
             result[12][10]=tile('SignTop',True);result[13][10]=tile('SignBase',True)

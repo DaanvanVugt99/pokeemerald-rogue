@@ -936,90 +936,24 @@ const struct Tileset gTileset_AdventurePaths =
     .callback = InitTilesetAnim_AdventurePaths,
 };
 
-const struct Tileset gTileset_PortalRoom =
+const struct Tileset gTileset_HubArchitecture =
 {
     .isCompressed = TRUE,
     .isSecondary = FALSE,
-    .tiles = gTilesetTiles_PortalRoom,
-    .palettes = gTilesetPalettes_PortalRoom,
-    .metatiles = gMetatiles_PortalRoom,
-    .metatileAttributes = gMetatileAttributes_PortalRoom,
+    .tiles = gTilesetTiles_HubArchitecture,
+    .palettes = gTilesetPalettes_Hub,
+    .metatiles = gMetatiles_HubArchitecture,
+    .metatileAttributes = gMetatileAttributes_HubArchitecture,
     .callback = NULL,
 };
 
-const struct Tileset gTileset_PortalRoomGate =
+const struct Tileset gTileset_HubFurnishings =
 {
     .isCompressed = TRUE,
     .isSecondary = TRUE,
-    .tiles = gTilesetTiles_PortalRoomGate,
-    .palettes = gTilesetPalettes_PortalRoom,
-    .metatiles = gMetatiles_PortalRoomGate,
-    .metatileAttributes = gMetatileAttributes_PortalRoomGate,
+    .tiles = gTilesetTiles_HubFurnishings,
+    .palettes = gTilesetPalettes_Hub,
+    .metatiles = gMetatiles_HubFurnishings,
+    .metatileAttributes = gMetatileAttributes_HubFurnishings,
     .callback = InitTilesetAnim_PortalRoom,
-};
-
-const struct Tileset gTileset_LabJunction =
-{
-    .isCompressed = TRUE,
-    .isSecondary = FALSE,
-    .tiles = gTilesetTiles_LabJunction,
-    .palettes = gTilesetPalettes_LabJunction,
-    .metatiles = gMetatiles_LabJunction,
-    .metatileAttributes = gMetatileAttributes_LabJunction,
-    .callback = NULL,
-};
-
-const struct Tileset gTileset_LabJunctionSecondary =
-{
-    .isCompressed = TRUE,
-    .isSecondary = TRUE,
-    .tiles = gTilesetTiles_LabJunctionSecondary,
-    .palettes = gTilesetPalettes_LabJunction,
-    .metatiles = gMetatiles_LabJunctionSecondary,
-    .metatileAttributes = gMetatileAttributes_LabJunctionSecondary,
-    .callback = NULL,
-};
-
-const struct Tileset gTileset_SafariLab =
-{
-    .isCompressed = TRUE,
-    .isSecondary = FALSE,
-    .tiles = gTilesetTiles_SafariLab,
-    .palettes = gTilesetPalettes_SafariLab,
-    .metatiles = gMetatiles_SafariLab,
-    .metatileAttributes = gMetatileAttributes_SafariLab,
-    .callback = NULL,
-};
-
-const struct Tileset gTileset_SafariLabSecondary =
-{
-    .isCompressed = TRUE,
-    .isSecondary = TRUE,
-    .tiles = gTilesetTiles_SafariLabSecondary,
-    .palettes = gTilesetPalettes_SafariLab,
-    .metatiles = gMetatiles_SafariLabSecondary,
-    .metatileAttributes = gMetatileAttributes_SafariLabSecondary,
-    .callback = NULL,
-};
-
-const struct Tileset gTileset_MainHall =
-{
-    .isCompressed = TRUE,
-    .isSecondary = FALSE,
-    .tiles = gTilesetTiles_MainHall,
-    .palettes = gTilesetPalettes_MainHall,
-    .metatiles = gMetatiles_MainHall,
-    .metatileAttributes = gMetatileAttributes_MainHall,
-    .callback = NULL,
-};
-
-const struct Tileset gTileset_MainHallSecondary =
-{
-    .isCompressed = TRUE,
-    .isSecondary = TRUE,
-    .tiles = gTilesetTiles_MainHallSecondary,
-    .palettes = gTilesetPalettes_MainHall,
-    .metatiles = gMetatiles_MainHallSecondary,
-    .metatileAttributes = gMetatileAttributes_MainHallSecondary,
-    .callback = NULL,
 };

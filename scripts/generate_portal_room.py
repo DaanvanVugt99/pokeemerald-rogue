@@ -81,6 +81,11 @@ def png(tiles, count=512):
     buf=io.BytesIO();image.save(buf,format='PNG');return buf.getvalue()
 
 def main():
+    # Converted districts share one asset pipeline. Retain the original
+    # composition recipes below as provenance for the immutable source art.
+    if (ROOT/'tools/data/hub_tiles.json').exists():
+        from generate_hub_tiles import main as generate_shared_hub
+        return generate_shared_hub()
     ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');args=ap.parse_args()
     b=Builder()
     # Reference layout, not atlas adjacency, defines every imported assembly.
@@ -240,12 +245,12 @@ def main():
             if not mask&bit:
                 for edge in edges:
                     for y in range(8,16):result[y][edge]=b.names['Void']|0x3C00
-                for y in range(8,14):result[y][pillar]=b.names['Pillar']|0x3C00
+                for y in range(8,12):result[y][pillar]=b.names['Pillar']|0x3C00
+                result[12][pillar]=b.names['PillarEnd']|0x3C00
         if not mask&2:
+            for x in (7,11):result[12][x]=b.names['Floor']|0x3000
             for x in range(7,12):
-                result[13][x]=b.names['Void']|0x3C00
-                result[14][x]=b.names['Wall']|0x3C00
-                result[15][x]=b.names['WallBase']|0x3C00
+                for y in range(13,16):result[y][x]=b.names['Void']|0x3C00
         return result
     outputs[PRI+'/tiles.png']=png(b.tiles)
     outputs[SEC+'/tiles.png']=png(b.portal_tiles,48)

@@ -234,26 +234,8 @@ const u16 gMetatileAttributes_CaveAlt[] = INCBIN_U16("data/tilesets/secondary/ca
 const u16 gMetatiles_AdventurePaths[] = INCBIN_U16("data/tilesets/secondary/adventure_paths/metatiles.bin");
 const u16 gMetatileAttributes_AdventurePaths[] = INCBIN_U16("data/tilesets/secondary/adventure_paths/metatile_attributes.bin");
 
-const u16 gMetatiles_PortalRoom[] = INCBIN_U16("data/tilesets/primary/portal_room/metatiles.bin");
-const u16 gMetatileAttributes_PortalRoom[] = INCBIN_U16("data/tilesets/primary/portal_room/metatile_attributes.bin");
+const u16 gMetatiles_HubArchitecture[] = INCBIN_U16("data/tilesets/primary/hub_architecture/metatiles.bin");
+const u16 gMetatileAttributes_HubArchitecture[] = INCBIN_U16("data/tilesets/primary/hub_architecture/metatile_attributes.bin");
 
-const u16 gMetatiles_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatiles.bin");
-const u16 gMetatileAttributes_PortalRoomGate[] = INCBIN_U16("data/tilesets/secondary/portal_room/metatile_attributes.bin");
-
-const u16 gMetatiles_LabJunction[] = INCBIN_U16("data/tilesets/primary/lab_junction/metatiles.bin");
-const u16 gMetatileAttributes_LabJunction[] = INCBIN_U16("data/tilesets/primary/lab_junction/metatile_attributes.bin");
-
-const u16 gMetatiles_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatiles.bin");
-const u16 gMetatileAttributes_LabJunctionSecondary[] = INCBIN_U16("data/tilesets/secondary/lab_junction/metatile_attributes.bin");
-
-const u16 gMetatiles_SafariLab[] = INCBIN_U16("data/tilesets/primary/safari_lab/metatiles.bin");
-const u16 gMetatileAttributes_SafariLab[] = INCBIN_U16("data/tilesets/primary/safari_lab/metatile_attributes.bin");
-
-const u16 gMetatiles_SafariLabSecondary[] = INCBIN_U16("data/tilesets/secondary/safari_lab/metatiles.bin");
-const u16 gMetatileAttributes_SafariLabSecondary[] = INCBIN_U16("data/tilesets/secondary/safari_lab/metatile_attributes.bin");
-
-const u16 gMetatiles_MainHall[] = INCBIN_U16("data/tilesets/primary/main_hall/metatiles.bin");
-const u16 gMetatileAttributes_MainHall[] = INCBIN_U16("data/tilesets/primary/main_hall/metatile_attributes.bin");
-
-const u16 gMetatiles_MainHallSecondary[] = INCBIN_U16("data/tilesets/secondary/main_hall/metatiles.bin");
-const u16 gMetatileAttributes_MainHallSecondary[] = INCBIN_U16("data/tilesets/secondary/main_hall/metatile_attributes.bin");
+const u16 gMetatiles_HubFurnishings[] = INCBIN_U16("data/tilesets/secondary/hub_furnishings/metatiles.bin");
+const u16 gMetatileAttributes_HubFurnishings[] = INCBIN_U16("data/tilesets/secondary/hub_furnishings/metatile_attributes.bin");
