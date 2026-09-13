@@ -837,13 +837,13 @@ TEST("Adventure setup: Gauntlet unlocks postgame and Slow Path cannot start new 
 
 TEST("Portal room: Trial choice is unlocked at the console and hidden for replays")
 {
-    bool8 hadUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT);
+    bool8 hadUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE);
     ResetRunReviewTestState();
-    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, FALSE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE, FALSE);
     RogueRunStart_PrepareStandard();
     EXPECT(!RogueRunStart_CanChooseTrial());
     EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
-    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, TRUE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE, TRUE);
     EXPECT(RogueRunStart_CanChooseTrial());
     EXPECT(SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
     EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), TRUE));
@@ -855,7 +855,7 @@ TEST("Portal room: Trial choice is unlocked at the console and hidden for replay
     FlagSet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE);
     EXPECT(!RogueRunStart_CanChooseTrial());
     EXPECT(!SetupHasOption(COMPOUND_STRING("Trial"), FALSE));
-    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, hadUpgrade);
+    RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE, hadUpgrade);
     FinishRunReviewTest();
 }
 

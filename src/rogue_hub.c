@@ -1,4 +1,5 @@
 #include "global.h"
+#include "data/park_tunnel_patches.h"
 #include "constants/portal_room_tiles.h"
 #include "constants/lab_junction_tiles.h"
 #include "constants/main_hall_tiles.h"
@@ -425,7 +426,7 @@ bool8 RogueHub_HasUpgradeRequirements(u16 upgradeId)
     u8 i;
     u8 check;
 
-    if(upgradeId == HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT
+    if(upgradeId == HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE
         && !FlagGet(FLAG_SYS_TRIALS_UNLOCKED))
         return FALSE;
 
@@ -1162,6 +1163,16 @@ bool8 RogueHub_AcceptMapConnection(struct MapHeader *mapHeader, const struct Map
     // Convert from CONNECTION_ to HUB_AREA_CONN_
     u8 area = GetAreaForLayout(mapHeader->mapLayoutId);
 
+    // Park facade maps are permanent terrain. Missing links are sealed by the
+    // rock closure patches; hiding the facade would cut the cliffs off at trees.
+    if (area == HUB_AREA_RIDE_TRAINING
+        && connection->mapGroup == MAP_GROUP(ROGUE_PARK_TUNNEL_NORTH)
+        && (connection->mapNum == MAP_NUM(ROGUE_PARK_TUNNEL_NORTH)
+            || connection->mapNum == MAP_NUM(ROGUE_PARK_TUNNEL_EAST)
+            || connection->mapNum == MAP_NUM(ROGUE_PARK_TUNNEL_SOUTH)
+            || connection->mapNum == MAP_NUM(ROGUE_PARK_TUNNEL_WEST)))
+        return TRUE;
+
     if(area != HUB_AREA_NONE)
     {
         u8 connDir = connection->direction - 1;
@@ -1688,43 +1699,29 @@ static void RogueHub_UpdateSafariAreaMetatiles()
     if (gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
         && RogueHub_HasUpgrade(HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE))
     {
-        MetatileSet_Tile(18, 6, METATILE_SafariLab_CaveTop | MAPGRID_COLLISION_MASK);
-        MetatileSet_Tile(18, 7, METATILE_SafariLab_CaveDoor);
+        MetatileSet_Tile(18, 4, METATILE_SafariLab_CaveTop | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(18, 5, METATILE_SafariLab_CaveDoor);
     }
+}
+
+static void ApplyParkTunnelClosedPatch(const struct ParkTunnelPatch *patch, u32 count)
+{
+    u32 i;
+    for (i = 0; i < count; ++i)
+        MapGridSetMetatileIdAt(patch[i].x + MAP_OFFSET, patch[i].y + MAP_OFFSET, patch[i].tile);
 }
 
 static void RogueHub_UpdateRideTrainingAreaMetatiles()
 {
-    // Remove connectionss
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
-    {
-        MetatileFill_TreesOverlapping(20, 0, 23, 8, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(20, 9, 23, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(20, 10, 23, 17);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
-    {
-        MetatileFill_CommonWarpExitHorizontal(32, 17);
-
-        MetatileFill_CommonPathRemoval(24, 18, 31, 21);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
-    {
-        MetatileFill_CommonWarpExitVertical(20, 34);
-        MetatileFill_TreeCaps(20, 35, 23);
-
-        MetatileFill_CommonPathRemoval(20, 22, 23, 33);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
-    {
-        MetatileFill_CommonWarpExitHorizontal(0, 17);
-
-        MetatileFill_CommonPathRemoval(2, 18, 19, 21);
-    }
+    // Disconnected entrances become continuous rock, including their visible border.
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+        ApplyParkTunnelClosedPatch(sParkTunnelClosedNorth, ARRAY_COUNT(sParkTunnelClosedNorth));
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+        ApplyParkTunnelClosedPatch(sParkTunnelClosedEast, ARRAY_COUNT(sParkTunnelClosedEast));
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+        ApplyParkTunnelClosedPatch(sParkTunnelClosedSouth, ARRAY_COUNT(sParkTunnelClosedSouth));
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_RIDE_TRAINING, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+        ApplyParkTunnelClosedPatch(sParkTunnelClosedWest, ARRAY_COUNT(sParkTunnelClosedWest));
 }
 
 static void RogueHub_UpdateMartsAreaMetatiles()

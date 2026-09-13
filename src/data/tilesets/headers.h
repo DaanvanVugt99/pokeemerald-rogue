@@ -957,3 +957,14 @@ const struct Tileset gTileset_HubFurnishings =
     .metatileAttributes = gMetatileAttributes_HubFurnishings,
     .callback = InitTilesetAnim_PortalRoom,
 };
+
+const struct Tileset gTileset_ParkTunnels =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_ParkTunnels,
+    .palettes = gTilesetPalettes_ParkTunnels,
+    .metatiles = gMetatiles_ParkTunnels,
+    .metatileAttributes = gMetatileAttributes_ParkTunnels,
+    .callback = InitTilesetAnim_Mauville,
+};

@@ -70,7 +70,10 @@ TEST("Safari lab: three exit lanes and cave gate work for every connection state
                     EXPECT_EQ(!!MapGridIsImpassableAt(x + MAP_OFFSET, 27 + MAP_OFFSET), !(mask & 2));
                     EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 27 + MAP_OFFSET), mask & 2 ? MB_SOUTH_ARROW_WARP : MB_NORMAL);
                 }
-                EXPECT_EQ(!!MapGridIsImpassableAt(18 + MAP_OFFSET, 7 + MAP_OFFSET), !(cave && !tutorial));
+                EXPECT_EQ(!!MapGridIsImpassableAt(18 + MAP_OFFSET, 5 + MAP_OFFSET), !(cave && !tutorial));
+                // Unlocking the cave must preserve the approach beneath it.
+                for (y = 6; y <= 7; ++y)
+                    EXPECT_EQ(MapGridGetMetatileIdAt(18 + MAP_OFFSET, y + MAP_OFFSET), header->mapLayout->map[y * 38 + 18] & MAPGRID_METATILE_ID_MASK);
                 for (x = 0; x < 3; ++x)
                     if (mask & bits[x])
                     {

@@ -53,6 +53,10 @@
 #define MAP_ROGUE_MAIN_HALL_CORRIDOR_HORIZONTAL (20 | (2 << 8))
 #define MAP_ROGUE_MAIN_HALL_CORRIDOR_NORTH      (21 | (2 << 8))
 #define MAP_ROGUE_MAIN_HALL_CORRIDOR_SOUTH      (22 | (2 << 8))
+#define MAP_ROGUE_PARK_TUNNEL_NORTH             (23 | (2 << 8))
+#define MAP_ROGUE_PARK_TUNNEL_EAST              (24 | (2 << 8))
+#define MAP_ROGUE_PARK_TUNNEL_SOUTH             (25 | (2 << 8))
+#define MAP_ROGUE_PARK_TUNNEL_WEST              (26 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

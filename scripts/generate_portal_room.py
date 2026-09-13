@@ -378,7 +378,7 @@ def main():
             reference_image.paste(reference_builder.render(reference_builder.names[name]),(xx*16,yy*16))
     reference_image.resize((480,608),Image.Resampling.NEAREST).save(OUT/'reference-hq.png')
     overlay=out.resize((960,768),Image.Resampling.NEAREST);d=ImageDraw.Draw(overlay)
-    labels={1:'GUIDANCE',2:'HUB UPGRADES',3:'STORAGE',4:'QUESTS',7:'REPLAY FLAG',8:'PEONIA',10:'TRIALS',11:'ADVENTURE'}
+    labels={1:'GUIDANCE',2:'HUB UPGRADES',3:'STORAGE',4:'QUESTS',7:'REPLAY FLAG',8:'PEONIA',10:'ADVENTURE'}
     for i,label in labels.items():
         e=events['object_events'][i-1];x=e['x'];y=e['y']
         d.rectangle((x*48,y*48,x*48+46,y*48+46),outline='#ffda70',width=2);d.text((x*48,y*48+16),label,fill='#ffda70')
@@ -400,7 +400,7 @@ def main():
     assert route[-1]==(9,3)
     for x,y in route:
         assert not blocks[y][x]&0xC00 and (x,y) not in occupied, ('Departure blocked',x,y)
-    console=events['object_events'][10]
+    console=next(e for e in events['object_events'] if e['graphics_id']=='OBJ_EVENT_GFX_ADVENTURE_CONSOLE')
     assert (console['x'],console['y'])==(9,6)
     for x,y in [(8,6),(10,6),(9,5)]:assert blocks[y][x]&0xC00
     assert events['warp_events'][6]['x']==9 and events['warp_events'][6]['y']==7

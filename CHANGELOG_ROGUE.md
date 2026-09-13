@@ -14,7 +14,43 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Changed
+
+- Hide the complete Park entrance and steel frame behind continuous rock when
+  its side is disconnected, including off-map seams. Preserve the latest cliff
+  and shoreline edits, extend their outer scenery, and remove a clipped half-tree.
+
+- Thicken the Park entrance surrounds into broad beveled steel frames with
+  recessed fasteners, preserving the authored cliffs and both warp lanes.
+
+- Remove the redundant Trial Attendant NPC and rename its upgrade to Trial
+  Console. Update Trial guidance and quest descriptions to use the Adventure
+  Console; existing Trial unlocks and upgrade progress are preserved.
+
+- Reskin the Park exits as rocky base tunnels with metal shutters for missing
+  connections. Preserve both warp lanes, the outdoor activities, and all paths;
+  add private corridor scenery and a generator that checks all 16 connection states.
+
 ### Fixed
+
+- Move the Safari legendary cave unlock artwork up two rows to match its
+  existing entrance warp, preserving the approach tiles below it.
+
+- Keep Park cliff scenery visible behind sealed exits and continue rock
+  formations off-map instead of replacing them with trees. Add metal rail
+  end blocks, chamfered caps, lintel corner joins, and post feet.
+
+- Repair Park tree canopies cut off by cliff edits, add rounded rock/tree
+  corner composites with native palettes, and align off-map canopy halves.
+  Validate complete trees and provide a Porymap tile reference preview.
+
+- Finish the authored Park cliff cleanup and doorway joins, align facade caps,
+  and repair copied tiles with incorrect warp directions. Preserve reviewed
+  Porymap terrain edits during tunnel asset generation.
+
+- Rebuild Park tunnel surrounds from the matching native cliff family, preserve
+  terrain colors, and cap off-map passages under rock instead of repeating long
+  exposed corridors. Add surrounding-terrain previews and a facade-length guard.
 
 - Reveal the matching two-tile door-description sign beside Bill's lab when
   the hidden lab unlocks, replacing the older sign artwork.
@@ -67,11 +103,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
-- Let the Safari terrarium Pokémon wander randomly in all four directions
+- Let the Safari terrarium PokÃ©mon wander randomly in all four directions
   within their enclosures instead of pacing only left and right.
 
 - Plant grass and gently animated flowers beneath the Safari terrarium glass,
-  including the tutorial's damaged habitats. Preserve frames and Pokémon paths.
+  including the tutorial's damaged habitats. Preserve frames and PokÃ©mon paths.
 
 - Add a framed door-description sign variant to the shared hub tiles and
   Porymap prefabs, keeping the original small wall display.
@@ -87,7 +123,7 @@ Format follows Keep a Changelog loosely:
   Lab catalogue and used HQ/Factory/Silph assemblies, and provide reusable
   Porymap furniture prefabs.
 
-- Keep the Safari capsule Pokémon facing down while glass-habitat Pokémon
+- Keep the Safari capsule PokÃ©mon facing down while glass-habitat PokÃ©mon
   continue roaming.
 
 - Furnish the four underground hub districts with Galactic HQ tables, stools,
@@ -95,7 +131,7 @@ Format follows Keep a Changelog loosely:
   safely recover Gate saves whose position is occupied by new furniture.
 
 - Rebuild the Town Square as the underground Main Hall, with a raised gallery,
-  paired School/Poké Connect doors, a progress monument and furnished service bays.
+  paired School/PokÃ© Connect doors, a progress monument and furnished service bays.
   Add three-wide shaded passages with centered arrivals, preserve construction
   tutorial rewards and recover old outdoor saves without resetting progression.
 
@@ -156,12 +192,12 @@ Format follows Keep a Changelog loosely:
   Den's purple grass with a medium stone arch and gently pulsing purple opening, distinguishing both from
   type-colored wild dens by silhouette.
 
-- Put Begin Adventure first at the entrance. Keep the selected Pokédex visible
+- Put Begin Adventure first at the entrance. Keep the selected PokÃ©dex visible
   before its editing unlock, with locked help text; the first clear unlocks editing.
 
 - Clarify encounter setup help as "Overworld Pokemon or traditional grass."
 
-- Rename Pokemon pool to Pokédex throughout adventure setup and exclude Hisui
+- Rename Pokemon pool to PokÃ©dex throughout adventure setup and exclude Hisui
   from the intro choices while retaining it for later editing.
 
 - Limit intro Pokemon pools to Regional and National. Remove the AI/weather and
@@ -200,7 +236,7 @@ Format follows Keep a Changelog loosely:
 - Increased run catch bonuses to 8x at 0-4 badges earned, 4x at 5-7 badges,
   and 2x from the Elite Four onward to ease team rebuilding. Existing
   repeated-catch restrictions remain unchanged.
-- Pokédex move lists now mark Divergence-added level-up and tutor/TM/TR access
+- PokÃ©dex move lists now mark Divergence-added level-up and tutor/TM/TR access
   with a star and a legend. Markers are generated from the locked source
   profiles, with shared-form inheritance and no additional RAM structures.
   Row stars are drawn directly because the small font lacks a visible star
@@ -332,7 +368,7 @@ Format follows Keep a Changelog loosely:
   typing, Ability slots and learnsets, detects changed approval text, and keeps
   unfinished ledger decisions visible rather than treating partial checks as
   full implementation.
-- Replaced the Pokédex's stat-buff `+` markers with upstream-style A: Inspect:
+- Replaced the PokÃ©dex's stat-buff `+` markers with upstream-style A: Inspect:
   original stats plus signed changes, current values and the actual BST delta.
   Changed typings and Ability slots are marked and Inspect shows their original
   values. Species without a canonical baseline are explicitly labelled.
@@ -398,14 +434,14 @@ Format follows Keep a Changelog loosely:
   which halves damage from contact moves.
 - Refreshed the remaining second-drop Z-A Mega sprite and palette assets from
   upstream for Raichu X, Staraptor, Scolipede, Dragalge, and Pyroar.
-- Added the Colosseum + XD Pokédex option to starting and normal-run setup,
+- Added the Colosseum + XD PokÃ©dex option to starting and normal-run setup,
   with its Orre Style quest awarding an exotic Lugia.
-- Expanded the Colosseum + XD Pokédex with its remaining upstream species.
+- Expanded the Colosseum + XD PokÃ©dex with its remaining upstream species.
 - Bumped the internal Rogue save schema; existing development saves are
-  intentionally discarded for this Pokédex update.
+  intentionally discarded for this PokÃ©dex update.
 - Added dedicated overworld graphics for Escape Rope and non-battle treasure
   rewards such as Nuggets and Stardust.
-- Ported upstream 2.2's type-colored Pokémon den sprites for Adventure Paths,
+- Ported upstream 2.2's type-colored PokÃ©mon den sprites for Adventure Paths,
   with a matching type adjective for trained den encounters while preserving
   the unique den's purple map marker.
 - Ported the Black and White trainer backsprites for Hilbert and Hilda from
@@ -420,12 +456,12 @@ Format follows Keep a Changelog loosely:
 - Added Pinwheel, a Treasure held item that switches its holder out after it
   successfully uses a wind move.
 - Added Victor's Band, a Treasure held item that restores 25% max HP after its
-  holder knocks out an opposing Pokémon.
+  holder knocks out an opposing PokÃ©mon.
 - Added Winged Boots, a Treasure held item that doubles the holder's Speed at or
   below half HP.
 - Added Healing Lamp, a Treasure held item that restores 1/8 max HP at the end
   of each turn, but makes the holder's moves consume one additional PP.
-- Added Golden Idol, a Treasure held item that boosts damage by 1% per ¥1,000
+- Added Golden Idol, a Treasure held item that boosts damage by 1% per Â¥1,000
   carried, up to 50%, and also doubles prize money when its holder enters battle.
 - Added Drain Blade, a Treasure held item that restores 1/8 of damaging-move
   damage, doubling the healing when the target began the move below half HP.
@@ -440,15 +476,15 @@ Format follows Keep a Changelog loosely:
 - Added Monotype Serum, Decoy Doll, and Wooden Sword Treasure held items for
   secondary-type removal with retained STAB, an entry Substitute paid for with
   25% max HP, and three 40%-power strikes from single-hit attacks respectively;
-  Decoy Doll uses a shiny-Clefairy-inspired recolor of the base Poké Doll.
+  Decoy Doll uses a shiny-Clefairy-inspired recolor of the base PokÃ© Doll.
 - Added Hexing Wand, Fickle Hat, and Golden Egg Treasure held items, rewarding
   status pressure, volatile end-of-turn stat changes, and low-HP healing
   priority respectively.
 - Added Raincoat, a Treasure held item that grants immunity to Water-type moves
   while rain is active.
 - Added Treasure Hunter, a Main Quest completed by discovering a Treasure room
-  for the first time, rewarding ¥10000, 5 Building Supplies, and 5 Dark
-  Pokéblocks.
+  for the first time, rewarding Â¥10000, 5 Building Supplies, and 5 Dark
+  PokÃ©blocks.
 - Added New Frontier, a Main Quest completed by clearing a Battle Tower, with a
   Battle Checker reward for reviewing previous boss and Rival battles.
 
@@ -460,7 +496,7 @@ Format follows Keep a Changelog loosely:
   island edges, embedded mineral formations, restrained recolored rock
   outcrops, and large clear-blue faceted crystal clusters at the original
   map's authored decoration anchors.
-- Added each starter's summary-style front-sprite animation to its Poké Ball
+- Added each starter's summary-style front-sprite animation to its PokÃ© Ball
   inspection reveal in the three-choice starter bag.
 - Added deterministic Treasure encounters to Standard and Slow Path
   Adventures, with three isolated held-item rewards: Bane Lens, Hush Band, and
@@ -509,7 +545,7 @@ Format follows Keep a Changelog loosely:
   from the Tower of Ashes resource pack for future held-item designs.
 - Added 41 more credited, native 24x24 Treasure concept icons and GBA-ready
   palettes selected from Tower of Ashes, NocTurn's Megapack, and the How You
-  Survive a Pokémon Journey resource pack.
+  Survive a PokÃ©mon Journey resource pack.
 - Added six weather-themed Treasure rewards: Eclipse, Sun, Rain, Sand, Snow,
   and Acid Rain Totems, each with a strong effect gated by its matching weather.
 - Added four terrain-themed Tiki Treasure rewards that set Electric, Grassy,
@@ -529,8 +565,8 @@ Format follows Keep a Changelog loosely:
 - Added an in-battle Move Info panel on L with category, power, accuracy, and
   adaptively fitted descriptions for normal, Z-, and Max Moves, plus compact
   summary-style type badges in the Fight menu.
-- Added direct level-move remembering from eligible party Pokémon's summary
-  screens, returning to the same Pokémon's Moves page after teaching or
+- Added direct level-move remembering from eligible party PokÃ©mon's summary
+  screens, returning to the same PokÃ©mon's Moves page after teaching or
   cancelling.
 - Added an optional `LTO=1` release-build mode with isolated build artifacts
   and a linker layout that recovers ROM and working-memory headroom.
@@ -547,7 +583,7 @@ Format follows Keep a Changelog loosely:
   Stolen Trade Case: a fixed travelling merchant creates the quest, the run's
   selected evil team builds a dynamically generated camp on a later route, and
   returning the recovered Trade Case at a final merchant checkpoint awards a
-  Large Pokéblock Bundle and ¥5,000. Scene placement, quest state, key-item
+  Large PokÃ©block Bundle and Â¥5,000. Scene placement, quest state, key-item
   cargo, battles, and pending rewards remain deterministic across quicksaves
   using a compact current-route save payload. The same route director now
   selects from a
@@ -555,11 +591,11 @@ Format follows Keep a Changelog loosely:
   Dark Deal Devil offers immediate money in exchange for a temporary Curse
   that lasts until the next Boss falls, and an Anomalous Fossil quest that
   carries a discovered Key Item fossil safely to a later restoration lab. The
-  restored Pokémon is always a level-1 Rare Unique, with a choice between
+  restored PokÃ©mon is always a level-1 Rare Unique, with a choice between
   preserving its original typing or accepting a seeded adaptive typing. The Forbidden
   Stone quest now gives the player an Odd Keystone, binds three escaped souls
   at separate locations on a later route, and ends with an uncatchable
-  Spiritomb battle for an Ability Patch and ¥10,000. Apricorn Crafting now
+  Spiritomb battle for an Ability Patch and Â¥10,000. Apricorn Crafting now
   presents three seeded Apricorns and lets the player choose one to exchange
   for five matching Apricorn Balls. Its Ball Maker may share the current route
   or follow the unfinished Adventure Quest onto a later branch. The one-off
@@ -569,7 +605,7 @@ Format follows Keep a Changelog loosely:
   seeded shop category to a route, supports normal buying and selling, and
   sells its entire inventory at half price. The once-per-Adventure Breeder's
   Exchange requests a species from the current route in return for a visible,
-  similarly powered Pokémon with a coherent trained set and three perfect
+  similarly powered PokÃ©mon with a coherent trained set and three perfect
   IVs; players can preview the offer, choose the exact partner to trade, and
   recover its held item safely. A once-per-Adventure Buried Cache event now
   occupies three exact event spots on one route: an archaeologist lends a route-local Field
@@ -577,7 +613,7 @@ Format follows Keep a Changelog loosely:
   either the cache or a recoverable wild ambush. Ancient, Trainer, relic, and
   rare Charm caches provide distinct seeded reward classes. Active routes now
   expose Porymap-visible typed exact spots for NPCs, NPC-plus-decor scenes,
-  decor-only nodes, and plant patches instead of reserving generic 3×3 lots;
+  decor-only nodes, and plant patches instead of reserving generic 3Ã—3 lots;
   the director independently claims one to three spot groups so quest
   consumers and unrelated route events can coexist while using sparse,
   map-authored coordinates and facing. The per-room scene plan is packed into
@@ -594,14 +630,14 @@ Format follows Keep a Changelog loosely:
   NPC offers one seeded salvage reward from a drifting bundle.
 - Added a Main Quest for defeating any Frontier Brain during an Adventure.
 - Added Main Quests for entering an Adventure with a full party and catching a
-  Unique Legendary Pokémon.
-- Added a deterministic Pokémon-profile refresh pipeline with a small source
+  Unique Legendary PokÃ©mon.
+- Added a deterministic PokÃ©mon-profile refresh pipeline with a small source
   lock, an ignored local PokeAPI/Showdown cache, explicit Divergence learnset
   and competitive-set rules, Z-A Mega form validation, drift reports, and
   offline generate/verify commands.
 - Added an em dash glyph to every Latin game font and taught the text toolchain
   to encode and measure it.
-- Added a `+` marker before Pokédex stat values that exceed the pinned canonical
+- Added a `+` marker before PokÃ©dex stat values that exceed the pinned canonical
   baseline, stored in otherwise-unused per-species bake bits and generated
   automatically alongside the species-change report.
 - Added a generated species-change report tracking base stats, typing, and
@@ -622,7 +658,7 @@ Format follows Keep a Changelog loosely:
   Blessing is limited to one successful use per team each battle; obsolete
   Leppa Berry profiles built around recycling it were removed.
 - Added Chaos Theory, the first generated-only Anomalous Ability. When every
-  party Pokémon has distinct typing, it uses Metronome after every move.
+  party PokÃ©mon has distinct typing, it uses Metronome after every move.
 - Added Ship of Theseus as a generated-only Anomalous Ability, passing its
   moves and both Abilities through every replacement that enters battle.
 - Added World Engine as a generated-only Anomalous Ability. It starts at a
@@ -630,7 +666,7 @@ Format follows Keep a Changelog loosely:
   turn and upon returning to battle, and pauses while its holder is absent.
 - Added Chromatic Flux as a generated-only Anomalous Ability. At the start of
   each turn, it makes its holder and all of its moves a random type.
-- Improved changed-type Unique Pokémon palette tinting, especially for follower
+- Improved changed-type Unique PokÃ©mon palette tinting, especially for follower
   sprites with neutral, single-hue, or color-wheel-wrapping palettes.
 - Added Mirror World as a generated-only Anomalous Ability, reversing all type
   matchups while its holder is active.
@@ -677,14 +713,14 @@ Format follows Keep a Changelog loosely:
   accuracy-oriented dynamic gift synergy now offers five curated moves.
 - Added accuracy-oriented dynamic gift profiles for Tantrum, Toxic Deluge,
   Marksman, Monsoon, and Intent.
-- Polished the Pokémon summary screen with explicit Stats, IVs, EVs, and Base
+- Polished the PokÃ©mon summary screen with explicit Stats, IVs, EVs, and Base
   Stats headers plus clearer move-reordering controls.
-- Optimized encrypted Pokémon data access by combining checksum and encryption
+- Optimized encrypted PokÃ©mon data access by combining checksum and encryption
   passes and replacing repeated substructure searches with constant-time
-  lookups, accelerating Pokémon-heavy Rogue generation and UI paths.
-- Corrected Pokédex body-color classifications for the new Mega Evolutions to
-  match Pokémon HOME.
-- Improved battle readability with separate 4× and ¼× move-selection labels,
+  lookups, accelerating PokÃ©mon-heavy Rogue generation and UI paths.
+- Corrected PokÃ©dex body-color classifications for the new Mega Evolutions to
+  match PokÃ©mon HOME.
+- Improved battle readability with separate 4Ã— and Â¼Ã— move-selection labels,
   actual held-item icons for Knock Off and stealing moves, Berry-eating
   animations for held Berry effects, and clearer side, hazard, Berry, and
   battlefield messages.
@@ -692,9 +728,9 @@ Format follows Keep a Changelog loosely:
   and keeping cable-car and TV-show scratch data local to the code that uses it.
 - Ported upstream battle visual polish for gimmick triggers, Mega/Primal
   evolution particles, Gust palette cycling, trainer intro palettes, and a
-  batch of updated Pokémon form sprites and icons.
+  batch of updated PokÃ©mon form sprites and icons.
 - Clarified the onboarding prompt so it explicitly tells players that they are
-  choosing the Pokédex for the run and that it controls the available Pokémon
+  choosing the PokÃ©dex for the run and that it controls the available PokÃ©mon
   and first partner choices.
 - Replaced Hisuian Braviary's Premonition with Temporal Shift, which randomly
   sets Trick Room or Tailwind on switch-in when neither effect is already
@@ -726,7 +762,7 @@ Format follows Keep a Changelog loosely:
 - Removed article-sensitive fossil-name wording from the Anomalous Fossil
   dialogue.
 - Made the fossil researcher describe adaptive typing generically so its
-  dialogue cannot disagree with the generated Rare Unique Pokémon.
+  dialogue cannot disagree with the generated Rare Unique PokÃ©mon.
 - Made route-scene presentation declarative: each recipe now defines its lots,
   objects, scripts, state visibility, and metatile accents in one ROM data
   table shared by initial composition and quicksave restoration. The generic
@@ -745,12 +781,12 @@ Format follows Keep a Changelog loosely:
 - Unified normal Adventures, Trials, Adventure Replay, and multiplayer behind
   an interactive Run Review that previews effective rules and readiness,
   supports in-place setup edits, and replaces the old confirmation prompts.
-- Made Sky Uppercut super effective against Flying-type Pokémon and limited its
+- Made Sky Uppercut super effective against Flying-type PokÃ©mon and limited its
   tutor distribution to the Blaziken line, Hitmonchan, and Medicham.
 - Reworked Sceptile's Unique Ability into Canopy Stalker: with three qualifying
   Grass, Dragon, or Dark allies, its first slicing move after switch-in now
   forces the target out instead of gaining priority.
-- Limited automatic Poké Ball selection to the first turn of each battle so
+- Limited automatic PokÃ© Ball selection to the first turn of each battle so
   manually cycled ball choices persist across later turns.
 - Made Gholdengo revert to Gimmighoul Chest Form instead of Roaming Form when
   systems such as the Safari Matrix display or spawn its base species.
@@ -766,36 +802,36 @@ Format follows Keep a Changelog loosely:
   Mega Punch, Shadow Claw, and Poltergeist learnset options they require.
 - Reworked Professor Birch's dialogue throughout the introduction, hub services,
   and alternate partner flow to emphasize his enthusiastic field research,
-  observations of wild Pokémon, and curiosity about Adventures.
-- Fixed Mega-Evolved Pokémon being marked as outside the selected Pokédex in
+  observations of wild PokÃ©mon, and curiosity about Adventures.
+- Fixed Mega-Evolved PokÃ©mon being marked as outside the selected PokÃ©dex in
   party and storage displays when their base species is included.
-- Assigned Professor Elm to the Encounter Lab, where he studies Pokémon released
+- Assigned Professor Elm to the Encounter Lab, where he studies PokÃ©mon released
   or fainted during Adventures, with dialogue and music reflecting his
   evolution-focused, easily flustered character.
 - Disabled the legacy multiplayer implementation while its replacement is in
   development, and replaced its hub interaction with a work-in-progress notice.
-- Renamed the legacy Modern and Classic Plus Pokédex variants to Rogue Modern
+- Renamed the legacy Modern and Classic Plus PokÃ©dex variants to Rogue Modern
   and Rogue Classic to distinguish them from Divergence's main dex selection.
-- Replaced the opening Modern/Classic prompt with a favorite-game Pokédex
+- Replaced the opening Modern/Classic prompt with a favorite-game PokÃ©dex
   selection that determines the first partner pool and an optional native
   battle-gimmick gift. The selection groups games by region, placing Legends
   Arceus with Sinnoh and Legends Z-A with Kalos, while cumulative generation
   limits live under a separate National submenu. Birch can change between the
-  same curated dexes later, while unrestricted direct Pokédex editing remains
-  a postgame upgrade. Trial Pokédex choices use the same regional grouping
+  same curated dexes later, while unrestricted direct PokÃ©dex editing remains
+  a postgame upgrade. Trial PokÃ©dex choices use the same regional grouping
   while retaining trial-only Rogue and Conquest options.
 - Increased the Sacred Trial Ho-Oh's chance of receiving a unique typing from
   50% to 67%.
-- Reworded Frontier Brain Pokémon rewards as gifts from the Frontier Brain
+- Reworded Frontier Brain PokÃ©mon rewards as gifts from the Frontier Brain
   instead of using generic item copy.
-- Focused older Pokémon stat buffs around their Divergence roles: Arbok and
+- Focused older PokÃ©mon stat buffs around their Divergence roles: Arbok and
   Parasect gained 20 HP, Wigglytuff gained 20 Defense and 15 Sp. Def, Dewgong
   gained 20 Defense, Hypno's Sp. Atk rose from 73 to 95, and both Marowak forms
   gained 10 HP and Attack.
-- Continued focused stat buffs for underperforming Johto Pokémon: Ledian gained
+- Continued focused stat buffs for underperforming Johto PokÃ©mon: Ledian gained
   10 HP, 50 Attack, and 5 Speed; Ariados and Magcargo gained 20 HP; Sunflora
   gained 20 Speed; and Delibird gained 25 Attack, 30 Speed, and 20 Sp. Atk.
-- Continued focused stat buffs for underperforming Hoenn Pokémon: Beautifly
+- Continued focused stat buffs for underperforming Hoenn PokÃ©mon: Beautifly
   gained 20 Speed, Dustox gained 20 HP, Delcatty gained 20 Attack and Sp. Atk,
   Tropius gained 20 Sp. Atk, and Luvdisc gained 10 HP, 45 Sp. Atk, and 25
   Speed. Castform traded 10 Attack for 10 HP, 20 Sp. Atk, and 10 Speed across
@@ -803,22 +839,22 @@ Format follows Keep a Changelog loosely:
   Kecleon gained 10 HP and Defense; Grumpig gained 10 HP, Defense, and Sp. Atk;
   and Banette and Chimecho received matching improvements across their base and
   Mega forms.
-- Continued focused stat buffs for underperforming Sinnoh Pokémon: Kricketune
+- Continued focused stat buffs for underperforming Sinnoh PokÃ©mon: Kricketune
   gained 10 Attack, Defense, Sp. Atk, and Sp. Def; every Wormadam cloak and
   Carnivine gained 20 HP; Mothim gained 20 Speed; and Lumineon gained 20 Attack
   and Sp. Atk.
-- Continued focused stat buffs for underperforming Unova Pokémon: Watchog's
+- Continued focused stat buffs for underperforming Unova PokÃ©mon: Watchog's
   Attack rose to 95, Maractus's HP to 90, Emolga's Sp. Atk to 85, Beheeyem's
   HP to 85, and Heatmor's Speed to 80.
-- Continued focused stat buffs for underperforming Kalos Pokémon: male and
+- Continued focused stat buffs for underperforming Kalos PokÃ©mon: male and
   female Meowstic now share a 478 BST through 86 HP and 95 Sp. Atk
   respectively, with the same form-specific increases carried into both Mega
   forms; Aromatisse's Defense rose to 85, Dedenne's Sp. Atk to 95, Trevenant's
   HP to 95, and Avalugg's Sp. Def to 55.
-- Continued focused stat buffs for underperforming Alola Pokémon: Gumshoos's HP
+- Continued focused stat buffs for underperforming Alola PokÃ©mon: Gumshoos's HP
   rose to 100, Shiinotic's to 75, Komala's Defense to 80, Turtonator's HP to
   70, and Togedemaru's HP to 75.
-- Continued focused stat buffs for underperforming Galar Pokémon: Thievul's
+- Continued focused stat buffs for underperforming Galar PokÃ©mon: Thievul's
   Sp. Atk rose to 100, Eldegoss's HP to 75, Dubwool's HP to 80, Grapploct's
   Sp. Def to 90, and Stonjourner's Sp. Def to 45. Orbeetle gained 15 Sp. Atk,
   Boltund gained 10 Attack, Frosmoth gained 15 Speed, and Falinks gained 10 HP,
@@ -857,30 +893,30 @@ Format follows Keep a Changelog loosely:
   replaces the basic whistle and cycles through party, Day Care, and
   park-registered mounts, while Flight provides three takeoffs that refresh at
   the start of every Adventure node.
-- Defeated Legendary-den Pokémon are now preserved in the hub Safari, allowing
+- Defeated Legendary-den PokÃ©mon are now preserved in the hub Safari, allowing
   uncatchable trial encounters to remain obtainable after the run.
 - Tera Shards are now reusable, limited to one copy of each type, stop appearing
-  as route drops once owned, show as sold out in shops, and cost ₽8,000.
+  as route drops once owned, show as sold out in shops, and cost â‚½8,000.
 - Regional Style Trials now temporarily remove every disabled battle-gimmick
   activator from the bag and supply only the one permitted by that trial.
 - Legendary Clause now limits only the party entering an Adventure; additional
-  Legendary and Mythical Pokémon may join the party during the run.
+  Legendary and Mythical PokÃ©mon may join the party during the run.
 - Species Clause now permits separate branches of the same evolution family,
   such as Vaporeon and Flareon, while still blocking direct evolution lines.
 - Rejected release choices now remain readable until the player acknowledges
   the explanation.
 - Kept chained Ability popups visible long enough to read before another
-  Ability from the same Pokémon replaces them.
-- Expanded generated Unique Pokémon's exotic move pool with all eleven
+  Ability from the same PokÃ©mon replaces them.
+- Expanded generated Unique PokÃ©mon's exotic move pool with all eleven
   non-field Divergence moves, seven additional curated moves, and 28 broadly
   useful ability-synergy moves while keeping conditional support moves out of
   the equal-weight random pool.
-- Expanded generated Unique Pokémon's regular Ability pool to every compatible
+- Expanded generated Unique PokÃ©mon's regular Ability pool to every compatible
   standard Ability. Mechanically identical names now share one weighted roll
   before choosing a flavor, and species/form-bound, severe-drawback,
   suppressive, and game-breaking effects remain excluded.
 - Gave Hisuian Lilligant Counterstep, retaliating with Low Sweep whenever an
-  opposing Pokémon's Speed rises.
+  opposing PokÃ©mon's Speed rises.
 - Gave Hisuian Avalugg Glacial Fortress, making special attacks calculate
   damage using its Defense instead of its Special Defense.
 - Gave Stonjourner Menhir, preventing a single hit from dealing more than half
@@ -891,10 +927,10 @@ Format follows Keep a Changelog loosely:
   with Bitter Malice when Illusion successfully baits a type immunity.
 - Gave Vigoroth Fever Pitch, priming a switch after its next successful
   damaging move whenever it uses a status move.
-- Removed King’s Domain from randomly generated Unique Pokémon because its
+- Removed Kingâ€™s Domain from randomly generated Unique PokÃ©mon because its
   effect requires Truant; Colossal and the other standard-ability-dependent
   effects remain species-bound as well.
-- Allowed generated Unique Pokémon to receive Rapid Replica, guaranteeing
+- Allowed generated Unique PokÃ©mon to receive Rapid Replica, guaranteeing
   Transform so the ability can always activate.
 
 ### Fixed
@@ -913,7 +949,7 @@ Format follows Keep a Changelog loosely:
   Toxisphere and Smog Refinery secondary-effect blocking, and retaliation from
   Precognition and Counterspell. Switch-in candidate evaluation now applies
   existing Ability rules to both ordinary and unique Ability slots.
-- Kept the partner Pokémon following the player during the scripted Adventure
+- Kept the partner PokÃ©mon following the player during the scripted Adventure
   entrance walk when starting immediately after arriving beside the nurse.
 - Preserved the Treasure encounter's authored astral palette by excluding the
   room from seasonal recoloring and time-of-day tinting.
@@ -923,10 +959,10 @@ Format follows Keep a Changelog loosely:
   marker after closing the reward preview.
 - Corrected Adventure Paths geology overlay priority so the player and room
   nodes render above nearby rocks and crystal clusters.
-- Applied dynamic custom Pokémon typing to switch-in hazards, battle AI
+- Applied dynamic custom PokÃ©mon typing to switch-in hazards, battle AI
   predictions, and party type checks so altered typings are respected outside
   active battle slots.
-- Corrected the optimized Pokémon substructure lookup table so party Pokémon
+- Corrected the optimized PokÃ©mon substructure lookup table so party PokÃ©mon
   retain their canonical data layout across all personality values.
 - Fixed multi-target previews leaving the acting battler's target bounce active
   after confirming or cancelling a move.
@@ -940,13 +976,13 @@ Format follows Keep a Changelog loosely:
   terminating its window-template list correctly.
 - Kept cached route-scene requests outside the resettable map heap, preventing
   popup and window memory corruption that could eventually crash the game.
-- Kept Buried Cache ambush Pokémon within the active Pokédex and made them
+- Kept Buried Cache ambush PokÃ©mon within the active PokÃ©dex and made them
   catchable, safely skipped the ambush when no candidate is available,
   repaired dynamically composed clue text, and gave the Field Shovel its own
   CC0 item icon adapted from AntumDeluge's OpenGameArt asset.
 - Ensured Mystery Egg delivery only accepts the marked courier egg, keeps the
   quest and party state intact when the Escape Rope cannot be added, and keeps
-  the Breeder's Exchange completion message aligned with the Pokémon actually
+  the Breeder's Exchange completion message aligned with the PokÃ©mon actually
   received. Failed breeder previews now return to the field instead of leaving
   the script waiting indefinitely.
 - Preserved authored route objects when generated scene objects cannot fit the
@@ -969,19 +1005,19 @@ Format follows Keep a Changelog loosely:
   no longer attempt invalid facing animations, and fossil props use
   context-specific inspection text.
 - Prevented intermittent tilemap corruption when paging left from move
-  relearning or replacement into the Pokémon stats summary.
-- Applied changed-type Unique Pokémon palette tinting to party, Day Care, and
-  registered ride Pokémon while mounted.
-- Moved automatic Poké Ball preselection out of the action-selection frame so
+  relearning or replacement into the PokÃ©mon stats summary.
+- Applied changed-type Unique PokÃ©mon palette tinting to party, Day Care, and
+  registered ride PokÃ©mon while mounted.
+- Moved automatic PokÃ© Ball preselection out of the action-selection frame so
   catchable battle menus no longer scan catch scores while the shortcut preview
   slides in.
 - Restored the expanded ability-description option while choosing a move to
   forget.
 - Made Bag of Tricks activate after self-targeting Dark-type status moves.
-- Preserved favorite-game Pokédex selections across the nested gimmick menu,
+- Preserved favorite-game PokÃ©dex selections across the nested gimmick menu,
   offered the gimmick choice for every National dex, and allowed Birch to
-  change the Pokédex before partner selection while refreshing the candidates.
-- Made favorite-game Pokédex selections configure the matching trainer pool:
+  change the PokÃ©dex before partner selection while refreshing the candidates.
+- Made favorite-game PokÃ©dex selections configure the matching trainer pool:
   regional dexes use their region, while National dexes cumulatively enable
   trainer regions through their selected generation.
 - Restored Professor Birch as the main professor throughout the intro,
@@ -993,34 +1029,34 @@ Format follows Keep a Changelog loosely:
 - Prevented random Unique Ability follow-up moves from repeating the move that
   triggered them when another pool option is available; Screen Test now always
   pairs Reflect with Light Screen and vice versa.
-- Made party and storage Pokédex legality indicators resolve temporary and
-  consolidated forms through their shared Pokédex entry, including Wobbuffet's
+- Made party and storage PokÃ©dex legality indicators resolve temporary and
+  consolidated forms through their shared PokÃ©dex entry, including Wobbuffet's
   Punching form.
 - Made generated Liquid Voice Politoed sets use Hyper Voice and limited
   Telepathy to Indeedee's doubles-oriented competitive sets.
 - Updated competitive profiles for Divergence-specific Ability replacements
-  and added validation against each Pokémon's current form-family Abilities.
+  and added validation against each PokÃ©mon's current form-family Abilities.
 - Prevented headless test crashes from hanging indefinitely by bounding emulator
   worker progress, failing fast on illegal opcodes, and moving a large Adventure
   path test snapshot off the GBA stack.
-- Preserved Unique Pokémon's nature and recalculated stats after applying or
+- Preserved Unique PokÃ©mon's nature and recalculated stats after applying or
   reapplying their custom data.
 - Made Unique Den payload generation deterministic under Adventure Replay
   without consuming the general gameplay RNG.
 - Recalculated party counts when loading recorded battles, preventing Illusion
-  from treating a non-final party member as the last Pokémon in the party.
+  from treating a non-final party member as the last PokÃ©mon in the party.
 - Hid an active Illusion user's real typing behind its disguise in the battle
   type indicator and move-selection effectiveness preview.
 - Hardened living-battler checks against invalid target IDs before accessing
   battler data.
 - Prevented Reef Protection from targeting a nonexistent opposing battler when
-  healing activates it between opposing Pokémon, including from Leftovers.
+  healing activates it between opposing PokÃ©mon, including from Leftovers.
 - Restored the original Legendary Statue's full shading and foot detail in
   its golden recolor instead of collapsing seven source shades into three.
 - Made holders of unique abilities that create Acid Rain, Sandstorm, or Hail
   immune to that weather's damage without granting Acid Rain healing to
-  non-Poison Pokémon.
-- Preserved unique Pokémon's native ability choices when they are caught,
+  non-Poison PokÃ©mon.
+- Preserved unique PokÃ©mon's native ability choices when they are caught,
   reconstructed in the Safari, or purchased from Safari offers.
 - Prevented Neutralizing Gas and Truant popups from inheriting another
   ability's name, and kept consecutive same-slot popups from freeing each
@@ -1043,10 +1079,10 @@ Format follows Keep a Changelog loosely:
 - Converted Unique Legendary roamers into stationary Alpha encounters so they
   cannot flee during their initially uncatchable phase.
 - Kept attacker-side unique ability popups attached to their actual battler,
-  including Serene Voice on opposing Pokémon.
+  including Serene Voice on opposing PokÃ©mon.
 - Corrected spelling errors across dialogue, UI copy, move descriptions,
-  Pokédex entries, and the Graffiti Tag ability name.
-- Corrected typos in Bugsy's post-battle dialogue and the Pokéblock
+  PokÃ©dex entries, and the Graffiti Tag ability name.
+- Corrected typos in Bugsy's post-battle dialogue and the PokÃ©block
   scattering prompt.
 - Shortened Charm and Dark Deal Curse descriptions to fit their item-detail
   panel without clipping.
@@ -1059,13 +1095,13 @@ Format follows Keep a Changelog loosely:
 - Prevented Frontier Brains from replacing routes in the starting column of an
   adventure path, ensuring the player can level before challenging them.
 - Moved battle gimmick selectors clear of the battler type indicators.
-- Prevented Honey Tree habitats from generating Pokémon forbidden by the active Trial.
+- Prevented Honey Tree habitats from generating PokÃ©mon forbidden by the active Trial.
 - Removed Swimmers and swimming Triathletes from land-based route Trainer
   encounters.
 - Prevented the level-up helper Trainer from Terastallizing.
 - Clarified that Iron Treads' Drive Protocol clears allied entry hazards and
   sets Gravity on switch-in.
-- Made Frontier Brain Pokémon rewards respect the configured nickname mode,
+- Made Frontier Brain PokÃ©mon rewards respect the configured nickname mode,
   including skipping prompts for Never and assigning names for Automatic.
 - Kept Tera type indicators visible during battle animations whenever their
   healthboxes remain visible.
@@ -1101,14 +1137,14 @@ Format follows Keep a Changelog loosely:
   the party like rival battles, while retaining Healing Flask restrictions.
 - Made Spiral Gaze users reliably prioritize their first-turn perfect-accuracy
   Hypnosis when the target can be put to sleep.
-- Kept each Pokédex's canonical visible roster and numbering while allowing
+- Kept each PokÃ©dex's canonical visible roster and numbering while allowing
   appropriate pre-evolutions, later evolutions, and regional family members
   throughout encounters, catching, evolution, storage, and run eligibility.
 - Replaced Summary Trainer Memo encounter details with compact, spoiler-free
-  evolution method guidance tailored to the current Pokémon and run.
+  evolution method guidance tailored to the current PokÃ©mon and run.
 - Standardized unique Ability descriptions to distinguish damage dealt from
   damage taken, made vague modifiers explicit, and added layout validation
-  for their Summary and Pokédex panels.
+  for their Summary and PokÃ©dex panels.
 - Replaced the random nickname data with a curated, equally weighted pool of
   2,500 common words, human names, and themed proper names.
 - Renamed ancient Paradox solo abilities as Instincts and future Paradox solo
@@ -1123,7 +1159,7 @@ Format follows Keep a Changelog loosely:
   Hail damage, respectively.
 - Updated the typings of Goodra, Golduck, Electivire, Midnight Form Lycanroc,
   Florges, Dodrio, Parasect, and Mega Absol to better match their designs.
-- Reworked generated Unique Pokémon movesets so exotic moves are unavailable
+- Reworked generated Unique PokÃ©mon movesets so exotic moves are unavailable
   across the full evolution family, changed typings independently select from
   four typed options, and Legendary move-dependent abilities always receive a
   semantically compatible custom move while preserving already-valid rolls.
@@ -1181,7 +1217,7 @@ Format follows Keep a Changelog loosely:
   knocks out a foe while backed by another Flying ally and Ground ally.
 - Gave Rayquaza Emerald Accord, a once-per-battle switch-in ability that restores
   weather, terrain, rooms, side conditions, and active stat changes to neutral.
-- Made the Roguelocke Trial require nicknames for every acquired Pokémon while
+- Made the Roguelocke Trial require nicknames for every acquired PokÃ©mon while
   preserving the player's nickname setting outside the Trial.
 - Show each battler's Tera type beside its level whenever Terastallization is
   enabled, using a grayscale icon until it Terastallizes.
@@ -1191,14 +1227,14 @@ Format follows Keep a Changelog loosely:
 - Made Jetstream use the user's effective Speed, allowing Tailwind, held items,
   Abilities, weather, status, and other Speed modifiers to affect its damage.
 - Made Unique Legendary variants available in legendary nodes from the start,
-  and moved alternative Unique Pokémon typings to the final Unique Lab upgrade.
+  and moved alternative Unique PokÃ©mon typings to the final Unique Lab upgrade.
 - Made Regional Style Trials exclusively enable and temporarily supply their
   era-appropriate battle gimmick, while legacy styles disable all gimmicks.
 - Made Orre Style replace the incoming party with Umbreon and Espeon while
   retaining its requirement to finish the Trial with both partners.
 - Layered staggered lightning strikes and electrical flashes through
   Thundercrush's rising stone animation.
-- Updated every Poké Ball item description to state its exact catch multiplier
+- Updated every PokÃ© Ball item description to state its exact catch multiplier
   and conditions while retaining descriptions of secondary capture effects.
 - Added independent 1x-4x speed controls for scripted cutscene movement,
   evolution animations, and catching animations.
@@ -1228,14 +1264,14 @@ Format follows Keep a Changelog loosely:
   be rearranged without stale saved items becoming unrelated rewards.
 - Sacred Ash can now be consumed immediately after any battle with party losses,
   before post-battle dialogue or reward popups, provided the player did not
-  white out; declining preserves the Ash and releases fainted Pokémon normally.
+  white out; declining preserves the Ash and releases fainted PokÃ©mon normally.
 - Smoothed boss difficulty progression by delaying competitive movesets across
   Easy, Average, and Hard, and by delaying boss weather until the Elite Four
   on Average and Gym 5 on Hard.
 - Made the dark charcoal window border palette the global default so standard
   menus, prompts, shops, and scripted choices use it consistently.
-- Grayscaled Safari matrix portraits for Pokémon outside the currently selected
-  Pokédex and labeled their inspection previews.
+- Grayscaled Safari matrix portraits for PokÃ©mon outside the currently selected
+  PokÃ©dex and labeled their inspection previews.
 - Added the level-up battle NPC to Mysterious Shrines so parties can reach the
   current level cap before challenging the shrine guardian.
 - Changed new hub area construction to use the hub map editor, allowing the
@@ -1248,9 +1284,9 @@ Format follows Keep a Changelog loosely:
 
 - Fixed the Trial preview briefly drawing its border around an unloaded gap
   before the complete overview appeared.
-- Fixed Infested Terrain damaging Flying and otherwise ungrounded Pokémon on
+- Fixed Infested Terrain damaging Flying and otherwise ungrounded PokÃ©mon on
   switch-in.
-- Fixed the storage out-of-Dex warning compressing and overlapping the Pokémon
+- Fixed the storage out-of-Dex warning compressing and overlapping the PokÃ©mon
   information panel.
 - Added Galarian Corsola to the Modern Pokedex alongside Cursola.
 - Fixed the intended increase in Full Rest Stop frequency during the Elite Four
@@ -1258,10 +1294,10 @@ Format follows Keep a Changelog loosely:
 - Fixed the lone opponent's type badges being vertically misaligned in 2-vs-1
   double battles.
 - Fixed evolved Safari catches being shown as nicknames when their hub offers
-  display the Pokémon's base species.
+  display the PokÃ©mon's base species.
 - Fixed Fossil Drill activating Rapid Spin when its user had fainted or was
   about to faint from its triggering move's recoil.
-- Fixed custom Unique Pokémon types reverting to their species' base types
+- Fixed custom Unique PokÃ©mon types reverting to their species' base types
   when switching into battle, and fixed empty adventure paths appearing after
   defeating a boss.
 - Fixed corrupted text and background tiles on the move-replacement summary
@@ -1286,17 +1322,17 @@ Format follows Keep a Changelog loosely:
 - Ported full battle animations for all five Torque moves from
   `pokeemerald-expansion`.
 - Restored Frontier Brain adventure-path encounters with three scheduled
-  Frontier Brain battles per run, previewed Pokémon trophies, and canon-inspired
+  Frontier Brain battles per run, previewed PokÃ©mon trophies, and canon-inspired
   competitive teams; Brandon can uniquely award one of his Legendary guardians.
   Brains now appear in Trial runs except Little Cup, only offer Trial-legal
   trophies, skip trophies during Limited Capture, and use Snagging instead during
   Orre Style.
 - Added Level, Tinted, Reach, Accuracy, Retaliate, and Stand Curses to the
   temporary Dark Deal pool as opponent-side mirrors of their Charms.
-- Added the Moody and Eviolite Charms, which adjust friendly Pokémon's stats
-  each turn and bolster the defenses of Pokémon that can still evolve.
+- Added the Moody and Eviolite Charms, which adjust friendly PokÃ©mon's stats
+  each turn and bolster the defenses of PokÃ©mon that can still evolve.
 - Added the Level and Regen Charms, which raise the player's level cap by three
-  and restore friendly Pokémon's HP when switching out.
+  and restore friendly PokÃ©mon's HP when switching out.
 - Added the Prep and Protean Charms, which grant priority to the first status
   move after switching in and change the user's type to match its first
   eligible move respectively.
@@ -1320,7 +1356,7 @@ Format follows Keep a Changelog loosely:
   including form-specific boosts and animations, switching restrictions, and
   battle gimmick cancellation while Tatsugiri is swallowed.
 - Added dimmed storage icons, grayscale previews, and a warning label for
-  Pokémon outside the currently selected Pokédex.
+  PokÃ©mon outside the currently selected PokÃ©dex.
 - Added Plain and Infested Seeds, which raise accuracy on Plain Terrain and
   critical-hit ratio on Infested Terrain respectively.
 
@@ -1350,18 +1386,18 @@ Format follows Keep a Changelog loosely:
 - Added the Eclipse-consuming Withering Script, Severing Rite, Earthen Seal,
   and Cinder Edict unique abilities for the Treasures of Ruin, and assigned
   Mean Streak to Okidogi.
-- Added an unlockable Stealth Poké Ride skill that lets thematically fitting
+- Added an unlockable Stealth PokÃ© Ride skill that lets thematically fitting
   mounts avoid automatic wild encounters.
 - Added a new GEEF logo splash before the upstream boot credit screen.
 - Added delayed slash, sparkle, and sound effects to the GEEF boot splash.
-- Added an expanded Pokémon summary Info view for reading wrapped ability
+- Added an expanded PokÃ©mon summary Info view for reading wrapped ability
   descriptions from the ability panel, which now stays open while switching
-  between Pokémon.
-- Added expanded canonical ability descriptions adapted from Pokémon Showdown
+  between PokÃ©mon.
+- Added expanded canonical ability descriptions adapted from PokÃ©mon Showdown
   for unchanged inherited abilities, with local expanded text for
   Divergence-modified abilities.
 - Tightened Divergence-modified ability short descriptions so they fit the
-  collapsed Pokémon Info ability panel.
+  collapsed PokÃ©mon Info ability panel.
 - Corrected Frisk and Infiltrator summary ability descriptions for the expanded
   ability view.
 - Updated Frisk and Omnisense battle messaging and Omnisense copy to communicate
@@ -1369,9 +1405,9 @@ Format follows Keep a Changelog loosely:
 - Ported upstream battle sprites and palettes for newly added Mega Evolutions
   that were still using placeholder battle art.
 - Added a once-per-run Unique Den map node with a custom tinted habitat icon
-  that uses the Den encounter map for a high-quality random Unique Pokémon
+  that uses the Den encounter map for a high-quality random Unique PokÃ©mon
   encounter before lab rarity and typing unlocks.
-- Expanded the dynamic Unique Pokémon regular and unique ability roll pools with
+- Expanded the dynamic Unique PokÃ©mon regular and unique ability roll pools with
   additional broadly useful and expressive options.
 - Added the Trial Attendant as an early Adventure Entrance hub upgrade, with V1
   trial contracts for Type Trials, Little Cup, BST Crown, Randoman Roulette,
@@ -1382,8 +1418,8 @@ Format follows Keep a Changelog loosely:
   whole empty patches with 5, 10, or 20 selected berries.
 - Added matching Day Care node berry helper options to harvest all ripe berries
   and bulk plant its three-tree patches with 3, 6, or 9 selected berries.
-- Added a richer Pokémon Safari offer preview with a Pokémon portrait and exact
-  Pokéblock owned/required costs before buying or dismissing an offer.
+- Added a richer PokÃ©mon Safari offer preview with a PokÃ©mon portrait and exact
+  PokÃ©block owned/required costs before buying or dismissing an offer.
 - Added evil-team outfit disguises: matching team trainers react with a
   question-mark emote instead of automatically approaching, while direct
   interaction still starts their normal battle.
@@ -1397,18 +1433,18 @@ Format follows Keep a Changelog loosely:
   Dance can consume the terrain instead of Cresselia, respectively.
 - Made Morelull and Shiinotic's Sporelight use Spotlight after every successful
   healing move instead of only once per battle.
-- Expanded Unique Pokémon move generation to a curated 154-move general pool
+- Expanded Unique PokÃ©mon move generation to a curated 154-move general pool
   with shared physical and special attacks for every type, added four complementary
   altered-type moves per type, and made the shrine guardian retain a more varied
   pair of moves from its selected competitive set. The Unique tracker now also
-  displays each tracked Pokémon's effective typing.
+  displays each tracked PokÃ©mon's effective typing.
 - Made run starts substantially faster by caching repeated species and trainer
   eligibility work, deferring late rival planning,
   and removing unnecessary portal transition frames.
 - Made the Starter Bag a prerequisite for constructing the Trial Attendant and
   aligned the player's Trial starter-selection approach with the bag.
 - Reworked Zygarde's Edgeproof unique ability into Natural Order, which moves
-  every active Pokémon's stat stages one step toward neutral at turn end.
+  every active PokÃ©mon's stat stages one step toward neutral at turn end.
 
 - Reworked Emolga's unique ability into Static Stash, which uses Charge after
   consuming a Berry or terrain seed, and simplified the Wattrel line's Storm
@@ -1430,44 +1466,44 @@ Format follows Keep a Changelog loosely:
 - Sacred Ash now activates only as an automatic whiteout rescue during
   Adventures instead of also being manually usable from the party menu.
 - Expanded thematically appropriate Main Quest rewards with a balanced spread
-  of typed and Shiny Pokéblocks.
-- Safari offers now base their Pokéblock types on the displayed base Pokémon
+  of typed and Shiny PokÃ©blocks.
+- Safari offers now base their PokÃ©block types on the displayed base PokÃ©mon
   while retaining the final evolution's BST-based total cost.
-- Unique Pokémon Dens now have a 30% chance to appear a second time during a
+- Unique PokÃ©mon Dens now have a 30% chance to appear a second time during a
   run, with both appearances scheduled away from other reserved encounters.
 - Reworked the Premier Ball with a 3x catch rate and a random neutral nature
-  for successfully caught Pokémon.
+  for successfully caught PokÃ©mon.
 - Updated the wild-battle quick-catch shortcut to begin each turn with the
   currently owned Ball that has the highest catch rate against the target,
   randomly selecting among Balls tied for the highest rate.
 - Reworked the Cherish Ball to guarantee at least three perfect IVs on a
-  successfully caught Pokémon while retaining its standard catch rate.
+  successfully caught PokÃ©mon while retaining its standard catch rate.
 - Reworked the Luxury Ball to scale with the player's money, granting a 2x
-  catch bonus at ¥10,000, 3x at ¥30,000, and 4x at ¥50,000.
+  catch bonus at Â¥10,000, 3x at Â¥30,000, and 4x at Â¥50,000.
 - Increased the Repeat Ball's catch bonus for previously caught species from
   3.5x to 4x.
 - Reworked the Nest Ball to grant a 4x catch bonus against Grass- and
-  Flying-type Pokémon instead of scaling with the target's level.
-- Increased the Net Ball's catch bonus against Water- and Bug-type Pokémon from
+  Flying-type PokÃ©mon instead of scaling with the target's level.
+- Increased the Net Ball's catch bonus against Water- and Bug-type PokÃ©mon from
   3.5x to 4x.
 - Reworked the Dive Ball to grant a 4x catch bonus against Water- and
-  Flying-type Pokémon instead of depending on the encounter location.
-- Reworked the Dream Ball to give caught Pokémon their Hidden Ability instead
+  Flying-type PokÃ©mon instead of depending on the encounter location.
+- Reworked the Dream Ball to give caught PokÃ©mon their Hidden Ability instead
   of receiving a catch bonus against sleeping targets.
 - Reworked the Moon Ball to grant a 4x catch bonus against Dark- and Fairy-type
-  Pokémon.
-- Made Pokémon caught in a Friend Ball start at maximum friendship.
+  PokÃ©mon.
+- Made PokÃ©mon caught in a Friend Ball start at maximum friendship.
 - Reworked the Heavy Ball to compare the target's weight with the active
-  Pokémon, granting a 2x bonus at 50 kg heavier, 3x at 150 kg, and 4x at 300 kg.
+  PokÃ©mon, granting a 2x bonus at 50 kg heavier, 3x at 150 kg, and 4x at 300 kg.
 - Reworked the Level Ball to use absolute level leads, granting a 2x bonus at
   10 levels, 3x at 25 levels, and 4x at 50 levels above the target.
-- Expanded the Fast Ball's 4x catch bonus to roaming Pokémon.
+- Expanded the Fast Ball's 4x catch bonus to roaming PokÃ©mon.
 - Made Fast Path pacing the Standard Adventure format and retained the previous
   Standard format as the optional Slow Path mode.
-- Made the selected Pokédex a run-entry legality rule for the party and Day Care,
-  with illegal Pokémon marked in the party screen.
-- Made a confirmed Trial Pokédex selection immediately become the active hub
-  Pokédex so party previews and run validation use the same rules.
+- Made the selected PokÃ©dex a run-entry legality rule for the party and Day Care,
+  with illegal PokÃ©mon marked in the party screen.
+- Made a confirmed Trial PokÃ©dex selection immediately become the active hub
+  PokÃ©dex so party previews and run validation use the same rules.
 - Made Insane Mode force Hard difficulty instead of presenting a difficulty
   selection.
 - Added an early Trial Attendant shortcut that previews and repeats the exact
@@ -1499,30 +1535,30 @@ Format follows Keep a Changelog loosely:
   Apotheosis into a Legendary-only Trial with Legendary starter choices, and
   Limited Capture into a Fresh Start Trial built around exactly five guaranteed
   captures.
-- Added a Trial Attendant Pokédex selection step so flexible trials can choose
+- Added a Trial Attendant PokÃ©dex selection step so flexible trials can choose
   their dex, while Region Style and Z-A Royale restrict choices to matching
   variants.
 - Grouped Type Trials and Regional Styles into chevron-marked Trial Attendant
   submenus so related trial families no longer crowd the top-level list.
-- Blocked Poké Ball throws against Pokémon that are illegal for the active
+- Blocked PokÃ© Ball throws against PokÃ©mon that are illegal for the active
   trial, reusing the existing no-catch battle item flow instead of waiting for
   the post-catch release flow.
 - Added Trial Attendant start validation for party, Day Care, and chosen partner
-  Pokémon so illegal trial teams are caught before entering the run.
+  PokÃ©mon so illegal trial teams are caught before entering the run.
 - Made Trial Attendant starter choices respect pending type, Little Cup, and
-  low-BST legality so the three offered partner Pokémon are valid for the
+  low-BST legality so the three offered partner PokÃ©mon are valid for the
   selected trial.
-- Grouped Trial Attendant Pokédex choices by Pokédex region, with National
+- Grouped Trial Attendant PokÃ©dex choices by PokÃ©dex region, with National
   generation options and other multi-variant dexes moved into submenus.
 - Made Trial Attendant difficulty selection start on Average by default.
 - Kept Trial Attendant runs from using the normal nurse's entrance movement.
 - Blocked Trainer battles when the current Trial party is illegal, with the
-  offending Pokémon shown, and prevented evolutions into Trial-illegal species.
-- Kept the battle Poké Ball shortcut visible but grayed out when catching is
-  temporarily blocked, while still hiding it when the Bag has no Poké Balls.
+  offending PokÃ©mon shown, and prevented evolutions into Trial-illegal species.
+- Kept the battle PokÃ© Ball shortcut visible but grayed out when catching is
+  temporarily blocked, while still hiding it when the Bag has no PokÃ© Balls.
 - Added the active Trial name to the start-menu run summary for saved and
   resumed Trial runs.
-- Reordered Trial startup validation to catch illegal party or Day Care Pokémon
+- Reordered Trial startup validation to catch illegal party or Day Care PokÃ©mon
   before saving or opening the optional starter selection.
 - Made the Trial Attendant upgrade become purchasable only after Trials are
   introduced in the Trial Area.
@@ -1531,9 +1567,9 @@ Format follows Keep a Changelog loosely:
 - Placed the Trial Attendant beside the normal Adventure nurse, replacing the
   fence behind them once the upgrade is built.
 - Replaced the Trial startup text sequence with a single overview panel showing
-  the selected Trial, difficulty, Pokédex, and paginated exhaustive rules before
+  the selected Trial, difficulty, PokÃ©dex, and paginated exhaustive rules before
   the native Yes/No confirmation prompt.
-- Made Z-A Royale enforce Double Battles alongside its Z-A Pokédex, Rainbow
+- Made Z-A Royale enforce Double Battles alongside its Z-A PokÃ©dex, Rainbow
   Trainer order, and all-region Trainer pool.
 - Reworked the Snover and Abomasnow line's White Canopy unique ability to set
   Snow and Grassy Terrain together on switch-in.
@@ -1548,65 +1584,65 @@ Format follows Keep a Changelog loosely:
 - Updated generic intro, credits, and system-facing title copy to use the
   Emerald Rogue: Divergence title while preserving Pokabbie's Emerald Rogue
   attribution.
-- Softened the Pokémon summary screen charcoal ramp so panels and headers read
+- Softened the PokÃ©mon summary screen charcoal ramp so panels and headers read
   lighter against the white information boxes.
-- Recolored the Rogue Pokédex page background stripes from blue to the same
+- Recolored the Rogue PokÃ©dex page background stripes from blue to the same
   dark grey stripe pair used by the summary screen.
 - Made A Unique Discovery active from the start with discovery rewards, and
   moved the Unique Scanner into Bill's first Unique Lab handoff.
-- Smoothed boss team sizes so Standard Elite Four battles use five Pokémon and
-  Hard mode reaches six-Pokémon boss teams starting at the Elite Four.
+- Smoothed boss team sizes so Standard Elite Four battles use five PokÃ©mon and
+  Hard mode reaches six-PokÃ©mon boss teams starting at the Elite Four.
 - Reworked the Bank into one-time Adventure Fund upgrades that set absolute
-  run-start money tiers up to ¥50000, while Bag Wipe rules still force runs
+  run-start money tiers up to Â¥50000, while Bag Wipe rules still force runs
   to start with no money.
-- Reworked Hub Safari acquisition into a Pokéblock purchase economy: Safari
-  sign and legendary cave Pokémon now show typed Pokéblock costs, preserve
+- Reworked Hub Safari acquisition into a PokÃ©block purchase economy: Safari
+  sign and legendary cave PokÃ©mon now show typed PokÃ©block costs, preserve
   stored run traits, and grant low-level egg/baby species to the party or PC.
 - Added an affordability marker to purchasable Hub Safari and legendary cave
-  Pokémon in the Safari selection grid.
-- Added a shiny marker to shiny Hub Safari and legendary cave Pokémon in the
+  PokÃ©mon in the Safari selection grid.
+- Added a shiny marker to shiny Hub Safari and legendary cave PokÃ©mon in the
   Safari selection grid.
-- Added a unique marker to unique Hub Safari and legendary cave Pokémon in the
+- Added a unique marker to unique Hub Safari and legendary cave PokÃ©mon in the
   Safari selection grid.
 - Added a combined shiny unique marker for Hub Safari and legendary cave
-  Pokémon that are both shiny and unique.
+  PokÃ©mon that are both shiny and unique.
 - Split the Safari selection grid markers into left caught, middle
   shiny/unique, and right affordability slots for clearer purchase scanning.
 - Added an option to dismiss only the selected Hub Safari or legendary cave
-  Pokémon after choosing it from the Safari selection grid.
+  PokÃ©mon after choosing it from the Safari selection grid.
 - Changed Safari purchase pricing to use refined final-BST cost tiers, split
   dual-type costs across both matching types, remove hidden individual
-  variation, and charge extra Shiny Pokéblocks for shiny Legendary/Mythical
-  Pokémon.
-- Added random Pokéblock drops to run boss rewards, with mostly typed
-  Pokéblocks, occasional stat Pokéblocks, and rare Shiny Pokéblocks.
-- Replaced Market Berry Blender minigames with direct Pokéblock crafting that
+  variation, and charge extra Shiny PokÃ©blocks for shiny Legendary/Mythical
+  PokÃ©mon.
+- Added random PokÃ©block drops to run boss rewards, with mostly typed
+  PokÃ©blocks, occasional stat PokÃ©blocks, and rare Shiny PokÃ©blocks.
+- Replaced Market Berry Blender minigames with direct PokÃ©block crafting that
   uses the Mart-style quantity UI, dynamic recipe lists, and matching berries
   as item currency.
-- Made Pokéblock recipe selection open the crafting item list directly instead
+- Made PokÃ©block recipe selection open the crafting item list directly instead
   of first showing a redundant Craft/Quit menu.
-- Removed the Berry Blender hub upgrade path and made Pokéblock crafting
+- Removed the Berry Blender hub upgrade path and made PokÃ©block crafting
   available through the Market mixer without unlocking duplicate NPCs.
-- Added bundled Pokéblock quest rewards, usually in 5-count chunks, including
-  progression bundles, Safari-themed bundles, and 10 matching typed Pokéblocks
+- Added bundled PokÃ©block quest rewards, usually in 5-count chunks, including
+  progression bundles, Safari-themed bundles, and 10 matching typed PokÃ©blocks
   from each Type Master quest.
-- Removed Shiny Pokéblocks from Treat Shop stock so they remain tied to run
+- Removed Shiny PokÃ©blocks from Treat Shop stock so they remain tied to run
   drops, quest rewards, and Starf Berry crafting.
-- Allow standard adventures to start with up to six party Pokémon, while
+- Allow standard adventures to start with up to six party PokÃ©mon, while
   blocking duplicate species from entering the same run-start party.
 - Added a visible Legendary Clause difficulty toggle: Easy leaves it off,
   Average and above enable it to limit runs to one Legendary/Mythical in the
   party, and the old early enemy Legendary pressure is now Brutal-only.
-- Weighted route and Team Hideout item drops toward Pokémon-linked special
+- Weighted route and Team Hideout item drops toward PokÃ©mon-linked special
   and evolution items when the matching evolution family is in the party, while
   preventing duplicate linked special-item drops on the same route.
-- Reduced Pokémon-linked special item drops so matching party items are only
+- Reduced PokÃ©mon-linked special item drops so matching party items are only
   favored after a rare special-item roll instead of increasing route special
   item frequency.
 - Removed battle-only Bag Clause dead items from generated item economies and
-  replaced the route shop vending machine's Poké Doll reward.
-- Added guaranteed small Pokéblock Bundle drops on normal routes for Bag
-  Clause runs, cashing small bundles into two random Pokéblocks and rare big
+  replaced the route shop vending machine's PokÃ© Doll reward.
+- Added guaranteed small PokÃ©block Bundle drops on normal routes for Bag
+  Clause runs, cashing small bundles into two random PokÃ©blocks and rare big
   bundles into five when the run ends.
 - Reworked Krookodile's Bounty unique ability so opposing switch-outs are
   punished with Pursuit while keeping the KO money payout.
@@ -1682,19 +1718,19 @@ Format follows Keep a Changelog loosely:
 - Fixed Trial starter generation mishandling move-based evolutions, which could
   pause debug builds before opening the starter bag.
 - Reduced the first rival battle's loading pause by planning and caching the
-  rival's roster without constructing discarded battle-ready Pokémon.
+  rival's roster without constructing discarded battle-ready PokÃ©mon.
 - Prevented the shrine guardian Ho-Oh from receiving Whirlwind, which could end
   its solo wild battle without resolving the trial.
 - Fixed Endless Core allowing Eternatus to switch, use an item, or flee instead
   of selecting a status move during its recharge turn.
-- Made automatic Poké Ball selection break equal catch-rate ties by using the
+- Made automatic PokÃ© Ball selection break equal catch-rate ties by using the
   ball with the lowest maximum potential, and preserve the Master Ball unless
   it is the only ball available.
-- Fixed battle animations firing debug assertions when a transformed Pokémon
+- Fixed battle animations firing debug assertions when a transformed PokÃ©mon
   was queried for its sprite dimensions, including once per hit of Double Kick,
   and retained Transform's gender-specific sprite across later sprite reloads.
 - Prevented the AI from repeatedly using Whirlwind and other phazing status
-  moves against Pokémon with Unmovable.
+  moves against PokÃ©mon with Unmovable.
 - Made Eevee require Baby-Doll Eyes specifically to evolve into Sylveon, so
   Fairy-type Covet no longer enables the evolution immediately.
 - Fixed the Quest Log index failing to redraw scrolled options after adding the
@@ -1709,13 +1745,13 @@ Format follows Keep a Changelog loosely:
   the starter bag instead of forcing the player to leave the startup flow.
 - Made the optional starter choice available to every Trial without requiring
   the separate Starter Bag hub upgrade.
-- Prevented flying Ride Pokémon from sliding on ice tiles.
+- Prevented flying Ride PokÃ©mon from sliding on ice tiles.
 - Corrected the battle-sprite positioning of newly added Z-A Mega Evolutions,
   including visible gaps beneath Mega Staraptor and other backsprites.
 - Made individual Trials appear only after their corresponding Trial quest
   has unlocked, preserving chained unlocks such as Chaos Master and Iron Kaizo.
 - Made Equalized apply a proportional 500-point base-stat spread throughout the
-  run, including wild battles, party stats, and the active Pokédex display.
+  run, including wild battles, party stats, and the active PokÃ©dex display.
 - Restored the gate-opening walk sequence when starting a Trial through the
   Trial Attendant.
 - Made completed or retired Trial runs return the player in front of the Trial
@@ -1724,7 +1760,7 @@ Format follows Keep a Changelog loosely:
   legal, and made its opponent teams follow the same Little Cup format before
   level-5 battle scaling is applied.
 - Disabled ordinary Trainer-battle Exp. Points during Little Cup Trials so
-  Pokémon remain at level 5, while leaving PokéAssistant EXP battles unaffected.
+  PokÃ©mon remain at level 5, while leaving PokÃ©Assistant EXP battles unaffected.
 - Preserved strong trainer evolution lines when adapting opponent teams to
   restricted formats, allowing choices such as Aggron to resolve into legal
   Little Cup forms such as Aron instead of falling into unrelated type pools.
@@ -1736,17 +1772,17 @@ Format follows Keep a Changelog loosely:
   trainer battle speed option.
 - Applied wild form-family encounter rules to catching contest spawns so they
   match normal route encounter filtering.
-- Fixed run boss Pokéblock rewards being added during the adventure, causing
+- Fixed run boss PokÃ©block rewards being added during the adventure, causing
   them to be lost when the run bag was wiped on return to the hub.
 - Removed stale legacy Safari entrance and shiny-list text now that Safari
-  acquisition uses Pokéblock offers.
+  acquisition uses PokÃ©block offers.
 - Fixed Ariados and Spinarak's Web Trap unique ability so any opposing Speed
   stage drop can trigger a queued random web move.
 - Fixed attacker-side move-end unique abilities, including Vicejaw and Handywork,
   failing after the target's contact ability retargeted battle script state first.
 - Fixed Unique Den encounters with custom typing showing base species type icons
   and untinted overworld preview sprites.
-- Fixed purchasing Unique Pokémon from the Hub Safari so their custom identity
+- Fixed purchasing Unique PokÃ©mon from the Hub Safari so their custom identity
   is preserved when sent to the party or PC.
 - Fixed attacker-side move-end unique abilities, including Windsurge, being
   attributed to the target when move-end script state changed the attacker first.

@@ -239,3 +239,6 @@ const u16 gMetatileAttributes_HubArchitecture[] = INCBIN_U16("data/tilesets/prim
 
 const u16 gMetatiles_HubFurnishings[] = INCBIN_U16("data/tilesets/secondary/hub_furnishings/metatiles.bin");
 const u16 gMetatileAttributes_HubFurnishings[] = INCBIN_U16("data/tilesets/secondary/hub_furnishings/metatile_attributes.bin");
+
+const u16 gMetatiles_ParkTunnels[] = INCBIN_U16("data/tilesets/secondary/park_tunnels/metatiles.bin");
+const u16 gMetatileAttributes_ParkTunnels[] = INCBIN_U16("data/tilesets/secondary/park_tunnels/metatile_attributes.bin");

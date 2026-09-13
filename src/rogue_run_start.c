@@ -543,7 +543,7 @@ bool8 RogueRunStart_CanChooseTrial(void)
 {
     return sRunStartContext.isActive
         && (sRunStartContext.source == RUN_START_SOURCE_NORMAL || sRunStartContext.source == RUN_START_SOURCE_TRIAL)
-        && RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT)
+        && RogueHub_HasUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE)
         && !FlagGet(FLAG_ROGUE_ADVENTURE_REPLAY_ACTIVE) && !RogueMP_IsActive();
 }
 

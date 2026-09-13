@@ -1647,7 +1647,7 @@
       "width": 34,
       "height": 36,
       "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Mauville",
+      "secondary_tileset": "gTileset_ParkTunnels",
       "border_filepath": "data/layouts/Rogue_Area_RideTraining/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_RideTraining/map.bin"
     },
@@ -2290,6 +2290,46 @@
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_MainHallCorridor_South/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_MainHallCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_PARK_TUNNEL_NORTH",
+      "name": "Rogue_ParkTunnel_North_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_GeneralHub",
+      "secondary_tileset": "gTileset_ParkTunnels",
+      "border_filepath": "data/layouts/Rogue_ParkTunnel_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_ParkTunnel_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_PARK_TUNNEL_EAST",
+      "name": "Rogue_ParkTunnel_East_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_GeneralHub",
+      "secondary_tileset": "gTileset_ParkTunnels",
+      "border_filepath": "data/layouts/Rogue_ParkTunnel_East/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_ParkTunnel_East/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_PARK_TUNNEL_SOUTH",
+      "name": "Rogue_ParkTunnel_South_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_GeneralHub",
+      "secondary_tileset": "gTileset_ParkTunnels",
+      "border_filepath": "data/layouts/Rogue_ParkTunnel_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_ParkTunnel_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_PARK_TUNNEL_WEST",
+      "name": "Rogue_ParkTunnel_West_Layout",
+      "width": 8,
+      "height": 24,
+      "primary_tileset": "gTileset_GeneralHub",
+      "secondary_tileset": "gTileset_ParkTunnels",
+      "border_filepath": "data/layouts/Rogue_ParkTunnel_West/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_ParkTunnel_West/map.bin"
     }
   ]
 }

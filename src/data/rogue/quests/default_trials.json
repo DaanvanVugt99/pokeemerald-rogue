@@ -187,7 +187,7 @@
             {
                 "name": "Randoman Roulette",
                 "display_group": "trial_quests",
-                "description": "Complete the Randoman Roulette Trial through the Trial Attendant.",
+                "description": "Complete the Randoman Roulette Trial through the Trial Console.",
                 "triggers":
                 [
                     {
@@ -206,7 +206,7 @@
             {
                 "name": "Chaos Master",
                 "display_group": "trial_quests",
-                "description": "Complete the Chaos Master Trial through the Trial Attendant.",
+                "description": "Complete the Chaos Master Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CHAOS_MASTER" ], "pass": "SUCCESS" }
@@ -219,7 +219,7 @@
             {
                 "name": "Roguelocke",
                 "display_group": "trial_quests",
-                "description": "Complete the Roguelocke Trial through the Trial Attendant.",
+                "description": "Complete the Roguelocke Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_ROGUELOCKE" ], "pass": "SUCCESS" }
@@ -232,7 +232,7 @@
             {
                 "name": "Can't Pick!?",
                 "display_group": "trial_quests",
-                "description": "Complete the Can't Pick!? Trial through the Trial Attendant.",
+                "description": "Complete the Can't Pick!? Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CANT_PICK" ], "pass": "SUCCESS" }
@@ -282,7 +282,7 @@
             {
                 "name": "Apotheosis",
                 "display_group": "trial_quests",
-                "description": "Complete the Apotheosis Trial through the Trial Attendant.",
+                "description": "Complete the Apotheosis Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_APOTHEOSIS" ], "pass": "SUCCESS" }
@@ -351,7 +351,7 @@
             {
                 "name": "Cursed Body",
                 "display_group": "trial_quests",
-                "description": "Complete the Cursed Body Trial through the Trial Attendant.",
+                "description": "Complete the Cursed Body Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_CURSED_BODY" ], "pass": "SUCCESS" }
@@ -365,7 +365,7 @@
             {
                 "name": "Limited Capture",
                 "display_group": "trial_quests",
-                "description": "Complete the Limited Capture Trial through the Trial Attendant.",
+                "description": "Complete the Limited Capture Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_LIMITED_CAPTURE" ], "pass": "SUCCESS" }
@@ -379,7 +379,7 @@
             {
                 "name": "BST Crown",
                 "display_group": "trial_quests",
-                "description": "Complete the BST Crown Trial through the Trial Attendant with only 400-or-lower BST Pokémon in Trainer battles.",
+                "description": "Complete the BST Crown Trial through the Trial Console with only 400-or-lower BST Pokémon in Trainer battles.",
                 "triggers":
                 [
                     {
@@ -397,7 +397,7 @@
             {
                 "name": "Little Cup",
                 "display_group": "trial_quests",
-                "description": "Complete the Little Cup Trial through the Trial Attendant.",
+                "description": "Complete the Little Cup Trial through the Trial Console.",
                 "triggers":
                 [
                     {
@@ -415,7 +415,7 @@
             {
                 "name": "Equalized",
                 "display_group": "trial_quests",
-                "description": "Complete the Equalized Trial through the Trial Attendant.",
+                "description": "Complete the Equalized Trial through the Trial Console.",
                 "triggers":
                 [
                     {
@@ -433,7 +433,7 @@
             {
                 "name": "Pro-Building",
                 "display_group": "trial_quests",
-                "description": "Complete the Pro-Building Trial through the Trial Attendant.",
+                "description": "Complete the Pro-Building Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_PRO_BUILDING" ], "pass": "SUCCESS" }
@@ -447,7 +447,7 @@
             {
                 "name": "Insane Mode",
                 "display_group": "trial_quests",
-                "description": "Complete the Insane Mode Trial through the Trial Attendant.",
+                "description": "Complete the Insane Mode Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_INSANE_MODE" ], "pass": "SUCCESS" }
@@ -460,7 +460,7 @@
             {
                 "name": "Iron Mono",
                 "display_group": "trial_quests",
-                "description": "Complete the Iron Mono Trial through the Trial Attendant.",
+                "description": "Complete the Iron Mono Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_IRON_MONO" ], "pass": "SUCCESS" }
@@ -474,7 +474,7 @@
             {
                 "name": "Iron Kaizo",
                 "display_group": "trial_quests",
-                "description": "Complete the Iron Kaizo Trial through the Trial Attendant.",
+                "description": "Complete the Iron Kaizo Trial through the Trial Console.",
                 "triggers":
                 [
                     { "on": [ "ENTER_HALL_OF_FAME" ], "condition": "TrialComplete", "params": [ "ROGUE_TRIAL_IRON_KAIZO" ], "pass": "SUCCESS" }

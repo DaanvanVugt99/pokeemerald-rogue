@@ -2,7 +2,6 @@ const FLAG_HIDE_RUIN_MANIAC = FLAG_TEMP_1
 const FLAG_HIDE_POKABBIE = FLAG_TEMP_2
 const FLAG_HIDE_STARTER_BAG = FLAG_TEMP_3
 const FLAG_HIDE_REPLAY_FLAG = FLAG_TEMP_4
-const FLAG_HIDE_TRIAL_ATTENDANT = FLAG_TEMP_5
 
 const VAR_FRAME_STATE = VAR_TEMP_0
 const VAR_TRIAL_MENU_CHOICE = VAR_TEMP_1
@@ -47,7 +46,6 @@ const OBJ_EVENT_RUIN_MANIAC = 5
 const OBJ_EVENT_FLAG = 7
 const OBJ_EVENT_PEONIA = 8
 const OBJ_EVENT_POKABBIE = 9
-const OBJ_EVENT_TRIAL_ATTENDANT = 10
 
 const MOVEMENT_TYPE_FLAG_ENABLED = MOVEMENT_TYPE_WALK_IN_PLACE_LEFT
 const MOVEMENT_TYPE_FLAG_DISABLED = MOVEMENT_TYPE_FACE_UP
@@ -142,16 +140,6 @@ script Rogue_Area_AdventureEntrance_MapLoad
     else
     {
         setflag(FLAG_HIDE_REPLAY_FLAG)
-    }
-
-    hubupgradeunlocked(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT)
-    if(var(VAR_RESULT) == YES)
-    {
-        clearflag(FLAG_HIDE_TRIAL_ATTENDANT)
-    }
-    else
-    {
-        setflag(FLAG_HIDE_TRIAL_ATTENDANT)
     }
 }
 
@@ -391,14 +379,6 @@ script Rogue_Area_AdventureEntrance_AdventureConsole
         callnative(RogueRunStart_Clear)
     }
     releaseall
-}
-
-script Rogue_Area_AdventureEntrance_TrialAttendant
-{
-    lock
-    faceplayer
-    msgbox(format("Trials change the rules of an Adventure.\pChoose a Trial at the Adventure Console in front of the portal.\pThe console shows its setup and checks your team before departure. Select None to return to a regular Adventure."))
-    release
 }
 
 script Rogue_Area_AdventureEntrance_SelectConsoleTrial

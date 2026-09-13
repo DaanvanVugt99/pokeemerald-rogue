@@ -1235,7 +1235,7 @@ TEST("Portal room: all connection masks retain interior tiles and the departure 
         if (mask & 4) RogueHub_BuildArea(HUB_AREA_MARTS, 1, 0);
         for (upgrade = 0; upgrade < 2; ++upgrade)
         {
-            RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT, upgrade);
+            RogueHub_SetUpgrade(HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE, upgrade);
             for (y = 0; y < 16; ++y)
                 for (x = 0; x < 20; ++x)
                     grid[(y + MAP_OFFSET) * gBackupMapLayout.width + x + MAP_OFFSET] = header->mapLayout->map[y * 20 + x];

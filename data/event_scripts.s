@@ -798,6 +798,10 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_MainHallCorridor_Horizontal/scripts.inc"
 	.include "data/maps/Rogue_MainHallCorridor_North/scripts.inc"
 	.include "data/maps/Rogue_MainHallCorridor_South/scripts.inc"
+	.include "data/maps/Rogue_ParkTunnel_North/scripts.inc"
+	.include "data/maps/Rogue_ParkTunnel_East/scripts.inc"
+	.include "data/maps/Rogue_ParkTunnel_South/scripts.inc"
+	.include "data/maps/Rogue_ParkTunnel_West/scripts.inc"
 
 	.include "data/maps/Rogue_HallwayFacade_Vertical/scripts.inc"
 

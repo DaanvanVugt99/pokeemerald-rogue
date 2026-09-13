@@ -1237,9 +1237,9 @@ text gHubUpgradeDesc_AdventureEntrance_AdventureReplay
     format("Adventures can be saved and replayed again.")
 }
 
-text gHubUpgradeDesc_AdventureEntrance_TrialAttendant
+text gHubUpgradeDesc_AdventureEntrance_TrialConsole
 {
-    format("A Trial Attendant can organize curated runs from the Town Exit.")
+    format("Unlocks Trials at the Adventure Console in the Adventure Gate.")
 }
 
 text gHubUpgradeDesc_BerryField_Brewing

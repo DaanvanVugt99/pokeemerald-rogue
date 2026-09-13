@@ -14,22 +14,22 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 16,
+      "map": "MAP_ROGUE_PARK_TUNNEL_WEST",
+      "offset": 0,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
+      "map": "MAP_ROGUE_PARK_TUNNEL_EAST",
       "offset": 16,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
+      "map": "MAP_ROGUE_PARK_TUNNEL_SOUTH",
       "offset": 18,
       "direction": "down"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
+      "map": "MAP_ROGUE_PARK_TUNNEL_NORTH",
       "offset": 18,
       "direction": "up"
     }
@@ -361,10 +361,6 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
-  "bg_events": [
-
-  ]
+  "coord_events": [],
+  "bg_events": []
 }

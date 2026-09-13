@@ -103,3 +103,14 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
     EXPECT(!RogueHub_RecoverHallwayPosition(safari, &x, &y));
     EXPECT_EQ(x, 18); EXPECT_EQ(y, 18);
 }
+
+TEST("Hub hallways: Park rock scenery remains visible independently of links")
+{
+    struct MapHeader park = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_RIDE_TRAINING), MAP_NUM(ROGUE_AREA_RIDE_TRAINING));
+    u32 i;
+    EXPECT_EQ(park.connections->count, 4);
+    // Facade visibility must not consult hub/save state. The map metatile
+    // updater separately replaces disconnected entrances with solid rock.
+    for (i = 0; i < park.connections->count; ++i)
+        EXPECT(RogueHub_AcceptMapConnection(&park, &park.connections->connections[i]));
+}

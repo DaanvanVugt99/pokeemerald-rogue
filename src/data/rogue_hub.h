@@ -27,7 +27,7 @@ extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity3[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonTyping[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_RandomStarter[];
 extern const u8 gHubUpgradeDesc_AdventureEntrance_AdventureReplay[];
-extern const u8 gHubUpgradeDesc_AdventureEntrance_TrialAttendant[];
+extern const u8 gHubUpgradeDesc_AdventureEntrance_TrialConsole[];
 extern const u8 gHubUpgradeDesc_BerryField_Brewing[];
 extern const u8 gHubUpgradeDesc_BerryField_ExtraField[];
 extern const u8 gHubUpgradeDesc_BerryField_HigherYeild[];
@@ -404,12 +404,12 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .descText = gHubUpgradeDesc_AdventureEntrance_AdventureReplay,
         .requiredUpgrades = { HUB_UPGRADE_NONE }
     },
-    [HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_ATTENDANT] =
+    [HUB_UPGRADE_ADVENTURE_ENTRANCE_TRIAL_CONSOLE] =
     {
-        .upgradeName = _("Trial Attendant"),
+        .upgradeName = _("Trial Console"),
         .targetArea = HUB_AREA_ADVENTURE_ENTRANCE,
         .buildCost = 3,
-        .descText = gHubUpgradeDesc_AdventureEntrance_TrialAttendant,
+        .descText = gHubUpgradeDesc_AdventureEntrance_TrialConsole,
         .requiredUpgrades = { HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER, HUB_UPGRADE_NONE }
     },
 

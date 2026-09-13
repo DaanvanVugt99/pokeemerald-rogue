@@ -195,7 +195,7 @@ remain outside this rework.
   with broken front panels at y13 and rear-wall warning indicators.
 - The Safari PC is at (14,8), accessible from (14,9). Workbenches at (9,20) and
   (27,20) sit below matching rear walls of the lower side bays. The cave opens
-  at (18,7), preserving normal warp 6; teleport arrival remains warp 7 at (18,18).
+  at (18,5), with its upper tile at (18,4), preserving normal warp 6; teleport arrival remains warp 7 at (18,18).
 - Original normal warps 0–7 and tutorial warps 0–5 keep their indices. Normal
   warps 8–10 and tutorial warps 6–8 cover the third exit lanes. Tutorial warp 9
   gathers the player at (18,18), facing Birch at (18,17), after the successful

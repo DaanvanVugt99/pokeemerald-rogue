@@ -57,7 +57,11 @@
     "Rogue_SafariCorridor_Vertical",
     "Rogue_MainHallCorridor_Horizontal",
     "Rogue_MainHallCorridor_North",
-    "Rogue_MainHallCorridor_South"
+    "Rogue_MainHallCorridor_South",
+    "Rogue_ParkTunnel_North",
+    "Rogue_ParkTunnel_East",
+    "Rogue_ParkTunnel_South",
+    "Rogue_ParkTunnel_West"
   ],
   "gMapGroup_RogueHubInteriors": [
     "Rogue_Interior_Home",

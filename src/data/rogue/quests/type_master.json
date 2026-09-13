@@ -71,7 +71,7 @@
             },
             {
                 "name": "Normal Master",
-                "description": "Complete the Normal Type Trial through the Trial Attendant.",
+                "description": "Complete the Normal Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_NORMAL"
@@ -88,7 +88,7 @@
             },
             {
                 "name": "Fighting Master",
-                "description": "Complete the Fighting Type Trial through the Trial Attendant.",
+                "description": "Complete the Fighting Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_FIGHTING"
@@ -105,7 +105,7 @@
             },
             {
                 "name": "Flying Master",
-                "description": "Complete the Flying Type Trial through the Trial Attendant.",
+                "description": "Complete the Flying Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_FLYING"
@@ -122,7 +122,7 @@
             },
             {
                 "name": "Poison Master",
-                "description": "Complete the Poison Type Trial through the Trial Attendant.",
+                "description": "Complete the Poison Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_POISON"
@@ -139,7 +139,7 @@
             },
             {
                 "name": "Ground Master",
-                "description": "Complete the Ground Type Trial through the Trial Attendant.",
+                "description": "Complete the Ground Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_GROUND"
@@ -156,7 +156,7 @@
             },
             {
                 "name": "Rock Master",
-                "description": "Complete the Rock Type Trial through the Trial Attendant.",
+                "description": "Complete the Rock Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_ROCK"
@@ -173,7 +173,7 @@
             },
             {
                 "name": "Bug Master",
-                "description": "Complete the Bug Type Trial through the Trial Attendant.",
+                "description": "Complete the Bug Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_BUG"
@@ -190,7 +190,7 @@
             },
             {
                 "name": "Ghost Master",
-                "description": "Complete the Ghost Type Trial through the Trial Attendant.",
+                "description": "Complete the Ghost Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_GHOST"
@@ -207,7 +207,7 @@
             },
             {
                 "name": "Steel Master",
-                "description": "Complete the Steel Type Trial through the Trial Attendant.",
+                "description": "Complete the Steel Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_STEEL"
@@ -224,7 +224,7 @@
             },
             {
                 "name": "Fire Master",
-                "description": "Complete the Fire Type Trial through the Trial Attendant.",
+                "description": "Complete the Fire Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_FIRE"
@@ -241,7 +241,7 @@
             },
             {
                 "name": "Water Master",
-                "description": "Complete the Water Type Trial through the Trial Attendant.",
+                "description": "Complete the Water Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_WATER"
@@ -258,7 +258,7 @@
             },
             {
                 "name": "Grass Master",
-                "description": "Complete the Grass Type Trial through the Trial Attendant.",
+                "description": "Complete the Grass Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_GRASS"
@@ -275,7 +275,7 @@
             },
             {
                 "name": "Electric Master",
-                "description": "Complete the Electric Type Trial through the Trial Attendant.",
+                "description": "Complete the Electric Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_ELECTRIC"
@@ -292,7 +292,7 @@
             },
             {
                 "name": "Psychic Master",
-                "description": "Complete the Psychic Type Trial through the Trial Attendant.",
+                "description": "Complete the Psychic Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_PSYCHIC"
@@ -309,7 +309,7 @@
             },
             {
                 "name": "Ice Master",
-                "description": "Complete the Ice Type Trial through the Trial Attendant.",
+                "description": "Complete the Ice Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_ICE"
@@ -326,7 +326,7 @@
             },
             {
                 "name": "Dragon Master",
-                "description": "Complete the Dragon Type Trial through the Trial Attendant.",
+                "description": "Complete the Dragon Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_DRAGON"
@@ -343,7 +343,7 @@
             },
             {
                 "name": "Dark Master",
-                "description": "Complete the Dark Type Trial through the Trial Attendant.",
+                "description": "Complete the Dark Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_DARK"
@@ -361,7 +361,7 @@
             {
                 "#if": "defined(ROGUE_EXPANSION)",
                 "name": "Fairy Master",
-                "description": "Complete the Fairy Type Trial through the Trial Attendant.",
+                "description": "Complete the Fairy Type Trial through the Trial Console.",
                 "template_params":
                 {
                     "TRIAL_ID": "ROGUE_TRIAL_TYPE_FAIRY"

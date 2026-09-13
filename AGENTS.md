@@ -76,6 +76,11 @@ or validation workflows change.
   containment bounds, service approaches, and corridor seams across 64 states.
   Normal generation reads the layouts and writes previews under `build/safari_lab`;
   do not rerun the guarded `--init-layout` converter. See `docs/design/safari_lab.md`.
+- Park tunnel assets and private facades use
+  `python3 scripts/generate_park_tunnels.py --check` (16 connection states).
+  Normal generation preserves the authored Park map/border; allocation and
+  original-footprint guards live in `tools/data/park_tunnels.json`. See
+  `docs/design/park_tunnels.md`.
 - Do not hand-edit `src/data/rogue_pokemon_profiles.h`. See
   `docs/pokemon_profile_pipeline.md` and use:
   - `./scripts/generate_pokemon_profiles.sh refresh`
