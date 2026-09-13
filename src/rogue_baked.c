@@ -1101,6 +1101,9 @@ extern const u8 gItemRoomDesc_RoyalJelly[];
 extern const u8 gItemRoomDesc_HugeSword[];
 extern const u8 gItemRoomDesc_HoOhPlume[];
 extern const u8 gItemRoomDesc_WardJewel[];
+extern const u8 gItemRoomDesc_ClearArmor[];
+extern const u8 gItemRoomDesc_SleepingBag[];
+extern const u8 gItemRoomDesc_PixieDust[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1282,6 +1285,12 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_HoOhPlume;
     case ITEM_WARD_JEWEL:
         return gItemRoomDesc_WardJewel;
+    case ITEM_CLEAR_ARMOR:
+        return gItemRoomDesc_ClearArmor;
+    case ITEM_SLEEPING_BAG:
+        return gItemRoomDesc_SleepingBag;
+    case ITEM_PIXIE_DUST:
+        return gItemRoomDesc_PixieDust;
     default:
         return Rogue_GetItemDesc(itemId);
     }

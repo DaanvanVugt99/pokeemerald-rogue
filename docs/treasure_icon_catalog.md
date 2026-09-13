@@ -46,7 +46,7 @@ palette reduction, or resizing.
 | Wonder Shield | `WonderShield` | Type matchup defense or conditional immunity | Implemented | Tower of Ashes |
 | Adaptive Specs | `ChampionsSpecs` | Damaging moves use whichever category deals more damage | Implemented | Tower of Ashes |
 | Choice Jewel | `ChoiceJewel` | Open concept | TBD | Tower of Ashes |
-| Clear Armor | `ClearArmor` | Open concept | TBD | Tower of Ashes |
+| Clear Armor | `ClearArmor` | Takes 20% less attack damage; stat stages cannot rise or fall | Implemented | Tower of Ashes |
 | Crush | `Crush` | Open concept | TBD | Tower of Ashes |
 | Drain Blade | `DrainBlade` | Damaging moves restore damage dealt, with doubled healing against weakened targets | Implemented | Tower of Ashes |
 | Grand Plaza | `GrandPlaza` | Open concept | TBD | Tower of Ashes |
@@ -71,7 +71,7 @@ palette reduction, or resizing.
 | Item 693 | `Item693` | Open concept | TBD | NocTurn |
 | Megaphone | `Megaphone` | Open concept | TBD | NocTurn |
 | Pinwheel | `Pinwheel` | Successfully using a wind move switches the holder out | Implemented | NocTurn |
-| Pixie Dust | `PixieDust` | Open concept | TBD | NocTurn |
+| Pixie Dust | `PixieDust` | Doubles moves' secondary-effect chances | Implemented | NocTurn |
 | Shock Bracer | `ShockBracer` | Open concept | TBD | NocTurn |
 | Vital Herb | `VitalHerb` | Open concept | TBD | NocTurn |
 | Charcoal Filter | `CharcoalFilter` | Open concept | TBD | How You Survive |
@@ -80,7 +80,7 @@ palette reduction, or resizing.
 | Name Card | `NameCard` | Open concept | TBD | How You Survive |
 | Poké Food Can | `PokeFoodCan` | Open concept | TBD | How You Survive |
 | Raincoat | `Raincoat` | Grants immunity to Water-type moves during rain | Implemented | How You Survive |
-| Sleeping Bag | `SleepingBag` | Open concept | TBD | How You Survive |
+| Sleeping Bag | `SleepingBag` | Halves attack damage while asleep, including Comatose | Implemented | How You Survive |
 | STR Salve | `StrSalve` | Open concept | TBD | How You Survive |
 | Tent Bag | `TentBag` | Open concept | TBD | How You Survive |
 | Water Bottle | `WaterBottle` | Open concept | TBD | How You Survive |

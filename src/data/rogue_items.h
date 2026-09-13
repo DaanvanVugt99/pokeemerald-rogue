@@ -159,6 +159,9 @@ extern const u8 gItemDesc_RoyalJelly[];
 extern const u8 gItemDesc_HugeSword[];
 extern const u8 gItemDesc_HoOhPlume[];
 extern const u8 gItemDesc_WardJewel[];
+extern const u8 gItemDesc_ClearArmor[];
+extern const u8 gItemDesc_SleepingBag[];
+extern const u8 gItemDesc_PixieDust[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -3174,6 +3177,51 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureVestJewel,
         .iconPalette = gItemIconPalette_TreasureVestJewel,
+    },
+
+    [ITEM_CLEAR_ARMOR - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Clear Armor"),
+        .itemId = ITEM_CLEAR_ARMOR,
+        .price = 0,
+        .description = gItemDesc_ClearArmor,
+        .holdEffect = HOLD_EFFECT_CLEAR_ARMOR,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureClearArmor,
+        .iconPalette = gItemIconPalette_TreasureClearArmor,
+    },
+
+    [ITEM_SLEEPING_BAG - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Sleeping Bag"),
+        .itemId = ITEM_SLEEPING_BAG,
+        .price = 0,
+        .description = gItemDesc_SleepingBag,
+        .holdEffect = HOLD_EFFECT_SLEEPING_BAG,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureSleepingBag,
+        .iconPalette = gItemIconPalette_TreasureSleepingBag,
+    },
+
+    [ITEM_PIXIE_DUST - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Pixie Dust"),
+        .itemId = ITEM_PIXIE_DUST,
+        .price = 0,
+        .description = gItemDesc_PixieDust,
+        .holdEffect = HOLD_EFFECT_PIXIE_DUST,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasurePixieDust,
+        .iconPalette = gItemIconPalette_TreasurePixieDust,
     },
 
 #ifdef ROGUE_DEBUG

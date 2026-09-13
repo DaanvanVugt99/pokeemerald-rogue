@@ -703,6 +703,36 @@ text gItemRoomDesc_WardJewel
     format("Special attacks calculate damage using the holder's Special Defense and its stat changes instead of Special Attack.")
 }
 
+text gItemDesc_ClearArmor
+{
+    format("Takes 20% less attack damage. Stat stages cannot rise or fall.")
+}
+
+text gItemRoomDesc_ClearArmor
+{
+    format("The holder takes 20% less damage from attacks, and its stat stages cannot rise or fall.")
+}
+
+text gItemDesc_SleepingBag
+{
+    format("While asleep, the holder takes half damage from attacks.")
+}
+
+text gItemRoomDesc_SleepingBag
+{
+    format("While asleep, the holder takes half damage from attacks.")
+}
+
+text gItemDesc_PixieDust
+{
+    format("The holder's moves have their secondary effect chance doubled.")
+}
+
+text gItemRoomDesc_PixieDust
+{
+    format("The holder's moves have their secondary effect chance doubled.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

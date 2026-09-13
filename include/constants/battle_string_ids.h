@@ -773,7 +773,9 @@
 #define STRINGID_PHANTOMSTONEREVEALED                  771
 #define STRINGID_DECOYDOLLCREATED                      772
 
-#define BATTLESTRINGS_COUNT                           773
+#define STRINGID_CLEARARMORBLOCKSSTATS                773
+
+#define BATTLESTRINGS_COUNT                           774
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

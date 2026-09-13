@@ -300,9 +300,12 @@
 #define ITEM_HUGE_SWORD                     (LAST_ITEM_TR + 61)
 #define ITEM_HO_OH_PLUME                    (LAST_ITEM_TR + 62)
 #define ITEM_WARD_JEWEL                     (LAST_ITEM_TR + 63)
+#define ITEM_CLEAR_ARMOR                    (LAST_ITEM_TR + 64)
+#define ITEM_SLEEPING_BAG                   (LAST_ITEM_TR + 65)
+#define ITEM_PIXIE_DUST                     (LAST_ITEM_TR + 66)
 
 #define FIRST_ITEM_ROOM_REWARD          ITEM_CURSED_LENS
-#define LAST_ITEM_ROOM_REWARD           ITEM_WARD_JEWEL
+#define LAST_ITEM_ROOM_REWARD           ITEM_PIXIE_DUST
 #define ITEM_ROOM_REWARD_COUNT          (LAST_ITEM_ROOM_REWARD - FIRST_ITEM_ROOM_REWARD + 1)
 
 #define ITEM_SORT_MODE_TYPE         0

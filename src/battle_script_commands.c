@@ -5016,7 +5016,8 @@ void SetMoveEffect(bool32 primary, u32 certain)
                     if (gBattleMons[gEffectBattler].statStages[i] != DEFAULT_STAT_STAGE)
                         break;
                 }
-                if ((gSpecialStatuses[gEffectBattler].physicalDmg || gSpecialStatuses[gEffectBattler].specialDmg) && i != NUM_BATTLE_STATS)
+                if (!AreBattlerStatStagesLocked(gEffectBattler)
+                 && (gSpecialStatuses[gEffectBattler].physicalDmg || gSpecialStatuses[gEffectBattler].specialDmg) && i != NUM_BATTLE_STATS)
                 {
                     for (i = 0; i < NUM_BATTLE_STATS; i++)
                         gBattleMons[gEffectBattler].statStages[i] = DEFAULT_STAT_STAGE;
@@ -6799,6 +6800,12 @@ static void Cmd_playstatchangeanimation(void)
     u32 battler = GetBattlerForBattleScript(cmd->battler);
     u32 ability = GetBattlerAbility(battler);
     u32 stats = cmd->stats;
+
+    if (AreBattlerStatStagesLocked(battler))
+    {
+        gBattlescriptCurrInstr = cmd->nextInstr;
+        return;
+    }
 
     // Handle Contrary and Simple
     if (ability == ABILITY_CONTRARY)
@@ -9615,7 +9622,11 @@ static void Cmd_switchindataupdate(void)
 
     SwitchInClearSetData(battler, preserveBatonPassState);
 
-    if (preserveJesterSwitchStats)
+    if (preserveBatonPassState && AreBattlerStatStagesLocked(battler))
+        for (i = 0; i < NUM_BATTLE_STATS; i++)
+            gBattleMons[battler].statStages[i] = DEFAULT_STAT_STAGE;
+
+    if (preserveJesterSwitchStats && !AreBattlerStatStagesLocked(battler))
     {
         for (i = 0; i < NUM_BATTLE_STATS; i++)
             gBattleMons[battler].statStages[i] = oldData.statStages[i];
@@ -14058,6 +14069,11 @@ static void Cmd_various(void)
     case VARIOUS_INVERT_STAT_STAGES:
     {
         VARIOUS_ARGS();
+        if (AreBattlerStatStagesLocked(battler))
+        {
+            gBattlescriptCurrInstr = BattleScript_ButItFailed;
+            return;
+        }
         for (i = 0; i < NUM_BATTLE_STATS; i++)
         {
             if (gBattleMons[battler].statStages[i] < DEFAULT_STAT_STAGE) // Negative becomes positive.
@@ -15148,6 +15164,11 @@ static void Cmd_various(void)
     {
         VARIOUS_ARGS();
         battler = gBattlerTarget;
+        if (AreBattlerStatStagesLocked(battler))
+        {
+            gBattlescriptCurrInstr = cmd->nextInstr;
+            return;
+        }
         for (i = 0; i < NUM_BATTLE_STATS; i++)
             if (gBattleMons[battler].statStages[i] < DEFAULT_STAT_STAGE)
                 gBattleMons[battler].statStages[i] = DEFAULT_STAT_STAGE;
@@ -16078,6 +16099,19 @@ static u32 ChangeStatBuffs(s8 statValue, u32 statId, u32 flags, const u8 *BS_ptr
         notProtectAffected++;
     flags &= ~STAT_CHANGE_NOT_PROTECT_AFFECTED;
 
+    if (battlerHoldEffect == HOLD_EFFECT_CLEAR_ARMOR)
+    {
+        RecordItemEffectBattle(battler, battlerHoldEffect);
+        if ((flags & STAT_CHANGE_ALLOW_PTR) && BS_ptr != NULL)
+        {
+            BattleScriptPush(BS_ptr);
+            gBattleScripting.battler = battler;
+            gLastUsedItem = gBattleMons[battler].item;
+            gBattlescriptCurrInstr = BattleScript_ClearArmorBlocksStats;
+        }
+        return STAT_CHANGE_DIDNT_WORK;
+    }
+
     if (battlerAbility == ABILITY_CONTRARY)
     {
         statValue ^= STAT_BUFF_NEGATIVE;
@@ -16459,6 +16493,9 @@ bool32 TryResetBattlerStatChanges(u8 battler)
 {
     u32 j;
     bool32 ret = FALSE;
+
+    if (AreBattlerStatStagesLocked(battler))
+        return FALSE;
 
     gDisableStructs[battler].stockpileDef = 0;
     gDisableStructs[battler].stockpileSpDef = 0;
@@ -17352,6 +17389,7 @@ static void Cmd_transformdataexecution(void)
         s32 i;
         u8 *battleMonAttacker, *battleMonTarget;
         u8 timesGotHit;
+        bool32 lockedStats = AreBattlerStatStagesLocked(gBattlerAttacker);
 
         gDisableStructs[gBattlerAttacker].uniqueOncePerSwitchInUsed =
             HasBattlerAbility(gBattlerAttacker, ABILITY_RAPID_REPLICA)
@@ -17376,7 +17414,12 @@ static void Cmd_transformdataexecution(void)
         battleMonTarget = (u8 *)(&gBattleMons[gBattlerTarget]);
 
         for (i = 0; i < offsetof(struct BattlePokemon, pp); i++)
+        {
+            if (lockedStats && i >= offsetof(struct BattlePokemon, statStages)
+             && i < offsetof(struct BattlePokemon, statStages) + sizeof(gBattleMons[gBattlerAttacker].statStages))
+                continue;
             battleMonAttacker[i] = battleMonTarget[i];
+        }
 
         gBattleStruct->overwrittenAbilities[gBattlerAttacker] = GetBattlerAbility(gBattlerTarget);
         for (i = 0; i < MAX_MON_MOVES; i++)
@@ -18542,6 +18585,12 @@ static void Cmd_copyfoestats(void)
     CMD_ARGS(const u8 *unused);
 
     s32 i;
+
+    if (AreBattlerStatStagesLocked(gBattlerAttacker))
+    {
+        gBattlescriptCurrInstr = BattleScript_ButItFailed;
+        return;
+    }
 
     for (i = 0; i < NUM_BATTLE_STATS; i++)
     {
@@ -20664,6 +20713,12 @@ static void Cmd_swapstatstages(void)
     s8 atkStatStage = gBattleMons[gBattlerAttacker].statStages[stat];
     s8 defStatStage = gBattleMons[gBattlerTarget].statStages[stat];
 
+    if (AreBattlerStatStagesLocked(gBattlerAttacker) || AreBattlerStatStagesLocked(gBattlerTarget))
+    {
+        gBattlescriptCurrInstr = BattleScript_ButItFailed;
+        return;
+    }
+
     gBattleMons[gBattlerAttacker].statStages[stat] = defStatStage;
     gBattleMons[gBattlerTarget].statStages[stat] = atkStatStage;
 
@@ -21070,6 +21125,8 @@ static bool32 TryStealPositiveStatChanges(u32 battlerAtk, u32 battlerDef)
 
     gBattleStruct->stolenStats[0] = 0;
     gBattleScripting.animArg1 = 0;
+    if (AreBattlerStatStagesLocked(battlerAtk) || AreBattlerStatStagesLocked(battlerDef))
+        return FALSE;
     for (i = STAT_ATK; i < NUM_BATTLE_STATS; i++)
     {
         if (gBattleMons[battlerDef].statStages[i] > DEFAULT_STAT_STAGE

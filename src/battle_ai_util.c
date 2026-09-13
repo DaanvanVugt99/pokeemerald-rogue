@@ -1902,6 +1902,9 @@ void ProtectChecks(u32 battlerAtk, u32 battlerDef, u32 move, u32 predictedMove, 
 // stat stages
 bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
 {
+    if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_ARMOR)
+        return FALSE;
+
     if (gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE
      && battlerAbility != ABILITY_CONTRARY
      && !AI_HasAbility(battler, ABILITY_CONTRARY))
@@ -1937,6 +1940,9 @@ bool32 ShouldLowerStat(u32 battler, u32 battlerAbility, u32 stat)
 
 bool32 BattlerStatCanRise(u32 battler, u32 battlerAbility, u32 stat)
 {
+    if (AI_DATA->holdEffects[battler] == HOLD_EFFECT_CLEAR_ARMOR)
+        return FALSE;
+
     if ((gBattleMons[battler].statStages[stat] < MAX_STAT_STAGE && battlerAbility != ABILITY_CONTRARY)
       || (battlerAbility == ABILITY_CONTRARY && gBattleMons[battler].statStages[stat] > MIN_STAT_STAGE))
         return TRUE;
@@ -4076,6 +4082,9 @@ u32 AI_CalcSecondaryEffectChance(u32 battlerAtk, u32 battlerDef, u32 move, u32 s
 
     if (AI_DATA->abilities[battlerAtk] == ABILITY_SERENE_GRACE)
         secondaryEffectChance *= 2;
+
+    if (AI_DATA->holdEffects[battlerAtk] == HOLD_EFFECT_PIXIE_DUST)
+        secondaryEffectChance = min(secondaryEffectChance * 2, 100);
 
     return secondaryEffectChance;
 }

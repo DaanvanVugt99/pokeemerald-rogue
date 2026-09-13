@@ -232,6 +232,9 @@
 #define HOLD_EFFECT_HUGE_SWORD              246
 #define HOLD_EFFECT_HO_OH_PLUME             247
 #define HOLD_EFFECT_WARD_JEWEL              248
+#define HOLD_EFFECT_CLEAR_ARMOR             249
+#define HOLD_EFFECT_SLEEPING_BAG            250
+#define HOLD_EFFECT_PIXIE_DUST              251
 
 #define HOLD_EFFECT_CHOICE(holdEffect)((holdEffect == HOLD_EFFECT_CHOICE_BAND || holdEffect == HOLD_EFFECT_CHOICE_SCARF || holdEffect == HOLD_EFFECT_CHOICE_SPECS))
 

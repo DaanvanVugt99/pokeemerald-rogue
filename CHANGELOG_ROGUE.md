@@ -14,6 +14,14 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+### Added
+
+- Add three Treasure rewards with their existing sprites: Clear Armor reduces
+  attack damage by 20% and prevents stat-stage changes; Sleeping Bag halves
+  attack damage while asleep; Pixie Dust doubles secondary-effect chances.
+  Pixie Dust stacks with Serene Grace up to 100%, and Sleeping Bag also works
+  with Comatose. These effects require no additional saved or per-battle state.
+
 ### Changed
 
 - Update the opening welcome for the single setup screen and give Birch’s

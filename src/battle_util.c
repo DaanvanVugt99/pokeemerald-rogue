@@ -3946,7 +3946,7 @@ bool32 DoNaturalOrderEndTurnEffect(void)
         statMask = 0;
         statCount = 0;
 
-        if (!IsBattlerAlive(battler))
+        if (!IsBattlerAlive(battler) || AreBattlerStatStagesLocked(battler))
             continue;
 
         for (stat = STAT_ATK; stat < NUM_BATTLE_STATS; stat++)
@@ -12834,6 +12834,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             break;
         case ABILITY_COSTAR:
             if (!gSpecialStatuses[battler].switchInAbilityDone
+             && !AreBattlerStatStagesLocked(battler)
              && IsDoubleBattle()
              && IsBattlerAlive(BATTLE_PARTNER(battler))
              && CountBattlerStatIncreases(BATTLE_PARTNER(battler), FALSE))
@@ -27339,6 +27340,21 @@ static inline uq4_12_t GetDefenderItemsModifier(u32 move, u32 moveType, u32 batt
         if (IsMoveMakingContact(move, battlerAtk))
             return UQ_4_12(0.5);
         return UQ_4_12(1.5);
+    case HOLD_EFFECT_CLEAR_ARMOR:
+        if (move == MOVE_NONE)
+            break;
+        if (updateFlags && typeEffectivenessModifier > UQ_4_12(0.0))
+            RecordItemEffectBattle(battlerDef, holdEffectDef);
+        return UQ_4_12(0.8);
+    case HOLD_EFFECT_SLEEPING_BAG:
+        if (move != MOVE_NONE
+         && ((gBattleMons[battlerDef].status1 & STATUS1_SLEEP) || HasBattlerAbility(battlerDef, ABILITY_COMATOSE)))
+        {
+            if (updateFlags && typeEffectivenessModifier > UQ_4_12(0.0))
+                RecordItemEffectBattle(battlerDef, holdEffectDef);
+            return UQ_4_12(0.5);
+        }
+        break;
     }
     return UQ_4_12(1.0);
 }
@@ -29405,11 +29421,25 @@ bool32 TestSheerForceFlag(u32 battler, u16 move)
         return FALSE;
 }
 
+bool32 AreBattlerStatStagesLocked(u32 battler)
+{
+    return GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_CLEAR_ARMOR;
+}
+
 // This function is the body of "jumpifstat", but can be used dynamically in a function
 bool32 CompareStat(u32 battler, u8 statId, u8 cmpTo, u8 cmpKind)
 {
     bool32 ret = FALSE;
     u8 statValue = gBattleMons[battler].statStages[statId];
+
+    // Limit checks also gate ability/item triggers and their animations.
+    if (AreBattlerStatStagesLocked(battler) && (cmpTo == MIN_STAT_STAGE || cmpTo == MAX_STAT_STAGE))
+    {
+        if (cmpKind == CMP_EQUAL)
+            return TRUE;
+        if (cmpKind == CMP_NOT_EQUAL || cmpKind == CMP_LESS_THAN || cmpKind == CMP_GREATER_THAN)
+            return FALSE;
+    }
 
     // Because this command is used as a way of checking if a stat can be lowered/raised,
     // we need to do some modification at run-time.
@@ -29763,6 +29793,9 @@ static bool32 CanPetrifyClearPositiveStatStages(u32 attacker, u32 target)
 {
     u32 statId;
 
+    if (AreBattlerStatStagesLocked(target))
+        return FALSE;
+
     for (statId = STAT_ATK; statId <= STAT_EVASION; statId++)
     {
         if (gBattleMons[target].statStages[statId] > DEFAULT_STAT_STAGE
@@ -29777,6 +29810,9 @@ static bool32 TryClearPositiveStatStagesForPetrify(u32 attacker, u32 target)
 {
     bool32 changed = FALSE;
     u32 statId;
+
+    if (AreBattlerStatStagesLocked(target))
+        return FALSE;
 
     for (statId = STAT_ATK; statId <= STAT_EVASION; statId++)
     {
@@ -29811,6 +29847,9 @@ static bool32 TryResetNegativeStatStages(u32 battler)
     u32 statId;
     bool32 reset = FALSE;
 
+    if (AreBattlerStatStagesLocked(battler))
+        return FALSE;
+
     for (statId = STAT_ATK; statId < NUM_BATTLE_STATS; statId++)
     {
         if (gBattleMons[battler].statStages[statId] < DEFAULT_STAT_STAGE)
@@ -29844,15 +29883,21 @@ bool32 AreBattlersOfSameGender(u32 battler1, u32 battler2)
     return (gender1 != MON_GENDERLESS && gender2 != MON_GENDERLESS && gender1 == gender2);
 }
 
-u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEffect)
+u32 CalcSecondaryEffectChance(u32 battler, u8 baseEffectChance, u16 moveEffect)
 {
+    u32 secondaryEffectChance = baseEffectChance;
     bool8 hasSereneGrace = (GetBattlerAbility(battler) == ABILITY_SERENE_GRACE);
     bool8 hasPyromancy = HasBattlerAbility(battler, ABILITY_PYROMANCY);
     bool8 hasRainbow = (gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_RAINBOW) != 0;
     u8 moveType = TYPE_MYSTERY;
 
     if (hasRainbow && hasSereneGrace && moveEffect == EFFECT_FLINCH_HIT)
-        return secondaryEffectChance *= 2;
+    {
+        u32 chance = (u32)secondaryEffectChance * 2;
+        if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_PIXIE_DUST)
+            chance *= 2;
+        return min(chance, 100);
+    }
 
     if (hasSereneGrace)
         secondaryEffectChance *= 2;
@@ -29886,6 +29931,9 @@ u32 CalcSecondaryEffectChance(u32 battler, u8 secondaryEffectChance, u16 moveEff
 
         //DebugPrintf("secondaryEffectChance:%d", secondaryEffectChance);
     }
+
+    if (GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_PIXIE_DUST)
+        return min((u32)secondaryEffectChance * 2, 100);
 
     return secondaryEffectChance;
 }

@@ -12010,6 +12010,12 @@ BattleScript_ItemNoStatLoss::
 	waitmessage B_WAIT_TIME_LONG
 	return
 
+BattleScript_ClearArmorBlocksStats::
+	pause B_WAIT_TIME_SHORT
+	printstring STRINGID_CLEARARMORBLOCKSSTATS
+	waitmessage B_WAIT_TIME_LONG
+	return
+
 BattleScript_BRNPrevention::
 	pause B_WAIT_TIME_SHORT
 	printfromtable gBRNPreventionStringIds
