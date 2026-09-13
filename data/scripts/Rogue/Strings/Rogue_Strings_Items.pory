@@ -693,6 +693,16 @@ text gItemRoomDesc_HoOhPlume
     format("Once per battle, switching out while hurt or statused fully restores the holder's HP and cures its status.")
 }
 
+text gItemDesc_WardJewel
+{
+    format("Special moves use Sp. Def instead of Sp. Atk.")
+}
+
+text gItemRoomDesc_WardJewel
+{
+    format("Special attacks calculate damage using the holder's Special Defense and its stat changes instead of Special Attack.")
+}
+
 text gItemDesc_MaxMushroom
 {
     format("When used on a {PKMN} they gain access their Gmax form.")

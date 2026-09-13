@@ -25847,6 +25847,16 @@ static inline u32 CalcAttackStat(u32 move, u32 battlerAtk, u32 battlerDef, u32 m
             atkStage = gBattleMons[battlerAtk].statStages[STAT_DEF];
         }
     }
+    else if (holdEffectAtk == HOLD_EFFECT_WARD_JEWEL && IS_MOVE_SPECIAL(move))
+    {
+        // Like Rusted Anchor, substitute the raw stat and its stages, keeping
+        // offensive-stat modifiers out of the calculation. Bespoke moves above
+        // retain their own stat source (notably Jetstream and Foul Play).
+        atkStat = gBattleMons[battlerAtk].spDefense;
+        atkStage = gBattleMons[battlerAtk].statStages[STAT_SPDEF];
+        if (updateFlags)
+            RecordItemEffectBattle(battlerAtk, holdEffectAtk);
+    }
     else if (HasBattlerAbility(battlerAtk, ABILITY_UPROOT)
           && (gStatuses3[battlerAtk] & STATUS3_ROOTED)
           && moveType == TYPE_GRASS)
@@ -27400,7 +27410,14 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
 
     userFinalAttack = CalcAttackStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk);
     targetFinalDefense = CalcDefenseStat(move, battlerAtk, battlerDef, moveType, isCrit, updateFlags, abilityAtk, abilityDef, holdEffectAtk, holdEffectDef, weather);
-    if (ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
+    if (holdEffectAtk == HOLD_EFFECT_WARD_JEWEL && IS_MOVE_SPECIAL(move))
+    {
+        // Ward Jewel takes precedence over Duality just as in CalcAttackStat.
+        // Frostbite affects Special Attack, not the substituted defensive stat.
+        usesOwnAttackStat = FALSE;
+        usesOwnSpAttackStat = FALSE;
+    }
+    else if (ShouldDualitySwapOffensiveStats(battlerAtk, move, moveType))
     {
         usesOwnAttackStat = IS_MOVE_SPECIAL(move);
         usesOwnSpAttackStat = IS_MOVE_PHYSICAL(move);

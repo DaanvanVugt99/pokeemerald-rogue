@@ -452,6 +452,10 @@ Format follows Keep a Changelog loosely:
 
 ### Added
 
+- Add Ward Jewel as a Treasure reward, using the red jewel necklace artwork.
+  Special attacks use the holder's Special Defense and its stages instead of
+  Special Attack, mirroring Rusted Anchor for special attackers.
+
 - Updated the revealed Z-A Mega abilities: Mega Absol Z uses Sharpness, Mega
   Garchomp Z uses Levitate, and Mega Lucario Z uses the new Aura Guard ability,
   which halves damage from contact moves.

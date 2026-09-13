@@ -1100,6 +1100,7 @@ extern const u8 gItemRoomDesc_Pinwheel[];
 extern const u8 gItemRoomDesc_RoyalJelly[];
 extern const u8 gItemRoomDesc_HugeSword[];
 extern const u8 gItemRoomDesc_HoOhPlume[];
+extern const u8 gItemRoomDesc_WardJewel[];
 
 extern const u32 *const gItemIconTable[][2];
 
@@ -1279,6 +1280,8 @@ const u8* Rogue_GetItemRoomDescription(u16 itemId)
         return gItemRoomDesc_HugeSword;
     case ITEM_HO_OH_PLUME:
         return gItemRoomDesc_HoOhPlume;
+    case ITEM_WARD_JEWEL:
+        return gItemRoomDesc_WardJewel;
     default:
         return Rogue_GetItemDesc(itemId);
     }

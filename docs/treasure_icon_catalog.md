@@ -62,7 +62,7 @@ palette reduction, or resizing.
 | Briar Bracer | `Thornmail` | Contact attackers are afflicted by Leech Seed | Implemented | Tower of Ashes |
 | Tinted Shield | `TintedShield` | Open concept | TBD | Tower of Ashes |
 | Tricky Box | `TrickyBox` | Answers opposing status moves with Copycat | Implemented | Tower of Ashes |
-| Vest Jewel | `VestJewel` | Open concept | TBD | Tower of Ashes |
+| Ward Jewel | `VestJewel` | Special attacks use Special Defense and its stat stages instead of Special Attack | Implemented | Tower of Ashes |
 | Wooden Sword | `WoodCannon` | Single-hit attacks strike three times at 40% power; only the first can add effects | Implemented | Tower of Ashes |
 | X Ancient | `XAncient` | Open concept | TBD | Tower of Ashes |
 | Elred Berry | `ElredBerry` | Open concept | TBD | NocTurn |

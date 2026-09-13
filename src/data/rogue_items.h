@@ -158,6 +158,7 @@ extern const u8 gItemDesc_Pinwheel[];
 extern const u8 gItemDesc_RoyalJelly[];
 extern const u8 gItemDesc_HugeSword[];
 extern const u8 gItemDesc_HoOhPlume[];
+extern const u8 gItemDesc_WardJewel[];
 extern const u8 gItemDesc_PartyCurse[];
 extern const u8 gItemDesc_EverstoneCurse[];
 extern const u8 gItemDesc_BattleItemCurse[];
@@ -3158,6 +3159,21 @@ const struct RogueItem gRogueItems[ITEM_ROGUE_ITEM_COUNT] =
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
         .iconImage = gItemIcon_TreasureHoOhPlume,
         .iconPalette = gItemIconPalette_TreasureHoOhPlume,
+    },
+
+    [ITEM_WARD_JEWEL - ITEM_ROGUE_ITEM_FIRST] =
+    {
+        .name = _("Ward Jewel"),
+        .itemId = ITEM_WARD_JEWEL,
+        .price = 0,
+        .description = gItemDesc_WardJewel,
+        .holdEffect = HOLD_EFFECT_WARD_JEWEL,
+        .pocket = POCKET_HELD_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .registrability = FALSE,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .iconImage = gItemIcon_TreasureVestJewel,
+        .iconPalette = gItemIconPalette_TreasureVestJewel,
     },
 
 #ifdef ROGUE_DEBUG
