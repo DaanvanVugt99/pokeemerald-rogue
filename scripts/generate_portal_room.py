@@ -202,6 +202,8 @@ def main():
                 assert vals[j]>>12==floor_pal
                 vals[j]=(vals[j]&0xFFF)|(controls_index<<12)
     b.provenance.append({'name':'ControlTop/ControlBase','foreground_palette':'NPC_4 dark grey casing at indices 12/13/7; donor indicators and floor unchanged'})
+    from hub_furnishings import append_hub_furnishings, architecture_collision
+    append_hub_furnishings(b)
     assert len(b.tiles)<=512 and len(b.pals)<=13
     outputs={}
     # Extend the established 16x32 PC icon, preserving its silhouette and NPC_4
@@ -438,7 +440,7 @@ def main():
         if bool(mask&1)==bool(mask&4):
             for yy in range(16):
                 for xx in range(2,10):
-                    assert bool(a[yy][xx]&0xC00)==bool(a[yy][18-xx]&0xC00), ('Asymmetric room boundary',mask,xx,yy)
+                    assert bool(architecture_collision(a[yy][xx], b.names))==bool(architecture_collision(a[yy][18-xx], b.names)), ('Asymmetric room boundary',mask,xx,yy)
         seen={(9,7)};q=deque(seen)
         while q:
             x,y=q.popleft()

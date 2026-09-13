@@ -32,7 +32,7 @@ script Rogue_Area_TownSquare_OnMapLoad
         // blocking connect centre
         setflag(FLAG_HIDE_LOCAL_WORKBENCH)
 
-        setobjectxyperm(OBJ_EVENT_BUILDER, 21, 8)
+        setobjectxyperm(OBJ_EVENT_BUILDER, 27, 5)
         setobjectmovementtype(OBJ_EVENT_BUILDER, MOVEMENT_TYPE_FACE_UP)
 
         setflag(FLAG_HIDE_BACK_PACKER)
@@ -51,7 +51,7 @@ script Rogue_Area_TownSquare_OnMapLoad
             setflag(FLAG_HIDE_BALL_GUY)
 
             // blocking workbench
-            setobjectxyperm(OBJ_EVENT_BUILDER, 24, 9)
+            setobjectxyperm(OBJ_EVENT_BUILDER, 6, 12)
             setobjectmovementtype(OBJ_EVENT_BUILDER, MOVEMENT_TYPE_FACE_UP)
         }
     }
@@ -147,6 +147,17 @@ script Rogue_Area_TownSquare_TalkBuilder
     lock
     faceplayer
 
+    if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
+    {
+        specialvar(VAR_RESULT, GetPlayerFacingDirection)
+        if(var(VAR_RESULT) != DIR_NORTH)
+        {
+            msgbox(format("Come around to the front of the workbench.\pI'll show you how to use it."))
+            release
+            end
+        }
+    }
+
     if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
         // blocking connect centre or workbench
@@ -176,24 +187,12 @@ script Rogue_Area_TownSquare_TalkBuilder
         waitse
         closemessage
         
-        specialvar(VAR_RESULT, GetPlayerFacingDirection)
-        switch(var(VAR_RESULT))
-        {
-            case DIR_NORTH:
-                applymovement(OBJ_EVENT_BUILDER, Rogue_Area_TownSquare_WorkbenchBuilder_North)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_TownSquare_WorkbenchPlayer_North)
-                waitmovement(0)
-            case DIR_EAST:
-                applymovement(OBJ_EVENT_BUILDER, Rogue_Area_TownSquare_WorkbenchBuilder_East)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_TownSquare_WorkbenchPlayer_East)
-                waitmovement(0)
-            case DIR_WEST:
-                applymovement(OBJ_EVENT_BUILDER, Rogue_Area_TownSquare_WorkbenchBuilder_West)
-                applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_TownSquare_WorkbenchPlayer_West)
-                waitmovement(0)
-        }
+        applymovement(OBJ_EVENT_BUILDER, Rogue_Area_TownSquare_WorkbenchBuilder_North)
+        waitmovement(0)
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_TownSquare_WorkbenchPlayer_North)
+        waitmovement(0)
 
-        setobjectxyperm(OBJ_EVENT_BUILDER, 25, 9)
+        setobjectxyperm(OBJ_EVENT_BUILDER, 7, 12)
 
         special(Rogue_IsMultiplayerClient)
         if(var(VAR_RESULT) == YES)
@@ -227,32 +226,6 @@ movement Rogue_Area_TownSquare_WorkbenchBuilder_North
     face_left
 }
 
-movement Rogue_Area_TownSquare_WorkbenchPlayer_East
-{
-    delay_16
-    walk_right
-    face_up
-}
-
-movement Rogue_Area_TownSquare_WorkbenchBuilder_East
-{
-    walk_right
-    face_left
-}
-
-movement Rogue_Area_TownSquare_WorkbenchPlayer_West
-{
-    delay_16
-    walk_left
-    face_up
-}
-
-movement Rogue_Area_TownSquare_WorkbenchBuilder_West
-{
-    walk_left
-    face_right
-}
-
 script Rogue_Area_TownSquare_TalkBallGuy
 {
     lock
@@ -280,4 +253,26 @@ script Rogue_Area_TownSquare_TalkBallGuy
     }
 
     release
+}
+
+script Rogue_Area_TownSquare_SchoolSign
+{
+    lockall
+    hubupgradeunlocked(HUB_UPGRADE_TOWN_SQUARE_SCHOOL)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("Trainer School\nLearning wing"))
+    }
+    else
+    {
+        msgbox(format("Trainer School\nThis wing is not open yet."))
+    }
+    releaseall
+}
+
+script Rogue_Area_TownSquare_ConnectSign
+{
+    lockall
+    msgbox(format("Poké Connect\nConnection wing"))
+    releaseall
 }

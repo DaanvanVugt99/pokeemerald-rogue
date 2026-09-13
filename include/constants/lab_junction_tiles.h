@@ -50,6 +50,18 @@
 #define METATILE_LabJunction_WarpSouth 0x02D
 #define METATILE_LabJunction_WarpWestUpper 0x02E
 #define METATILE_LabJunction_WarpEastUpper 0x02F
+#define METATILE_LabJunction_Decor_Table_0_0 0x030
+#define METATILE_LabJunction_Decor_Table_1_0 0x031
+#define METATILE_LabJunction_Decor_Table_0_1 0x032
+#define METATILE_LabJunction_Decor_Table_1_1 0x033
+#define METATILE_LabJunction_Decor_Stool_0_0 0x034
+#define METATILE_LabJunction_Decor_Cargo_0_0 0x035
+#define METATILE_LabJunction_Decor_Cargo_1_0 0x036
+#define METATILE_LabJunction_Decor_Cargo_0_1 0x037
+#define METATILE_LabJunction_Decor_Cargo_1_1 0x038
+#define METATILE_LabJunction_Decor_Cargo_0_2 0x039
+#define METATILE_LabJunction_Decor_Cargo_1_2 0x03A
+#define METATILE_LabJunction_Decor_WallPlate_0_0 0x03B
 #define LAB_JUNCTION_DOOR_PALETTE 11
 
 #endif

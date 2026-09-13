@@ -355,6 +355,174 @@
         "x": 12,
         "y": 2
       }
+    },
+    {
+      "name": "Decor_Table_0_0",
+      "source": "galactic",
+      "metatile": "0x2FC",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 46,
+        "y": 39
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_1_0",
+      "source": "galactic",
+      "metatile": "0x2FE",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 47,
+        "y": 39
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_0_1",
+      "source": "galactic",
+      "metatile": "0x30C",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 46,
+        "y": 40
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_1_1",
+      "source": "galactic",
+      "metatile": "0x30E",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 47,
+        "y": 40
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Stool_0_0",
+      "source": "galactic",
+      "metatile": "0x361",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 45,
+        "y": 39
+      },
+      "assembly": "Stool",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_0",
+      "source": "galactic",
+      "metatile": "0x3D8",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 44
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_0",
+      "source": "galactic",
+      "metatile": "0x3D9",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 44
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_1",
+      "source": "galactic",
+      "metatile": "0x3DA",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 45
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_1",
+      "source": "galactic",
+      "metatile": "0x3DB",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 45
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_2",
+      "source": "galactic",
+      "metatile": "0x3DC",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 46
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_2",
+      "source": "galactic",
+      "metatile": "0x3DD",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 46
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_WallPlate_0_0",
+      "source": "galactic",
+      "metatile": "0x224",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 50,
+        "y": 35
+      },
+      "assembly": "WallPlate",
+      "background": "WallBase",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
     }
   ],
   "assemblies": [
@@ -441,7 +609,7 @@
       ]
     }
   ],
-  "tiles": 77,
+  "tiles": 100,
   "palettes": 12,
   "door": "HQ shutter with two retracting leaves; frame remains fixed"
 }

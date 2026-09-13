@@ -795,6 +795,9 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_LabCorridor_Vertical/scripts.inc"
 	.include "data/maps/Rogue_SafariCorridor_Horizontal/scripts.inc"
 	.include "data/maps/Rogue_SafariCorridor_Vertical/scripts.inc"
+	.include "data/maps/Rogue_MainHallCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_MainHallCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_MainHallCorridor_South/scripts.inc"
 
 	.include "data/maps/Rogue_HallwayFacade_Vertical/scripts.inc"
 

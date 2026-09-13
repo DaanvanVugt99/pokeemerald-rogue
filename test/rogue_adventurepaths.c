@@ -1309,11 +1309,14 @@ TEST("Portal room: stale service positions trigger a real continue warp even whe
     struct MapHeader header = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE), MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE));
     struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
     struct WarpData oldWarp = gSaveBlock1Ptr->continueGameWarp;
+    s16 oldX = gSaveBlock1Ptr->pos.x, oldY = gSaveBlock1Ptr->pos.y;
     bool8 oldStatus = UseContinueGameWarp();
     bool8 oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     u8 count = header.events->objectEventCount;
 
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gSaveBlock1Ptr->pos.x = 9;
+    gSaveBlock1Ptr->pos.y = 7;
     memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
     objects[0].x = 9;
     objects[0].y = 6;
@@ -1346,7 +1349,23 @@ TEST("Portal room: stale service positions trigger a real continue warp even whe
     Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
     EXPECT(UseContinueGameWarp());
 
+    // A newly placed table must also recover saves with current NPC templates.
+    objects[10] = header.events->objectEvents[10];
+    gSaveBlock1Ptr->pos.x = 12;
+    gSaveBlock1Ptr->pos.y = 11;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 9);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 7);
+    gSaveBlock1Ptr->pos.y = 10; // The story crossing remains clear.
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+
     gSaveBlock1Ptr->continueGameWarp = oldWarp;
+    gSaveBlock1Ptr->pos.x = oldX;
+    gSaveBlock1Ptr->pos.y = oldY;
     if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
     if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }

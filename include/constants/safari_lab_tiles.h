@@ -129,5 +129,17 @@
 #define METATILE_SafariLab_WarpSouth 0x07D
 #define METATILE_SafariLab_WarpWestTop 0x07E
 #define METATILE_SafariLab_WarpEastTop 0x07F
+#define METATILE_SafariLab_Decor_Table_0_0 0x080
+#define METATILE_SafariLab_Decor_Table_1_0 0x081
+#define METATILE_SafariLab_Decor_Table_0_1 0x082
+#define METATILE_SafariLab_Decor_Table_1_1 0x083
+#define METATILE_SafariLab_Decor_Stool_0_0 0x084
+#define METATILE_SafariLab_Decor_Cargo_0_0 0x085
+#define METATILE_SafariLab_Decor_Cargo_1_0 0x086
+#define METATILE_SafariLab_Decor_Cargo_0_1 0x087
+#define METATILE_SafariLab_Decor_Cargo_1_1 0x088
+#define METATILE_SafariLab_Decor_Cargo_0_2 0x089
+#define METATILE_SafariLab_Decor_Cargo_1_2 0x08A
+#define METATILE_SafariLab_Decor_WallPlate_0_0 0x08B
 
 #endif

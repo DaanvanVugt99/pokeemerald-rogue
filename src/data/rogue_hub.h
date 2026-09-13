@@ -200,7 +200,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
     [HUB_AREA_TOWN_SQUARE] = 
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_TOWN_SQUARE),
-        .areaName = _("Town Square"),
+        .areaName = _("Main Hall"),
         .descText = gHubAreaDesc_Todo,
         .requiredUpgrades = { HUB_UPGRADE_NONE },
         .connectionWarps = 

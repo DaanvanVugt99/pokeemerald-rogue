@@ -1684,10 +1684,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_TOWN_SQUARE",
       "name": "Rogue_Area_TownSquare_Layout",
-      "width": 28,
-      "height": 20,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Slateport",
+      "width": 36,
+      "height": 30,
+      "primary_tileset": "gTileset_MainHall",
+      "secondary_tileset": "gTileset_MainHallSecondary",
       "border_filepath": "data/layouts/Rogue_Area_TownSquare/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_TownSquare/map.bin"
     },
@@ -2260,6 +2260,36 @@
       "secondary_tileset": "gTileset_SafariLabSecondary",
       "border_filepath": "data/layouts/Rogue_SafariCorridor_Vertical/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_SafariCorridor_Vertical/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MAIN_HALL_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_MainHallCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_MainHall",
+      "secondary_tileset": "gTileset_MainHallSecondary",
+      "border_filepath": "data/layouts/Rogue_MainHallCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MainHallCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MAIN_HALL_CORRIDOR_NORTH",
+      "name": "Rogue_MainHallCorridor_North_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_MainHall",
+      "secondary_tileset": "gTileset_MainHallSecondary",
+      "border_filepath": "data/layouts/Rogue_MainHallCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MainHallCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MAIN_HALL_CORRIDOR_SOUTH",
+      "name": "Rogue_MainHallCorridor_South_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_MainHall",
+      "secondary_tileset": "gTileset_MainHallSecondary",
+      "border_filepath": "data/layouts/Rogue_MainHallCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MainHallCorridor_South/map.bin"
     }
   ]
 }

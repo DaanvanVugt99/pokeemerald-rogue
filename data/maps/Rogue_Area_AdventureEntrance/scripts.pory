@@ -306,7 +306,7 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
-        msgbox(format("Hi {PLAYER}!\pThe builder was looking for you.\pI believe he said he would wait in the Town Square for you."))
+        msgbox(format("Hi {PLAYER}!\pThe builder was looking for you.\pI believe he said he would wait in the Main Hall for you."))
     }
     else
     {
@@ -354,7 +354,7 @@ script Rogue_Area_AdventureEntrance_AdventureConsole
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
-        msgbox(format("The builder is waiting in the Town Square.\pVisit him before your next Adventure."))
+        msgbox(format("The builder is waiting in the Main Hall.\pVisit him before your next Adventure."))
     }
     else
     {

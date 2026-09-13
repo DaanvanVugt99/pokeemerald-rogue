@@ -1,6 +1,7 @@
 #include "global.h"
 #include "constants/portal_room_tiles.h"
 #include "constants/lab_junction_tiles.h"
+#include "constants/main_hall_tiles.h"
 #include "constants/safari_lab_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
@@ -1026,6 +1027,9 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
         else if (warpId == 18) warpId = 4;
     }
 
+    if (area == HUB_AREA_TOWN_SQUARE && warpId >= 11 && warpId <= 14)
+        warpId = (warpId - 11) * 2; // Third N/E/S/W lanes; keep original indices.
+
     if (area == HUB_AREA_SAFARI_ZONE)
     {
         if (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL)
@@ -1061,6 +1065,7 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     switch (mapHeader->mapLayoutId)
     {
     case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
+    case LAYOUT_ROGUE_AREA_TOWN_SQUARE:
     case LAYOUT_ROGUE_AREA_LABS:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
@@ -1211,6 +1216,7 @@ void RogueHub_ApplyMapMetatiles()
         break;
 
     case LAYOUT_ROGUE_AREA_TOWN_SQUARE:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateTownSquareAreaMetatiles();
         break;
 
@@ -1800,54 +1806,32 @@ static void RogueHub_UpdateMartsAreaMetatiles()
 
 static void RogueHub_UpdateTownSquareAreaMetatiles()
 {
-    // Remove connections
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(13, 0, 18, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(13, 1, 18, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(14, 2, 17, 8);
+        MetatileFill_Tile(16, 0, 20, 2, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 3, 20, 3, METATILE_MainHall_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 4, 20, 4, METATILE_MainHall_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 5, 20, 5, METATILE_MainHall_FloorShadow);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(26, 9);
-
-        MetatileFill_CommonPathRemoval(23, 10, 25, 12);
+        MetatileFill_Tile(34, 14, 35, 21, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(33, 14, 33, 19, METATILE_MainHall_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitVertical(14, 18);
-        MetatileFill_TreeCaps(14, 19, 17);
-
-        MetatileFill_CommonPathRemoval(13, 13, 17, 17);
+        MetatileFill_Tile(16, 25, 20, 25, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 26, 20, 26, METATILE_MainHall_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 27, 20, 27, METATILE_MainHall_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(16, 28, 20, 29, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
     }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(0, 7);
-
-        MetatileFill_CommonPathRemoval(2, 9, 13, 11);
+        MetatileFill_Tile(0, 14, 2, 21, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(3, 14, 3, 19, METATILE_MainHall_Pillar | MAPGRID_COLLISION_MASK);
     }
-
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL))
-    {
-        MetatileFill_TreesOverlapping(1, 1, 5, 4, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(1, 5, 4, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(6, 1, 6, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(5, 5, 5, TREE_TYPE_SPARSE);
-
-        MetatileFill_Tile(6, 2, 6, 5, METATILE_GeneralHub_Grass);
-        MetatileFill_Tile(3, 6, 5, 6, METATILE_GeneralHub_Grass);
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_TUTORS))
-    {
-        MetatileFill_Tile(6, 12, 12, 15, METATILE_GeneralHub_Grass);
-        MetatileFill_Tile(9, 16, 12, 16, METATILE_GeneralHub_Grass);
-    }
+    if (!RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL))
+        MetatileSet_Tile(9, 4, METATILE_MainHall_ClosedDoor | MAPGRID_COLLISION_MASK);
 }
 
 static void RogueHub_UpdateMarketAreaMetatiles()

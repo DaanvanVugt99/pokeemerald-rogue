@@ -16,6 +16,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Track authored map and border binaries as build dependencies so incremental
+  ROM/test builds pick up Porymap layout edits without a map JSON change.
+
 - Align Adventure Gate, Labs and Safari hub exits with the second shaded hallway
   tile, and center arrivals regardless of the exit lane used. Update tutorial
   guards and recover saves beyond the old thresholds; outdoor exits stay unchanged.
@@ -37,6 +40,18 @@ Format follows Keep a Changelog loosely:
   suggested higher or lower level is available.
 
 ### Changed
+
+- Keep the Safari capsule Pokémon facing down while glass-habitat Pokémon
+  continue roaming.
+
+- Furnish the four underground hub districts with Galactic HQ tables, stools,
+  cargo stacks and wall plates. Preserve service/story routes and hallway widths;
+  safely recover Gate saves whose position is occupied by new furniture.
+
+- Rebuild the Town Square as the underground Main Hall, with a raised gallery,
+  paired School/Poké Connect doors, a progress monument and furnished service bays.
+  Add three-wide shaded passages with centered arrivals, preserve construction
+  tutorial rewards and recover old outdoor saves without resetting progression.
 
 - Rebuild the Safari hub as an underground containment lab with glass habitats,
   specimen capsules, a dark Safari PC, and three-wide shaded hub passages.

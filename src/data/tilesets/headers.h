@@ -1001,3 +1001,25 @@ const struct Tileset gTileset_SafariLabSecondary =
     .metatileAttributes = gMetatileAttributes_SafariLabSecondary,
     .callback = NULL,
 };
+
+const struct Tileset gTileset_MainHall =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_MainHall,
+    .palettes = gTilesetPalettes_MainHall,
+    .metatiles = gMetatiles_MainHall,
+    .metatileAttributes = gMetatileAttributes_MainHall,
+    .callback = NULL,
+};
+
+const struct Tileset gTileset_MainHallSecondary =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_MainHallSecondary,
+    .palettes = gTilesetPalettes_MainHall,
+    .metatiles = gMetatiles_MainHallSecondary,
+    .metatileAttributes = gMetatileAttributes_MainHallSecondary,
+    .callback = NULL,
+};

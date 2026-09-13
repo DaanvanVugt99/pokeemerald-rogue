@@ -8403,6 +8403,12 @@ static bool8 HasStaleAdventureEntranceServices(const struct MapHeader *mapHeader
     // snapshot's count equal to the new map's, while its positions remain stale.
     static const u8 serviceIds[] = {1, 2, 3, 4, 7, 8, 10, 11};
     u8 i, j, k;
+    s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+
+    // Furniture edits can leave an otherwise-current save inside a solid tile.
+    if (x < 0 || y < 0 || x >= mapHeader->mapLayout->width || y >= mapHeader->mapLayout->height
+        || (mapHeader->mapLayout->map[y * mapHeader->mapLayout->width + x] & MAPGRID_COLLISION_MASK))
+        return TRUE;
 
     for (i = 0; i < ARRAY_COUNT(serviceIds); ++i)
     {
@@ -8444,10 +8450,67 @@ static bool8 HasStaleLabJunctionSnapshot(const struct MapHeader *header, const s
     return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
 }
 
+static void PrepareMainHallBuilder(struct ObjectEventTemplate *object)
+{
+    u16 intro = VarGet(VAR_ROGUE_INTRO_STATE);
+    if (intro < ROGUE_INTRO_STATE_REPORT_TO_PROF)
+    {
+        object->x = 27;
+        object->y = 5;
+        object->elevation = 5;
+        object->movementType = MOVEMENT_TYPE_FACE_UP;
+    }
+    else
+    {
+        object->x = intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? 6 : 7;
+        object->y = 12;
+        object->elevation = 3;
+        object->movementType = intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? MOVEMENT_TYPE_FACE_UP : MOVEMENT_TYPE_FACE_LEFT;
+    }
+}
+
+static bool8 HasStaleMainHallSnapshot(const struct MapHeader *header, const struct ObjectEventTemplate *objects, u8 count)
+{
+    s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+    u8 i, j;
+    for (i = 0; i < header->events->objectEventCount; ++i)
+    {
+        struct ObjectEventTemplate expected = header->events->objectEvents[i];
+        if (expected.localId == 3)
+            PrepareMainHallBuilder(&expected);
+        for (j = 0; j < count; ++j)
+            if (objects[j].localId == expected.localId)
+                break;
+        if (j == count || objects[j].x != expected.x || objects[j].y != expected.y
+            || objects[j].elevation != expected.elevation || objects[j].graphicsId != expected.graphicsId)
+            return TRUE;
+    }
+    if (x < 0 || y < 0 || x >= header->mapLayout->width || y >= header->mapLayout->height)
+        return TRUE;
+    return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
+}
+
 void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave, struct ObjectEventTemplate *objectEvents, u8* objectEventCount, u8 objectEventCapacity)
 {
     bool8 isLoadingSameMap = (gRogueLocal.recentObjectEventLoadedLayout == mapHeader->mapLayoutId);
     gRogueLocal.recentObjectEventLoadedLayout = mapHeader->mapLayoutId;
+
+    if (!Rogue_IsRunActive() && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_TOWN_SQUARE)
+    {
+        u8 i;
+        if (loadingFromSave && HasStaleMainHallSnapshot(mapHeader, objectEvents, *objectEventCount))
+        {
+            // A continue warp rebuilds both elevations and live objects. Leave
+            // progression/gift flags intact; completed tutorials must stay done.
+            bool8 learning = VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD;
+            SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_TOWN_SQUARE), MAP_NUM(ROGUE_AREA_TOWN_SQUARE), WARP_ID_NONE,
+                learning ? 6 : 18, learning ? 13 : 19);
+            SetContinueGameWarpStatus();
+        }
+        for (i = 0; i < *objectEventCount; ++i)
+            if (objectEvents[i].localId == 3)
+                PrepareMainHallBuilder(&objectEvents[i]);
+    }
 
     if (loadingFromSave && !Rogue_IsRunActive())
     {

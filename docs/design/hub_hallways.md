@@ -1,6 +1,6 @@
 # Underground hub hallway transitions
 
-The Adventure Gate, Labs junction and both Safari variants use one convention:
+The Adventure Gate, Labs junction, Main Hall and both Safari variants use one convention:
 the first shaded tile starts the fade; the second shaded tile carries a
 three-wide directional warp strip. Decorative hall/facade tiles beyond it are
 ordinary dark floor. The warp no longer depends on how far the map buffer extends.
@@ -19,6 +19,7 @@ Coordinates below are the centered warp tile, before the inward arrival step:
 | Adventure Gate | (0,11) | (18,11) | — | (9,15) |
 | Labs | (2,9) | (26,9) | (14,1) | (14,20) |
 | Safari, normal and tutorial | (4,15) | (32,15) | — | (18,27) |
+| Main Hall | (1,17) | (35,17) | (18,1) | (18,28) |
 
 The original warp IDs and district connections remain stable. All lane tiles
 retain their directional arrow behavior; the aisle-side neighboring tile is

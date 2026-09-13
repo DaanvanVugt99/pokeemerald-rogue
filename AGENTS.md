@@ -156,6 +156,8 @@ or validation workflows change.
 - Map/object/script-only changes: regenerate or incrementally build the affected
   map/ROM. Do not run a headless suite unless an existing focused test directly
   covers the changed behavior.
+- Map and border binaries are explicit `maps.o` dependencies. An incremental
+  build picks up Porymap layout edits without touching map JSON or cleaning.
 - Small scoped C or test changes: run one relevant filtered test first. Run its
   unfiltered suite only when the change affects several behaviors in that suite
   or no reliable focused filter exists and the risk justifies it.

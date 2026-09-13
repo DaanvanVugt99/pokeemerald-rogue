@@ -110,6 +110,8 @@ def main():
         frames.append(frame)
         for y in range(32):
             for x in range(16):anim.putpixel((x,phase*32+y),door_colors.index(frame.getpixel((x,y))))
+    from hub_furnishings import append_hub_furnishings
+    append_hub_furnishings(b)
     assert len(b.tiles)<=512 and len(b.pals)<=13 and len(b.metas)<=512
     outputs={}
     outputs[PRI+'/tiles.png']=png(b.tiles)

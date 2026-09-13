@@ -52,6 +52,18 @@
 #define METATILE_PortalRoom_FloorFadeSouth 0x02F
 #define METATILE_PortalRoom_FloorDeepSouth 0x030
 #define METATILE_PortalRoom_ControlTop 0x031
+#define METATILE_PortalRoom_Decor_Table_0_0 0x032
+#define METATILE_PortalRoom_Decor_Table_1_0 0x033
+#define METATILE_PortalRoom_Decor_Table_0_1 0x034
+#define METATILE_PortalRoom_Decor_Table_1_1 0x035
+#define METATILE_PortalRoom_Decor_Stool_0_0 0x036
+#define METATILE_PortalRoom_Decor_Cargo_0_0 0x037
+#define METATILE_PortalRoom_Decor_Cargo_1_0 0x038
+#define METATILE_PortalRoom_Decor_Cargo_0_1 0x039
+#define METATILE_PortalRoom_Decor_Cargo_1_1 0x03A
+#define METATILE_PortalRoom_Decor_Cargo_0_2 0x03B
+#define METATILE_PortalRoom_Decor_Cargo_1_2 0x03C
+#define METATILE_PortalRoom_Decor_WallPlate_0_0 0x03D
 #define METATILE_PortalRoom_Opening 0x200
 
 #endif

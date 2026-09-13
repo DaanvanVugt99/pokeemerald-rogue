@@ -1,0 +1,579 @@
+{
+  "metatiles": [
+    {
+      "name": "Floor",
+      "source": "galactic",
+      "metatile": "0x33F",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 4
+      }
+    },
+    {
+      "name": "FloorShadow",
+      "source": "galactic",
+      "metatile": "0x337",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 4
+      }
+    },
+    {
+      "name": "Void",
+      "source": "galactic",
+      "metatile": "0x001",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 0
+      }
+    },
+    {
+      "name": "PillarCap",
+      "source": "galactic",
+      "metatile": "0x2E1",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "name": "PillarJoin",
+      "source": "galactic",
+      "metatile": "0x211",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 1
+      }
+    },
+    {
+      "name": "Pillar",
+      "source": "galactic",
+      "metatile": "0x20A",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "name": "PillarEnd",
+      "source": "galactic",
+      "metatile": "0x209",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "name": "Wall",
+      "source": "galactic",
+      "metatile": "0x219",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 4,
+        "y": 1
+      }
+    },
+    {
+      "name": "WallBase",
+      "source": "galactic",
+      "metatile": "0x221",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 4,
+        "y": 2
+      }
+    },
+    {
+      "name": "InnerJoin",
+      "source": "galactic",
+      "metatile": "0x210",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 12
+      }
+    },
+    {
+      "name": "InnerBase",
+      "source": "galactic",
+      "metatile": "0x220",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 13
+      }
+    },
+    {
+      "name": "InnerFoot",
+      "source": "galactic",
+      "metatile": "0x333",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 5,
+        "y": 14
+      }
+    },
+    {
+      "name": "FrameTopLeft",
+      "source": "galactic",
+      "metatile": "0x2C3",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameTop",
+      "source": "galactic",
+      "metatile": "0x2C4",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameTopRight",
+      "source": "galactic",
+      "metatile": "0x2C5",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 12
+      }
+    },
+    {
+      "name": "FrameLeft",
+      "source": "galactic",
+      "metatile": "0x2CB",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 1,
+        "y": 13
+      }
+    },
+    {
+      "name": "FrameRight",
+      "source": "galactic",
+      "metatile": "0x2CD",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 3,
+        "y": 13
+      }
+    },
+    {
+      "name": "Door",
+      "source": "galactic",
+      "metatile": "0x2CC",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 2,
+        "y": 13
+      }
+    },
+    {
+      "name": "SignTop",
+      "source": "galactic",
+      "metatile": "0x21B",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 11,
+        "y": 1
+      }
+    },
+    {
+      "name": "SignBase",
+      "source": "galactic",
+      "metatile": "0x223",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 11,
+        "y": 2
+      }
+    },
+    {
+      "name": "Sofa_0_0",
+      "source": "silph",
+      "metatile": "0x349",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 9,
+        "y": 3
+      }
+    },
+    {
+      "name": "Sofa_1_0",
+      "source": "silph",
+      "metatile": "0x34A",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 10,
+        "y": 3
+      }
+    },
+    {
+      "name": "Sofa_2_0",
+      "source": "silph",
+      "metatile": "0x34B",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 11,
+        "y": 3
+      }
+    },
+    {
+      "name": "Sofa_0_1",
+      "source": "silph",
+      "metatile": "0x351",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 9,
+        "y": 4
+      }
+    },
+    {
+      "name": "Sofa_1_1",
+      "source": "silph",
+      "metatile": "0x352",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 10,
+        "y": 4
+      }
+    },
+    {
+      "name": "Sofa_2_1",
+      "source": "silph",
+      "metatile": "0x353",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 11,
+        "y": 4
+      }
+    },
+    {
+      "name": "Plant_0_0",
+      "source": "silph",
+      "metatile": "0x2EA",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 5,
+        "y": 2
+      }
+    },
+    {
+      "name": "Plant_0_1",
+      "source": "silph",
+      "metatile": "0x2F1",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+        "x": 5,
+        "y": 3
+      }
+    },
+    {
+      "name": "Monitor_0_0",
+      "source": "galactic",
+      "metatile": "0x2B9",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 8,
+        "y": 2
+      }
+    },
+    {
+      "name": "Monitor_0_1",
+      "source": "galactic",
+      "metatile": "0x376",
+      "behavior": 0,
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 8,
+        "y": 3
+      }
+    },
+    {
+      "name": "StandReference",
+      "source": "rock",
+      "metatile": "0x272",
+      "behavior": 0
+    },
+    {
+      "name": "PlinthLeft",
+      "source": "town_square",
+      "metatile": "0x229",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "PlinthCenter",
+      "source": "town_square",
+      "metatile": "0x228",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "PlinthRight",
+      "source": "town_square",
+      "metatile": "0x22A",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "PlinthTopLeft",
+      "source": "town_square",
+      "metatile": "0x221",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "PlinthTopCenter",
+      "source": "town_square",
+      "metatile": "0x220",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "PlinthTopRight",
+      "source": "town_square",
+      "metatile": "0x222",
+      "reference": "Original TownSquare (9..11,4..5); intact foreground, HQ floor background, private neutral palette"
+    },
+    {
+      "name": "Decor_Table_0_0",
+      "source": "galactic",
+      "metatile": "0x2FC",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 46,
+        "y": 39
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_1_0",
+      "source": "galactic",
+      "metatile": "0x2FE",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 47,
+        "y": 39
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_0_1",
+      "source": "galactic",
+      "metatile": "0x30C",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 46,
+        "y": 40
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Table_1_1",
+      "source": "galactic",
+      "metatile": "0x30E",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 47,
+        "y": 40
+      },
+      "assembly": "Table",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Stool_0_0",
+      "source": "galactic",
+      "metatile": "0x361",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 45,
+        "y": 39
+      },
+      "assembly": "Stool",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_0",
+      "source": "galactic",
+      "metatile": "0x3D8",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 44
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_0",
+      "source": "galactic",
+      "metatile": "0x3D9",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 44
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_1",
+      "source": "galactic",
+      "metatile": "0x3DA",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 45
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_1",
+      "source": "galactic",
+      "metatile": "0x3DB",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 45
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_0_2",
+      "source": "galactic",
+      "metatile": "0x3DC",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 37,
+        "y": 46
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_Cargo_1_2",
+      "source": "galactic",
+      "metatile": "0x3DD",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 38,
+        "y": 46
+      },
+      "assembly": "Cargo",
+      "background": "Floor",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    },
+    {
+      "name": "Decor_WallPlate_0_0",
+      "source": "galactic",
+      "metatile": "0x224",
+      "reference": {
+        "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+        "x": 50,
+        "y": 35
+      },
+      "assembly": "WallPlate",
+      "background": "WallBase",
+      "behavior": 0,
+      "palette": "Exact donor colors; existing banks plus unused bank-0 entries"
+    }
+  ],
+  "assemblies": [
+    {
+      "name": "Sofa",
+      "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+      "source": [
+        9,
+        3,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "Plant",
+      "layout": "LAYOUT_ROGUE_ENCOUNTER_SILPH_CO",
+      "source": [
+        5,
+        2,
+        1,
+        2
+      ]
+    },
+    {
+      "name": "Monitor",
+      "layout": "LAYOUT_ROGUE_ENCOUNTER_GALACTIC_HQ",
+      "source": [
+        8,
+        2,
+        1,
+        2
+      ]
+    }
+  ],
+  "stairs": "Secret Base stand 0x272 tread bands; private gray repeatable center and end caps; ordinary behavior",
+  "tiles": 126,
+  "palettes": 13
+}

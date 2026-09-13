@@ -126,6 +126,8 @@ def main():
     for meta in b.metas:
         for i,v in enumerate(meta):meta[i]=(v&0xFFF)|(used.index(v>>12)<<12)
     b.pals=[b.pals[i] for i in used]
+    from hub_furnishings import append_hub_furnishings
+    append_hub_furnishings(b)
     assert len(b.tiles)<=512 and len(b.pals)<=13,(len(b.tiles),len(b.pals))
     def t(name,solid=False):return b.names[name]|0x3000|(0xC00 if solid else 0)
     def fill(a,x1,y1,x2,y2,n,solid=False):
@@ -178,7 +180,7 @@ def main():
         pal=b.pals[i] if i<len(b.pals) else [(0,0,0)]*16
         outputs[(PRI if i<6 else SEC)+f'/palettes/{i:02}.pal']=('JASC-PAL\r\n0100\r\n16\r\n'+'\r\n'.join(' '.join(map(str,c)) for c in pal)+'\r\n').encode()
     outputs['include/constants/safari_lab_tiles.h']=('#ifndef GUARD_SAFARI_LAB_TILES_H\n#define GUARD_SAFARI_LAB_TILES_H\n\n'+''.join(f'#define METATILE_SafariLab_{n} 0x{v:03X}\n' for n,v in b.names.items())+'\n#endif\n').encode()
-    outputs['data/tilesets/safari_lab_sources.json']=(json.dumps({'rock':rock_ids,'hardware':'Galactic HQ complete specimen machinery (1,1), 2x3; lab junction structural metatiles','containment':'Private glass frames and expanded capsule housing; normal floor below transparent windows','pc':'Existing dark Adventure Console sprite','tiles':len(b.tiles),'palettes':len(b.pals)},indent=2)+'\n').encode()
+    outputs['data/tilesets/safari_lab_sources.json']=(json.dumps({'rock':rock_ids,'hardware':'Galactic HQ complete specimen machinery (1,1), 2x3; lab junction structural metatiles','containment':'Private glass frames and expanded capsule housing; normal floor below transparent windows','pc':'Existing dark Adventure Console sprite','furnishings':[p for p in b.provenance if p['name'].startswith('Decor_')],'tiles':len(b.tiles),'palettes':len(b.pals)},indent=2)+'\n').encode()
     for suffix,w,h in [('Horizontal',16,8),('Vertical',8,12)]:
         arr=[]
         for y in range(h):
