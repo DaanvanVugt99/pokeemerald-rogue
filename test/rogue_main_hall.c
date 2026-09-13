@@ -1,4 +1,5 @@
 #include "global.h"
+#include "constants/event_object_movement.h"
 #include "constants/flags.h"
 #include "constants/vars.h"
 #include "constants/rogue.h"
@@ -126,14 +127,17 @@ TEST("Main Hall: recover obsolete saves without repeating gifts, retain both flo
         EXPECT(UseContinueGameWarp());
         EXPECT_EQ(VarGet(VAR_ROGUE_INTRO_STATE), intro);
         EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
-        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, intro == ROGUE_INTRO_STATE_LEARN_TO_BUILD ? 6 : 18);
-        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, intro == ROGUE_INTRO_STATE_LEARN_TO_BUILD ? 13 : 19);
+        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, intro == ROGUE_INTRO_STATE_LEARN_TO_BUILD ? header.events->objectEvents[0].x : 18);
+        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, intro == ROGUE_INTRO_STATE_LEARN_TO_BUILD ? header.events->objectEvents[0].y - 2 : 19);
         EXPECT_EQ(objects[2].elevation, intro < ROGUE_INTRO_STATE_REPORT_TO_PROF ? 5 : 3);
-        EXPECT_EQ(objects[2].x, intro < ROGUE_INTRO_STATE_REPORT_TO_PROF ? 27 : intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? 6 : 7);
+        EXPECT_EQ(objects[2].x, intro < ROGUE_INTRO_STATE_REPORT_TO_PROF ? 27 : header.events->objectEvents[0].x + (intro > ROGUE_INTRO_STATE_LEARN_TO_BUILD));
+        EXPECT_EQ(objects[2].y, intro < ROGUE_INTRO_STATE_REPORT_TO_PROF ? 5 : header.events->objectEvents[0].y - 1);
+        EXPECT_EQ(objects[2].movementType, intro < ROGUE_INTRO_STATE_REPORT_TO_PROF ? MOVEMENT_TYPE_FACE_UP : intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? MOVEMENT_TYPE_FACE_DOWN : MOVEMENT_TYPE_FACE_LEFT);
     }
     VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_COMPLETE);
     count = header.events->objectEventCount;
     memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    Rogue_ModifyObjectEvents(&header, FALSE, objects, &count, ARRAY_COUNT(objects));
     for (y = 6; y <= 19; y += 13)
     {
         gSaveBlock1Ptr->pos.x = 18; gSaveBlock1Ptr->pos.y = y;

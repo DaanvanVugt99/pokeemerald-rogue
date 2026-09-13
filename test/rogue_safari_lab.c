@@ -174,12 +174,29 @@ TEST("Safari lab: buffer displays preserve identity, shrink after dismissal and 
 TEST("Safari lab: display objects are solid without changing tutorial encounter collision")
 {
     struct MapHeader oldHeader = gMapHeader;
-    struct ObjectEvent display = {.localId = 4, .graphicsId = OBJ_EVENT_GFX_FOLLOW_MON_0};
+    struct ObjectEvent display = {0};
     struct ObjectEvent player = {.localId = OBJ_EVENT_ID_PLAYER};
+    u8 i, displayCount = 0;
     gMapHeader = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
-    EXPECT(RogueSafari_IsLabDisplay(&display));
-    EXPECT(!FollowMon_IsCollisionExempt(&display, &player));
-    EXPECT(!FollowMon_IsCollisionExempt(&player, &display));
+    for (i = 0; i < gMapHeader.events->objectEventCount; ++i)
+    {
+        const struct ObjectEventTemplate *template = &gMapHeader.events->objectEvents[i];
+        display.localId = template->localId;
+        display.graphicsId = template->graphicsId;
+        if (display.graphicsId >= OBJ_EVENT_GFX_FOLLOW_MON_0 && display.graphicsId <= OBJ_EVENT_GFX_FOLLOW_MON_3)
+        {
+            ++displayCount;
+            EXPECT(RogueSafari_IsLabDisplay(&display));
+            EXPECT(!FollowMon_IsCollisionExempt(&display, &player));
+            EXPECT(!FollowMon_IsCollisionExempt(&player, &display));
+        }
+        else
+            EXPECT(!RogueSafari_IsLabDisplay(&display));
+    }
+    EXPECT_EQ(displayCount, 4);
+    display.graphicsId = OBJ_EVENT_GFX_FOLLOW_MON_5;
+    EXPECT(!RogueSafari_IsLabDisplay(&display));
+    display.graphicsId = OBJ_EVENT_GFX_FOLLOW_MON_0;
     gMapHeader.mapLayoutId = LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL;
     EXPECT(!RogueSafari_IsLabDisplay(&display));
     gMapHeader = oldHeader;

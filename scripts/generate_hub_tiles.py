@@ -318,6 +318,26 @@ def previews(cat):
             im.save(OUT/(key+'-assemblies.png'))
 
 
+def check_safari_enclosures():
+    events=json.loads((ROOT/'data/maps/Rogue_Area_SafariZone/map.json').read_text())
+    layouts=json.loads((ROOT/'data/layouts/layouts.json').read_text())['layouts']
+    layout=next(l for l in layouts if l['id']==events['layout'])
+    cells=words(layout['blockdata_filepath']);w=layout['width'];h=layout['height']
+    for slot,left in ((0,9),(1,24)):
+        e=next(e for e in events['object_events'] if e['graphics_id']==f'OBJ_EVENT_GFX_FOLLOW_MON_{slot}')
+        assert e['movement_type']=='MOVEMENT_TYPE_WANDER_AROUND', ('Terrarium needs four-direction wandering',slot)
+        assert e['movement_range_x'] and e['movement_range_y'], ('Terrarium needs bounded movement',slot)
+        allowed=set()
+        for y in range(max(0,e['y']-e['movement_range_y']),min(h,e['y']+e['movement_range_y']+1)):
+            for x in range(max(0,e['x']-e['movement_range_x']),min(w,e['x']+e['movement_range_x']+1)):
+                v=cells[y*w+x]
+                if not v&0xC00 and v>>12==e['elevation']:allowed.add((x,y))
+        expected={(x,y) for x in range(left,left+4) for y in range(10,13)}
+        assert allowed==expected, ('Terrarium movement must cover exactly its 4x3 interior',slot,allowed^expected)
+        assert (e['x'],e['y']) in allowed, ('Terrarium spawn outside interior',slot)
+    print('Safari terrariums: four-direction movement and both 4x3 containment bounds PASS.')
+
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--check',action='store_true');parser.add_argument('--convert-layouts',action='store_true')
     args=parser.parse_args();assert not(args.check and args.convert_layouts)
@@ -353,6 +373,7 @@ def main():
     if args.convert_layouts:convert_layouts(cat)
     from check_hub_corridors import check_corridors
     check_corridors(cat)
+    check_safari_enclosures()
     previews(cat)
     print(f'Shared hub: {len(cat.tiles)}/1024 tiles; {len(cat.metas)}/1024 metatiles; 13/13 palettes. Original art verified pixel-for-pixel.')
 

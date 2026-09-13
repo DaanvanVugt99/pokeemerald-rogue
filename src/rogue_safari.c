@@ -130,8 +130,11 @@ void RogueSafari_ResetSpawns()
 
 bool8 RogueSafari_IsLabDisplay(struct ObjectEvent *object)
 {
+    // Porymap service edits may renumber local IDs; the four display graphics
+    // slots remain distinct from the player's follower and tutorial encounters.
     return gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
-        && object->localId >= 4 && object->localId <= 7;
+        && object->graphicsId >= OBJ_EVENT_GFX_FOLLOW_MON_0
+        && object->graphicsId <= OBJ_EVENT_GFX_FOLLOW_MON_3;
 }
 
 u8 RogueSafari_GetLabDisplayIndex(u8 slot)
@@ -173,10 +176,10 @@ void RogueSafari_SetupLabDisplays(void)
 
 void RogueSafari_PositionTutorialBirch(void)
 {
-    // Gather at a known clear dialogue station after the catch. Arbitrary
-    // player-relative coordinates can put Birch inside a habitat wall.
-    SetObjEventTemplateCoords(4, 18, 17);
-    TryMoveObjectEventToMapCoords(4, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, 18, 17);
+    // Gather between the habitats so both enclosures remain in the camera
+    // above the dialogue box. Tutorial warp 9 places the player at (18, 13).
+    SetObjEventTemplateCoords(4, 18, 12);
+    TryMoveObjectEventToMapCoords(4, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, 18, 12);
     VarSet(VAR_TEMP_2, 0);
 }
 

@@ -16,6 +16,18 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Update the opening welcome for the single setup screen and give Birch’s
+  lab/Safari starter dialogue a warmer, more conversational voice, preserving
+  the tutorial instructions and Adventure rules.
+
+- Move the Safari introduction’s post-catch conversation five tiles north,
+  framing the enclosures behind Birch and the player above the dialogue box.
+
+- Move starter selection to the end of the walk to the Adventure portal, hide
+  the unused overworld bag, and label the option Choose a Starter. Cancellation
+  walks back to the console with setup preserved; the destination-ready message
+  remains before departure. Current-party and fixed-team runs skip selection.
+
 - Hide the complete Park entrance and steel frame behind continuous rock when
   its side is disconnected, including off-map seams. Preserve the latest cliff
   and shoreline edits, extend their outer scenery, and remove a clipped half-tree.
@@ -32,6 +44,17 @@ Format follows Keep a Changelog loosely:
   add private corridor scenery and a generator that checks all 16 connection states.
 
 ### Fixed
+
+- Anchor the Main Hall builder above the authored workbench for his tutorial.
+  Update the player approach, demonstration movement, and saved-scene recovery
+  to follow the current station instead of its obsolete northwest coordinates.
+
+- Shorten Birch’s northbound introduction route in the Labs hall to go right
+  and then up into the hallway, removing the downward detour.
+
+- Restore random four-direction wandering across both Safari terrariums’ full
+  4×3 interiors. Recognize enclosure displays by their graphics slots so Porymap
+  object reordering cannot give them wild-spawn or follower collision behavior.
 
 - Move the Safari legendary cave unlock artwork up two rows to match its
   existing entrance warp, preserving the approach tiles below it.

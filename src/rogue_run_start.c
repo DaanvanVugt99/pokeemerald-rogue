@@ -28,7 +28,7 @@ static EWRAM_DATA struct RogueRunStartContext sRunStartContext;
 static const u8 sText_AdventureSettings[] = _("Adventure Settings");
 static const u8 sText_StartingTeam[] = _("Starting Team");
 static const u8 sText_CurrentParty[] = _("Current Party");
-static const u8 sText_StarterBag[] = _("Starter Bag");
+static const u8 sText_StarterBag[] = _("Choose a Starter");
 static const u8 sText_Pokedex[] = _("Pokédex");
 static const u8 sText_Trial[] = _("Trial");
 static const u8 sText_Difficulty[] = _("Ascension");

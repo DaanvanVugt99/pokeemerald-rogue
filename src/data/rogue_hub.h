@@ -390,7 +390,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     //
     [HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER] = 
     {
-        .upgradeName = _("Starter Bag"),
+        .upgradeName = _("Starter Choice"),
         .targetArea = HUB_AREA_ADVENTURE_ENTRANCE,
         .buildCost = 3,
         .descText = gHubUpgradeDesc_AdventureEntrance_RandomStarter,

@@ -53,8 +53,8 @@ script Rogue_Interior_ProfLab_FrameState0
     applymovement(OBJ_EVENT_ID_PLAYER, Common_Movement_FaceUp)
     waitmovement(0)
 
-    msgbox(format("BIRCH: There we are!\pThe way you watched that Pokémon before making your move…\pExcellent fieldwork!\pI can't think of a better Trainer to head into the field for {POKEMON_HUB}."))
-    msgbox(format("Now, {PLAYER}.\pWould you like me to go over what we know about Adventures?"), MSGBOX_YESNO)
+    msgbox(format("BIRCH: Well, that was a bit more excitement than I had planned!\pBut look at you two!\nI had a feeling you'd make a good team."))
+    msgbox(format("Now then, {PLAYER}!\pWould you like me to tell you a little about Adventures?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {
@@ -62,10 +62,10 @@ script Rogue_Interior_ProfLab_FrameState0
     }
     else
     {
-        msgbox(format("Hmhm!\pYour memory really is coming back quickly!"))
+        msgbox(format("Hmhm!\pEager to get going, are you?\nThat's the spirit!"))
     }
 
-    msgbox(format("Before you set out, take these.\pA field researcher should always come prepared!"))
+    msgbox(format("Oh, before I forget!\nYou'll want these for the road."))
     giveitem(ITEM_POKE_BALL, 10)
     giveitem(ITEM_POTION, 5)
 
@@ -73,15 +73,15 @@ script Rogue_Interior_ProfLab_FrameState0
 
     if(var(VAR_RESULT) != ITEM_NONE)
     {
-        msgbox(format("Oh, yes!\pBased on the Pokédex you chose, I thought this might come in handy."), MSGBOX_DEFAULT)
+        msgbox(format("Oh, and take this along, too!\pIt might come in handy on your Adventures."), MSGBOX_DEFAULT)
         call(Rogue_Common_DisplayPopups)
     }
 
-    msgbox(format("And this is the most important tool of all—your very own Pokédex!"))
+    msgbox(format("And there's one more thing...\nYour very own Pokédex!"))
     
     if(flag(FLAG_SYS_POKEDEX_GET))
     {
-        msgbox(format("Oh?\pPokabbie already gave you one!\pMy, my—you are prepared.\nNo need for another, then!"))
+        msgbox(format("Oh? Pokabbie gave you one already?\pHmhm! One step ahead of me!"))
     }
     else
     {
@@ -91,7 +91,7 @@ script Rogue_Interior_ProfLab_FrameState0
     }
     setflag(FLAG_SYS_POKEMON_GET)
 
-    msgbox(format("This model has been upgraded, too.\pIt can show you a Pokémon's stats, moves, evolutions, and more."))
+    msgbox(format("There's quite a lot packed into that little thing!\pHave a look when you get a chance. You can check your Pokémon's stats, moves, and even how they evolve."))
     msgbox(format("That should do it!\pGood luck, {PLAYER}—and come show me what you discover!"))
     closemessage
 
@@ -104,7 +104,7 @@ script Rogue_Interior_ProfLab_FrameState0
 
     setvar(VAR_0x8004, 0)
     special(BufferMonNickname)
-    msgbox(format("Hi {PLAYER}!\pYour {STR_VAR_1} seems to really enjoy walking around outside of it's Poké Ball.\pWould you like {STR_VAR_1} to follow you?"), MSGBOX_YESNO)
+    msgbox(format("Hi {PLAYER}!\pYour {STR_VAR_1} seems to really enjoy walking around outside its Poké Ball.\pWould you like {STR_VAR_1} to follow you?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {
@@ -145,7 +145,7 @@ script Rogue_Interior_ProfLab_TalkBirch
 {
     lock
     faceplayer
-    msgbox(format("BIRCH: Ah, {PLAYER}!\pWould you like me to go over what we know about Adventures?"), MSGBOX_YESNO)
+    msgbox(format("BIRCH: Ah, {PLAYER}!\nGood to see you!\pWould you like to hear about Adventures?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {
@@ -171,7 +171,7 @@ script Rogue_Interior_ProfLab_TalkAssistant
         special(BufferMonNickname)
         if(flag(FLAG_SYS_SHOW_POKE_FOLLOWER))
         {
-            msgbox(format("Hi {PLAYER}!\pWould you like to put {STR_VAR_1} back in it's Poké Ball?"), MSGBOX_YESNO)
+            msgbox(format("Hi {PLAYER}!\pWould you like to put {STR_VAR_1} back in its Poké Ball?"), MSGBOX_YESNO)
             if(var(VAR_RESULT) == YES)
             {
                 clearflag(FLAG_SYS_SHOW_POKE_FOLLOWER)
@@ -193,11 +193,11 @@ script Rogue_Interior_ProfLab_TalkAssistant
 
 script Rogue_Interior_ProfLab_TalkBirch_AdventureExplain
 {
-    msgbox(format("As you may remember, the world beyond {POKEMON_HUB} has changed.\pRoutes now connect in unpredictable patterns, and every Adventure may lead through them in a different order."))
-    msgbox(format("We've also observed Pokémon returning to a lower level when an Adventure begins.\pCuriously, they still remember all their moves."))
-    msgbox(format("Your Bag is stranger still.\pIt seems to record exactly what you carried when you left.\pUse an item during an Adventure, and it returns when you come home.\pFind one out there, and it disappears when you return."))
-    msgbox(format("The Trainers out there haven't changed one bit—they're always eager for a battle.\pKeep your Pokémon well trained!"))
-    msgbox(format("The whole phenomenon is fascinating!\pBring back whatever observations you can.\pWith enough field data, we may work out what's happening."))
+    msgbox(format("You never quite know where an Adventure will take you!\pThe routes beyond {POKEMON_HUB} keep joining up in different ways. You might find a whole new path each time you set out!"))
+    msgbox(format("Here's an odd thing...\pYour Pokémon return to a lower level when you begin an Adventure, but they still remember all their moves!"))
+    msgbox(format("And your Bag seems to have a memory of its own!\pUse an item you brought along, and it'll be back when you come home.\pAnything you pick up out there disappears when you return, though."))
+    msgbox(format("Oh, and keep your Pokémon in good shape!\pThe Trainers out there are always looking for a battle."))
+    msgbox(format("Strange, isn't it?\pThat's why I'm so keen to see what you discover! Come back and tell me all about it."))
 }
 
 script Rogue_Interior_ProfLab_TriggerIntro0
@@ -229,7 +229,7 @@ script Rogue_Interior_ProfLab_TriggerIntro2
 
 script Rogue_Interior_ProfLab_TriggerIntroInternal
 {
-    msgbox(format("BIRCH: Ah, {PLAYER}!\pYou look much more like yourself now!\p{POKEMON_HUB} is finally taking shape, but there's still so much we don't know about the routes beyond it.\pWe need someone to explore them, observe the wild Pokémon, and bring back supplies for the village.\pI think you're just the Trainer for the job!\pFirst, though, you'll need a Pokémon Partner…"))
+    msgbox(format("BIRCH: Ah, {PLAYER}!\nFeeling a bit more like yourself?\p{POKEMON_HUB} is coming along nicely, don't you think?\pBut those routes outside still have me scratching my head. There's something new every time I go out!\pHow about lending us a hand? You could meet all sorts of Pokémon and bring back supplies for the village.\pOf course, you'll need a Pokémon of your own first..."))
 
     playbgm(MUS_NONE, FALSE)
     msgbox(format("PROFFFFFFESSOR!"))
@@ -242,12 +242,12 @@ script Rogue_Interior_ProfLab_TriggerIntroInternal
     applymovement(OBJ_EVENT_RUIN_MANIAC, RuinManiacIntro0)
     waitmovement(0)
 
-    msgbox(format("The habitat glass broke!\nThe Pokémon got out!"))
+    msgbox(format("The glass broke!\nThey're loose in the Safari lab!"))
 
     applymovement(OBJ_EVENT_BIRCH, BirchIntro0)
     waitmovement(0)
 
-    msgbox(format("BIRCH: The containment lab?\pWe need to get those Pokémon to safety.\pCome on, {PLAYER}!\nI could use your help!"))
+    msgbox(format("BIRCH: What?!\nAll three of them?\pOh, dear... We'd better hurry!\n{PLAYER}, come and give me a hand!"))
     closemessage
 
     applymovement(OBJ_EVENT_RUIN_MANIAC, RuinManiacIntro1)

@@ -175,7 +175,7 @@
     },
     {
       "x": 18,
-      "y": 18,
+      "y": 13,
       "elevation": 3,
       "dest_map": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
       "dest_warp_id": "0"

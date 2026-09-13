@@ -30,7 +30,7 @@ static const u8 sAscensionText27[] = _("Each format has its own ladder.");
 static const u8 sAscensionText28[] = _("Choose which Pokemon can appear.");
 static const u8 sAscensionText29[] = _("A: choose trainer regions and order.");
 static const u8 sAscensionText30[] = _("Overworld Pokemon or traditional grass.");
-static const u8 sAscensionText31[] = _("Current party or the starter bag.");
+static const u8 sAscensionText31[] = _("Use your party or choose a starter.");
 static const u8 sAscensionText32[] = _("Read the fixed adventure rules.");
 static const u8 sAscensionText33[] = _("Confirm these adventure settings.");
 static const u8 sAscensionText34[] = _("A");
@@ -40,7 +40,7 @@ static const u8 sAscensionText37[] = _("Standard");
 static const u8 sAscensionText38[] = _("Select Pokédex");
 static const u8 sAscensionText39[] = _("Visible");
 static const u8 sAscensionText40[] = _("Traditional");
-static const u8 sAscensionText41[] = _("Starter bag");
+static const u8 sAscensionText41[] = _("Choose a Starter");
 static const u8 sAscensionText42[] = _("Current party");
 static const u8 sAscensionText43[] = _("ASCENSION ");
 static const u8 sAscensionText44[] = _(" - LOCKED");
@@ -173,7 +173,7 @@ static const u8 sIntroHelp[] = _("Choose Continue when you're ready.");
 static const u8 sPoolReadOnly[] = _("B: back");
 static const u8 sIntroPoolHelp[] = _("Shapes encounters and first partners.");
 static const u8 sPoolUnavailable[] = _("No compatible Pokédexes.");
-static const u8 sLockedTeam[] = _("Starter bag is not available here.");
+static const u8 sLockedTeam[] = _("Starter selection is unavailable here.");
 
 static const struct RogueTrialDefinition *MenuTrial(void)
 {

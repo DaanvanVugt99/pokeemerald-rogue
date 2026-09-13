@@ -121,15 +121,9 @@ script Rogue_Area_AdventureEntrance_MapLoad
         setflag(FLAG_HIDE_POKABBIE)
     }
 
-    hubupgradeunlocked(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER)
-    if(var(VAR_RESULT) == YES)
-    {
-        clearflag(FLAG_HIDE_STARTER_BAG)
-    }
-    else
-    {
-        setflag(FLAG_HIDE_STARTER_BAG)
-    }
+    // Keep the retired bag's object slot hidden so later local IDs stay stable.
+    // Starter eligibility is checked from the upgrade, independently of this flag.
+    setflag(FLAG_HIDE_STARTER_BAG)
 
     hubupgradeunlocked(HUB_UPGRADE_ADVENTURE_ENTRANCE_ADVENTURE_REPLAY)
     if(var(VAR_RESULT) == YES)
@@ -551,7 +545,8 @@ script Rogue_StartAdventureInternal
             setvar(VAR_TRIAL_MENU_CHOICE, YES)
         }
 
-        if(!flag(FLAG_HIDE_STARTER_BAG))
+        hubupgradeunlocked(HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER)
+        if(var(VAR_RESULT) == YES)
         {
             setvar(VAR_ALLOW_STARTER_CHOICE, YES)
         }
@@ -629,40 +624,47 @@ script Rogue_StartAdventureInternal
 
         setvar(VAR_STARTER_SWAP_SPECIES, SPECIES_NONE)
 
+        // Settle the team source and validate the current party at the console.
+        // Fixed-party Trials bypass starter selection entirely.
         special(RogueTrial_PendingHasFixedStartingParty)
         if(var(VAR_RESULT) == NO && var(VAR_ALLOW_STARTER_CHOICE) == YES)
         {
-            if(var(VAR_TRIAL_MENU_CHOICE) == YES)
-            {
-                setvar(VAR_RESULT, YES)
-            }
-            else
+            if(var(VAR_TRIAL_MENU_CHOICE) != YES)
             {
                 msgbox(format("Take a random Partner Pokémon?"), MSGBOX_YESNO)
+                copyvar(VAR_TRIAL_MENU_CHOICE, VAR_RESULT)
+                closemessage
             }
-            closemessage
-            if(var(VAR_RESULT) == YES)
-            {
-                special(ChooseStarter)
-                setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-                waitstate
-                clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
-                if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
-                {
-                    call(Rogue_Adventure_CancelStarterSelection)
-                    return
-                }
-            }
+        }
+        else
+        {
+            setvar(VAR_TRIAL_MENU_CHOICE, NO)
         }
 
         special(RogueTrial_PendingHasFixedStartingParty)
-        if(var(VAR_RESULT) == NO && var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+        if(var(VAR_RESULT) == NO && var(VAR_TRIAL_MENU_CHOICE) == NO)
         {
             special(Rogue_CheckPartyHasDuplicateStartSpecies)
             if(var(VAR_RESULT) == YES)
             {
                 msgbox(format("You can't start an Adventure with duplicate Pokémon species or more than one Legendary or Mythical Pokémon.\pPlease deposit or swap one of them at a PC first."), MSGBOX_DEFAULT)
-                call(Rogue_Adventure_CancelRunStartAfterGate)
+                setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
+                return
+            }
+        }
+
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkIntoPortal)
+        waitmovement(0)
+
+        if(var(VAR_TRIAL_MENU_CHOICE) == YES)
+        {
+            special(ChooseStarter)
+            setflag(FLAG_SCRIPT_HIDE_FOLLOWER)
+            waitstate
+            clearflag(FLAG_SCRIPT_HIDE_FOLLOWER)
+            if(var(VAR_STARTER_SWAP_SPECIES) == SPECIES_NONE)
+            {
+                call(Rogue_Adventure_CancelStarterSelection)
                 return
             }
         }
@@ -688,8 +690,6 @@ script Rogue_StartAdventureInternal
         }
 
         special(RogueTrial_RecordInitialParty)
-        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_WalkIntoPortal)
-        waitmovement(0)
 
         msgbox(format("Destination ready. Good luck, {PLAYER}!"))
         closemessage
@@ -715,19 +715,27 @@ movement Rogue_Adventure_WalkIntoPortal
     walk_up
 }
 
+movement Rogue_Adventure_ReturnFromPortal
+{
+    walk_down
+    walk_right * 2
+    walk_down * 3
+    walk_left * 2
+    face_up
+}
+
 script Rogue_Adventure_CancelStarterSelection
 {
-    // Preparation happens at the console, so there is no gate movement to undo.
-    if(var(VAR_RUN_START_USES_TEAM_CHOICE) == YES)
-    {
-        setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
-    }
+    call(Rogue_Adventure_CancelRunStartAfterGate)
     return
 }
 
 script Rogue_Adventure_CancelRunStartAfterGate
 {
-    // Kept as a shared failure target; departure has not started yet.
+    closemessage
+    special(Rogue_PrepareFollowerForRunStart)
+    applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Adventure_ReturnFromPortal)
+    waitmovement(0)
     setvar(VAR_RUN_START_OUTCOME, RUN_START_OUTCOME_RETRY)
     return
 }

@@ -189,7 +189,11 @@ remain outside this rework.
 - Habitat frames start at (8,9) and (23,9); occupants wander randomly across the
   full 4×3 interiors x9–12/x24–27, y10–12, starting at (10,11)/(26,11).
   Horizontal range 2 includes a solid frame column, which collision excludes;
-  vertical range 1 keeps movement within the three interior rows.
+  vertical range 1 keeps movement within the three interior rows. The map objects
+  use `MOVEMENT_TYPE_WANDER_AROUND`; display detection follows graphics slots
+  0–3, independently of local object numbers changed by service edits. The shared
+  generator checks both movement types and exact walkable 4×3 bounds against
+  the authored map, including collision and elevation.
   Capsules start at (9,5)/(25,5), with occupants at (10,7)/(26,7).
   The tutorial instead places its three existing choices on the public floor,
   with broken front panels at y13 and rear-wall warning indicators.
@@ -198,8 +202,9 @@ remain outside this rework.
   at (18,5), with its upper tile at (18,4), preserving normal warp 6; teleport arrival remains warp 7 at (18,18).
 - Original normal warps 0–7 and tutorial warps 0–5 keep their indices. Normal
   warps 8–10 and tutorial warps 6–8 cover the third exit lanes. Tutorial warp 9
-  gathers the player at (18,18), facing Birch at (18,17), after the successful
-  catch. It does not regenerate the starter choices or repeat the Ball gift.
+  gathers the player at (18,13), facing Birch at (18,12), after the successful
+  catch. This frames both habitats above the dialogue box. It does not regenerate
+  the starter choices or repeat the Ball gift.
 - Architecture is copied into private resources from the finished research
   junction, whose source assemblies are documented in `lab_junction.md`.
   Galactic HQ's complete specimen-machine assembly at (1,1), size 2 × 3,

@@ -8450,8 +8450,18 @@ static bool8 HasStaleLabJunctionSnapshot(const struct MapHeader *header, const s
     return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
 }
 
-static void PrepareMainHallBuilder(struct ObjectEventTemplate *object)
+static const struct ObjectEventTemplate *GetMainHallWorkbench(const struct MapHeader *header)
 {
+    u8 i;
+    for (i = 0; i < header->events->objectEventCount; ++i)
+        if (header->events->objectEvents[i].graphicsId == OBJ_EVENT_GFX_WORK_TABLE)
+            return &header->events->objectEvents[i];
+    return NULL;
+}
+
+static void PrepareMainHallBuilder(const struct MapHeader *header, struct ObjectEventTemplate *object)
+{
+    const struct ObjectEventTemplate *workbench = GetMainHallWorkbench(header);
     u16 intro = VarGet(VAR_ROGUE_INTRO_STATE);
     if (intro < ROGUE_INTRO_STATE_REPORT_TO_PROF)
     {
@@ -8460,12 +8470,14 @@ static void PrepareMainHallBuilder(struct ObjectEventTemplate *object)
         object->elevation = 5;
         object->movementType = MOVEMENT_TYPE_FACE_UP;
     }
-    else
+    else if (workbench != NULL)
     {
-        object->x = intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? 6 : 7;
-        object->y = 12;
-        object->elevation = 3;
-        object->movementType = intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? MOVEMENT_TYPE_FACE_UP : MOVEMENT_TYPE_FACE_LEFT;
+        // Follow the authored workbench instead of the old northwest station.
+        // The builder stands above it, then steps right for the demonstration.
+        object->x = workbench->x + (intro > ROGUE_INTRO_STATE_LEARN_TO_BUILD);
+        object->y = workbench->y - 1;
+        object->elevation = workbench->elevation;
+        object->movementType = intro <= ROGUE_INTRO_STATE_LEARN_TO_BUILD ? MOVEMENT_TYPE_FACE_DOWN : MOVEMENT_TYPE_FACE_LEFT;
     }
 }
 
@@ -8477,12 +8489,13 @@ static bool8 HasStaleMainHallSnapshot(const struct MapHeader *header, const stru
     {
         struct ObjectEventTemplate expected = header->events->objectEvents[i];
         if (expected.localId == 3)
-            PrepareMainHallBuilder(&expected);
+            PrepareMainHallBuilder(header, &expected);
         for (j = 0; j < count; ++j)
             if (objects[j].localId == expected.localId)
                 break;
         if (j == count || objects[j].x != expected.x || objects[j].y != expected.y
-            || objects[j].elevation != expected.elevation || objects[j].graphicsId != expected.graphicsId)
+            || objects[j].elevation != expected.elevation || objects[j].graphicsId != expected.graphicsId
+            || (expected.localId == 3 && objects[j].movementType != expected.movementType))
             return TRUE;
     }
     if (x < 0 || y < 0 || x >= header->mapLayout->width || y >= header->mapLayout->height)
@@ -8502,14 +8515,15 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
         {
             // A continue warp rebuilds both elevations and live objects. Leave
             // progression/gift flags intact; completed tutorials must stay done.
-            bool8 learning = VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD;
+            const struct ObjectEventTemplate *workbench = GetMainHallWorkbench(mapHeader);
+            bool8 learning = VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD && workbench != NULL;
             SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_TOWN_SQUARE), MAP_NUM(ROGUE_AREA_TOWN_SQUARE), WARP_ID_NONE,
-                learning ? 6 : 18, learning ? 13 : 19);
+                learning ? workbench->x : 18, learning ? workbench->y - 2 : 19);
             SetContinueGameWarpStatus();
         }
         for (i = 0; i < *objectEventCount; ++i)
             if (objectEvents[i].localId == 3)
-                PrepareMainHallBuilder(&objectEvents[i]);
+                PrepareMainHallBuilder(mapHeader, &objectEvents[i]);
     }
 
     if (loadingFromSave && !Rogue_IsRunActive())

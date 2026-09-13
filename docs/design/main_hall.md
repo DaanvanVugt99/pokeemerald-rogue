@@ -20,17 +20,20 @@ The east–west crossing occupies y16–18; the teleport arrival is (18,19).
 
 | Service | Position | Notes |
 |---|---|---|
-| Workbench | (6,11) | Northwest, backed by the gallery wall |
-| Builder | (7,12) | Reserved standing space after the tutorial |
+| Workbench | (28,18) | Authored eastern station, approached from above |
+| Builder | (28,17), then (29,17) | Above the workbench; steps right during the tutorial |
 | Bag upgrades | (12,22) | Southwest seating bay |
 | Move tutor / deleter | (28,12) / (30,12) | Northeast advice station; both hidden until unlocked |
 | Ball Guy | (24,22) | Southeast gathering bay |
 
 Before reporting to Birch, the builder stands at (27,5), elevation 5, blocking
 Poké Connect. During preparation for the construction tutorial he stands at
-(6,12), elevation 3. The player approaches from (6,13); side interactions direct
+(28,17), elevation 3, directly above the authored workbench at (28,18).
+The player approaches from (28,16), facing south; other interactions direct
 the player around without granting gifts or advancing the scene. The builder
-steps right, then the player moves north to the workbench. Existing Town Map,
+steps right to (29,17), then the player moves south to use the workbench from above.
+Runtime placement and saved-scene recovery derive these offsets from the workbench
+map object, so later Porymap moves do not restore the old station coordinates. Existing Town Map,
 Building Supplies, construction options and one-time progression logic are kept.
 The persistent template and elevation are prepared together before objects spawn.
 
@@ -96,7 +99,7 @@ are 14. Missing connections become complete walls with black exterior backing.
 
 Old outdoor object snapshots and newly solid player locations recover via the
 existing continue warp. An unfinished construction lesson returns the player to
-the south workbench approach; other states return south of the monument. Flags,
+the north workbench approach; other states return south of the monument. Flags,
 gifts and introduction progress remain untouched. Valid current gallery and
 ground-floor saves remain in place. Hallway saves beyond a moved threshold use
 the shared centered recovery. There is no save format change or save deletion.

@@ -50,9 +50,8 @@ script Rogue_Area_TownSquare_OnMapLoad
         {
             setflag(FLAG_HIDE_BALL_GUY)
 
-            // blocking workbench
-            setobjectxyperm(OBJ_EVENT_BUILDER, 6, 12)
-            setobjectmovementtype(OBJ_EVENT_BUILDER, MOVEMENT_TYPE_FACE_UP)
+            // Runtime places the builder directly above the authored workbench.
+            setobjectmovementtype(OBJ_EVENT_BUILDER, MOVEMENT_TYPE_FACE_DOWN)
         }
     }
 
@@ -150,9 +149,9 @@ script Rogue_Area_TownSquare_TalkBuilder
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
         specialvar(VAR_RESULT, GetPlayerFacingDirection)
-        if(var(VAR_RESULT) != DIR_NORTH)
+        if(var(VAR_RESULT) != DIR_SOUTH)
         {
-            msgbox(format("Come around to the front of the workbench.\pI'll show you how to use it."))
+            msgbox(format("Come around to this side of the workbench.\pI'll show you how to use it."))
             release
             end
         }
@@ -163,7 +162,14 @@ script Rogue_Area_TownSquare_TalkBuilder
         // blocking connect centre or workbench
         msgbox(format("I'm almost finished up here.\nCome back and check later."))
 
-        turnobject(OBJ_EVENT_BUILDER, DIR_NORTH)
+        if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_REPORT_TO_PROF)
+        {
+            turnobject(OBJ_EVENT_BUILDER, DIR_NORTH)
+        }
+        else
+        {
+            turnobject(OBJ_EVENT_BUILDER, DIR_SOUTH)
+        }
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
@@ -192,7 +198,8 @@ script Rogue_Area_TownSquare_TalkBuilder
         applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_TownSquare_WorkbenchPlayer_North)
         waitmovement(0)
 
-        setobjectxyperm(OBJ_EVENT_BUILDER, 7, 12)
+        copyobjectxytoperm(OBJ_EVENT_BUILDER)
+        setobjectmovementtype(OBJ_EVENT_BUILDER, MOVEMENT_TYPE_FACE_LEFT)
 
         special(Rogue_IsMultiplayerClient)
         if(var(VAR_RESULT) == YES)
@@ -216,8 +223,8 @@ script Rogue_Area_TownSquare_TalkBuilder
 movement Rogue_Area_TownSquare_WorkbenchPlayer_North
 {
     delay_16
-    walk_up
-    face_up
+    walk_down
+    face_down
 }
 
 movement Rogue_Area_TownSquare_WorkbenchBuilder_North
