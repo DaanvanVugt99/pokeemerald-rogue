@@ -52,7 +52,7 @@ script Rogue_Area_Labs_StartGame
     applymovement(OBJ_EVENT_ID_PLAYER, PlayerStartGame0)
     waitmovement(0)
 
-    msgbox(format("BIRCH: There you are!\nFeeling a little better?\pTake your time looking around {POKEMON_HUB}. Something might jog your memory!\pI'll be in my lab, through the door on the left. Come see me when you're ready!"))
+    msgbox(format("BIRCH: Here we are—{POKEMON_HUB}!\pTake a look around. I'll be in my lab, through the door on the left. Come and see me when you're ready."))
     closemessage
 
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame1)

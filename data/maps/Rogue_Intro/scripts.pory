@@ -203,7 +203,7 @@ script Rogue_PreIntro
 
     msgbox(format("{COLOR BLUE}Welcome to Emerald Rogue:\nDivergence {STR_VAR_2}\p{STR_VAR_1} {STR_VAR_3}!\pLet's get your Adventure set up!"))
 
-    msgbox(format("{COLOR BLUE}Pick the settings you'd like to start with on the next screen.\pYou can always change them later."))
+    msgbox(format("{COLOR BLUE}Choose your starting settings. You can change these later, except your Pokédex.\pYour Pokédex determines which Pokémon you can encounter and choose as your first partner. You can't change it until you become Champion."))
     setvar(VAR_RESULT, NO)
     while(var(VAR_RESULT) == NO)
     {
@@ -212,7 +212,6 @@ script Rogue_PreIntro
         waitstate
     }
 
-    msgbox(format("{COLOR BLUE}All set!\nHave fun out there!"))
     closemessage
 }
 
@@ -231,7 +230,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     // Fade in screen
     //
     delay(60)
-    msgbox(format("… … …\p… … …!\pHey… … …!\pCan you hear me?\nOh! There you are!"), MSGBOX_AUTOCLOSE)
+    msgbox(format("Hello? Can you hear me?\pOh, thank goodness!"), MSGBOX_AUTOCLOSE)
 
     setobjectxy(OBJ_LOCAL_ID_PROF, COORD_CENTRE_X, COORD_CENTRE_Y)
     
@@ -241,8 +240,8 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
     msgbox(format
     (
-        "Oh, thank goodness!\pYou took quite a tumble out there.\pWhat do you remember?\p… … …\p"
-        "Hmm…\nA little amnesia, perhaps.\pLet's see if we can't jog that memory of yours."
+        "You took quite a tumble out there.\nWhat do you remember?\p"
+        "A little hazy? Take your time.\nYou're safe here."
     ), MSGBOX_AUTOCLOSE)
 
     playbgm(MUS_RG_NEW_GAME_EXIT, FALSE)
@@ -260,16 +259,10 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     call(Rogue_Intro_PlayAnim_ParentChildMon)
 
     msgbox(format(
-        "Pokémon can be found just about everywhere—on land, in the sky, and beneath the waves!\p"
-        "People live alongside them as friends, partners, and sometimes rivals in battle.\p"
-        "I study how Pokémon live in the wild, and how each species adapts to its surroundings.\p"
-
-        "Lately, though, those surroundings have become very strange.\p"
-        "Routes are joining up in ways they never did before, and Pokémon are appearing far from their usual habitats!\p"
-        "For a field researcher, it's fascinating!\nA little dangerous, too.\p"
-        "And the Trainers out there are as eager to battle as ever!\p"
-
-        "Now then…\nLet's see what you remember."
+        "There's a portal here that leads to another realm.\p"
+        "I've been exploring the other side. A route I knew on one visit can lead somewhere else on the next—and the Pokémon aren't where I'd expect them, either!\p"
+        "We've tucked our laboratory underground. It's our hideout, too—a place to study what we've found and rest between trips.\p"
+        "I still haven't worked out why that realm keeps shifting. I'd love your help, but let's find you a Pokémon partner before sending you through."
     ))
 
     waitmovement(OBJ_LOCAL_ID_FOLLOWMON_PARENT)
@@ -289,9 +282,7 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     }
 
     msgbox(format(
-        "Whew!\pYou had me worried for a moment, {PLAYER}!\p"
-        "Looks like your memory is coming back just fine.\p"
-        "Come on—let's get you on your feet."
+        "Come on, {PLAYER}.\nLet's get you on your feet."
     ))
 
     special(Rogue_AssignDefaultRegion)
@@ -311,17 +302,17 @@ script Rogue_Intro_MapScripts_LoadFrame_0
 
 script Rogue_Intro_CustomisePlayer
 {
-    msgbox(format("First things first—do you remember what you look like?"))
+    msgbox(format("Do you remember what you look like?"))
     fadescreen(FADE_TO_BLACK)
     special(Special_ViewPlayerCustomisationMenu)
     waitstate
 
-    msgbox(format("Good, good!\nAnd your name?"))
+    msgbox(format("And your name?"))
     fadescreen(FADE_TO_BLACK)
     special(ChangePlayerNickname)
     waitstate
 
-    msgbox(format("One more thing.\pWe came here with a small group to establish a new village.\pDo you remember what we called it?"))
+    msgbox(format("And our little hideout...\pIt's become quite a home, hasn't it? Do you remember what we called it?"))
     fadescreen(FADE_TO_BLACK)
     special(ChangePokemonHubName)
     waitstate

@@ -17,6 +17,48 @@
 #define POOL_BIT(v) (1ULL << (v))
 #define ALL_POOLS (~0ULL >> (64 - POKEDEX_VARIANT_COUNT))
 
+bool8 RogueTest_ExerciseIntroConfirmation(const struct RogueAdventureConfig *draft, u16 gimmick,
+    bool8 accept, bool8 *defaultBack, bool8 *unchanged, bool8 *duplicateRejected);
+bool8 RogueTest_IntroConfirmationTextFits(void);
+
+TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Continue")
+{
+    struct RogueAdventureConfig before, draft, after;
+    bool8 defaultBack, unchanged, duplicateRejected;
+    u16 initialVariant = VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION);
+    u16 initialItem = VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM);
+    RogueRunStart_Clear();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ResetSettingsToDefaults();
+    Rogue_CopyAdventureConfig(&before);
+    draft = before;
+    draft.pokedexVariant = POKEDEX_VARIANT_NATIONAL_GEN9;
+    draft.overworldMons = !draft.overworldMons;
+    EXPECT(!RogueTest_ExerciseIntroConfirmation(&draft, ITEM_TERA_ORB, FALSE,
+        &defaultBack, &unchanged, &duplicateRejected));
+    EXPECT(defaultBack);
+    EXPECT(unchanged);
+    EXPECT(duplicateRejected);
+    Rogue_CopyAdventureConfig(&after);
+    EXPECT_EQ(memcmp(&before, &after, sizeof(before)), 0);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), initialVariant);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), initialItem);
+    // Returning from confirmation can be followed by a different selection.
+    draft.pokedexVariant = POKEDEX_VARIANT_HOENN_ORAS;
+    EXPECT(RogueTest_ExerciseIntroConfirmation(&draft, ITEM_MEGA_RING, TRUE,
+        &defaultBack, &unchanged, &duplicateRejected));
+    EXPECT(defaultBack);
+    EXPECT(unchanged);
+    EXPECT(duplicateRejected);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_HOENN_ORAS);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_MEGA_RING);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_HOENN_ORAS);
+    Rogue_CopyAdventureConfig(&after);
+    EXPECT_EQ(after.overworldMons, draft.overworldMons);
+    EXPECT_EQ(after.battleFormat, draft.battleFormat);
+    EXPECT_NE(after.trainerRegions, 0);
+}
+
 static u64 CuratedPools(void)
 {
     u64 mask = 0;
@@ -206,6 +248,7 @@ TEST("Pokemon pool: roster names and summaries fit the GBA columns")
     struct RoguePokedexSelection selection;
     u8 v, i, text[160];
     static const u16 gimmicks[] = { ITEM_NONE, ITEM_MEGA_RING, ITEM_Z_POWER_RING, ITEM_DYNAMAX_BAND, ITEM_TERA_ORB };
+    EXPECT(RogueTest_IntroConfirmationTextFits());
     for (v = 0; v < POKEDEX_VARIANT_COUNT; ++v)
     {
         EXPECT_LE(GetStringWidth(FONT_SMALL_NARROW, gPokedexVariants[v].displayName, 0), 134);

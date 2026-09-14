@@ -6,6 +6,12 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Clarify the initial Pokédex commitment with a draft-preserving confirmation; streamline opening dialogue, restore the guided Quest Board walk with manual recovery, and direct first returns to the Main Hall building tutorial.
+- Make onboarding instructions explicit about Pokémon selection, Bag restoration, fainting rules, route previews, quest rewards, and building; replace vague qualifiers with concrete actions and conditions.
+- Establish the opening story around investigating a shifting realm through a portal from an underground laboratory and hideout; retain the appearance-memory prompt.
+- Introduce Unique Pokémon and Treasure rooms before the first Adventure, with repeatable explanations from Birch about unusual moves/Abilities and reading treasure effects before taking an item.
+- Restore character voice throughout onboarding: Birch shares observations and curiosity, the nurse gives welcoming practical guidance, and the builder shows enthusiasm for expanding the base without implying a cancelled purchase succeeded.
+
 - Seat nursery Pokemon directly on their couches, remove the glass backs, and replace outdoor flower/fence decorations with indoor shop pots and furnishings.
 - Clean up nursery glass end frames, wall-post bases, decorative floor shadows, and locked egg-room shading while preserving the L-shaped layout.
 - Give the Pokemon Nursery an L-shaped care gallery with staggered bays and a compact lower service wing; port flowers, shrubs, fences, and complete tea flower boxes from the original Day Care into stable shared tiles and Porymap prefabs.

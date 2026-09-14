@@ -173,22 +173,37 @@ script Rogue_Area_TownSquare_TalkBuilder
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
+        // Give the map first, then check the remaining capacity for supplies.
+        // A retry retains the map without duplicating either gift.
+        msgbox(format("Ah, {PLAYER}! Ready to help this place grow?\pThis Town Map shows our rooms and the empty spaces. I've got a few ideas for those!"))
+        checkitem(ITEM_TOWN_MAP)
+        if(var(VAR_RESULT) == NO) { giveitem(ITEM_TOWN_MAP) }
+        checkitem(ITEM_TOWN_MAP)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("Can't fit the Town Map in your Bag?\pMake some room and come back. I'll keep it here for you."))
+            release
+            end
+        }
+        checkitemspace(ITEM_BUILDING_SUPPLIES, 1)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("Can't squeeze these Building Supplies into your Bag.\pMake some room and come back—we'll get building then."))
+            release
+            end
+        }
         // do workbench tutorial
         clearflag(FLAG_ROGUE_HIDE_WORKBENCHES)
         addvar(VAR_ROGUE_INTRO_STATE, 1)
-        
-        msgbox(format("Ah! {PLAYER}!\nJust the person I was waiting for!\pProfessor Birch told me that you were going on Adventures for {POKEMON_HUB} now.\pWhich means you'll now be in charge of collecting Building Supplies for {POKEMON_HUB} expansion.\pHere, let me show you.\pFirstly, you can have this Town Map.\pYou can use it to look at the current layout of {POKEMON_HUB}."))
-        
-        giveitem(ITEM_TOWN_MAP)
         waitse
 
         special(Special_ViewWorldMap)
         waitstate
         
-        msgbox(format("That's the current layout of {POKEMON_HUB}.\pYou can build and upgrade areas with Building Supplies you gather from completing Quests.\pHere's some I had left over."))
+        msgbox(format("Bring in Building Supplies from Quests, and we can put up new rooms or improve the ones we've got.\pHere, take these for your first project!"))
         giveitem(ITEM_BUILDING_SUPPLIES)
     
-        msgbox(format("Now if you interact with Workbenches like this one here, you'll be able to spend the Building Supplies on improving {POKEMON_HUB}.\pGive it a try!"))
+        msgbox(format("This workbench is where you choose what to build. Go on, have a look.\pNo need to buy anything yet. You can leave and come back when you've decided."))
 
         waitse
         closemessage
@@ -209,6 +224,7 @@ script Rogue_Area_TownSquare_TalkBuilder
         else
         {
             call(Rogue_Area_WorkbenchOptions)
+            msgbox(format("I'll be here when you need a hand!\pReady to head out again? The Adventure Console's over in the Adventure Gate."))
         }
     }
     else

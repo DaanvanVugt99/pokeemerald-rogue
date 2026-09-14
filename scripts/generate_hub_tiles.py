@@ -446,6 +446,8 @@ def main():
     from check_hub_corridors import check_corridors
     check_corridors(cat)
     check_safari_enclosures()
+    from check_onboarding import main as check_onboarding
+    check_onboarding()
     previews(cat)
     print(f'Shared hub: {len(cat.tiles)}/1024 tiles; {len(cat.metas)}/1024 metatiles; 13/13 palettes. Source art verified pixel-for-pixel; capsule shadow replacements verified.')
 

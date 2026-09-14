@@ -1828,16 +1828,22 @@ script Rogue_InteractWithQuestBoard
 {
     lockall
 
-    if(var(VAR_ROGUE_INTRO_STATE) <= ROGUE_INTRO_STATE_COLLECT_QUEST_LOG)
+    if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_COLLECT_QUEST_LOG)
     {
-        msgbox(format("It's a board filled with all sort of requests!"))
+        msgbox(format("The Quest Board lists Quests and their rewards.\pGet a partner from Birch, then ask the nurse for your Quest Book."))
     }
     else
     {
         specialvar(VAR_RESULT, GetPlayerFacingDirection)
         if(var(VAR_RESULT) == DIR_NORTH)
         {
-            call(Rogue_InteractWithQuestBoardInternal)
+            if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_COLLECT_QUEST_LOG)
+            {
+                checkitem(ITEM_QUEST_LOG)
+                if(var(VAR_RESULT) == YES) { call(Rogue_CompleteInitialQuestBoard) }
+                else { msgbox(format("Speak to the nurse first. She has your Quest Book.")) }
+            }
+            else { call(Rogue_InteractWithQuestBoardInternal) }
         }
         else
         {
@@ -1916,6 +1922,15 @@ script Rogue_InteractWithQuestBoardInternal
         }
         waitstate
     }
+}
+
+script Rogue_CompleteInitialQuestBoard
+{
+    if(var(VAR_ROGUE_INTRO_STATE) != ROGUE_INTRO_STATE_COLLECT_QUEST_LOG) { return }
+    special(Rogue_ShowNewQuests)
+    waitstate
+    addvar(VAR_ROGUE_INTRO_STATE, 1)
+    msgbox(format("Your first requests are in the Quest Book.\pUse the Adventure Console beside the nurse when you're ready to leave."))
 }
 
 script Rogue_InteractWithPC

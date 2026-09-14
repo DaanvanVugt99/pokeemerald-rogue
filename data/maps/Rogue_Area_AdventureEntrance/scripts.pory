@@ -256,12 +256,24 @@ movement FaceRight
 
 script Rogue_Area_AdventureEntrance_SpeakNurse
 {
-    lock
+    lockall
     faceplayer
 
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)
     {
-        msgbox(format("{PLAYER}!\pThere's some strange noises coming from the clearing!\pYou must go help the Professor!"))
+        setvar(VAR_0x8004, HUB_AREA_SAFARI_ZONE)
+        special(Rogue_CheckHubConnectionDir)
+        switch(var(VAR_RESULT))
+        {
+            case HUB_AREA_CONN_EAST:
+                msgbox(format("Birch needs help in the Safari Lab!\pTake the passage on the right."))
+            case HUB_AREA_CONN_WEST:
+                msgbox(format("Birch needs help in the Safari Lab!\pTake the passage on the left."))
+            case HUB_AREA_CONN_SOUTH:
+                msgbox(format("Birch needs help in the Safari Lab!\pTake the passage at the bottom of this room."))
+            default:
+                msgbox(format("Birch needs help in the Safari Lab!\pFollow the signs for the Safari Lab."))
+        }
     }
     elif (var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_COLLECT_QUEST_LOG)
     {
@@ -269,26 +281,23 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
     }
     elif (var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_COLLECT_QUEST_LOG)
     {
-        msgbox(format("Hi {PLAYER}!\pIt looks like you're almost ready to set off on an Adventure!\pBefore you set off, please take this."))
-
-        giveitem(ITEM_QUEST_LOG)
-        msgbox(format("You can use that Quest Book to track Quests and Trials to complete during Adventures.\pIf you would please check the Quest Board beside me, there should be some initial Quests to get you started!"))
-
-        closemessage
-        playbgm(MUS_RG_FOLLOW_ME, FALSE)
-
-
-        msgbox(format("The board has some Quests posted on it!"))
-        fadedefaultbgm()
-
-        special(Rogue_ShowNewQuests)
-        waitstate
-
-        addvar(VAR_ROGUE_INTRO_STATE, 1)
+        checkitem(ITEM_QUEST_LOG)
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("There you are, {PLAYER}.\pI've got a Quest Book for you. You'll want this before you set off."))
+            giveitem(ITEM_QUEST_LOG)
+        }
+        checkitem(ITEM_QUEST_LOG)
+        if(var(VAR_RESULT) == YES)
+        {
+            msgbox(format("Your Quest Book keeps your Quests and progress together, so you won't lose track.\pYour first Quests are on the board to the left. Go and have a look."))
+            closemessage
+            call(Rogue_Area_AdventureEntrance_GuideToBoard)
+        }
     }
     elif(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
-        msgbox(format("Hi {PLAYER}!\pThe builder was looking for you.\pI believe he said he would wait in the Main Hall for you."))
+        msgbox(format("The builder's been asking after you.\pHe's waiting in the Main Hall. Go and see him before your next Adventure."))
     }
     else
     {
@@ -315,7 +324,59 @@ script Rogue_Area_AdventureEntrance_SpeakNurse
         msgbox(format("Use the Adventure Console in front of the gateway when you are ready.\pIt can prepare an Adventure and send you through the portal."))
     }
 
-    release
+    releaseall
+}
+
+// Only the east and south sides of the nurse are accessible in this map.
+// Keep a manual handoff for old saves or an unexpected player position.
+script Rogue_Area_AdventureEntrance_GuideToBoard
+{
+    getplayerxy(VAR_0x8008, VAR_0x8009)
+    if(var(VAR_0x8008) == 11 && var(VAR_0x8009) == 6)
+    {
+        call(Rogue_Area_AdventureEntrance_PrepareBoardWalk)
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_AdventureEntrance_BoardFromEast)
+    }
+    elif(var(VAR_0x8008) == 10 && var(VAR_0x8009) == 7)
+    {
+        call(Rogue_Area_AdventureEntrance_PrepareBoardWalk)
+        applymovement(OBJ_EVENT_ID_PLAYER, Rogue_Area_AdventureEntrance_BoardFromSouth)
+    }
+    else
+    {
+        msgbox(format("Read the Quest Board from the front, just below it.\pThen use the Adventure Console beside me to set off."))
+        return
+    }
+    waitmovement(0)
+    if(var(VAR_0x800B) == 0)
+    {
+        call(Rogue_ScriptShowFollower)
+    }
+    fadedefaultbgm()
+    call(Rogue_CompleteInitialQuestBoard)
+}
+
+script Rogue_Area_AdventureEntrance_PrepareBoardWalk
+{
+    setvar(VAR_0x800B, 0)
+    if(flag(FLAG_SCRIPT_HIDE_FOLLOWER)) { setvar(VAR_0x800B, 1) }
+    call(Rogue_ScriptHideFollower)
+    playbgm(MUS_RG_FOLLOW_ME, FALSE)
+}
+
+movement Rogue_Area_AdventureEntrance_BoardFromEast
+{
+    walk_down
+    walk_left * 7
+    walk_up * 2
+    face_up
+}
+
+movement Rogue_Area_AdventureEntrance_BoardFromSouth
+{
+    walk_left * 6
+    walk_up * 2
+    face_up
 }
 
 script Rogue_Area_AdventureEntrance_IntroduceAscension
@@ -686,6 +747,7 @@ script Rogue_StartAdventureInternal
 
         if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_GO_ON_ADVENTURE)
         {
+            msgbox(format("On the Adventure map, interact with a route to see its type and difficulty.\pThen choose whether to enter it."))
             addvar(VAR_ROGUE_INTRO_STATE, 1)
         }
 
@@ -840,7 +902,7 @@ script Rogue_ReturnAdventureInternal
     }
     else
     {
-        msgbox(format("Looks like there aren't any rewards for this Adventure."))
+        msgbox(format("No Adventure rewards this time.\pStill, it's good to have you back."))
     }
 
     clearflag(FLAG_ROGUE_LEFT_ON_RUN)
@@ -881,7 +943,15 @@ script Rogue_ReturnAdventureInternal
         }
     }
 
-    msgbox(format("Use the Adventure Console when you're ready for your next Adventure."), MSGBOX_DEFAULT)
+    if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
+    {
+        msgbox(format("Your hub team and Bag are back as you left them, with any rewards added.\pDon't forget the Quest Board—you can collect rewards there for Quests you've finished."))
+        msgbox(format("The builder's waiting for you in the Main Hall. Go and see him next.\pHe's saved you some Building Supplies and wants to show you how to build new rooms."))
+    }
+    else
+    {
+        msgbox(format("Use the Adventure Console when you're ready for your next Adventure."), MSGBOX_DEFAULT)
+    }
 
     releaseall
 }

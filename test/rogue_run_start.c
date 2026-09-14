@@ -712,6 +712,7 @@ TEST("Adventure setup: reveal choices as their unlocks become available")
     EXPECT(SetupHasOption(COMPOUND_STRING("Pokédex"), FALSE));
     EXPECT(!RogueTest_AdventurePokedexCanOpen());
     FlagSet(FLAG_ROGUE_MET_POKABBIE);
+    EXPECT(RogueTest_AdventurePokedexCanOpen());
     EXPECT(SetupHasOption(COMPOUND_STRING("Trainers"), FALSE));
     EXPECT(SetupHasOption(COMPOUND_STRING("Pokédex"), FALSE));
     EXPECT(!SetupHasOption(COMPOUND_STRING("Ascension"), FALSE));

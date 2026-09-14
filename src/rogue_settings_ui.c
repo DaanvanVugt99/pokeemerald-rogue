@@ -58,7 +58,7 @@ static const u8 sAscensionText55[] = _("A/Left/Right: change  B: back");
 static const u8 sAscensionText56[] = _("Select at least one trainer region.");
 static const u8 sAscensionText57[] = _("Check starting team and requirements.");
 static const u8 sAscensionText58[] = _("Clear the preceding level to unlock.");
-static const u8 sAscensionText59[] = _("Clear an adventure to edit this.");
+static const u8 sAscensionText59[] = _("Become Champion to change Pokédex.");
 static const u8 sNone[] = _("None");
 static const u8 sChooseTrial[] = _("Trial");
 static const u8 sChooseTrialHelp[] = _("Choose a Trial, or None for a normal run.");
@@ -93,7 +93,7 @@ static const u8 sChooseTrialHelp[] = _("Choose a Trial, or None for a normal run
 #include "constants/rogue_hub.h"
 
 // Shared by the entrance, C-Gear and Config Lab. Only an entrance context can start.
-enum { PAGE_SETUP, PAGE_ASCENSION, PAGE_TRAINERS, PAGE_POOL };
+enum { PAGE_SETUP, PAGE_ASCENSION, PAGE_TRAINERS, PAGE_POOL, PAGE_INTRO_CONFIRM };
 enum { MENU_ADVENTURE, MENU_INTRO, MENU_CURATED_POOL, MENU_TRIAL_POOL };
 enum { ROW_ASCENSION, ROW_MODE, ROW_FORMAT, ROW_DEX, ROW_TRAINERS, ROW_ENCOUNTERS,
        ROW_TEAM, ROW_RULES, ROW_DONE, ROW_TRIAL, ROW_COUNT };
@@ -118,6 +118,9 @@ struct AdventureMenu
     bool8 readOnly;
     bool8 entrance;
     bool8 closing;
+    bool8 introConfirmed;
+    bool8 introCommitted;
+    u8 confirmChoice;
     const u8 *message;
 };
 static EWRAM_DATA struct AdventureMenu *sMenu;
@@ -171,7 +174,13 @@ static const u8 sPoolStart[] = _("Start: ");
 static const u8 sContinue[] = _("Continue");
 static const u8 sIntroHelp[] = _("Choose Continue when you're ready.");
 static const u8 sPoolReadOnly[] = _("B: back");
-static const u8 sIntroPoolHelp[] = _("Shapes encounters and first partners.");
+static const u8 sIntroPoolHelp[] = _("Can't change until you become Champion.");
+static const u8 sPoolContextLocked[] = _("Change this in your own hub.");
+static const u8 sIntroConfirmTitle[] = _("YOUR STARTING POKÉDEX");
+static const u8 sIntroConfirmQuestion[] = _("Begin with this Pokédex?");
+static const u8 sIntroConfirmEffect[] = _("Sets wild Pokémon and first partners.");
+static const u8 sIntroConfirmLock[] = _("You can't change it until\nyou become Champion.");
+static const u8 sGoBack[] = _("Go back");
 static const u8 sPoolUnavailable[] = _("No compatible Pokédexes.");
 static const u8 sLockedTeam[] = _("Starter selection is unavailable here.");
 
@@ -279,7 +288,7 @@ static bool8 IsPoolEditingLocked(void)
 
 static const u8 *DescriptionForRow(u8 row)
 {
-    if (row == ROW_DEX && IsPoolEditingLocked()) return sAscensionText59;
+    if (row == ROW_DEX && IsPoolEditingLocked()) return RoguePokedex_IsVariantEditUnlocked() ? sPoolContextLocked : sAscensionText59;
     if (sMenu->intro && row == ROW_DEX) return sIntroPoolHelp;
     if (!RogueAscension_IsRevealed())
     {
@@ -321,7 +330,7 @@ static bool8 BeginPool(void)
 {
     if (IsPoolEditingLocked())
     {
-        sMenu->message = sAscensionText59;
+        sMenu->message = RoguePokedex_IsVariantEditUnlocked() ? sPoolContextLocked : sAscensionText59;
         return FALSE;
     }
     if (!RogueDexSelection_Init(&sMenu->pool, PoolAvailability(), sMenu->config.pokedexVariant,
@@ -474,7 +483,7 @@ static void DrawPool(void)
     }
     RogueDexSelection_Describe(&sMenu->pool, text);
     Print(0, 114, text, FALSE);
-    Print(0, 132, sMenu->message != NULL ? sMenu->message : sMenu->readOnly ? sPoolReadOnly : sAscensionText55, FALSE);
+    Print(0, 132, sMenu->message != NULL ? sMenu->message : sMenu->intro ? sIntroPoolHelp : sMenu->readOnly ? sPoolReadOnly : sAscensionText55, FALSE);
 }
 
 static u8 BaseRulePageCount(void)
@@ -490,7 +499,18 @@ static void Draw(void)
     struct RogueAdventureConfig preview = sMenu->config;
     preview.ascension = sMenu->candidate;
     FillWindowPixelBuffer(0, PIXEL_FILL(0));
-    if (sMenu->page == PAGE_POOL)
+    if (sMenu->page == PAGE_INTRO_CONFIRM)
+    {
+        Print(0, 0, sIntroConfirmTitle, TRUE);
+        Print(0, 20, gPokedexVariants[sMenu->config.pokedexVariant].displayName, TRUE);
+        Print(0, 38, sIntroConfirmQuestion, FALSE);
+        Print(0, 54, sIntroConfirmEffect, FALSE);
+        Print(0, 72, sIntroConfirmLock, FALSE);
+        Print(0, 110, sContinue, sMenu->confirmChoice == 0);
+        Print(112, 110, sGoBack, sMenu->confirmChoice == 1);
+        Print(0, 132, sMenu->message != NULL ? sMenu->message : sAscensionText55, FALSE);
+    }
+    else if (sMenu->page == PAGE_POOL)
         DrawPool();
     else if (sMenu->page == PAGE_ASCENSION)
     {
@@ -561,17 +581,41 @@ static void CloseMenu(u16 result)
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
 }
 
+static bool8 RequestIntroConfirmation(void)
+{
+    if (!sMenu->intro || sMenu->introConfirmed)
+        return FALSE;
+    sMenu->page = PAGE_INTRO_CONFIRM;
+    sMenu->confirmChoice = 1;
+    sMenu->message = NULL;
+    return TRUE;
+}
+
+static bool8 CommitIntroSelection(void)
+{
+    if (!sMenu->introConfirmed || sMenu->introCommitted
+        || !RoguePokedex_IsCuratedVariant(sMenu->config.pokedexVariant))
+        return FALSE;
+    // Validate and store the initial choice before applying the remaining draft.
+    gSpecialVar_0x8006 = sMenu->config.pokedexVariant;
+    gSpecialVar_0x8005 = sMenu->startingGimmick;
+    RoguePokedex_StoreInitialSelection();
+    if (!gSpecialVar_Result)
+        return FALSE;
+    Rogue_ApplyAdventureConfig(&sMenu->config);
+    // Keep the existing initial trainer-pool selection semantics.
+    RoguePokedex_ApplyTrainerPoolForVariant(sMenu->config.pokedexVariant);
+    sMenu->introCommitted = TRUE;
+    return TRUE;
+}
+
 static void ExitMenu(u8 taskId, bool8 accept, bool8 start)
 {
+    if (sMenu->closing) return;
     if (sMenu->intro && accept)
     {
-        if (!RoguePokedex_IsCuratedVariant(sMenu->config.pokedexVariant))
-        { sMenu->message = sPoolUnavailable; Draw(); return; }
-        Rogue_ApplyAdventureConfig(&sMenu->config);
-        gSpecialVar_0x8006 = sMenu->config.pokedexVariant;
-        gSpecialVar_0x8005 = sMenu->startingGimmick;
-        RoguePokedex_StoreInitialSelection();
-        if (!gSpecialVar_Result) { sMenu->message = sPoolUnavailable; Draw(); return; }
+        if (RequestIntroConfirmation()) { Draw(); return; }
+        if (!CommitIntroSelection()) { sMenu->message = sPoolUnavailable; Draw(); return; }
     }
     else if (accept && !sMenu->readOnly && !sMenu->poolOnly)
     {
@@ -612,6 +656,47 @@ static void ReturnToSetup(u8 field)
     while (sMenu->row + 1 < sMenu->rowCount && sMenu->rows[sMenu->row] != field) ++sMenu->row;
     sMenu->message = NULL;
 }
+
+static void ResolveIntroConfirmation(bool8 accept)
+{
+    sMenu->introConfirmed = accept;
+    if (!accept) ReturnToSetup(ROW_DONE);
+}
+
+#if TESTING
+bool8 RogueTest_IntroConfirmationTextFits(void)
+{
+    const u8 *const lines[] = { sIntroConfirmTitle, sIntroConfirmQuestion,
+        sIntroConfirmEffect, sIntroConfirmLock, sIntroPoolHelp, sPoolContextLocked };
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(lines); ++i)
+        if (GetStringWidth(FONT_SMALL_NARROW, lines[i], 0) > 224) return FALSE;
+    return GetStringWidth(FONT_SMALL_NARROW, sContinue, 0) <= 112
+        && GetStringWidth(FONT_SMALL_NARROW, sGoBack, 0) <= 112;
+}
+
+bool8 RogueTest_ExerciseIntroConfirmation(const struct RogueAdventureConfig *draft, u16 gimmick,
+    bool8 accept, bool8 *defaultBack, bool8 *unchanged, bool8 *duplicateRejected)
+{
+    struct AdventureMenu menu = {0};
+    struct AdventureMenu *previous = sMenu;
+    bool8 result;
+    menu.intro = TRUE;
+    menu.config = *draft;
+    menu.startingGimmick = gimmick;
+    sMenu = &menu;
+    RequestIntroConfirmation();
+    *defaultBack = menu.page == PAGE_INTRO_CONFIRM && menu.confirmChoice == 1;
+    ResolveIntroConfirmation(FALSE);
+    *unchanged = memcmp(&menu.config, draft, sizeof(*draft)) == 0 && menu.startingGimmick == gimmick;
+    RequestIntroConfirmation();
+    ResolveIntroConfirmation(accept);
+    result = CommitIntroSelection();
+    *duplicateRejected = !CommitIntroSelection();
+    sMenu = previous;
+    return result;
+}
+#endif
 
 static void HandlePoolInput(u8 taskId, s8 direction)
 {
@@ -660,6 +745,18 @@ static void Task_Input(u8 taskId)
         Free(sMenu); sMenu = NULL;
         DestroyTask(taskId);
         SetMainCallback2(gMain.savedCallback);
+        return;
+    }
+    if (sMenu->page == PAGE_INTRO_CONFIRM)
+    {
+        if (JOY_NEW(B_BUTTON)) ResolveIntroConfirmation(FALSE);
+        else if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN)) sMenu->confirmChoice ^= 1;
+        else if (JOY_NEW(A_BUTTON))
+        {
+            ResolveIntroConfirmation(sMenu->confirmChoice == 0);
+            if (sMenu->introConfirmed) ExitMenu(taskId, TRUE, FALSE);
+        }
+        Draw();
         return;
     }
     if (sMenu->page == PAGE_POOL) { HandlePoolInput(taskId, dir); return; }

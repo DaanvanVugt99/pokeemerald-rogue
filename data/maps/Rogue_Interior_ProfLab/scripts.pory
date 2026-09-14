@@ -53,8 +53,10 @@ script Rogue_Interior_ProfLab_FrameState0
     applymovement(OBJ_EVENT_ID_PLAYER, Common_Movement_FaceUp)
     waitmovement(0)
 
-    msgbox(format("BIRCH: Well, that was a bit more excitement than I had planned!\pBut look at you two!\nI had a feeling you'd make a good team."))
-    msgbox(format("Now then, {PLAYER}!\pWould you like me to tell you a little about Adventures?"), MSGBOX_YESNO)
+    msgbox(format("BIRCH: Well, that wasn't how I planned to find you a partner!\pBut look at you two. I think you'll make a fine team out there."))
+    call(Rogue_Interior_ProfLab_ExplainDiscoveries)
+    msgbox(format("Now, look after that team. Under the base rules, fainted Pokémon leave your party. If they all faint, the Adventure ends.\pWhen you return, you'll have your hub team and Bag back, with any Adventure rewards added.\pYou can read Base rules at the Adventure Console before you set off."))
+    msgbox(format("Shall I explain a little more about what happens to your Pokémon and Bag when you return?"), MSGBOX_YESNO)
 
     if(var(VAR_RESULT) == YES)
     {
@@ -62,7 +64,7 @@ script Rogue_Interior_ProfLab_FrameState0
     }
     else
     {
-        msgbox(format("Hmhm!\pEager to get going, are you?\nThat's the spirit!"))
+        msgbox(format("Another time, then. Come and ask me about Adventures whenever you like."))
     }
 
     msgbox(format("Oh, before I forget!\nYou'll want these for the road."))
@@ -91,8 +93,7 @@ script Rogue_Interior_ProfLab_FrameState0
     }
     setflag(FLAG_SYS_POKEMON_GET)
 
-    msgbox(format("There's quite a lot packed into that little thing!\pHave a look when you get a chance. You can check your Pokémon's stats, moves, and even how they evolve."))
-    msgbox(format("That should do it!\pGood luck, {PLAYER}—and come show me what you discover!"))
+    msgbox(format("There's plenty to read in that Pokédex—stats, moves, even how your Pokémon evolve.\pGo and see the nurse at the Adventure Gate next. She's got a Quest Book for you."))
     closemessage
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
@@ -111,6 +112,8 @@ script Rogue_Interior_ProfLab_FrameState0
         setflag(FLAG_SYS_SHOW_POKE_FOLLOWER)
         special(Rogue_SetupFollowParterMonObjectEvent)
 
+        setvar(VAR_0x8004, 0)
+        special(BufferMonNickname)
         msgbox(format("{STR_VAR_1} looks so happy!"))
     }
     else
@@ -149,6 +152,7 @@ script Rogue_Interior_ProfLab_TalkBirch
 
     if(var(VAR_RESULT) == YES)
     {
+        call(Rogue_Interior_ProfLab_ExplainDiscoveries)
         call(Rogue_Interior_ProfLab_TalkBirch_AdventureExplain)
     }
 
@@ -163,7 +167,7 @@ script Rogue_Interior_ProfLab_TalkAssistant
 
     if(var(VAR_ROGUE_INTRO_STATE) < ROGUE_INTRO_STATE_REPORT_TO_PROF)
     {
-        msgbox(format("Hi {PLAYER}!\pI hope you're doing well!\nI heard you hit your head."))
+        msgbox(format("Oh, you must be {PLAYER}!\pBirch's desk is at the back. He's been hoping you'd stop by."))
     }
     else
     {
@@ -191,13 +195,18 @@ script Rogue_Interior_ProfLab_TalkAssistant
     release
 }
 
+script Rogue_Interior_ProfLab_ExplainDiscoveries
+{
+    msgbox(format("Some Pokémon beyond the portal have moves or Abilities I'd never expect from their species. We call them Unique Pokémon!\pLook for their habitats on the Adventure map. I'd love to see what you find."))
+    msgbox(format("And don't walk past the Treasure rooms! Their items can be a real help in battle.\pOne boosts attacking moves but stops you using status moves. Read the pedestal's description before you take anything."))
+}
+
 script Rogue_Interior_ProfLab_TalkBirch_AdventureExplain
 {
-    msgbox(format("You never quite know where an Adventure will take you!\pThe routes beyond {POKEMON_HUB} keep joining up in different ways. You might find a whole new path each time you set out!"))
-    msgbox(format("Here's an odd thing...\pYour Pokémon return to a lower level when you begin an Adventure, but they still remember all their moves!"))
-    msgbox(format("And your Bag seems to have a memory of its own!\pUse an item you brought along, and it'll be back when you come home.\pAnything you pick up out there disappears when you return, though."))
-    msgbox(format("Oh, and keep your Pokémon in good shape!\pThe Trainers out there are always looking for a battle."))
-    msgbox(format("Strange, isn't it?\pThat's why I'm so keen to see what you discover! Come back and tell me all about it."))
+    setvar(VAR_0x8004, STARTER_MON_LEVEL)
+    buffernumberstring(STR_VAR_1, VAR_0x8004)
+    msgbox(format("Here's an odd thing: on Standard Adventures, your Pokémon start at Lv.{STR_VAR_1}, but remember their moves!\pBack home, they'll have their original levels and moves again, plus any level rewards."))
+    msgbox(format("The Pokémon you catch can join the Safari Lab—just bring them back in your party.\pYour Bag goes back to what was in it before you left. The Adventure rewards are added on top."))
 }
 
 script Rogue_Interior_ProfLab_TriggerIntro0
@@ -229,7 +238,7 @@ script Rogue_Interior_ProfLab_TriggerIntro2
 
 script Rogue_Interior_ProfLab_TriggerIntroInternal
 {
-    msgbox(format("BIRCH: Ah, {PLAYER}!\nFeeling a bit more like yourself?\p{POKEMON_HUB} is coming along nicely, don't you think?\pBut those routes outside still have me scratching my head. There's something new every time I go out!\pHow about lending us a hand? You could meet all sorts of Pokémon and bring back supplies for the village.\pOf course, you'll need a Pokémon of your own first..."))
+    msgbox(format("BIRCH: Ah, {PLAYER}!\pI could use a hand exploring the realm beyond the portal. I come back with more questions every time!\pYou can help with our Quests, too. The Building Supplies you earn will let us add to this laboratory. Now, about that partner..."))
 
     playbgm(MUS_NONE, FALSE)
     msgbox(format("PROFFFFFFESSOR!"))
@@ -242,7 +251,7 @@ script Rogue_Interior_ProfLab_TriggerIntroInternal
     applymovement(OBJ_EVENT_RUIN_MANIAC, RuinManiacIntro0)
     waitmovement(0)
 
-    msgbox(format("The glass broke!\nThey're loose in the Safari lab!"))
+    msgbox(format("The glass broke!\nThe Pokémon are loose in the Safari Lab!"))
 
     applymovement(OBJ_EVENT_BIRCH, BirchIntro0)
     waitmovement(0)
