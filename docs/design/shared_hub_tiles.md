@@ -70,9 +70,9 @@ and [Emerald examples](https://github.com/huderlem/porymap/blob/master/resources
 
 ## Capacity and animation
 
-1021/1024 graphics tile slots and 884/1024 metatile slots are addressed. The
+1021/1024 graphics tile slots and 921/1024 metatile slots are addressed. The
 metatile count includes unused padding up to the secondary-set boundary; there
-are 506 populated catalogue entries. All 13 background palette banks are used.
+are 543 populated catalogue entries. All 13 background palette banks are used.
 
 The portal owns graphics slots 512–547 and palette 12; static tile allocation
 skips those slots. Both research-door animations use palette 11 with their
@@ -152,3 +152,19 @@ Verification checks original source art separately and requires each replacement
 to preserve the capsule interior and foreground while shading exposed floor.
 The capsule-only background graphics are updated in place; their green interior
 pixels must remain unchanged.
+
+Supply Depot counters append two compositions at 0x374-0x375 using existing table
+graphics, Floor backing, covered layering, and MB_COUNTER. No graphics or palettes
+are allocated.
+
+Supply Depot correctness variants at 0x376-0x382 preserve equipment foregrounds
+while composing floor/shadow backings, plus a floor-backed indoor pillar cap.
+They allocate no new graphics and do not modify source tiles or existing IDs.
+
+Original Slateport mart goods and indoor Shop displays use static padding
+graphics 643-678 (previously zero and unreferenced), below the animation window
+at 1008. The addressed graphics buffer remains 1021 slots; high-water usage does
+not mean every lower slot contains artwork. Allocation asserts blank/unreferenced
+inputs and preserves all established metatile IDs, graphics, palettes and animations.
+The 22 merchandise floor/shadow compositions occupy 0x383-0x398. Four manually
+authored market prefabs expose reusable drawer and display assemblies in Porymap.

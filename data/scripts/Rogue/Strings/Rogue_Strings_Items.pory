@@ -1184,7 +1184,7 @@ text gHubAreaDesc_Home
 
 text gHubAreaDesc_Marts
 {
-    format("Shops for TMs, Poké Balls, Held Items etc.")
+    format("Indoor departments for supplies, Balls and TMs.")
 }
 
 text gHubAreaDesc_RideTraining

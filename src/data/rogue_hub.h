@@ -181,7 +181,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
     [HUB_AREA_MARTS] = 
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_MARTS),
-        .areaName = _("Poké Marts"),
+        .areaName = _("Supply Depot"),
         .descText = gHubAreaDesc_Marts,
         .buildCost = 25,
         .requiredUpgrades = { HUB_UPGRADE_NONE },

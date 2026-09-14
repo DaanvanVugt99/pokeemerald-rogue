@@ -50,3 +50,53 @@ script Rogue_Area_Marts_OnMapLoad
         setflag(FLAG_HIDE_HELD_ITEMS)
     }
 }
+
+script SupplyDepot_HeldItems
+{
+    lock
+    faceplayer
+    message("Welcome to the Held Items counter!")
+    waitmessage
+    rogue_dynamicpokemart(ROGUE_SHOP_HELD_ITEMS)
+    msgbox("Come again soon!")
+    release
+}
+
+script SupplyDepot_BattleItems
+{
+    lock
+    faceplayer
+    message("Welcome to the Battle Items counter!")
+    waitmessage
+    rogue_dynamicpokemart(ROGUE_SHOP_BATTLE_ENHANCERS)
+    msgbox("Come again soon!")
+    release
+}
+
+script SupplyDepot_BallsSign
+{
+    lockall
+    msgbox("SUPPLY DEPOT\nPOKé BALLS", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script SupplyDepot_TMsSign
+{
+    lockall
+    msgbox("SUPPLY DEPOT\nTECHNICAL MACHINES", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script SupplyDepot_GeneralSign
+{
+    lockall
+    msgbox("SUPPLY DEPOT\nGENERAL SUPPLIES", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script SupplyDepot_EquipmentSign
+{
+    lockall
+    msgbox("SUPPLY DEPOT\nBATTLE EQUIPMENT", MSGBOX_DEFAULT)
+    releaseall
+}

@@ -1,6 +1,6 @@
 {
   "tiles": 1021,
-  "metatiles": 884,
+  "metatiles": 921,
   "palettes": 13,
   "mapping": {
     "portal_room": {
@@ -793,6 +793,10 @@
     "DoorSignTop": 828,
     "DoorSignBase": 829
   },
+  "supply_depot_merchandise_tile_range": [
+    643,
+    679
+  ],
   "recolored_donors": [
     "Factory",
     "Galactic",

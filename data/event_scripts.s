@@ -938,3 +938,7 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_BerryLabCorridor_Horizontal/scripts.inc"
 	.include "data/maps/Rogue_BerryLabCorridor_North/scripts.inc"
 	.include "data/maps/Rogue_BerryLabCorridor_South/scripts.inc"
+
+	.include "data/maps/Rogue_SupplyDepotCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_SupplyDepotCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_SupplyDepotCorridor_South/scripts.inc"

@@ -76,6 +76,10 @@ or validation workflows change.
   containment bounds, service approaches, and corridor seams across 64 states.
   Normal generation reads the layouts and writes previews under `build/safari_lab`;
   do not rerun the guarded `--init-layout` converter. See `docs/design/safari_lab.md`.
+- Supply Depot layout/border are Porymap-authored. Run
+  `python3 scripts/generate_supply_depot.py --check` for all 2048 connection/upgrade
+  states and previews; normal generation writes only aliases/private facades.
+  Never rerun the guarded `--init-layout` converter. See `docs/design/supply_depot.md`.
 - Park tunnel assets and private facades use
   `python3 scripts/generate_park_tunnels.py --check` (16 connection states).
   Normal generation preserves the authored Park map/border; allocation and

@@ -70,9 +70,63 @@ TEST("Hub hallways: Berry Lab refreshes legacy objects and invalid positions")
     if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }
 
+TEST("Hub hallways: Supply Depot recovers legacy staff without changing upgrades or money")
+{
+    struct MapHeader header = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_MARTS), MAP_NUM(ROGUE_AREA_MARTS));
+    struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
+    struct WarpData oldWarp = gSaveBlock1Ptr->continueGameWarp;
+    s16 oldX = gSaveBlock1Ptr->pos.x, oldY = gSaveBlock1Ptr->pos.y;
+    bool8 oldStatus = UseContinueGameWarp(), oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    bool8 oldUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS);
+    u32 oldMoney = gSaveBlock1Ptr->money;
+    u8 count = header.events->objectEventCount;
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_MARTS_TMS, TRUE);
+    gSaveBlock1Ptr->pos.x = 18;
+    gSaveBlock1Ptr->pos.y = 23;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    objects[0].x = 15;
+    objects[0].y = 11;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_MARTS));
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 18);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 23);
+    EXPECT(RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS));
+    EXPECT_EQ(gSaveBlock1Ptr->money, oldMoney);
+    count = header.events->objectEventCount;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+    gSaveBlock1Ptr->pos.x = 4;
+    gSaveBlock1Ptr->pos.y = 3;
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    gSaveBlock1Ptr->continueGameWarp = oldWarp;
+    gSaveBlock1Ptr->pos.x = oldX;
+    gSaveBlock1Ptr->pos.y = oldY;
+    RogueHub_SetUpgrade(HUB_UPGRADE_MARTS_TMS, oldUpgrade);
+    if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
+    if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+}
+
 TEST("Hub hallways: every lane arrives centered at the same shaded threshold")
 {
     static const struct {u8 mapNum, warp, x, y, behavior;} lanes[] = {
+        {MAP_NUM(ROGUE_AREA_MARTS),0,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),1,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),9,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),2,34,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),3,34,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),10,34,15,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),4,18,29,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),5,18,29,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),11,18,29,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),6,2,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),7,2,15,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),12,2,15,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),0,0,11,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),1,0,11,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),7,0,11,MB_WEST_ARROW_WARP},
@@ -155,7 +209,7 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
         {MAP_NUM(ROGUE_AREA_FARMING_FIELD),8},
-        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),4},
+        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),8},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
     u8 i;

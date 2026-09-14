@@ -884,5 +884,125 @@
         "elevation": 3
       }
     ]
+  },
+  {
+    "name": "Hub / Market stock drawers",
+    "width": 1,
+    "height": 2,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 899,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "metatile_id": 901,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Hub / Market stocked shelf",
+    "width": 2,
+    "height": 1,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 913,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "metatile_id": 915,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Hub / Market medicine display",
+    "width": 2,
+    "height": 1,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 917,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "metatile_id": 919,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Hub / Market supply stock",
+    "width": 2,
+    "height": 3,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 899,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "metatile_id": 899,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "metatile_id": 901,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "metatile_id": 901,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "metatile_id": 903,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "metatile_id": 911,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
   }
 ]

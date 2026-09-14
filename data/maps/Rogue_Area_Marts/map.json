@@ -6,7 +6,7 @@
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
-  "map_type": "MAP_TYPE_TOWN",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,33 +14,33 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 6,
-      "direction": "down"
-    },
-    {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 10,
+      "map": "MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_HORIZONTAL",
+      "offset": 12,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 10,
+      "map": "MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_HORIZONTAL",
+      "offset": 12,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 6,
+      "map": "MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_NORTH",
+      "offset": 15,
       "direction": "up"
+    },
+    {
+      "map": "MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_SOUTH",
+      "offset": 15,
+      "direction": "down"
     }
   ],
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
-      "x": 15,
-      "y": 11,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 10,
+      "y": 22,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -50,10 +50,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
-      "x": 6,
-      "y": 10,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 10,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -63,10 +63,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
-      "x": 6,
-      "y": 5,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 26,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -76,36 +76,36 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MYSTERY_GIFT_MAN",
-      "x": 14,
-      "y": 4,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "x": 29,
+      "y": 22,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Shop_HeldItems",
+      "script": "SupplyDepot_HeldItems",
       "flag": "FLAG_TEMP_4"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MYSTERY_GIFT_MAN",
-      "x": 14,
-      "y": 3,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "x": 24,
+      "y": 22,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Rogue_Shop_BattleEnhancers",
+      "script": "SupplyDepot_BattleItems",
       "flag": "FLAG_TEMP_3"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 18,
-      "y": 11,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 14,
+      "y": 25,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -114,11 +114,11 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TRUCK",
-      "x": 16,
-      "y": 4,
+      "graphics_id": "OBJ_EVENT_GFX_ROUTE_PROP_SUPPLY_CRATE",
+      "x": 22,
+      "y": 25,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -129,64 +129,92 @@
   ],
   "warp_events": [
     {
-      "x": 9,
-      "y": 0,
+      "x": 18,
+      "y": 1,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_MARTS",
       "dest_warp_id": "0"
     },
     {
-      "x": 10,
-      "y": 0,
+      "x": 19,
+      "y": 1,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_MARTS",
       "dest_warp_id": "0"
     },
     {
-      "x": 21,
-      "y": 13,
+      "x": 34,
+      "y": 15,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_MARTS",
       "dest_warp_id": "0"
     },
     {
-      "x": 21,
-      "y": 14,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_MARTS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 9,
-      "y": 19,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_MARTS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 10,
-      "y": 19,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_MARTS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 0,
-      "y": 13,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_MARTS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 0,
-      "y": 14,
+      "x": 34,
+      "y": 16,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_MARTS",
       "dest_warp_id": "0"
     },
     {
       "x": 18,
-      "y": 12,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 34,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_MARTS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 14,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_MARTS",
       "dest_warp_id": "0"
@@ -196,6 +224,69 @@
 
   ],
   "bg_events": [
-
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 13,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "SupplyDepot_BallsSign"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 13,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "SupplyDepot_TMsSign"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 18,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "SupplyDepot_GeneralSign"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 18,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "SupplyDepot_EquipmentSign"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 12,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "SupplyDepot_BallsSign"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 12,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "SupplyDepot_TMsSign"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 17,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "SupplyDepot_GeneralSign"
+    },
+    {
+      "type": "sign",
+      "x": 23,
+      "y": 17,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "SupplyDepot_EquipmentSign"
+    }
   ]
 }

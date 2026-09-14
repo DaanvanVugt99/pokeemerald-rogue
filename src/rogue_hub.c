@@ -5,6 +5,7 @@
 #include "constants/main_hall_tiles.h"
 #include "constants/safari_lab_tiles.h"
 #include "constants/berry_lab_tiles.h"
+#include "constants/supply_depot_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1021,7 +1022,7 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
         else if (warpId == 9) warpId = 2;
     }
 
-    if (area == HUB_AREA_BERRY_FIELD && warpId >= 9 && warpId <= 12)
+    if ((area == HUB_AREA_BERRY_FIELD || area == HUB_AREA_MARTS) && warpId >= 9 && warpId <= 12)
         warpId = (warpId - 9) * 2; // Appended third lanes, N/E/S/W.
 
     if (area == HUB_AREA_LABS)
@@ -1073,6 +1074,7 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     case LAYOUT_ROGUE_AREA_TOWN_SQUARE:
     case LAYOUT_ROGUE_AREA_LABS:
     case LAYOUT_ROGUE_AREA_FARMING_FIELD:
+    case LAYOUT_ROGUE_AREA_MARTS:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
         break;
@@ -1723,79 +1725,101 @@ static void RogueHub_UpdateRideTrainingAreaMetatiles()
 
 static void RogueHub_UpdateMartsAreaMetatiles()
 {
-    // Remove connectionss
     if(RogueHub_GetAreaAtConnection(HUB_AREA_MARTS, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(7, 0, 12, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(7, 1, 12, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(8, 2, 11, 11);
+        MetatileFill_Tile(16, 0, 20, 2, METATILE_SupplyDepot_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 3, 19, 3, METATILE_SupplyDepot_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 4, 19, 4, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 5, 19, 5, METATILE_SupplyDepot_FloorShadow);
+        MetatileSet_Tile(16, 2, METATILE_SupplyDepot_PillarCap | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(20, 2, METATILE_SupplyDepot_PillarCap | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(16, 5, METATILE_SupplyDepot_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(20, 5, METATILE_SupplyDepot_Pillar | MAPGRID_COLLISION_MASK);
     }
 
     if(RogueHub_GetAreaAtConnection(HUB_AREA_MARTS, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(20, 11, 21, 16, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(17, 12, 19, 15);
+        MetatileFill_Tile(33, 12, 36, 19, METATILE_SupplyDepot_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(32, 12, 32, 18, METATILE_SupplyDepot_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(32, 12, METATILE_SupplyDepot_PillarJoin | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(32, 18, METATILE_SupplyDepot_PillarJoin | MAPGRID_COLLISION_MASK);
     }
 
     if(RogueHub_GetAreaAtConnection(HUB_AREA_MARTS, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(5, 18, 14, 19, TREE_TYPE_DENSE);
-        MetatileFill_TreeCaps(5, 17, 19);
-
-        MetatileFill_CommonPathRemoval(8, 16, 11, 16);
+        MetatileFill_Tile(17, 27, 19, 27, METATILE_SupplyDepot_Floor);
+        MetatileFill_Tile(16, 28, 20, 30, METATILE_SupplyDepot_Void | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(16, 27, METATILE_SupplyDepot_PillarEnd | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(20, 27, METATILE_SupplyDepot_PillarEnd | MAPGRID_COLLISION_MASK);
     }
 
     if(RogueHub_GetAreaAtConnection(HUB_AREA_MARTS, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(0, 11, 1, 16, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(2, 12, 7, 15);
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_GENERAL_STOCK))
-    {
-        MetatileFill_Tile(13, 8, 13, 10, METATILE_GeneralHub_Grass);
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_POKE_BALLS) && !RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS))
-    {
-        MetatileFill_TreesOverlapping(2, 1, 7, 10, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(1, 11, 6, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(7, 11, 7, TREE_TYPE_SPARSE);
-    }
-    else
-    {
-        if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_POKE_BALLS))
-        {
-            MetatileFill_TreesOverlapping(1, 8, 7, 10, TREE_TYPE_DENSE);
-            MetatileFill_TreeCaps(2, 7, 7);
-            MetatileFill_TreeStumps(1, 11, 6, TREE_TYPE_DENSE);
-            MetatileFill_TreeStumps(7, 11, 7, TREE_TYPE_SPARSE);
-        }
-        else if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_POKE_BALLS_STOCK))
-        {
-            MetatileFill_Tile(2, 7, 3, 10, METATILE_GeneralHub_Grass);
-        }
-
-        if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS))
-        {
-            MetatileFill_TreesOverlapping(2, 1, 7, 4, TREE_TYPE_DENSE);
-            MetatileFill_TreeStumps(2, 5, 6, TREE_TYPE_DENSE);
-            MetatileFill_TreeStumps(7, 5, 7, TREE_TYPE_SPARSE);
-
-        }
-        else if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS_STOCK))
-        {
-            MetatileFill_Tile(2, 2, 3, 5, METATILE_GeneralHub_Grass);
-            MetatileFill_Tile(4, 2, 7, 2, METATILE_GeneralHub_Grass);
-        }
+        MetatileFill_Tile(0, 12, 3, 19, METATILE_SupplyDepot_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 12, 4, 18, METATILE_SupplyDepot_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(4, 12, METATILE_SupplyDepot_PillarJoin | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(4, 18, METATILE_SupplyDepot_PillarJoin | MAPGRID_COLLISION_MASK);
     }
 
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TRAVELER_BATTLE_ENCHANCERS))
     {
-        MetatileFill_Tile(13, 2, 18, 5, METATILE_GeneralHub_Grass);
+        MetatileFill_Tile(25, 25, 26, 26, METATILE_SupplyDepot_Floor);
+        MetatileFill_Tile(23, 21, 24, 21, METATILE_SupplyDepot_Floor);
+        MetatileSet_Tile(23, 23, METATILE_SupplyDepot_CounterLeft | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(24, 23, METATILE_SupplyDepot_CounterRight | MAPGRID_COLLISION_MASK);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TRAVELER_HELD_ITEMS))
+    {
+        MetatileFill_Tile(29, 25, 30, 26, METATILE_SupplyDepot_Floor);
+        MetatileFill_Tile(28, 21, 29, 21, METATILE_SupplyDepot_Floor);
+        MetatileSet_Tile(28, 23, METATILE_SupplyDepot_CounterLeft | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(29, 23, METATILE_SupplyDepot_CounterRight | MAPGRID_COLLISION_MASK);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_GENERAL_STOCK))
+    {
+        MetatileFill_Tile(6, 24, 7, 26, METATILE_SupplyDepot_Floor);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_POKE_BALLS_STOCK))
+    {
+        MetatileFill_Tile(13, 9, 14, 11, METATILE_SupplyDepot_Floor);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS_STOCK))
+    {
+        MetatileFill_Tile(29, 9, 30, 11, METATILE_SupplyDepot_Floor);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_POKE_BALLS))
+    {
+        MetatileFill_Tile(5, 5, 15, 11, METATILE_SupplyDepot_FloorDim40);
+        MetatileFill_Tile(8, 4, 9, 4, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(8, 12, 12, 12, METATILE_SupplyDepot_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(8, 13, 12, 13, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(8, 14, 12, 14, METATILE_SupplyDepot_FloorShadow);
+        MetatileSet_Tile(12, 5, METATILE_SupplyDepot_PlantBaseShadow | MAPGRID_COLLISION_MASK);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TMS))
+    {
+        MetatileFill_Tile(21, 5, 31, 11, METATILE_SupplyDepot_FloorDim40);
+        MetatileFill_Tile(24, 4, 25, 4, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 12, 28, 12, METATILE_SupplyDepot_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 13, 28, 13, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 14, 28, 14, METATILE_SupplyDepot_FloorShadow);
+        MetatileSet_Tile(28, 5, METATILE_SupplyDepot_PlantBaseShadow | MAPGRID_COLLISION_MASK);
+    }
+
+    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TRAVELER_BATTLE_ENCHANCERS) && !RogueHub_HasUpgrade(HUB_UPGRADE_MARTS_TRAVELER_HELD_ITEMS))
+    {
+        MetatileFill_Tile(21, 20, 31, 27, METATILE_SupplyDepot_FloorDim40);
+        MetatileSet_Tile(24, 17, METATILE_SupplyDepot_Floor);
+        MetatileSet_Tile(28, 17, METATILE_SupplyDepot_Floor);
+        MetatileFill_Tile(24, 18, 28, 18, METATILE_SupplyDepot_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 19, 28, 19, METATILE_SupplyDepot_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(21, 20, 31, 20, METATILE_SupplyDepot_FloorShadowDim40);
     }
 }
 

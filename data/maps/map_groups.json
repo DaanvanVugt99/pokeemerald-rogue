@@ -64,7 +64,10 @@
     "Rogue_ParkTunnel_West",
     "Rogue_BerryLabCorridor_Horizontal",
     "Rogue_BerryLabCorridor_North",
-    "Rogue_BerryLabCorridor_South"
+    "Rogue_BerryLabCorridor_South",
+    "Rogue_SupplyDepotCorridor_Horizontal",
+    "Rogue_SupplyDepotCorridor_North",
+    "Rogue_SupplyDepotCorridor_South"
   ],
   "gMapGroup_RogueHubInteriors": [
     "Rogue_Interior_Home",

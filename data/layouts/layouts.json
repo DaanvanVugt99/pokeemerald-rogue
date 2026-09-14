@@ -1664,10 +1664,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_MARTS",
       "name": "Rogue_Area_Marts_Layout",
-      "width": 22,
-      "height": 20,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Slateport",
+      "width": 37,
+      "height": 31,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_Marts/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_Marts/map.bin"
     },
@@ -2360,6 +2360,36 @@
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_BerryLabCorridor_South/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_BerryLabCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_SUPPLY_DEPOT_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_SupplyDepotCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_SupplyDepotCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_SupplyDepotCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_SUPPLY_DEPOT_CORRIDOR_NORTH",
+      "name": "Rogue_SupplyDepotCorridor_North_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_SupplyDepotCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_SupplyDepotCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_SUPPLY_DEPOT_CORRIDOR_SOUTH",
+      "name": "Rogue_SupplyDepotCorridor_South_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_SupplyDepotCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_SupplyDepotCorridor_South/map.bin"
     }
   ]
 }

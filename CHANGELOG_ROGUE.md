@@ -6,6 +6,19 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Make Supply Depot department signs readable from both sides of their partitions, including the central aisle while departments are locked.
+- Darken the full top floor edge inside the locked Supply Depot equipment room.
+
+- Furnish the Supply Depot with original mart stock drawers, crates, baskets,
+  merchandise, and indoor shop displays; add reusable Porymap market prefabs.
+
+- Correct Supply Depot doorway jambs, divider joins, indoor pillar-cap backings,
+  and equipment floor/shadow layers; verify complete assemblies in every state.
+
+- Replace outdoor Poke Marts with the indoor Supply Depot: four departments,
+  staffed counters, upgrade-driven storage displays, three-lane hallways, and
+  recovery for saves made in the old mart. Add authored-map validation/previews.
+
 - `Added` for new features, content, assets, and tooling.
 - `Changed` for behavior, balancing, flow, or data changes.
 - `Fixed` for bug fixes.
