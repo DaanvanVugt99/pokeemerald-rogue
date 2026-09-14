@@ -1611,9 +1611,14 @@ static void CleanupItemRoomPreview(u8 taskId)
 {
     if (gTasks[taskId].tItemRoomPreviewIconSpriteId != SPRITE_NONE)
     {
-        DestroySpriteAndFreeResources(&gSprites[gTasks[taskId].tItemRoomPreviewIconSpriteId]);
+        // AddItemIconSprite frees its temporary SpriteTemplate. Do not read
+        // resource tags through that dangling pointer during cleanup: doing
+        // so can free the separate treasure icon still on the pedestal.
+        DestroySprite(&gSprites[gTasks[taskId].tItemRoomPreviewIconSpriteId]);
         gTasks[taskId].tItemRoomPreviewIconSpriteId = SPRITE_NONE;
     }
+    FreeSpriteTilesByTag(ITEM_ROOM_PREVIEW_ICON_TAG);
+    FreeSpritePaletteByTag(ITEM_ROOM_PREVIEW_ICON_TAG);
 
     if (gTasks[taskId].tItemRoomPreviewPicWindow != WINDOW_NONE)
     {

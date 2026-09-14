@@ -22,6 +22,7 @@
 #include "overworld.h"
 #include "rogue.h"
 #include "rogue_adventurepaths.h"
+#include "rogue_charms.h"
 #include "rogue_controller.h"
 #include "rogue_followmon.h"
 #include "rogue_gifts.h"
@@ -1181,6 +1182,45 @@ TEST("Item Room rewards are excluded from generic item queries")
         }
         Free(queryFlags);
     }
+}
+
+TEST("Item Room full-bag rejection leaves the treasure available for a later claim")
+{
+    struct ItemSlot *originalBag = Alloc(sizeof(gSaveBlock1Ptr->bagPockets));
+    bool8 originalClaimed = FlagGet(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    u16 itemId;
+    u16 removableItem = ITEM_NONE;
+
+    EXPECT(originalBag != NULL);
+    memcpy(originalBag, gSaveBlock1Ptr->bagPockets, sizeof(gSaveBlock1Ptr->bagPockets));
+    ClearBag();
+    FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    for(itemId = ITEM_POTION; itemId < ITEMS_COUNT && GetBagUnreservedFreeSlots() != 0; ++itemId)
+    {
+        if(itemId != ITEM_CURSED_LENS
+            && ItemId_GetPocket(itemId) == ItemId_GetPocket(ITEM_CURSED_LENS)
+            && AddBagItem(itemId, 1))
+            removableItem = itemId;
+    }
+    EXPECT_EQ(GetBagUnreservedFreeSlots(), 0);
+    EXPECT(!RogueAdv_TryClaimItemRoomReward(0, ITEM_CURSED_LENS));
+    EXPECT(!RogueAdv_IsItemRoomRewardClaimed(0));
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_CURSED_LENS), 0);
+
+    EXPECT(RemoveBagItem(removableItem, 1));
+    EXPECT(RogueAdv_TryClaimItemRoomReward(0, ITEM_CURSED_LENS));
+    EXPECT(RogueAdv_IsItemRoomRewardClaimed(0));
+    EXPECT_EQ(CountTotalItemQuantityInBag(ITEM_CURSED_LENS), 1);
+
+    ClearBag();
+    memcpy(gSaveBlock1Ptr->bagPockets, originalBag, sizeof(gSaveBlock1Ptr->bagPockets));
+    UpdateBagItemsPointers();
+    RecalcCharmCurseValues();
+    Free(originalBag);
+    if(originalClaimed)
+        FlagSet(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
+    else
+        FlagClear(FLAG_ROGUE_ITEM_ROOM_CLAIMED_0);
 }
 
 TEST("Claimed Item Room schedule slots cannot grant their reward twice")

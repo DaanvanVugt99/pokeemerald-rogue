@@ -78,6 +78,17 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Audit route-quest dialogue: stop Egg Courier cancellations from falling
+  through to acceptance/error text, restore Trade Case and Ability Patch names
+  after battles, refresh Apricorn dialogue after reward popups, and correct
+  duplicated Apricorn wording and Ball plurals.
+
+- Recolor overworld machine parts magenta with purple shading so they stand
+  apart from normal TM, HM, and TR pickups.
+
+- Keep the Item Room treasure icon on its pedestal after a full-bag rejection
+  or cancelled preview; closing the preview now frees only its own graphics.
+
 - Introduce the Field Repair Bench quest on the technician's first conversation
   even when parts were collected beforehand, acknowledge the find, and preserve
   progress (including going straight to the reward if all three were found).
