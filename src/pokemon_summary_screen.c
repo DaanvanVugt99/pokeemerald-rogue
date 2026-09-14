@@ -151,7 +151,7 @@ static EWRAM_DATA struct PokemonSummaryScreenData
         u8 level; // 0x5
         u8 ribbonCount; // 0x6
         u8 ailment; // 0x7
-        u8 abilityNum; // 0x8
+        u16 ability;
         u8 metLocation; // 0x9
         u8 metLevel; // 0xA
         u8 metGame; // 0xB
@@ -1848,7 +1848,10 @@ static bool8 ExtractMonDataToSummaryStruct(struct Pokemon *mon)
         sum->genderFlag = GetMonData(mon, MON_DATA_GENDER_FLAG);
         sum->exp = GetMonData(mon, MON_DATA_EXP);
         sum->level = GetMonData(mon, MON_DATA_LEVEL);
-        sum->abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM);
+        // Run Ability overrides belong to the original party mon, not this
+        // screen's copy. Box and preview mons keep their native Ability.
+        sum->ability = GetMonAbility(sMonSummaryScreen->isBoxMon
+            ? mon : &sMonSummaryScreen->monList.mons[sMonSummaryScreen->curMonIndex]);
         sum->item = GetMonData(mon, MON_DATA_HELD_ITEM);
         sum->pid = GetMonData(mon, MON_DATA_PERSONALITY);
         sum->sanity = GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG);
@@ -3852,7 +3855,7 @@ static bool32 HasAccessToGmaxForm(u16 species)
 
 static void PrintMonAbilityName(void)
 {
-    u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum, sMonSummaryScreen->summary.OTID);
+    u16 ability = sMonSummaryScreen->summary.ability;
     PrintTextOnWindow(AddWindowFromTemplateList(GetPageInfoTemplate(), PSS_DATA_WINDOW_INFO_ABILITY), gAbilityNames[ability], 0, 1, 0, 1);
 
     if(IsDynamaxEnabled() && HasAccessToGmaxForm(sMonSummaryScreen->summary.species) && (sMonSummaryScreen->summary.gigatamaxFactor || RogueQuest_GetMonMasteryFlag(sMonSummaryScreen->summary.species)))
@@ -3863,7 +3866,7 @@ static void PrintMonAbilityName(void)
 
 static void PrintMonAbilityDescription(void)
 {
-    u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum, sMonSummaryScreen->summary.OTID);
+    u16 ability = sMonSummaryScreen->summary.ability;
 
     if (sMonSummaryScreen->infoAbilityExpanded)
     {

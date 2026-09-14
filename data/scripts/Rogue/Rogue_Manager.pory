@@ -548,28 +548,47 @@ script Rogue_RouteEvent_FieldRepairBench
         end
     }
 
-    if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_NOT_STARTED)
+    if(var(VAR_0x800A) == FALSE)
     {
-        msgbox(format("Ah, just my luck!\pI lost three machine parts nearby.\pBring them back and I can tune one Pokémon's Ability. Could you help?"), MSGBOX_YESNO)
-        if(var(VAR_RESULT) == NO)
+        if(var(VAR_0x8007) == 0)
         {
-            msgbox(format("Fair enough. I'll keep looking before the parts get kicked farther off the road."))
+            msgbox(format("Ah, just my luck!\pI lost three machine parts nearby.\pBring them back and I can tune one Pokémon's Ability. Could you help?"), MSGBOX_YESNO)
+            if(var(VAR_RESULT) == NO)
+            {
+                msgbox(format("Fair enough. I'll keep looking before the parts get kicked farther off the road."))
+                release
+                end
+            }
+        }
+        else
+        {
+            if(var(VAR_0x8007) == 1)
+            {
+                msgbox(format("Oh! That's one of my missing machine parts!"))
+            }
+            else
+            {
+                msgbox(format("Oh! Those are my missing machine parts!"))
+            }
+            msgbox(format("I'm a technician. This machine can tune a Pokémon's Ability, but I lost three of its parts nearby.\pThanks for helping me find them! Once I have all three, I'll tune one of your Pokémon's Abilities for you."))
+        }
+
+        special(RogueRouteEvents_TryAcceptFieldRepairBenchQuest)
+        if(var(VAR_RESULT) != ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        {
+            msgbox(format("Hm... The modulator isn't responding. Give me a moment to check the wiring."))
             release
             end
         }
 
-        special(RogueRouteEvents_TryAcceptFieldRepairBenchQuest)
-        if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
+        special(RogueRouteEvents_GetInteractionData)
+        special(RogueRouteEvents_BufferFieldRepairBenchData)
+        if(var(VAR_0x8007) == 0)
         {
             msgbox(format("Thanks. There should be three parts in all.\pIf you spot anything shiny, bring it here."))
+            release
+            end
         }
-        else
-        {
-            msgbox(format("Hm... The modulator isn't responding. Give me a moment to check the wiring."))
-        }
-
-        release
-        end
     }
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_ACTIVE)
@@ -600,6 +619,7 @@ script Rogue_RouteEvent_FieldRepairBench
     }
 
     copyvar(VAR_0x8006, VAR_0x8004)
+    special(RogueRouteEvents_BufferFieldRepairBenchData)
     bufferpartymonnick(STR_VAR_2, VAR_0x8006)
     msgbox(format("Tune {STR_VAR_2}'s Ability to {STR_VAR_1}?"), MSGBOX_YESNO)
     if(var(VAR_RESULT) == NO)
@@ -612,6 +632,8 @@ script Rogue_RouteEvent_FieldRepairBench
     special(RogueRouteEvents_TryApplyFieldRepairAbility)
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
+        special(RogueRouteEvents_BufferFieldRepairBenchData)
+        bufferpartymonnick(STR_VAR_2, VAR_0x8006)
         msgbox(format("{STR_VAR_2}'s Ability became {STR_VAR_1}!"))
     }
     elif(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_WRONG_MON)
@@ -760,6 +782,7 @@ script Rogue_RouteEvent_BreedersExchange
     if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
     {
         call(Rogue_Common_DisplayPopups)
+        special(RogueRouteEvents_GetInteractionData)
         bufferspeciesname(STR_VAR_1, VAR_0x8004)
         msgbox(format("Thanks! Please take good care of {STR_VAR_1}!"))
     }

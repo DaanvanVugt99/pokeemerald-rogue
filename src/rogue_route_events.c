@@ -2468,6 +2468,8 @@ void RogueRouteEvents_BufferFieldRepairBenchData(void)
 
     gSpecialVar_0x8007 = quest != NULL ? CountFieldRepairParts(quest->progress) : 0;
     gSpecialVar_0x8009 = quest != NULL && CanAnyPartyMonApplyFieldRepairAbility(ability);
+    // payload[1] records the introduction separately from parts collected.
+    gSpecialVar_0x800A = quest != NULL && quest->payload[1] != 0;
 }
 
 void RogueRouteEvents_TryAcceptFieldRepairBenchQuest(void)
@@ -2481,19 +2483,24 @@ void RogueRouteEvents_TryAcceptFieldRepairBenchQuest(void)
         || scene.recipeId != ROGUE_ROUTE_SCENE_RECIPE_FIELD_REPAIR_BENCH
         || scene.source != ROGUE_ROUTE_SCENE_SOURCE_QUEST_GENERATOR
         || scene.lotRole != 0
-        || RogueRouteScenes_GetState(scene.sceneSlot) != ROGUE_ROUTE_EVENT_STATE_NOT_STARTED
-        || RogueAdventureQuests_HasDefinition(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH)
+        || RogueRouteScenes_GetState(scene.sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
         || scene.rewardItem == ABILITY_NONE
         || scene.rewardItem >= ABILITIES_COUNT)
         return;
 
-    params.payload[0] = scene.rewardItem;
-    params.target = ROGUE_FIELD_REPAIR_PART_COUNT;
-    questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH, &params);
+    questId = FindFieldRepairBenchQuest();
+    if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
+    {
+        params.payload[0] = scene.rewardItem;
+        params.target = ROGUE_FIELD_REPAIR_PART_COUNT;
+        questId = RogueAdventureQuests_Create(ROGUE_ADVENTURE_QUEST_DEFINITION_FIELD_REPAIR_BENCH, &params);
+    }
     if(questId == ROGUE_ADVENTURE_QUEST_INVALID_ID)
         return;
 
-    RogueRouteScenes_SetState(scene.sceneSlot, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    gRogueRun.adventureQuests[questId].payload[1] = TRUE;
+    RogueRouteScenes_SetState(scene.sceneSlot, RogueAdventureQuests_IsProgressTargetMet(questId)
+        ? ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING : ROGUE_ROUTE_EVENT_STATE_ACTIVE);
     gSpecialVar_Result = ROGUE_ROUTE_EVENT_RESULT_SUCCESS;
 }
 
@@ -2799,6 +2806,10 @@ void RogueRouteEvents_ValidateBreedersExchangeSelection(void)
     if(!RogueRouteScenes_GetCurrentInteractionRequest(&scene))
         return;
 
+    // ChoosePartyMon replaces 0x8004 with the selected party slot.
+    // Restore the species IDs used by the confirmation and rejection text.
+    gSpecialVar_0x8004 = scene.rewardItem;
+    gSpecialVar_0x8005 = scene.requestedItem;
     gSpecialVar_Result = ValidateBreedersExchangeSelection(&scene, gSpecialVar_0x8006, NULL);
 }
 

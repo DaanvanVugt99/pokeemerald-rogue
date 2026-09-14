@@ -2276,6 +2276,65 @@ static u8 FindFieldRepairCompatiblePartySlot(u16 ability)
     return PARTY_NOTHING_CHOSEN;
 }
 
+TEST("Field Repair Bench introduces the quest without losing parts found before talking")
+{
+    struct RogueAdvPath originalPath;
+    struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
+    struct ObjectEvent originalObjectEvents[OBJECT_EVENTS_COUNT];
+    struct RogueRouteSceneRequest bench;
+    struct RogueRouteSceneRequest part;
+    u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
+    bool8 originalHidden = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
+    u8 originalRoomId;
+    u8 originalSelectedObjectEvent = gSelectedObjectEvent;
+    u8 partsFound;
+    u8 role;
+    u8 questId;
+
+    SetupCurrentEvent(&originalPath, &originalRoomId);
+    memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
+    memcpy(originalObjectEvents, gObjectEvents, sizeof(originalObjectEvents));
+
+    for(partsFound = 0; partsFound <= ROGUE_FIELD_REPAIR_PART_COUNT; ++partsFound)
+    {
+        ClearAdventureQuestSlotsForRouteTest();
+        VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
+        SetDebugFieldRepairBenchScene();
+        EXPECT(RogueRouteScenes_GetPlacementRequest(0, &bench));
+        for(role = 1; role <= partsFound; ++role)
+        {
+            EXPECT(RogueRouteScenes_GetPlacementRequest(role, &part));
+            SelectPlacement(&part);
+            RogueRouteEvents_CollectFieldRepairPart();
+            EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+        }
+
+        SelectPlacement(&bench);
+        RogueRouteEvents_BufferFieldRepairBenchData();
+        EXPECT_EQ(gSpecialVar_0x800A, FALSE);
+        EXPECT_EQ(gSpecialVar_0x8007, partsFound);
+        RogueRouteEvents_TryAcceptFieldRepairBenchQuest();
+        EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+        EXPECT_EQ(RogueAdventureQuests_GetCount(), 1);
+        questId = RogueAdventureQuests_GetQuestIdAt(0);
+        EXPECT_EQ(RogueAdventureQuests_Get(questId)->payload[0], bench.rewardItem);
+        RogueRouteEvents_BufferFieldRepairBenchData();
+        EXPECT_EQ(gSpecialVar_0x800A, TRUE);
+        EXPECT_EQ(gSpecialVar_0x8007, partsFound);
+        EXPECT_EQ(RogueAdventureQuests_IsProgressTargetMet(questId), partsFound == ROGUE_FIELD_REPAIR_PART_COUNT);
+        EXPECT_EQ(RogueRouteScenes_GetState(bench.sceneSlot), partsFound == ROGUE_FIELD_REPAIR_PART_COUNT
+            ? ROGUE_ROUTE_EVENT_STATE_REWARD_PENDING : ROGUE_ROUTE_EVENT_STATE_ACTIVE);
+    }
+
+    RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalHidden);
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
+    gRogueAdvPath = originalPath;
+    gRogueRun.adventureRoomId = originalRoomId;
+    memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
+    memcpy(gObjectEvents, originalObjectEvents, sizeof(originalObjectEvents));
+    gSelectedObjectEvent = originalSelectedObjectEvent;
+}
+
 TEST("Field Repair Bench collects three parts and applies a run-only Ability override")
 {
     struct RogueAdvPath originalPath;
@@ -2359,6 +2418,10 @@ TEST("Field Repair Bench collects three parts and applies a run-only Ability ove
 
     SelectPlacement(&bench);
     gSpecialVar_0x8006 = slot;
+    StringCopy(gStringVar1, gText_ThreeQuestionMarks);
+    RogueRouteEvents_BufferFieldRepairBenchData();
+    EXPECT_EQ(StringCompare(gStringVar1, gAbilityNames[ability]), 0);
+    EXPECT_EQ(gSpecialVar_0x8006, slot);
     RogueRouteEvents_TryApplyFieldRepairAbility();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT_EQ(gPlayerParty[slot].rogueExtraData.abilityOverride, ability);
@@ -2367,6 +2430,12 @@ TEST("Field Repair Bench collects three parts and applies a run-only Ability ove
     EXPECT_EQ(RogueRouteScenes_GetState(bench.sceneSlot), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT_EQ(RogueAdventureQuests_GetCount(), 0);
     EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_FIELD_REPAIR_BENCH));
+
+    // Completion removes the quest; the success text must still name its Ability.
+    StringCopy(gStringVar1, gText_ThreeQuestionMarks);
+    RogueRouteEvents_BufferFieldRepairBenchData();
+    EXPECT_EQ(StringCompare(gStringVar1, gAbilityNames[ability]), 0);
+    EXPECT_EQ(gSpecialVar_0x8006, slot);
 
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
     EXPECT_EQ(GetMonAbility(&gPlayerParty[slot]), nativeAbility);
@@ -2563,8 +2632,14 @@ TEST("Breeder's Exchange trades one local catch for a deterministic trained Poke
     ClearBag();
     heldItem = ITEM_POTION;
     SetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM, &heldItem);
+    // Model the party menu replacing the offer species with a party index.
+    gSpecialVar_0x8004 = 0;
+    gSpecialVar_0x8005 = SPECIES_NONE;
     RogueRouteEvents_ValidateBreedersExchangeSelection();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
+    EXPECT_EQ(gSpecialVar_0x8004, exchange.rewardItem);
+    EXPECT_EQ(gSpecialVar_0x8005, exchange.requestedItem);
+    EXPECT_EQ(gSpecialVar_0x8006, 0);
     RogueRouteEvents_TryCompleteBreedersExchange();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT_EQ(gSpecialVar_0x8004, exchange.rewardItem);

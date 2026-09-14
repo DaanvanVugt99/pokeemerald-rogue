@@ -78,6 +78,15 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Introduce the Field Repair Bench quest on the technician's first conversation
+  even when parts were collected beforehand, acknowledge the find, and preserve
+  progress (including going straight to the reward if all three were found).
+
+- Restore quest dialogue values after party selection and reward popups so the
+  Field Repair Bench names its Ability correctly and the breeder names the
+  actual offered Pokemon. Show run-only Ability overrides in the party summary,
+  including both the Ability name and description.
+
 - Finish Berry Lab wall/corridor joins and growing-bed rims, fix wall-backed
   plant tops on open floors, and add grow lights, propagation trays, and greenery.
   Keep top- and left-wall plant pots on matching dark floor shadows.
