@@ -1174,7 +1174,7 @@ text gHubAreaDesc_TrialFrontier
 
 text gHubAreaDesc_BerryField
 {
-    format("Grow Berries and craft basic Potions.")
+    format("An indoor greenhouse for Berries and basic Potions.")
 }
 
 text gHubAreaDesc_Home
@@ -1224,7 +1224,7 @@ text gHubUpgradeDesc_Home_BerryField1
 
 text gHubUpgradeDesc_Home_BerryField2
 {
-    format("A 2nd small plot to plant berries. (Unlocks Berry Fields area)")
+    format("A 2nd small plot to plant berries. (Unlocks Berry Lab area)")
 }
 
 text gHubUpgradeDesc_Home_GrassField
@@ -1289,7 +1289,7 @@ text gHubUpgradeDesc_BerryField_Brewing
 
 text gHubUpgradeDesc_BerryField_ExtraField
 {
-    format("An additional plot to grown berries in.")
+    format("Activate another five-plant growing bed.")
 }
 
 text gHubUpgradeDesc_BerryField_HigherYeild

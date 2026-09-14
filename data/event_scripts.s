@@ -934,3 +934,7 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Route_Sinnoh_MtCoronet/scripts.inc"
 
 	.include "data/maps/Rogue_Route_Sinnoh_IronIsland/scripts.inc"
+
+	.include "data/maps/Rogue_BerryLabCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_BerryLabCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_BerryLabCorridor_South/scripts.inc"

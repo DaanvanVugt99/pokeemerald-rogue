@@ -81,6 +81,10 @@ or validation workflows change.
   Normal generation preserves the authored Park map/border; allocation and
   original-footprint guards live in `tools/data/park_tunnels.json`. See
   `docs/design/park_tunnels.md`.
+- Berry Lab uses `python3 scripts/generate_berry_lab.py --check` to verify
+  all 256 connection/bed/brewing states and preview the authored room. Normal
+  generation only updates private facades and tile aliases; never rerun the
+  guarded `--init-layout` converter. See `docs/design/berry_lab.md`.
 - Do not hand-edit `src/data/rogue_pokemon_profiles.h`. See
   `docs/pokemon_profile_pipeline.md` and use:
   - `./scripts/generate_pokemon_profiles.sh refresh`

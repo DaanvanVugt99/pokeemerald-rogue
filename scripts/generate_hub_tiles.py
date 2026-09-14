@@ -147,6 +147,29 @@ class Catalogue:
             self.attrs[mid]=(self.attrs[original]&0x0FFF)|(entry['layer_type']<<12)
         from generate_terrarium_tiles import append_terrariums
         append_terrariums(self)
+        from berry_lab_tiles import append_berry_lab
+        append_berry_lab(self)
+        # Capsules are wall fixtures: replace their light floor backing in place.
+        # Preserve IDs, foreground art, attributes, and immutable private sources.
+        shadow=self.mapping['lab_junction'][self.config['rooms']['lab_junction']['names']['FloorShadow']]
+        self.capsule_originals={}
+        self.capsule_original_tiles={}
+        for x in range(3):
+            mid=self.mapping['safari_lab'][self.config['rooms']['safari_lab']['names'][f'Capsule_{x}_3']]
+            assert mid==99+x, 'Capsule IDs moved'
+            self.capsule_originals[mid]=self.metas[mid][:]
+            # The green capsule interior is part of the background, too.
+            # Repaint only its exposed floor, retaining the original silhouette.
+            for j,word in enumerate(self.metas[mid][:4]):
+                idx=word&1023;raw=self.tiles[idx];pal=self.pals[word>>12]
+                sw=self.metas[shadow][j];shade=self.tiles[sw&1023];sp=self.pals[sw>>12]
+                pixels=bytes(raw[(7-y if word&2048 else y)*8+(7-x if word&1024 else x)] for y in range(8) for x in range(8))
+                replacement=bytes(pal.index((106,123,123)) if pal[pixels[k]]==(106,123,123) else pal.index(sp[shade[k]]) for k in range(64))
+                if replacement==pixels:continue
+                assert not word&0xC00, 'Review flipped capsule background'
+                assert all(m==mid for m,meta in enumerate(self.metas) if any(v&1023==idx for v in meta)), 'Capsule graphics are shared'
+                self.capsule_original_tiles[idx]=raw
+                self.tiles[idx]=replacement
         assert len(self.metas)<=1024 and len(self.tiles)<=1024
 
     def meta(self,key,mid):
@@ -180,10 +203,10 @@ class Catalogue:
             index=len(self.tiles);self.tiles.append(new)
         return index|(v&0xC00)|(pi<<12)
 
-    def render(self,mid):
+    def render(self,mid,vals=None,original_tiles=None):
         im=Image.new('RGB',(16,16))
-        for j,v in enumerate(self.metas[mid]):
-            raw=self.tiles[v&1023];pal=self.pals[v>>12]
+        for j,v in enumerate(self.metas[mid] if vals is None else vals):
+            raw=(original_tiles or {}).get(v&1023,self.tiles[v&1023]);pal=self.pals[v>>12]
             for y in range(8):
                 for x in range(8):
                     c=raw[(7-y if v&2048 else y)*8+(7-x if v&1024 else x)]
@@ -225,6 +248,8 @@ class Catalogue:
             header+=f'#define METATILE_HubFurnishings_{name} 0x{mid:03X}\n'
         for name,mid in self.terrariums.items():
             header+=f'#define METATILE_HubFurnishings_Planted{name} 0x{mid:03X}\n'
+        for name,mid in self.berry_lab.items():
+            header+=f'#define METATILE_HubFurnishings_BerryLab_{name} 0x{mid:03X}\n'
         for entry in self.config.get('labels',[]):
             key,old=entry['source'];mid=self.mapping[key][old]
             prefix='HubArchitecture' if mid<512 else 'HubFurnishings'
@@ -346,11 +371,24 @@ def main():
     # unused by the current map but still referenced by runtime upgrade code.
     for key in cat.config['rooms']:
         for old,new in cat.mapping[key].items():
-            assert render(cat.sources[key],old).tobytes()==cat.render(new).tobytes(),(key,old,new)
+            original=cat.capsule_originals.get(new,cat.metas[new])
+            assert render(cat.sources[key],old).tobytes()==cat.render(new,original,cat.capsule_original_tiles).tobytes(),(key,old,new)
             assert cat.attrs[new]==cat.sources[key].attrs[old//512][old%512]
-            for a,b in zip(cat.meta(key,old),cat.metas[new]):
-                before=cat.sources[key].tile(a);after=cat.tiles[b&1023]
+            for a,b in zip(cat.meta(key,old),original):
+                before=cat.sources[key].tile(a);after=cat.capsule_original_tiles.get(b&1023,cat.tiles[b&1023])
                 assert [c==0 for c in before]==[c==0 for c in after],('Transparency changed',key,old)
+    shadow=cat.mapping['lab_junction'][cat.config['rooms']['lab_junction']['names']['FloorShadow']]
+    for mid,original in cat.capsule_originals.items():
+        assert cat.metas[mid]==original, 'Capsule tile composition changed'
+        before=cat.render(mid,original,cat.capsule_original_tiles)
+        after=cat.render(mid)
+        for y in range(16):
+            for x in range(16):
+                j=y//8*2+x//8;word=original[j];k=y%8*8+x%8
+                raw=cat.capsule_original_tiles.get(word&1023,cat.tiles[word&1023])
+                if cat.pals[word>>12][raw[k]]==(106,123,123):
+                    assert before.getpixel((x,y))==after.getpixel((x,y)), 'Capsule interior changed'
+        assert before.tobytes()!=after.tobytes(), 'Capsule floor was not shaded'
     # Static decorations can never reference the VRAM region animated at runtime.
     for mid,vals in enumerate(cat.metas):
         if not cat.portal_start<=mid<cat.portal_start+9:
@@ -375,7 +413,7 @@ def main():
     check_corridors(cat)
     check_safari_enclosures()
     previews(cat)
-    print(f'Shared hub: {len(cat.tiles)}/1024 tiles; {len(cat.metas)}/1024 metatiles; 13/13 palettes. Original art verified pixel-for-pixel.')
+    print(f'Shared hub: {len(cat.tiles)}/1024 tiles; {len(cat.metas)}/1024 metatiles; 13/13 palettes. Source art verified pixel-for-pixel; capsule shadow replacements verified.')
 
 
 if __name__=='__main__':main()

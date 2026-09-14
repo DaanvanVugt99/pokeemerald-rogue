@@ -4,6 +4,7 @@
 #include "constants/lab_junction_tiles.h"
 #include "constants/main_hall_tiles.h"
 #include "constants/safari_lab_tiles.h"
+#include "constants/berry_lab_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1020,6 +1021,9 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
         else if (warpId == 9) warpId = 2;
     }
 
+    if (area == HUB_AREA_BERRY_FIELD && warpId >= 9 && warpId <= 12)
+        warpId = (warpId - 9) * 2; // Appended third lanes, N/E/S/W.
+
     if (area == HUB_AREA_LABS)
     {
         if (warpId == 15) warpId = 6;
@@ -1068,6 +1072,7 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
     case LAYOUT_ROGUE_AREA_TOWN_SQUARE:
     case LAYOUT_ROGUE_AREA_LABS:
+    case LAYOUT_ROGUE_AREA_FARMING_FIELD:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
         break;
@@ -1632,48 +1637,40 @@ static void RogueHub_UpdateHomeInteriorMetatiles()
 
 static void RogueHub_UpdateFarmingAreaMetatiles()
 {
-    // Remove connectionss
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(17, 0, 22, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(17, 1, 22, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(18, 2, 21, 2);
+        MetatileFill_Tile(12, 0, 16, 2, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 3, 16, 3, METATILE_BerryLab_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 4, 16, 4, METATILE_BerryLab_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(12, 5, 16, 5, METATILE_BerryLab_FloorShadow);
     }
-
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(38, 5, 39, 9, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(22, 6, 37, 8);
+        MetatileFill_Tile(25, 8, 28, 12, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(24, 8, 24, 14, METATILE_BerryLab_Pillar | MAPGRID_COLLISION_MASK);
     }
-
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonPathRemoval(18, 9, 21, 9);
-
-        MetatileFill_TreesOverlapping(15, 10, 24, 11, TREE_TYPE_DENSE);
-        MetatileFill_TreeCaps(16, 9, 23);
+        MetatileSet_Tile(12, 21, METATILE_BerryLab_Floor);
+        MetatileSet_Tile(16, 21, METATILE_BerryLab_Floor);
+        MetatileFill_Tile(12, 22, 16, 24, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
     }
-
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(0, 1, 1, 8, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(2, 3, 14, 5);
+        MetatileFill_Tile(0, 8, 3, 12, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 8, 4, 14, METATILE_BerryLab_Pillar | MAPGRID_COLLISION_MASK);
     }
-
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD0))
     {
-        MetatileFill_Tile(29, 3, 36, 5, METATILE_GeneralHub_Grass);
+        MetatileFill_Tile(17, 7, 21, 7, METATILE_BerryLab_InactiveBed);
     }
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1))
     {
-        MetatileFill_Tile(10, 6, 16, 8, METATILE_GeneralHub_Grass);
+        MetatileFill_Tile(17, 15, 21, 15, METATILE_BerryLab_InactiveBed);
     }
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD2))
     {
-        MetatileFill_Tile(2, 6, 8, 8, METATILE_GeneralHub_Grass);
+        MetatileFill_Tile(7, 15, 11, 15, METATILE_BerryLab_InactiveBed);
     }
 }
 

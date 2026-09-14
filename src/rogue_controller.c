@@ -8450,6 +8450,25 @@ static bool8 HasStaleLabJunctionSnapshot(const struct MapHeader *header, const s
     return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
 }
 
+static bool8 HasStaleBerryLabSnapshot(const struct MapHeader *header, const struct ObjectEventTemplate *objects, u8 count)
+{
+    u8 i, j;
+    s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
+    for (i = 0; i < header->events->objectEventCount; ++i)
+    {
+        const struct ObjectEventTemplate *expected = &header->events->objectEvents[i];
+        for (j = 0; j < count; ++j)
+            if (objects[j].localId == expected->localId)
+                break;
+        if (j == count || objects[j].x != expected->x || objects[j].y != expected->y
+            || objects[j].elevation != expected->elevation)
+            return TRUE;
+    }
+    if (x < 0 || y < 0 || x >= header->mapLayout->width || y >= header->mapLayout->height)
+        return TRUE;
+    return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
+}
+
 static const struct ObjectEventTemplate *GetMainHallWorkbench(const struct MapHeader *header)
 {
     u8 i;
@@ -8534,6 +8553,18 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
             SetContinueGameWarp(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE, x, y);
             SetContinueGameWarpStatus();
         }
+    }
+
+    if (loadingFromSave && !Rogue_IsRunActive()
+        && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_FARMING_FIELD
+        && HasStaleBerryLabSnapshot(mapHeader, objectEvents, *objectEventCount))
+    {
+        // Rebuild live objects and elevations through the normal continue warp.
+        // Berry tree state and hub upgrades live separately and remain intact.
+        const struct WarpEvent *arrival = &mapHeader->events->warps[8];
+        SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_FARMING_FIELD), MAP_NUM(ROGUE_AREA_FARMING_FIELD),
+            WARP_ID_NONE, arrival->x, arrival->y);
+        SetContinueGameWarpStatus();
     }
 
     // Old entrance snapshots have no console and cache the outdoor NPC positions.

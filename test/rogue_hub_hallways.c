@@ -5,6 +5,70 @@
 #include "overworld.h"
 #include "rogue_hub.h"
 #include "test/test.h"
+#include "event_data.h"
+#include "load_save.h"
+#include "rogue_controller.h"
+#include "constants/flags.h"
+#include "constants/berry.h"
+
+TEST("Hub hallways: Berry Lab refreshes legacy objects and invalid positions")
+{
+    struct MapHeader header = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_FARMING_FIELD), MAP_NUM(ROGUE_AREA_FARMING_FIELD));
+    struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
+    struct WarpData oldWarp = gSaveBlock1Ptr->continueGameWarp;
+    s16 oldX = gSaveBlock1Ptr->pos.x, oldY = gSaveBlock1Ptr->pos.y;
+    bool8 oldStatus = UseContinueGameWarp(), oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    bool8 oldUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1);
+    struct BerryTree oldTree = gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11];
+    u8 count = header.events->objectEventCount;
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1, TRUE);
+    gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].berry = 1;
+    gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].stage = BERRY_STAGE_BERRIES;
+    gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].berryYield = 7;
+    gSaveBlock1Ptr->pos.x = 14;
+    gSaveBlock1Ptr->pos.y = 18;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    objects[21].x = 11; // Old merchant location, same object count.
+    objects[21].y = 2;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_FARMING_FIELD));
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 14);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 18);
+    EXPECT_EQ(gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].berry, 1);
+    EXPECT_EQ((u8)gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].stage, BERRY_STAGE_BERRIES);
+    EXPECT_EQ(gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11].berryYield, 7);
+    EXPECT(RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1));
+
+    count = header.events->objectEventCount;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    memset(&objects[count], 0, sizeof(*objects));
+    objects[count++].localId = 50; // Followers must not force a relocation.
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+    gSaveBlock1Ptr->pos.x = 37; // Within the old outdoor map, beyond the new room.
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 14);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 18);
+    ClearContinueGameWarpStatus();
+    gSaveBlock1Ptr->pos.x = 7;
+    gSaveBlock1Ptr->pos.y = 6; // New glass back panel.
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+
+    gSaveBlock1Ptr->continueGameWarp = oldWarp;
+    gSaveBlock1Ptr->pos.x = oldX;
+    gSaveBlock1Ptr->pos.y = oldY;
+    gSaveBlock1Ptr->berryTrees[BERRY_TREE_HUB_11] = oldTree;
+    RogueHub_SetUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1, oldUpgrade);
+    if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
+    if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+}
 
 TEST("Hub hallways: every lane arrives centered at the same shaded threshold")
 {
@@ -48,6 +112,18 @@ TEST("Hub hallways: every lane arrives centered at the same shaded threshold")
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),2,18,27,MB_SOUTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),3,18,27,MB_SOUTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),8,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),0,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),1,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),9,14,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),2,26,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),3,26,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),10,26,11,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),4,14,23,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),5,14,23,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),11,14,23,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),6,2,11,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),7,2,11,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),12,2,11,MB_WEST_ARROW_WARP},
     };
     u32 i;
     for (i = 0; i < ARRAY_COUNT(lanes); ++i)
@@ -78,6 +154,7 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
         {MAP_NUM(ROGUE_AREA_LABS),11},{MAP_NUM(ROGUE_AREA_LABS),12},{MAP_NUM(ROGUE_AREA_LABS),13},{MAP_NUM(ROGUE_AREA_LABS),14},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
+        {MAP_NUM(ROGUE_AREA_FARMING_FIELD),8},
         {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),4},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));

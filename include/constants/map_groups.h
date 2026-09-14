@@ -57,6 +57,9 @@
 #define MAP_ROGUE_PARK_TUNNEL_EAST              (24 | (2 << 8))
 #define MAP_ROGUE_PARK_TUNNEL_SOUTH             (25 | (2 << 8))
 #define MAP_ROGUE_PARK_TUNNEL_WEST              (26 | (2 << 8))
+#define MAP_ROGUE_BERRY_LAB_CORRIDOR_HORIZONTAL (27 | (2 << 8))
+#define MAP_ROGUE_BERRY_LAB_CORRIDOR_NORTH      (28 | (2 << 8))
+#define MAP_ROGUE_BERRY_LAB_CORRIDOR_SOUTH      (29 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

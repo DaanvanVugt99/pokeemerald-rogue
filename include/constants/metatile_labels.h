@@ -1485,6 +1485,24 @@
 #define METATILE_HubFurnishings_PlantedBrokenHabitat_3 0x35F
 #define METATILE_HubFurnishings_PlantedBrokenHabitat_4 0x360
 #define METATILE_HubFurnishings_PlantedBrokenHabitat_5 0x361
+#define METATILE_HubFurnishings_BerryLab_Soil 0x362
+#define METATILE_HubFurnishings_BerryLab_GlassBack0 0x363
+#define METATILE_HubFurnishings_BerryLab_GlassBack1 0x364
+#define METATILE_HubFurnishings_BerryLab_GlassBack2 0x365
+#define METATILE_HubFurnishings_BerryLab_GlassBack3 0x366
+#define METATILE_HubFurnishings_BerryLab_GlassBack4 0x367
+#define METATILE_HubFurnishings_BerryLab_GlassBack5 0x368
+#define METATILE_HubFurnishings_BerryLab_PlantTop 0x369
+#define METATILE_HubFurnishings_BerryLab_PlantBase 0x36A
+#define METATILE_HubFurnishings_BerryLab_BedEndLeft 0x36B
+#define METATILE_HubFurnishings_BerryLab_BedEndRight 0x36C
+#define METATILE_HubFurnishings_BerryLab_SoilRim 0x36D
+#define METATILE_HubFurnishings_BerryLab_InactiveBed 0x36E
+#define METATILE_HubFurnishings_BerryLab_GrowLight 0x36F
+#define METATILE_HubFurnishings_BerryLab_SeedTray 0x370
+#define METATILE_HubFurnishings_BerryLab_PropagationBase 0x371
+#define METATILE_HubFurnishings_BerryLab_PlantBaseShadow 0x372
+#define METATILE_HubFurnishings_BerryLab_PlantTopShadow 0x373
 // END GENERATED SHARED HUB LABELS
 
 #endif // GUARD_METATILE_LABELS_H

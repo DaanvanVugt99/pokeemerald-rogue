@@ -26,7 +26,7 @@ static const u8 sText_Desc_Home_BerryField2[] = _(
 );
 
 static const u8 sText_Complete_Home_BerryField2[] = _(
-    "New Farming Field area expansion\n"
+    "New Berry Lab area expansion\n"
     "unlocked!"
 );
 

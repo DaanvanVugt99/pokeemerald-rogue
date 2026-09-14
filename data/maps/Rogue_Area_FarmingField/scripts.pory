@@ -118,7 +118,7 @@ script Rogue_Area_FarmingField_SpeakBerryMerchant
         appenddynamicmultichoice("Buy berries", BERRY_FIELD_MENU_BUY_BERRIES)
         appenddynamicmultichoice("Exit", MULTI_B_PRESSED)
 
-        message(format("Welcome!\nHow can I help with the berry field?"))
+        message(format("Welcome!\nHow can I help in the Berry Lab?"))
         waitmessage
         enddynamicmultichoice(1, 0, 6, TRUE)
 

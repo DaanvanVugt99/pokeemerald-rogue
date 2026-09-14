@@ -24,6 +24,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Rebuild Berry Fields as the indoor Berry Lab, with four glass-backed growing
+  beds, a south service nook, and three-wide underground hallways. Preserve
+  planted berries, upgrades, and services; recover saves from the old layout.
+
 - Update the opening welcome for the single setup screen and give Birch’s
   lab/Safari starter dialogue a warmer, more conversational voice, preserving
   the tutorial instructions and Adventure rules.
@@ -52,6 +56,12 @@ Format follows Keep a Changelog loosely:
   add private corridor scenery and a generator that checks all 16 connection states.
 
 ### Fixed
+
+- Finish Berry Lab wall/corridor joins and growing-bed rims, fix wall-backed
+  plant tops on open floors, and add grow lights, propagation trays, and greenery.
+  Keep top- and left-wall plant pots on matching dark floor shadows.
+  Shade the exposed floor around wall-mounted specimen capsule bases while
+  preserving their glass-interior backdrop.
 
 - Match Safari save recovery against the authored console position so valid
   saves resume where the player stopped, while obsolete layouts still recover.

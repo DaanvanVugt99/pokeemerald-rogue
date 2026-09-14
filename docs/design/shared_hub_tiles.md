@@ -1,6 +1,6 @@
 # Shared underground hub tiles
 
-Adventure Gate, Research Junction, Safari (including its tutorial), Main Hall
+Adventure Gate, Research Junction, Safari (including its tutorial), Main Hall, Berry Lab
 and their corridor facades use **HubArchitecture + HubFurnishings** in Porymap.
 Other districts and donor maps retain their original tilesets.
 
@@ -70,9 +70,9 @@ and [Emerald examples](https://github.com/huderlem/porymap/blob/master/resources
 
 ## Capacity and animation
 
-1012/1024 graphics tile slots and 866/1024 metatile slots are addressed. The
+1021/1024 graphics tile slots and 884/1024 metatile slots are addressed. The
 metatile count includes unused padding up to the secondary-set boundary; there
-are 488 populated catalogue entries. All 13 background palette banks are used.
+are 506 populated catalogue entries. All 13 background palette banks are used.
 
 The portal owns graphics slots 512â€“547 and palette 12; static tile allocation
 skips those slots. Both research-door animations use palette 11 with their
@@ -144,3 +144,11 @@ original catalogue, preserving source graphics and portal-animation slots.
 Focused runtime checks use the existing `Hub hallways:` and `Main Hall:` Rogue
 tests. Interactive Porymap and emulator validation still needs a human check of
 the selector/prefabs, doorway animation and portal animation.
+
+The wall-mounted specimen capsule replaces the light backing of bottom-row
+metatiles 99–101 with FloorShadow in place. IDs, foregrounds, attributes,
+palettes, and private source assets stay unchanged; no graphics are allocated.
+Verification checks original source art separately and requires each replacement
+to preserve the capsule interior and foreground while shading exposed floor.
+The capsule-only background graphics are updated in place; their green interior
+pixels must remain unchanged.

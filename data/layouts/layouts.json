@@ -1564,10 +1564,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_FARMING_FIELD",
       "name": "Rogue_Area_FarmingField_Layout",
-      "width": 40,
-      "height": 12,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Petalburg",
+      "width": 29,
+      "height": 25,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_FarmingField/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_FarmingField/map.bin"
     },
@@ -2330,6 +2330,36 @@
       "secondary_tileset": "gTileset_ParkTunnels",
       "border_filepath": "data/layouts/Rogue_ParkTunnel_West/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_ParkTunnel_West/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_BERRY_LAB_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_BerryLabCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_BerryLabCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_BerryLabCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_BERRY_LAB_CORRIDOR_NORTH",
+      "name": "Rogue_BerryLabCorridor_North_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_BerryLabCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_BerryLabCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_BERRY_LAB_CORRIDOR_SOUTH",
+      "name": "Rogue_BerryLabCorridor_South_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_BerryLabCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_BerryLabCorridor_South/map.bin"
     }
   ]
 }

@@ -126,7 +126,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
     [HUB_AREA_BERRY_FIELD] = 
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_FARMING_FIELD),
-        .areaName = _("Berry Fields"),
+        .areaName = _("Berry Lab"),
         .descText = gHubAreaDesc_BerryField,
         .buildCost = 10,
         .requiredUpgrades = { HUB_UPGRADE_NONE },
@@ -433,7 +433,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     },
     [HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD0] = 
     {
-        .upgradeName = _("Berry Field+"),
+        .upgradeName = _("Growing Bed+"),
         .targetArea = HUB_AREA_BERRY_FIELD,
         .buildCost = 3,
         .descText = gHubUpgradeDesc_BerryField_ExtraField,
@@ -441,7 +441,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     },
     [HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1] = 
     {
-        .upgradeName = _("Berry Field++"),
+        .upgradeName = _("Growing Bed++"),
         .targetArea = HUB_AREA_BERRY_FIELD,
         .buildCost = 5,
         .descText = gHubUpgradeDesc_BerryField_ExtraField,
@@ -449,7 +449,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     },
     [HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD2] = 
     {
-        .upgradeName = _("Berry Field+++"),
+        .upgradeName = _("Growing Bed+++"),
         .targetArea = HUB_AREA_BERRY_FIELD,
         .buildCost = 7,
         .descText = gHubUpgradeDesc_BerryField_ExtraField,

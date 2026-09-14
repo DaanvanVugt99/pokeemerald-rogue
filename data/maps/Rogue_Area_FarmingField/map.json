@@ -6,7 +6,7 @@
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
-  "map_type": "MAP_TYPE_TOWN",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,32 +14,32 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 16,
-      "direction": "down"
-    },
-    {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 0,
+      "map": "MAP_ROGUE_BERRY_LAB_CORRIDOR_HORIZONTAL",
+      "offset": 8,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 4,
+      "map": "MAP_ROGUE_BERRY_LAB_CORRIDOR_HORIZONTAL",
+      "offset": 8,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 16,
+      "map": "MAP_ROGUE_BERRY_LAB_CORRIDOR_NORTH",
+      "offset": 11,
       "direction": "up"
+    },
+    {
+      "map": "MAP_ROGUE_BERRY_LAB_CORRIDOR_SOUTH",
+      "offset": 11,
+      "direction": "down"
     }
   ],
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 16,
-      "y": 2,
-      "elevation": 0,
+      "x": 20,
+      "y": 21,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -50,8 +50,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 11,
-      "y": 7,
+      "x": 17,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -63,8 +63,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 12,
-      "y": 7,
+      "x": 18,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -76,8 +76,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 13,
-      "y": 7,
+      "x": 19,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -89,8 +89,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 14,
-      "y": 7,
+      "x": 20,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -102,8 +102,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 15,
-      "y": 7,
+      "x": 21,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -115,8 +115,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 31,
-      "y": 4,
+      "x": 17,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -128,8 +128,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 32,
-      "y": 4,
+      "x": 18,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -141,8 +141,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 33,
-      "y": 4,
+      "x": 19,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -154,8 +154,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 34,
-      "y": 4,
+      "x": 20,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -167,8 +167,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 35,
-      "y": 4,
+      "x": 21,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -180,8 +180,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 23,
-      "y": 4,
+      "x": 7,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -193,8 +193,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 24,
-      "y": 4,
+      "x": 8,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -206,8 +206,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 25,
-      "y": 4,
+      "x": 9,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -219,8 +219,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 26,
-      "y": 4,
+      "x": 10,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -232,8 +232,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 27,
-      "y": 4,
+      "x": 11,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -245,8 +245,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 3,
-      "y": 7,
+      "x": 7,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -258,8 +258,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 4,
-      "y": 7,
+      "x": 8,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -271,8 +271,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 5,
-      "y": 7,
+      "x": 9,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -284,8 +284,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 6,
-      "y": 7,
+      "x": 10,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -297,8 +297,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
-      "x": 7,
-      "y": 7,
+      "x": 11,
+      "y": 15,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -310,10 +310,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_LINK_RECEPTIONIST",
-      "x": 11,
-      "y": 2,
-      "elevation": 4,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 14,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -323,9 +323,9 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_DECOR_CAULDRON",
-      "x": 10,
-      "y": 2,
-      "elevation": 0,
+      "x": 15,
+      "y": 11,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -337,64 +337,92 @@
   ],
   "warp_events": [
     {
-      "x": 19,
-      "y": 0,
+      "x": 14,
+      "y": 1,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 20,
-      "y": 0,
+      "x": 15,
+      "y": 1,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 39,
-      "y": 7,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 39,
-      "y": 8,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 19,
+      "x": 26,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 20,
+      "x": 26,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
-      "y": 3,
+      "x": 2,
+      "y": 12,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
-      "y": 4,
+      "x": 14,
+      "y": 18,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
-      "x": 16,
-      "y": 3,
+      "x": 13,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 26,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 10,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
