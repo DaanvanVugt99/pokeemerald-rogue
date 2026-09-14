@@ -198,6 +198,8 @@ class Catalogue:
         self.attrs.append(0x1000)
         from supply_depot_merchandise import append_merchandise
         append_merchandise(self)
+        from nursery_decorations import append_nursery
+        append_nursery(self)
         assert len(self.metas)<=1024 and len(self.tiles)<=1024
 
     def meta(self,key,mid):
@@ -280,6 +282,8 @@ class Catalogue:
             header+=f'#define METATILE_HubFurnishings_BerryLab_{name} 0x{mid:03X}\n'
         for name,mid in self.supply_depot.items():
             header+=f'#define METATILE_HubFurnishings_SupplyDepot_{name} 0x{mid:03X}\n'
+        for name,mid in self.nursery.items():
+            header+=f'#define METATILE_HubFurnishings_Nursery_{name} 0x{mid:03X}\n'
         for entry in self.config.get('labels',[]):
             key,old=entry['source'];mid=self.mapping[key][old]
             prefix='HubArchitecture' if mid<512 else 'HubFurnishings'
@@ -304,7 +308,7 @@ class Catalogue:
             else:generated.append(line)
         block=begin+'\n'+'\n'.join(generated)+'\n'+end+'\n\n'
         outputs['include/constants/metatile_labels.h']=content.replace('#endif // GUARD_METATILE_LABELS_H',block+'#endif // GUARD_METATILE_LABELS_H').encode()
-        outputs['data/tilesets/hub_sources.json']=(json.dumps({'tiles':len(self.tiles),'metatiles':len(self.metas),'palettes':len(self.pals),'mapping':self.mapping,'compositions':self.compositions,'supply_depot_merchandise_tile_range':self.merchandise_tile_range,'recolored_donors':sorted(self.recolored),'portal_tile_range':[512,547],'door_palette':11,'portal_palette':12},indent=2)+'\n').encode()
+        outputs['data/tilesets/hub_sources.json']=(json.dumps({'tiles':len(self.tiles),'metatiles':len(self.metas),'palettes':len(self.pals),'mapping':self.mapping,'compositions':self.compositions,'supply_depot_merchandise_tile_range':self.merchandise_tile_range,'nursery_tile_range':self.nursery_tile_range,'recolored_donors':sorted(self.recolored),'portal_tile_range':[512,547],'door_palette':11,'portal_palette':12},indent=2)+'\n').encode()
         return outputs
 
 

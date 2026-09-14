@@ -1904,10 +1904,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_DAY_CARE",
       "name": "Rogue_Area_DayCare_Layout",
-      "width": 32,
-      "height": 18,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Mauville",
+      "width": 37,
+      "height": 29,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_DayCare/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_DayCare/map.bin"
     },
@@ -2390,6 +2390,36 @@
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_SupplyDepotCorridor_South/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_SupplyDepotCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_NURSERY_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_NurseryCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_NurseryCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_NurseryCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_NURSERY_CORRIDOR_NORTH",
+      "name": "Rogue_NurseryCorridor_North_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_NurseryCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_NurseryCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_NURSERY_CORRIDOR_SOUTH",
+      "name": "Rogue_NurseryCorridor_South_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_NurseryCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_NurseryCorridor_South/map.bin"
     }
   ]
 }

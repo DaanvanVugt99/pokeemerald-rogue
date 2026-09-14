@@ -1,6 +1,6 @@
 {
   "tiles": 1021,
-  "metatiles": 921,
+  "metatiles": 948,
   "palettes": 13,
   "mapping": {
     "portal_room": {
@@ -796,6 +796,10 @@
   "supply_depot_merchandise_tile_range": [
     643,
     679
+  ],
+  "nursery_tile_range": [
+    679,
+    703
   ],
   "recolored_donors": [
     "Factory",

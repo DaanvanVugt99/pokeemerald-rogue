@@ -1194,7 +1194,7 @@ text gHubAreaDesc_RideTraining
 
 text gHubAreaDesc_DayCare
 {
-    format("Bring extra {PKMN} into Adventures and hatch Eggs.")
+    format("Care for {PKMN} and collect Eggs at the indoor Nursery.")
 }
 
 text gHubAreaDesc_Market

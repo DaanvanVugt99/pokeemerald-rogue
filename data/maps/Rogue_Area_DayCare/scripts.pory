@@ -162,7 +162,7 @@ script Rogue_Area_DayCare_InteractWithPhoneBooth
     if(var(VAR_RESULT) == DIR_NORTH)
     {
         lock
-        msgbox(format("It's the Day Care's phone!"))
+        msgbox(format("It's the Nursery's communication terminal!"))
 
         if(!flag(FLAG_ROGUE_RUN_ACTIVE))
         {
@@ -195,4 +195,28 @@ script Rogue_Area_DayCare_SpeakDaycareLady
         special(ReloadWarpSilent)
         release
     }
+}
+
+script Nursery_CareSign {
+    lockall
+    msgbox("POKéMON NURSERY\nCARE LOUNGE", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script Nursery_EggsSign {
+    lockall
+    msgbox("POKéMON NURSERY\nEGG NURSERY", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script Nursery_ReceptionSign {
+    lockall
+    msgbox("POKéMON NURSERY\nRECEPTION", MSGBOX_DEFAULT)
+    releaseall
+}
+
+script Nursery_TeaSign {
+    lockall
+    msgbox("POKéMON NURSERY\nTEA ROOM", MSGBOX_DEFAULT)
+    releaseall
 }

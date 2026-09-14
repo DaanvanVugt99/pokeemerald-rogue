@@ -6,6 +6,7 @@
 #include "constants/safari_lab_tiles.h"
 #include "constants/berry_lab_tiles.h"
 #include "constants/supply_depot_tiles.h"
+#include "constants/pokemon_nursery_tiles.h"
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
@@ -1022,7 +1023,7 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
         else if (warpId == 9) warpId = 2;
     }
 
-    if ((area == HUB_AREA_BERRY_FIELD || area == HUB_AREA_MARTS) && warpId >= 9 && warpId <= 12)
+    if ((area == HUB_AREA_BERRY_FIELD || area == HUB_AREA_MARTS || area == HUB_AREA_DAY_CARE) && warpId >= 9 && warpId <= 12)
         warpId = (warpId - 9) * 2; // Appended third lanes, N/E/S/W.
 
     if (area == HUB_AREA_LABS)
@@ -1075,6 +1076,7 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     case LAYOUT_ROGUE_AREA_LABS:
     case LAYOUT_ROGUE_AREA_FARMING_FIELD:
     case LAYOUT_ROGUE_AREA_MARTS:
+    case LAYOUT_ROGUE_AREA_DAY_CARE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
         break;
@@ -1247,6 +1249,7 @@ void RogueHub_ApplyMapMetatiles()
         break;
 
     case LAYOUT_ROGUE_AREA_DAY_CARE:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateDayCareAreaMetatiles();
         break;
     
@@ -1989,61 +1992,70 @@ static void RogueHub_UpdateTrialFrontierAreaMetatiles()
 
 static void RogueHub_UpdateDayCareAreaMetatiles()
 {
-    // Remove connectionss
     if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(17, 0, 22, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(17, 1, 22, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(18, 2, 21, 11);
+        MetatileFill_Tile(16, 0, 20, 2, METATILE_Nursery_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 3, 19, 3, METATILE_Nursery_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 4, 19, 4, METATILE_Nursery_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 5, 19, 5, METATILE_Nursery_FloorShadow);
+        MetatileSet_Tile(16, 2, METATILE_Nursery_PillarCap | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(20, 2, METATILE_Nursery_PillarCap | MAPGRID_COLLISION_MASK);
     }
 
     if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(30, 11);
-
-        MetatileFill_CommonPathRemoval(22, 12, 29, 14);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
-    {
-        MetatileFill_TreesOverlapping(17, 16, 22, 17, TREE_TYPE_DENSE);
-        MetatileFill_TreeCaps(18, 15, 21);
+        MetatileFill_Tile(33, 11, 36, 18, METATILE_Nursery_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(32, 11, 32, 15, METATILE_Nursery_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(32, 11, METATILE_Nursery_PillarJoin | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(32, 15, METATILE_Nursery_PillarEnd | MAPGRID_COLLISION_MASK);
     }
 
     if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
-        MetatileFill_CommonWarpExitHorizontal(0, 11);
-
-        MetatileFill_CommonPathRemoval(2, 12, 4, 14);
+        MetatileFill_Tile(0, 11, 3, 18, METATILE_Nursery_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 11, 4, 17, METATILE_Nursery_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(4, 11, METATILE_Nursery_PillarJoin | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(4, 17, METATILE_Nursery_PillarJoin | MAPGRID_COLLISION_MASK);
     }
 
+    if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+    {
+        MetatileFill_Tile(16, 26, 20, 28, METATILE_Nursery_Void | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(16, 25, METATILE_Nursery_PillarEnd | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(20, 25, METATILE_Nursery_PillarEnd | MAPGRID_COLLISION_MASK);
+    }
+
+    if(Rogue_GetCurrentDaycareSlotCount() < 2)
+    {
+        MetatileFill_Tile(10, 6, 11, 6, METATILE_Nursery_CoffeeMiddleTopDim | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 6, METATILE_Nursery_CoffeeRightTopDim | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(10, 7, 11, 7, METATILE_Nursery_CoffeeMiddleSeatDim | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 7, METATILE_Nursery_CoffeeRightSeatDim | MAPGRID_COLLISION_MASK);
+    }
+    if(Rogue_GetCurrentDaycareSlotCount() < 3)
+    {
+        MetatileSet_Tile(12, 9, METATILE_Nursery_CoffeeSideTopDim | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 10, METATILE_Nursery_CoffeeSideMiddleDim | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 11, METATILE_Nursery_CoffeeSideSeatDim | MAPGRID_COLLISION_MASK);
+    }
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_BREEDER))
     {
-        MetatileFill_Tile(10, 10, 10, 10, 0x291 | MAPGRID_COLLISION_MASK); // place wooden fence
+        MetatileFill_Tile(23, 5, 31, 10, METATILE_Nursery_FloorDim40);
+        MetatileFill_Tile(23, 5, 31, 5, METATILE_Nursery_FloorShadowDim40);
+        MetatileFill_Tile(23, 6, 23, 10, METATILE_Nursery_FloorShadowDim40);
+        MetatileFill_Tile(23, 4, 31, 4, METATILE_Nursery_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(22, 5, 22, 12, METATILE_Nursery_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(22, 11, METATILE_Nursery_PillarJoin | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(22, 12, METATILE_Nursery_InnerBase | MAPGRID_COLLISION_MASK);
     }
-
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP))
     {
-        // Default to remove and look nice-ish
-        MetatileFill_Tile(24, 6, 29, 9, METATILE_GeneralHub_Grass);
-
-        MetatileFill_TreesOverlapping(26, 5, 39, 6, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(27, 7, 29, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(26, 7, 26, TREE_TYPE_SPARSE);
-
-        // Place big block of trees instead
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(18, 0, 29, 8, TREE_TYPE_DENSE);
-            MetatileFill_TreeStumps(18, 9, 29, TREE_TYPE_DENSE);
-        }
-
-        // Place big block of trees instead
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_DAY_CARE, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(24, 5, 31, 15, TREE_TYPE_DENSE);
-        }
+        MetatileFill_Tile(5, 19, 11, 25, METATILE_Nursery_FloorDim40);
+        MetatileFill_Tile(12, 19, 12, 25, METATILE_Nursery_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 18, METATILE_Nursery_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 25, METATILE_Nursery_PillarEnd | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(5, 19, 11, 19, METATILE_Nursery_FloorShadowDim40);
+        MetatileFill_Tile(5, 20, 5, 25, METATILE_Nursery_FloorShadowDim40);
     }
 }
 

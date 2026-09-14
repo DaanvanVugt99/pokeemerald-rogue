@@ -168,3 +168,11 @@ not mean every lower slot contains artwork. Allocation asserts blank/unreference
 inputs and preserves all established metatile IDs, graphics, palettes and animations.
 The 22 merchandise floor/shadow compositions occupy 0x383-0x398. Four manually
 authored market prefabs expose reusable drawer and display assemblies in Porymap.
+
+## Nursery donor additions
+
+The Nursery appends metatiles 921-932 for original Day Care flowers, shrubs,
+fences and complete tea flower boxes, with floor/shadow backgrounds.
+`nursery_decorations.py` reads immutable GeneralHub + Mauville source art and
+uses static padding 679-691, after mart merchandise and before Safari animation
+slots. Existing compositions, graphics, palettes and animation slots stay fixed.

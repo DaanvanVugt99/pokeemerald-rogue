@@ -6,7 +6,7 @@
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
-  "map_type": "MAP_TYPE_TOWN",
+  "map_type": "MAP_TYPE_INDOOR",
   "allow_cycling": true,
   "allow_escaping": false,
   "allow_running": true,
@@ -14,32 +14,32 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 16,
-      "direction": "down"
-    },
-    {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 10,
+      "map": "MAP_ROGUE_NURSERY_CORRIDOR_HORIZONTAL",
+      "offset": 11,
       "direction": "left"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 10,
+      "map": "MAP_ROGUE_NURSERY_CORRIDOR_HORIZONTAL",
+      "offset": 11,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 16,
+      "map": "MAP_ROGUE_NURSERY_CORRIDOR_NORTH",
+      "offset": 15,
       "direction": "up"
+    },
+    {
+      "map": "MAP_ROGUE_NURSERY_CORRIDOR_SOUTH",
+      "offset": 15,
+      "direction": "down"
     }
   ],
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 16,
-      "y": 9,
-      "elevation": 0,
+      "x": 15,
+      "y": 24,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -50,10 +50,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_VAR_0",
-      "x": 27,
-      "y": 10,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "x": 8,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -63,10 +63,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_OLD_WOMAN",
-      "x": 6,
-      "y": 11,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 14,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -76,10 +76,10 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_OLD_MAN_2",
-      "x": 10,
-      "y": 10,
-      "elevation": 0,
-      "movement_type": "MOVEMENT_TYPE_NONE",
+      "x": 27,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
@@ -89,8 +89,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_0",
-      "x": 15,
-      "y": 6,
+      "x": 8,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -102,8 +102,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_2",
-      "x": 9,
-      "y": 5,
+      "x": 12,
+      "y": 10,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -115,8 +115,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_FOLLOW_MON_1",
-      "x": 10,
-      "y": 8,
+      "x": 11,
+      "y": 7,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
       "movement_range_x": 0,
@@ -127,10 +127,10 @@
       "flag": "FLAG_TEMP_6"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PHONE_BOOTH",
-      "x": 2,
-      "y": 11,
-      "elevation": 0,
+      "graphics_id": "OBJ_EVENT_GFX_PC_STAND",
+      "x": 13,
+      "y": 18,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -141,9 +141,9 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_PC_STAND",
-      "x": 4,
-      "y": 11,
-      "elevation": 0,
+      "x": 15,
+      "y": 18,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -155,73 +155,162 @@
   ],
   "warp_events": [
     {
-      "x": 19,
-      "y": 0,
+      "x": 18,
+      "y": 1,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 20,
-      "y": 0,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 31,
-      "y": 13,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 31,
-      "y": 14,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 20,
-      "y": 17,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
       "dest_warp_id": "0"
     },
     {
       "x": 19,
-      "y": 17,
+      "y": 1,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
+      "x": 34,
       "y": 14,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
+      "x": 34,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 34,
       "y": 13,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
       "dest_warp_id": "0"
     },
     {
-      "x": 16,
-      "y": 10,
+      "x": 17,
+      "y": 27,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_LABS",
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_ROGUE_AREA_DAY_CARE",
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
+  "coord_events": [],
   "bg_events": [
-
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 11,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Nursery_CareSign"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 10,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "Nursery_CareSign"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 12,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Nursery_EggsSign"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 11,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "Nursery_EggsSign"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 24,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Nursery_ReceptionSign"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 23,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "Nursery_ReceptionSign"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 18,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Nursery_TeaSign"
+    },
+    {
+      "type": "sign",
+      "x": 8,
+      "y": 17,
+      "elevation": 3,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_SOUTH",
+      "script": "Nursery_TeaSign"
+    }
   ]
 }

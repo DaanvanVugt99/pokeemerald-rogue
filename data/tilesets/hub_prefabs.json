@@ -1004,5 +1004,111 @@
         "elevation": 3
       }
     ]
+  },
+  {
+    "name": "Nursery / Original care greenery",
+    "width": 2,
+    "height": 1,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 921,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "metatile_id": 923,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Nursery / Original care fence",
+    "width": 3,
+    "height": 1,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 925,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "metatile_id": 925,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "metatile_id": 925,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Nursery / Original tea flower box",
+    "width": 1,
+    "height": 2,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 930,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "metatile_id": 931,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
+  },
+  {
+    "name": "Nursery / Sideways coffee couch",
+    "width": 1,
+    "height": 3,
+    "primary_tileset": "gTileset_HubArchitecture",
+    "secondary_tileset": "gTileset_HubFurnishings",
+    "metatiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "metatile_id": 938,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "metatile_id": 946,
+        "collision": 3,
+        "elevation": 3
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "metatile_id": 939,
+        "collision": 3,
+        "elevation": 3
+      }
+    ]
   }
 ]

@@ -63,6 +63,9 @@
 #define MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_HORIZONTAL (30 | (2 << 8))
 #define MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_NORTH      (31 | (2 << 8))
 #define MAP_ROGUE_SUPPLY_DEPOT_CORRIDOR_SOUTH      (32 | (2 << 8))
+#define MAP_ROGUE_NURSERY_CORRIDOR_HORIZONTAL      (33 | (2 << 8))
+#define MAP_ROGUE_NURSERY_CORRIDOR_NORTH           (34 | (2 << 8))
+#define MAP_ROGUE_NURSERY_CORRIDOR_SOUTH           (35 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

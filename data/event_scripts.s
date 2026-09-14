@@ -880,6 +880,9 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Area_TrialFrontier/scripts.inc"
 
 	.include "data/maps/Rogue_Area_DayCare/scripts.inc"
+	.include "data/maps/Rogue_NurseryCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_NurseryCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_NurseryCorridor_South/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_SilphCo/scripts.inc"
 

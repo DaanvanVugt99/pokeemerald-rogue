@@ -241,7 +241,7 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
     [HUB_AREA_DAY_CARE] = 
     {
         SET_AREA_PRIMARY_MAP(ROGUE_AREA_DAY_CARE),
-        .areaName = _("Day Care"),
+        .areaName = _("Pokémon Nursery"),
         .descText = gHubAreaDesc_DayCare,
         .buildCost = 30,
         .requiredUpgrades = { HUB_UPGRADE_NONE },

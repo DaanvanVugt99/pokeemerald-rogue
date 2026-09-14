@@ -80,6 +80,11 @@ or validation workflows change.
   `python3 scripts/generate_supply_depot.py --check` for all 2048 connection/upgrade
   states and previews; normal generation writes only aliases/private facades.
   Never rerun the guarded `--init-layout` converter. See `docs/design/supply_depot.md`.
+- Pokemon Nursery layout/border are Porymap-authored. Use
+  `python3 scripts/generate_pokemon_nursery.py --check` for 4,096 connection,
+  upgrade and occupancy states; normal generation writes only private facades,
+  aliases and previews. Never rerun `--init-layout` on the converted room.
+  See `docs/design/pokemon_nursery.md`.
 - Park tunnel assets and private facades use
   `python3 scripts/generate_park_tunnels.py --check` (16 connection states).
   Normal generation preserves the authored Park map/border; allocation and

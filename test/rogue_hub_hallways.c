@@ -10,6 +10,9 @@
 #include "rogue_controller.h"
 #include "constants/flags.h"
 #include "constants/berry.h"
+#include "constants/vars.h"
+#include "constants/event_objects.h"
+#include "pokemon.h"
 
 TEST("Hub hallways: Berry Lab refreshes legacy objects and invalid positions")
 {
@@ -115,15 +118,27 @@ TEST("Hub hallways: Supply Depot recovers legacy staff without changing upgrades
 TEST("Hub hallways: every lane arrives centered at the same shaded threshold")
 {
     static const struct {u8 mapNum, warp, x, y, behavior;} lanes[] = {
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),0,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),1,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),9,18,1,MB_NORTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),2,34,14,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),3,34,14,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),10,34,14,MB_EAST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),4,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),5,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),11,18,27,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),6,2,14,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),7,2,14,MB_WEST_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_DAY_CARE),12,2,14,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),0,18,1,MB_NORTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),1,18,1,MB_NORTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),9,18,1,MB_NORTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),2,34,15,MB_EAST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),3,34,15,MB_EAST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),10,34,15,MB_EAST_ARROW_WARP},
-        {MAP_NUM(ROGUE_AREA_MARTS),4,18,29,MB_SOUTH_ARROW_WARP},
-        {MAP_NUM(ROGUE_AREA_MARTS),5,18,29,MB_SOUTH_ARROW_WARP},
-        {MAP_NUM(ROGUE_AREA_MARTS),11,18,29,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),4,18,28,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),5,18,28,MB_SOUTH_ARROW_WARP},
+        {MAP_NUM(ROGUE_AREA_MARTS),11,18,28,MB_SOUTH_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),6,2,15,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),7,2,15,MB_WEST_ARROW_WARP},
         {MAP_NUM(ROGUE_AREA_MARTS),12,2,15,MB_WEST_ARROW_WARP},
@@ -209,7 +224,7 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
         {MAP_NUM(ROGUE_AREA_FARMING_FIELD),8},
-        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),8},
+        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
     u8 i;
@@ -244,4 +259,69 @@ TEST("Hub hallways: Park rock scenery remains visible independently of links")
     // updater separately replaces disconnected entrances with solid rock.
     for (i = 0; i < park.connections->count; ++i)
         EXPECT(RogueHub_AcceptMapConnection(&park, &park.connections->connections[i]));
+}
+
+TEST("Hub hallways: Nursery recovers old saves and accepts dynamic graphics")
+{
+    struct MapHeader header = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_DAY_CARE), MAP_NUM(ROGUE_AREA_DAY_CARE));
+    struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
+    struct WarpData oldWarp = gSaveBlock1Ptr->continueGameWarp;
+    struct BoxPokemon oldMon = *Rogue_GetDaycareBoxMon(0);
+    s16 oldX = gSaveBlock1Ptr->pos.x, oldY = gSaveBlock1Ptr->pos.y;
+    bool8 oldStatus = UseContinueGameWarp(), oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    bool8 oldUpgrade = RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP);
+    bool8 oldCapacity0 = RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY0);
+    bool8 oldCapacity1 = RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY1);
+    u16 oldEgg = VarGet(VAR_ROGUE_DAYCARE_EGG_SPECIES), oldCycles = VarGet(VAR_ROGUE_DAYCARE_EGG_CYCLES);
+    u16 species = SPECIES_BULBASAUR;
+    u8 count = header.events->objectEventCount;
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP, FALSE);
+    SetBoxMonData(Rogue_GetDaycareBoxMon(0), MON_DATA_SPECIES, &species);
+    VarSet(VAR_ROGUE_DAYCARE_EGG_SPECIES, SPECIES_PIKACHU);
+    VarSet(VAR_ROGUE_DAYCARE_EGG_CYCLES, 7);
+    gSaveBlock1Ptr->pos.x = 18;
+    gSaveBlock1Ptr->pos.y = 21;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    objects[2].x = 6; objects[2].y = 11; objects[2].elevation = 0;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_DAY_CARE));
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 18);
+    EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 21);
+    EXPECT_EQ(GetBoxMonData(Rogue_GetDaycareBoxMon(0), MON_DATA_SPECIES), species);
+    EXPECT_EQ(VarGet(VAR_ROGUE_DAYCARE_EGG_SPECIES), SPECIES_PIKACHU);
+    EXPECT_EQ(VarGet(VAR_ROGUE_DAYCARE_EGG_CYCLES), 7);
+    EXPECT(!RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP));
+    count = header.events->objectEventCount;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    objects[1].graphicsId = OBJ_EVENT_GFX_MISC_YOUNG_COUPLE_F;
+    objects[4].graphicsId = OBJ_EVENT_GFX_OLD_WOMAN;
+    objects[5].graphicsId = OBJ_EVENT_GFX_OLD_WOMAN;
+    objects[6].graphicsId = OBJ_EVENT_GFX_OLD_WOMAN;
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+    // Former inactive-bay floor is now a permanent coffee-corner aisle.
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY0, FALSE);
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY1, FALSE);
+    gSaveBlock1Ptr->pos.x = 11; gSaveBlock1Ptr->pos.y = 8;
+    count = header.events->objectEventCount;
+    memcpy(objects, header.events->objectEvents, count * sizeof(*objects));
+    ClearContinueGameWarpStatus();
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(!UseContinueGameWarp());
+    gSaveBlock1Ptr->pos.x = 9; gSaveBlock1Ptr->pos.y = 20;
+    Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
+    EXPECT(UseContinueGameWarp());
+    gSaveBlock1Ptr->continueGameWarp = oldWarp;
+    gSaveBlock1Ptr->pos.x = oldX; gSaveBlock1Ptr->pos.y = oldY;
+    *Rogue_GetDaycareBoxMon(0) = oldMon;
+    VarSet(VAR_ROGUE_DAYCARE_EGG_SPECIES, oldEgg); VarSet(VAR_ROGUE_DAYCARE_EGG_CYCLES, oldCycles);
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP, oldUpgrade);
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY0, oldCapacity0);
+    RogueHub_SetUpgrade(HUB_UPGRADE_DAY_CARE_CAPACITY1, oldCapacity1);
+    if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
+    if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }

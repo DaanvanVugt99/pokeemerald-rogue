@@ -8461,11 +8461,24 @@ static bool8 HasStaleStaticHubSnapshot(const struct MapHeader *header, const str
             if (objects[j].localId == expected->localId)
                 break;
         if (j == count || objects[j].x != expected->x || objects[j].y != expected->y
-            || objects[j].elevation != expected->elevation || objects[j].graphicsId != expected->graphicsId)
+            || objects[j].elevation != expected->elevation
+            || (objects[j].graphicsId != expected->graphicsId
+                && !(header->mapLayoutId == LAYOUT_ROGUE_AREA_DAY_CARE
+                    && (expected->localId == 2 || (expected->localId >= 5 && expected->localId <= 7)))))
             return TRUE;
     }
     if (x < 0 || y < 0 || x >= header->mapLayout->width || y >= header->mapLayout->height)
         return TRUE;
+    if (header->mapLayoutId == LAYOUT_ROGUE_AREA_DAY_CARE)
+    {
+        // Authored tiles describe the fully unlocked room; also reject positions
+        // in currently closed departments. Couch collisions never change.
+        if ((x >= 22 && x <= 31 && y >= 5 && y <= 10
+                && !RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_BREEDER))
+            || (x >= 5 && x <= 12 && y >= 19 && y <= 25
+                && !RogueHub_HasUpgrade(HUB_UPGRADE_DAY_CARE_TEA_SHOP)))
+            return TRUE;
+    }
     return (header->mapLayout->map[y * header->mapLayout->width + x] & MAPGRID_COLLISION_MASK) != 0;
 }
 
@@ -8573,6 +8586,16 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
     {
         const struct WarpEvent *arrival = &mapHeader->events->warps[8];
         SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_MARTS), MAP_NUM(ROGUE_AREA_MARTS),
+            WARP_ID_NONE, arrival->x, arrival->y);
+        SetContinueGameWarpStatus();
+    }
+
+    if (loadingFromSave && !Rogue_IsRunActive()
+        && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_DAY_CARE
+        && HasStaleStaticHubSnapshot(mapHeader, objectEvents, *objectEventCount))
+    {
+        const struct WarpEvent *arrival = &mapHeader->events->warps[8];
+        SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_DAY_CARE), MAP_NUM(ROGUE_AREA_DAY_CARE),
             WARP_ID_NONE, arrival->x, arrival->y);
         SetContinueGameWarpStatus();
     }

@@ -6,6 +6,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Seat nursery Pokemon directly on their couches, remove the glass backs, and replace outdoor flower/fence decorations with indoor shop pots and furnishings.
+- Clean up nursery glass end frames, wall-post bases, decorative floor shadows, and locked egg-room shading while preserving the L-shaped layout.
+- Give the Pokemon Nursery an L-shaped care gallery with staggered bays and a compact lower service wing; port flowers, shrubs, fences, and complete tea flower boxes from the original Day Care into stable shared tiles and Porymap prefabs.
+- Rework Day Care into an indoor Pokemon Nursery with three capacity-based care bays, reception, an egg nursery, and a tea room. Preserve existing services and saves; add three-lane hallway arrivals, two-sided signs, private facades, and nursery validation/previews.
 - Make Supply Depot department signs readable from both sides of their partitions, including the central aisle while departments are locked.
 - Darken the full top floor edge inside the locked Supply Depot equipment room.
 
@@ -36,6 +40,10 @@ Format follows Keep a Changelog loosely:
   with Comatose. These effects require no additional saved or per-battle state.
 
 ### Changed
+
+- Correct the nursery sideways couch orientation by moving it to the right of the coffee table; group drinks on the left and clear excess lounge decoration.
+
+- Rework the nursery care gallery into a shared coffee corner with a long couch, Rocket sideways seating, a low table, and dimmed seats for locked capacity upgrades.
 
 - Rebuild Berry Fields as the indoor Berry Lab, with four glass-backed growing
   beds, a south service nook, and three-wide underground hallways. Preserve
