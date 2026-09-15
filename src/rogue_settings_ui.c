@@ -178,7 +178,7 @@ static const u8 sIntroPoolHelp[] = _("Can't change until you become Champion.");
 static const u8 sPoolContextLocked[] = _("Change this in your own hub.");
 static const u8 sIntroConfirmTitle[] = _("YOUR STARTING POKÉDEX");
 static const u8 sIntroConfirmQuestion[] = _("Begin with this Pokédex?");
-static const u8 sIntroConfirmEffect[] = _("Sets wild Pokémon and first partners.");
+static const u8 sIntroConfirmEffect[] = _("Sets encounters and first partners.");
 static const u8 sIntroConfirmLock[] = _("You can't change it until\nyou become Champion.");
 static const u8 sGoBack[] = _("Go back");
 static const u8 sPoolUnavailable[] = _("No compatible Pokédexes.");
@@ -483,7 +483,7 @@ static void DrawPool(void)
     }
     RogueDexSelection_Describe(&sMenu->pool, text);
     Print(0, 114, text, FALSE);
-    Print(0, 132, sMenu->message != NULL ? sMenu->message : sMenu->intro ? sIntroPoolHelp : sMenu->readOnly ? sPoolReadOnly : sAscensionText55, FALSE);
+    Print(0, 132, sMenu->message != NULL ? sMenu->message : sMenu->readOnly ? sPoolReadOnly : sAscensionText55, FALSE);
 }
 
 static u8 BaseRulePageCount(void)

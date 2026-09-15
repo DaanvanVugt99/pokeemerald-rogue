@@ -86,6 +86,10 @@ laboratory/hideout used to investigate it. Birch's lab invitation connects
 the player's expeditions and Quest supplies to research and expanding the base.
 The cause of the shifting realm and the portal's origin remain unexplained.
 
+The opening is kept to a brief premise, using the original researcher's curiosity
+and "Let's see what you remember" transition into character creation. It does
+not discuss finding the player a partner; that conversation belongs in the lab.
+
 The subsequent voice pass retains explicit mechanics while treating spoken
 dialogue as a conversation. Birch describes his own observations and admits what
 he has not figured out; the nurse welcomes the player and points out the next

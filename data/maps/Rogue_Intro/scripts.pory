@@ -258,10 +258,9 @@ script Rogue_Intro_MapScripts_LoadFrame_0
     call(Rogue_Intro_PlayAnim_ParentChildMon)
 
     msgbox(format(
-        "There's a portal here that leads to another realm.\p"
-        "I've been exploring the other side. A route I knew on one visit can lead somewhere else on the next—and the Pokémon aren't where I'd expect them, either!\p"
-        "We've tucked our laboratory underground. It's our hideout, too—a place to study what we've found and rest between trips.\p"
-        "I still haven't worked out why that realm keeps shifting. I'd love your help, but let's find you a Pokémon partner before sending you through."
+        "Beyond our portal is a realm where routes keep shifting and Pokémon appear far from their usual habitats!\p"
+        "We're studying it from our underground lab. For a researcher, it's fascinating!\p"
+        "Now then…\nLet's see what you remember."
     ))
 
     waitmovement(OBJ_LOCAL_ID_FOLLOWMON_PARENT)
@@ -311,7 +310,7 @@ script Rogue_Intro_CustomisePlayer
     special(ChangePlayerNickname)
     waitstate
 
-    msgbox(format("And our little hideout...\pIt's become quite a home, hasn't it? Do you remember what we called it?"))
+    msgbox(format("And our base...\pIt's become quite a home, hasn't it? Do you remember what we called it?"))
     fadescreen(FADE_TO_BLACK)
     special(ChangePokemonHubName)
     waitstate

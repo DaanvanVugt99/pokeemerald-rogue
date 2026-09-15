@@ -6,6 +6,14 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Call the player's underground home a base in the intro naming dialogue and naming-screen prompt, replacing the inherited village label.
+
+- Describe the starting Pokédex as setting encounters and first partners, including trainer encounters rather than only wild Pokémon.
+
+- Shorten Birch's opening to the shifting-realm premise and restore the original transition into character creation; introduce the player's partner later in the lab.
+
+- Show navigation controls instead of repeating the Champion restriction while browsing the initial Pokédex choices; retain the introductory explanation and final confirmation.
+
 - Remove inherited EX/Vanilla edition labels from the opening, main menu, and save-update greeting; present Divergence as a single standalone game.
 
 - Clarify the initial Pokédex commitment with a draft-preserving confirmation; streamline opening dialogue, restore the guided Quest Board walk with manual recovery, and direct first returns to the Main Hall building tutorial.
