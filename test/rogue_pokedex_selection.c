@@ -20,6 +20,21 @@
 bool8 RogueTest_ExerciseIntroConfirmation(const struct RogueAdventureConfig *draft, u16 gimmick,
     bool8 accept, bool8 *defaultBack, bool8 *unchanged, bool8 *duplicateRejected);
 bool8 RogueTest_IntroConfirmationTextFits(void);
+bool8 RogueTest_AdventureControlScenario(u8 scenario);
+
+TEST("Adventure controls: A confirms, horizontal input changes, and B returns")
+{
+    u8 scenario;
+    RogueRunStart_Clear();
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    Rogue_ResetSettingsToDefaults();
+    for (scenario = 0; scenario < 7; ++scenario)
+        EXPECT(RogueTest_AdventureControlScenario(scenario));
+    RogueRunStart_PrepareStandard();
+    EXPECT(RogueTest_AdventureControlScenario(7));
+    RogueRunStart_Clear();
+    EXPECT(RogueTest_IntroConfirmationTextFits());
+}
 
 TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Continue")
 {

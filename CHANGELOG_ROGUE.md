@@ -6,6 +6,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Standardize opening setup, appearance editor and Adventure Console controls: Left/Right changes values, A confirms or opens editors, and B returns from editors. A on inline settings leaves both the value and selected row unchanged. Update control hints and cover settings, Pokédex, trainers, Ascension and confirmation input with a focused regression test.
+
 - Call the player's underground home a base in the intro naming dialogue and naming-screen prompt, replacing the inherited village label.
 
 - Describe the starting Pokédex as setting encounters and first partners, including trainer encounters rather than only wild Pokémon.
@@ -56,6 +58,13 @@ Format follows Keep a Changelog loosely:
   with Comatose. These effects require no additional saved or per-battle state.
 
 ### Changed
+
+- Audit manually reworked regular Ability descriptions against their battle effects.
+  Correct Solar Power's removed HP drain, Rain Dish healing, Iron Fist/Reckless
+  multipliers, Filter reduction, Protean/Libero and Gale Wings restrictions,
+  Forecast weather support, and Supersweet Syrup's stat and repeat activation.
+  Add expanded Insomnia/Solid Rock text, clarify Inner Focus/Steadfast, and
+  explicitly state Poison Heal/Toxic Boost's protection from poison damage.
 
 - Add Stone Axe to Haxorus at level 67, Shore Up to both Stunfisk forms at
   level 40, Psycho Boost to Malamar at level 65, No Retreat to Octillery at

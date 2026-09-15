@@ -6,6 +6,39 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_TACKLE].strikeCount < 2);
 }
 
+SINGLE_BATTLE_TEST("Parental Bond popup parity: Brutal and Toxic Tandem stay silent")
+{
+    u16 species, ability, uniqueAbility;
+    bool32 blocked;
+
+    PARAMETRIZE { species = SPECIES_WOBBUFFET; ability = ABILITY_PARENTAL_BOND; uniqueAbility = ABILITY_NONE; blocked = FALSE; }
+    PARAMETRIZE { species = SPECIES_WOBBUFFET; ability = ABILITY_PARENTAL_BOND; uniqueAbility = ABILITY_NONE; blocked = TRUE; }
+    PARAMETRIZE { species = SPECIES_HAXORUS; ability = ABILITY_MOLD_BREAKER; uniqueAbility = ABILITY_BRUTAL; blocked = FALSE; }
+    PARAMETRIZE { species = SPECIES_HAXORUS; ability = ABILITY_MOLD_BREAKER; uniqueAbility = ABILITY_BRUTAL; blocked = TRUE; }
+    PARAMETRIZE { species = SPECIES_BEEDRILL; ability = ABILITY_SWARM; uniqueAbility = ABILITY_TOXIC_TANDEM; blocked = FALSE; }
+    PARAMETRIZE { species = SPECIES_BEEDRILL; ability = ABILITY_SWARM; uniqueAbility = ABILITY_TOXIC_TANDEM; blocked = TRUE; }
+
+    GIVEN {
+        ASSUME(gBattleMoves[MOVE_POISON_STING].type == TYPE_POISON);
+        ASSUME(gBattleMoves[MOVE_POISON_STING].strikeCount < 2);
+        PLAYER(species) { Ability(ability); UniqueAbility(uniqueAbility); Moves(MOVE_POISON_STING); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(400); MaxHP(400); Moves(MOVE_CELEBRATE, MOVE_PROTECT); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_POISON_STING); MOVE(opponent, blocked ? MOVE_PROTECT : MOVE_CELEBRATE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_PARENTAL_BOND);
+            ABILITY_POPUP(player, ABILITY_BRUTAL);
+            ABILITY_POPUP(player, ABILITY_TOXIC_TANDEM);
+        }
+    } THEN {
+        if (blocked)
+            EXPECT_EQ(opponent->hp, 400);
+        else
+            EXPECT_LT(opponent->hp, 400);
+    }
+}
+
 SINGLE_BATTLE_TEST("Brutal makes damaging moves hit twice")
 {
     GIVEN {

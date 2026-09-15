@@ -744,6 +744,17 @@ static void Task_RoguePlayerUIMain(u8 taskId)
     u8 startPageIdx = sPlayerOutfitUIState->currentPageIdx;
     u8 startOptionIdx = sPlayerOutfitUIState->currentOptionIdx;
 
+    // A on an inline value changes neither the value nor the selected row.
+    if (JOY_NEW(A_BUTTON))
+    {
+        u8 entry = sPlayerOutfitUIState->currentPageEntries[startOptionIdx];
+        MenuItemInputCallback input = sRoguePlayerUIEntries[entry].processInput;
+        if (input == RoguePlayerUI_EntryOutfit_ProcessInput
+         || input == RoguePlayerUI_EntryClothesStylePreset_ProcessInput
+         || input == RoguePlayerUI_EntryClothesStyleRGB_ProcessInput)
+            return;
+    }
+
     if ((CanExitWithB() && JOY_NEW(B_BUTTON)) || (JOY_NEW(A_BUTTON) && (sPlayerOutfitUIState->currentPageEntries[sPlayerOutfitUIState->currentOptionIdx] == UI_ENTRY_BACK || sPlayerOutfitUIState->currentPageEntries[sPlayerOutfitUIState->currentOptionIdx] == UI_ENTRY_EXIT)))
     {
         if(!RoguePlayerUI_ClosePage())
@@ -815,11 +826,12 @@ static void Task_RoguePlayerUIMain(u8 taskId)
     // Process callback
     {
         u8 currentEntryIdx = sPlayerOutfitUIState->currentPageEntries[sPlayerOutfitUIState->currentOptionIdx];
+        MenuItemInputCallback input = sRoguePlayerUIEntries[currentEntryIdx].processInput;
 
-        if(sRoguePlayerUIEntries[currentEntryIdx].processInput != NULL && sRoguePlayerUIEntries[currentEntryIdx].processInput(currentEntryIdx, sPlayerOutfitUIState->currentOptionIdx))
+        if(input != NULL && input(currentEntryIdx, sPlayerOutfitUIState->currentOptionIdx))
         {
             // Special sound effect here to not break ears
-            if(sRoguePlayerUIEntries[currentEntryIdx].processInput == RoguePlayerUI_EntryClothesStyleRGB_ProcessInput)
+            if(input == RoguePlayerUI_EntryClothesStyleRGB_ProcessInput)
                 PlaySE(SE_BALL);
             else
                 PlaySE(SE_SELECT);
@@ -1264,7 +1276,7 @@ static bool8 RoguePlayerUI_EntryOutfit_ProcessInput(u8 entryIdx, u8 menuOffset)
         RoguePlayerUI_RefreshPageEntries();
         return TRUE;
     }
-    else if(JOY_REPEAT(DPAD_RIGHT) || JOY_NEW(A_BUTTON))
+    else if(JOY_REPEAT(DPAD_RIGHT))
     {
         do
         {
@@ -1488,7 +1500,7 @@ static bool8 RoguePlayerUI_EntryClothesStylePreset_ProcessInput(u8 entryIdx, u8 
         RefreshUIOutfitStylesFromSource();
         return TRUE;
     }
-    else if(JOY_NEW(DPAD_RIGHT) || JOY_NEW(A_BUTTON))
+    else if(JOY_NEW(DPAD_RIGHT))
     {
         RoguePlayer_IncrementOutfitStyleByName(outfitStyle, 1);
         RefreshUIOutfitStylesFromSource();

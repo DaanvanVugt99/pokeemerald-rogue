@@ -128,6 +128,26 @@ explanations; the initial optional carryover question does not repeat them.
 
 ## Validation record
 
+Adventure setup controls use Left/Right to change values and A to confirm. On
+inline setup rows, A leaves both the selected row and draft value unchanged. On Pokédex and
+trainer pages, A accepts the displayed choices and returns to setup. A opens
+submenus; Left/Right no longer opens them. Ascension still previews changes and
+requires A to apply them. B returns from child pages; root new-game setup still
+requires Continue because it has no parent screen. L/R shoulder buttons retain
+rule-page navigation. The final confirmation uses Left/Right to choose, A to
+confirm and B to return with drafts intact. The focused `Adventure controls:`
+test drives the real input handler with graphics suppressed, including read-only
+views, cancellation, confirmation and control-text widths.
+
+- PASS: `Adventure controls: A confirms, horizontal input changes, and B returns`
+  covers eight input scenarios, including Adventure Console context, plus the control-text width check.
+
+The opening appearance editor follows the same convention: Left/Right changes
+outfits, color presets and RGB values; A leaves the value and selected row
+unchanged. A still opens subpages and activates explicit actions such as
+Randomize and Done. B returns from subpages. Starter selection and the console's
+Trial lists already use A to select and B to return; they do not cycle values on A.
+
 - PASS: nine `Pokemon pool:` headless tests, including confirmation default,
   draft preservation, cancellation without persistence, changed selection,
   commit and duplicate-commit rejection, all supported initial pool/gimmick

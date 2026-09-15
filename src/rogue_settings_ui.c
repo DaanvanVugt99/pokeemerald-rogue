@@ -45,7 +45,7 @@ static const u8 sAscensionText42[] = _("Current party");
 static const u8 sAscensionText43[] = _("ASCENSION ");
 static const u8 sAscensionText44[] = _(" - LOCKED");
 static const u8 sAscensionText45[] = _("Unlocked: A");
-static const u8 sAscensionText46[] = _("Left/Right: level  L/R: page  B: back");
+static const u8 sAscensionText46[] = _("Left/Right: level  L/R: page  A: OK  B: back");
 static const u8 sAscensionText47[] = _("ADVENTURE RULES");
 static const u8 sAscensionText48[] = _("TRAINERS");
 static const u8 sAscensionText49[] = _("SET UP ADVENTURE");
@@ -54,7 +54,8 @@ static const u8 sAscensionText51[] = _("On");
 static const u8 sAscensionText52[] = _("Off");
 static const u8 sAscensionText53[] = _("Begin Adventure");
 static const u8 sAscensionText54[] = _("Close");
-static const u8 sAscensionText55[] = _("A/Left/Right: change  B: back");
+static const u8 sAscensionText55[] = _("Left/Right: change  A: OK  B: back");
+static const u8 sConfirmControls[] = _("Left/Right: choose  A: OK  B: back");
 static const u8 sAscensionText56[] = _("Select at least one trainer region.");
 static const u8 sAscensionText57[] = _("Check starting team and requirements.");
 static const u8 sAscensionText58[] = _("Clear the preceding level to unlock.");
@@ -124,6 +125,9 @@ struct AdventureMenu
     const u8 *message;
 };
 static EWRAM_DATA struct AdventureMenu *sMenu;
+#if TESTING
+static bool8 sTestSkipDraw;
+#endif
 static const struct BgTemplate sBg[] = {{ .bg = 0, .charBaseIndex = 0, .mapBaseIndex = 31, .screenSize = 0, .paletteMode = 0 }};
 static const struct WindowTemplate sWindows[] = {
     {.bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 28, .height = 18, .paletteNum = 15, .baseBlock = 1},
@@ -497,6 +501,9 @@ static void Draw(void)
     u8 i;
     u8 text[160];
     struct RogueAdventureConfig preview = sMenu->config;
+#if TESTING
+    if (sTestSkipDraw) return;
+#endif
     preview.ascension = sMenu->candidate;
     FillWindowPixelBuffer(0, PIXEL_FILL(0));
     if (sMenu->page == PAGE_INTRO_CONFIRM)
@@ -508,7 +515,7 @@ static void Draw(void)
         Print(0, 72, sIntroConfirmLock, FALSE);
         Print(0, 110, sContinue, sMenu->confirmChoice == 0);
         Print(112, 110, sGoBack, sMenu->confirmChoice == 1);
-        Print(0, 132, sMenu->message != NULL ? sMenu->message : sAscensionText55, FALSE);
+        Print(0, 132, sMenu->message != NULL ? sMenu->message : sConfirmControls, FALSE);
     }
     else if (sMenu->page == PAGE_POOL)
         DrawPool();
@@ -667,7 +674,8 @@ static void ResolveIntroConfirmation(bool8 accept)
 bool8 RogueTest_IntroConfirmationTextFits(void)
 {
     const u8 *const lines[] = { sIntroConfirmTitle, sIntroConfirmQuestion,
-        sIntroConfirmEffect, sIntroConfirmLock, sIntroPoolHelp, sPoolContextLocked };
+        sIntroConfirmEffect, sIntroConfirmLock, sIntroPoolHelp, sPoolContextLocked,
+        sAscensionText55, sConfirmControls, sAscensionText46 };
     u8 i;
     for (i = 0; i < ARRAY_COUNT(lines); ++i)
         if (GetStringWidth(FONT_SMALL_NARROW, lines[i], 0) > 224) return FALSE;
@@ -708,7 +716,7 @@ static void HandlePoolInput(u8 taskId, s8 direction)
     }
     else if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
         sMenu->row = Cycle(sMenu->row, sMenu->rowCount, JOY_REPEAT(DPAD_UP) ? -1 : 1);
-    else if (field == DEX_FIELD_DONE && JOY_NEW(A_BUTTON))
+    else if (JOY_NEW(A_BUTTON))
     {
         if (sMenu->poolOnly) ExitMenu(taskId, !sMenu->readOnly, FALSE);
         else
@@ -725,11 +733,91 @@ static void HandlePoolInput(u8 taskId, s8 direction)
             ReturnToSetup(ROW_DEX);
         }
     }
-    else if (!sMenu->readOnly && (direction || JOY_NEW(A_BUTTON)))
+    else if (!sMenu->readOnly && direction && field != DEX_FIELD_DONE)
     {
-        RogueDexSelection_Cycle(&sMenu->pool, field, direction ? direction : 1);
+        RogueDexSelection_Cycle(&sMenu->pool, field, direction);
         BuildPoolRows();
         while (sMenu->row + 1 < sMenu->rowCount && sMenu->rows[sMenu->row] != field) ++sMenu->row;
+    }
+    Draw();
+}
+
+static void HandleSetupAction(u8 taskId, u8 row)
+{
+    switch (row)
+    {
+    case ROW_ASCENSION:
+    case ROW_RULES:
+        sMenu->page = PAGE_ASCENSION;
+        sMenu->candidate = sMenu->config.ascension;
+        sMenu->rulesPage = row == ROW_RULES ? 2 : 0;
+        break;
+    case ROW_DEX:
+        BeginPool();
+        break;
+    case ROW_TRAINERS:
+        BuildRows(PAGE_TRAINERS);
+        break;
+    case ROW_TRIAL:
+        if (!RogueRunStart_CanChooseTrial()) return;
+        if (!TrialAllowsConfig(&sMenu->config) || sMenu->config.trainerRegions == 0)
+        {
+            sMenu->message = sTrialRestriction;
+            break;
+        }
+        RogueRunStart_UpdateConfig(&sMenu->config);
+        if (MenuTrial() == NULL)
+        {
+            Rogue_ApplyAdventureConfig(&sMenu->config);
+            memcpy(gRogueSaveBlock->selectedAscension, sMenu->remembered, sizeof(sMenu->remembered));
+            gRogueSaveBlock->selectedAscension[sMenu->config.battleFormat] = sMenu->config.ascension;
+        }
+        CloseMenu(RUN_REVIEW_ACTION_CHOOSE_TRIAL);
+        return;
+    case ROW_DONE:
+        ExitMenu(taskId, TRUE, sMenu->entrance);
+        return;
+    default:
+        // Inline values are already in the draft; A leaves them and the cursor alone.
+        return;
+    }
+    Draw();
+}
+
+static void HandleSetupValue(u8 row, s8 direction)
+{
+    const struct RogueTrialDefinition *trial = MenuTrial();
+    if (sMenu->readOnly) return;
+    if (trial != NULL && (row == ROW_MODE || (row == ROW_FORMAT && trial->hasForcedBattleFormat)
+     || (row == ROW_TEAM && (trial->forceRandomStarter || trial->fixedStartingPartyCount))))
+    {
+        sMenu->message = sTrialRestriction;
+        Draw();
+        return;
+    }
+    switch (row)
+    {
+    case ROW_MODE:
+        sMenu->config.mode = sMenu->config.mode != ROGUE_GAME_MODE_GAUNTLET
+            && Rogue_IsAdventureModeAvailable(ROGUE_GAME_MODE_GAUNTLET)
+            ? ROGUE_GAME_MODE_GAUNTLET : ROGUE_GAME_MODE_STANDARD;
+        break;
+    case ROW_FORMAT:
+        sMenu->remembered[sMenu->config.battleFormat] = sMenu->config.ascension;
+        sMenu->config.battleFormat = Cycle(sMenu->config.battleFormat, 3, direction);
+        sMenu->config.ascension = min(sMenu->remembered[sMenu->config.battleFormat], RogueAscension_GetUnlocked(sMenu->config.battleFormat));
+        break;
+    case ROW_ENCOUNTERS:
+        sMenu->config.overworldMons = !sMenu->config.overworldMons;
+        break;
+    case ROW_TEAM:
+        if (sMenu->entrance && !RogueRunStart_GetContext()->canUseStarterBag)
+            sMenu->message = sLockedTeam;
+        else
+            sMenu->config.startingTeam = !sMenu->config.startingTeam;
+        break;
+    default:
+        return;
     }
     Draw();
 }
@@ -737,7 +825,7 @@ static void HandlePoolInput(u8 taskId, s8 direction)
 static void Task_Input(u8 taskId)
 {
     u8 row = sMenu->rows[sMenu->row];
-    s8 dir = JOY_REPEAT(DPAD_LEFT) ? -1 : JOY_REPEAT(DPAD_RIGHT) ? 1 : 0;
+    s8 dir = JOY_NEW(A_BUTTON) ? 0 : JOY_REPEAT(DPAD_LEFT) ? -1 : JOY_REPEAT(DPAD_RIGHT) ? 1 : 0;
     if (gPaletteFade.active) return;
     if (sMenu->closing)
     {
@@ -750,7 +838,7 @@ static void Task_Input(u8 taskId)
     if (sMenu->page == PAGE_INTRO_CONFIRM)
     {
         if (JOY_NEW(B_BUTTON)) ResolveIntroConfirmation(FALSE);
-        else if (JOY_REPEAT(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN)) sMenu->confirmChoice ^= 1;
+        else if (dir) sMenu->confirmChoice ^= 1;
         else if (JOY_NEW(A_BUTTON))
         {
             ResolveIntroConfirmation(sMenu->confirmChoice == 0);
@@ -781,9 +869,8 @@ static void Task_Input(u8 taskId)
     {
         if (sMenu->page == PAGE_TRAINERS)
         {
-            BuildRows(PAGE_SETUP);
-            while (sMenu->row + 1 < sMenu->rowCount && sMenu->rows[sMenu->row] != ROW_TRAINERS) ++sMenu->row;
-            sMenu->message = NULL; Draw();
+            ReturnToSetup(ROW_TRAINERS);
+            Draw();
         }
         else if (sMenu->intro) { sMenu->message = sIntroHelp; Draw(); }
         else ExitMenu(taskId, FALSE, FALSE);
@@ -791,84 +878,164 @@ static void Task_Input(u8 taskId)
     }
     if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
     {
-        u8 count = sMenu->rowCount;
-        sMenu->row = Cycle(sMenu->row, count, JOY_REPEAT(DPAD_UP) ? -1 : 1);
+        sMenu->row = Cycle(sMenu->row, sMenu->rowCount, JOY_REPEAT(DPAD_UP) ? -1 : 1);
         sMenu->message = NULL; Draw(); return;
     }
     if (!dir && !JOY_NEW(A_BUTTON)) return;
     if (sMenu->page == PAGE_TRAINERS)
     {
+        if (JOY_NEW(A_BUTTON))
+        {
+            ReturnToSetup(ROW_TRAINERS);
+            Draw(); return;
+        }
         if (!sMenu->readOnly)
         {
             const struct RogueTrialDefinition *trial = MenuTrial();
             if (trial != NULL && ((row == 0 && trial->hasForcedTrainerOrder)
              || (row != 0 && (trial->forcedTrainerToggle != ROGUE_TRIAL_NO_TRAINER_TOGGLE || trial->enableAllRegionalTrainers))))
             { sMenu->message = sTrialRestriction; Draw(); return; }
-            if (row == 0) sMenu->config.trainerOrder = Cycle(sMenu->config.trainerOrder, 3, dir ? dir : 1);
+            if (row == 0) sMenu->config.trainerOrder = Cycle(sMenu->config.trainerOrder, 3, dir);
             else sMenu->config.trainerRegions ^= 1 << (row - 1);
         }
         Draw(); return;
     }
-    if (row == ROW_ASCENSION || row == ROW_RULES)
-    {
-        sMenu->page = PAGE_ASCENSION;
-        sMenu->candidate = sMenu->config.ascension;
-        sMenu->rulesPage = row == ROW_RULES ? 2 : 0;
-    }
-    else if (row == ROW_DEX) { BeginPool(); }
-    else if (row == ROW_TRAINERS) { BuildRows(PAGE_TRAINERS); }
-    else if (row == ROW_TRIAL)
-    {
-        if (JOY_NEW(A_BUTTON) && RogueRunStart_CanChooseTrial())
-        {
-            if (!TrialAllowsConfig(&sMenu->config) || sMenu->config.trainerRegions == 0)
-            { sMenu->message = sTrialRestriction; Draw(); return; }
-            RogueRunStart_UpdateConfig(&sMenu->config);
-            if (MenuTrial() == NULL)
-            {
-                Rogue_ApplyAdventureConfig(&sMenu->config);
-                memcpy(gRogueSaveBlock->selectedAscension, sMenu->remembered, sizeof(sMenu->remembered));
-                gRogueSaveBlock->selectedAscension[sMenu->config.battleFormat] = sMenu->config.ascension;
-            }
-            CloseMenu(RUN_REVIEW_ACTION_CHOOSE_TRIAL);
-        }
-        return;
-    }
-    else if (row == ROW_DONE)
-    {
-        if (JOY_NEW(A_BUTTON)) ExitMenu(taskId, TRUE, sMenu->entrance);
-        return;
-    }
-    else if (!sMenu->readOnly)
-    {
-        const struct RogueTrialDefinition *trial = MenuTrial();
-        if (trial != NULL && (row == ROW_MODE || (row == ROW_FORMAT && trial->hasForcedBattleFormat)
-         || (row == ROW_TEAM && (trial->forceRandomStarter || trial->fixedStartingPartyCount))))
-        { sMenu->message = sTrialRestriction; Draw(); return; }
-        if (!dir) dir = 1;
-        switch (row)
-        {
-        case ROW_MODE:
-        {
-            sMenu->config.mode = sMenu->config.mode != ROGUE_GAME_MODE_GAUNTLET
-                && Rogue_IsAdventureModeAvailable(ROGUE_GAME_MODE_GAUNTLET)
-                ? ROGUE_GAME_MODE_GAUNTLET : ROGUE_GAME_MODE_STANDARD;
-            break;
-        }
-        case ROW_FORMAT:
-            sMenu->remembered[sMenu->config.battleFormat] = sMenu->config.ascension;
-            sMenu->config.battleFormat = Cycle(sMenu->config.battleFormat, 3, dir);
-            sMenu->config.ascension = min(sMenu->remembered[sMenu->config.battleFormat], RogueAscension_GetUnlocked(sMenu->config.battleFormat)); break;
-        case ROW_ENCOUNTERS: sMenu->config.overworldMons = !sMenu->config.overworldMons; break;
-        case ROW_TEAM:
-            if (sMenu->entrance && !RogueRunStart_GetContext()->canUseStarterBag)
-                sMenu->message = sLockedTeam;
-            else sMenu->config.startingTeam = !sMenu->config.startingTeam;
-            break;
-        }
-    }
-    Draw();
+    if (JOY_NEW(A_BUTTON)) HandleSetupAction(taskId, row);
+    else if (dir) HandleSetupValue(row, dir);
 }
+
+#if TESTING
+static void TestPressMenuKey(u16 key)
+{
+    gMain.newKeys = key;
+    gMain.newAndRepeatedKeys = key;
+    Task_Input(0);
+}
+
+// Exercise the real input handlers, suppressing only graphics. Each scenario
+// starts with a fresh draft and leaves saved settings and key state untouched.
+bool8 RogueTest_AdventureControlScenario(u8 scenario)
+{
+    struct AdventureMenu menu = {0};
+    struct AdventureMenu *previous = sMenu;
+    struct RogueAdventureConfig before;
+    u16 oldNew = gMain.newKeys, oldRepeat = gMain.newAndRepeatedKeys;
+    bool8 oldFade = gPaletteFade.active;
+    bool8 ok = TRUE;
+    u8 i;
+    const u8 values[] = { ROW_FORMAT, ROW_ENCOUNTERS, ROW_TEAM };
+    const u8 submenus[] = { ROW_DEX, ROW_TRAINERS, ROW_RULES, ROW_ASCENSION };
+    Rogue_CopyAdventureConfig(&menu.config);
+    menu.intro = scenario != 7;
+    menu.entrance = scenario == 7;
+    menu.config.pokedexVariant = POKEDEX_VARIANT_KANTO_RBY;
+    menu.config.ascension = 0;
+    before = menu.config;
+    sMenu = &menu;
+    sTestSkipDraw = TRUE;
+    gPaletteFade.active = FALSE;
+    if (scenario == 0 || scenario == 7)
+    {
+        for (i = 0; i < (scenario == 7 ? 2 : ARRAY_COUNT(values)); ++i)
+        {
+            menu.page = PAGE_SETUP; menu.row = 0; menu.rowCount = 2;
+            menu.rows[0] = values[i]; menu.rows[1] = ROW_DONE;
+            TestPressMenuKey(A_BUTTON);
+            ok &= memcmp(&before, &menu.config, sizeof(before)) == 0 && menu.row == 0;
+            menu.row = 0;
+            TestPressMenuKey(DPAD_RIGHT);
+            ok &= memcmp(&before, &menu.config, sizeof(before)) != 0;
+            TestPressMenuKey(DPAD_LEFT);
+            ok &= memcmp(&before, &menu.config, sizeof(before)) == 0;
+        }
+    }
+    else if (scenario == 1)
+    {
+        for (i = 0; i < 2; ++i)
+        {
+            menu.page = PAGE_TRAINERS; menu.row = 0; menu.rowCount = 1; menu.rows[0] = i;
+            TestPressMenuKey(DPAD_RIGHT);
+            ok &= memcmp(&before, &menu.config, sizeof(before)) != 0;
+            TestPressMenuKey(DPAD_LEFT);
+            ok &= memcmp(&before, &menu.config, sizeof(before)) == 0;
+            TestPressMenuKey(A_BUTTON);
+            ok &= menu.page == PAGE_SETUP && memcmp(&before, &menu.config, sizeof(before)) == 0;
+        }
+    }
+    else if (scenario == 2)
+    {
+        u16 selected;
+        ok &= BeginPool();
+        TestPressMenuKey(DPAD_RIGHT);
+        selected = menu.pool.variant;
+        ok &= selected != before.pokedexVariant;
+        TestPressMenuKey(B_BUTTON);
+        ok &= menu.page == PAGE_SETUP && menu.config.pokedexVariant == before.pokedexVariant;
+        ok &= BeginPool();
+        TestPressMenuKey(DPAD_RIGHT);
+        selected = menu.pool.variant;
+        TestPressMenuKey(A_BUTTON);
+        ok &= menu.page == PAGE_SETUP && menu.config.pokedexVariant == selected;
+    }
+    else if (scenario == 3)
+    {
+        for (i = 0; i < ARRAY_COUNT(submenus); ++i)
+        {
+            menu.page = PAGE_SETUP; menu.row = 0; menu.rowCount = 1; menu.rows[0] = submenus[i];
+            TestPressMenuKey(DPAD_RIGHT);
+            ok &= menu.page == PAGE_SETUP;
+            TestPressMenuKey(A_BUTTON);
+            ok &= menu.page != PAGE_SETUP;
+            TestPressMenuKey(B_BUTTON);
+            ok &= menu.page == PAGE_SETUP && memcmp(&before, &menu.config, sizeof(before)) == 0;
+        }
+    }
+    else if (scenario == 4)
+    {
+        menu.readOnly = TRUE;
+        menu.page = PAGE_SETUP; menu.rowCount = 1; menu.rows[0] = ROW_FORMAT;
+        TestPressMenuKey(DPAD_RIGHT);
+        TestPressMenuKey(A_BUTTON);
+        ok &= memcmp(&before, &menu.config, sizeof(before)) == 0;
+        ok &= BeginPool();
+        TestPressMenuKey(DPAD_RIGHT);
+        TestPressMenuKey(A_BUTTON);
+        ok &= menu.page == PAGE_SETUP && memcmp(&before, &menu.config, sizeof(before)) == 0;
+    }
+    else if (scenario == 5)
+    {
+        menu.rowCount = 1; menu.rows[0] = ROW_DONE;
+        RequestIntroConfirmation();
+        TestPressMenuKey(DPAD_UP);
+        ok &= menu.confirmChoice == 1;
+        TestPressMenuKey(DPAD_LEFT);
+        ok &= menu.confirmChoice == 0 && !menu.introCommitted;
+        TestPressMenuKey(DPAD_RIGHT);
+        TestPressMenuKey(A_BUTTON); // Confirm Go back, not another value change.
+        ok &= menu.page == PAGE_SETUP && !menu.introConfirmed && !menu.introCommitted;
+        RequestIntroConfirmation();
+        TestPressMenuKey(B_BUTTON);
+        ok &= menu.page == PAGE_SETUP && memcmp(&before, &menu.config, sizeof(before)) == 0;
+    }
+    else if (scenario == 6)
+    {
+        menu.page = PAGE_ASCENSION; menu.rowCount = 1; menu.rows[0] = ROW_ASCENSION;
+        TestPressMenuKey(DPAD_RIGHT);
+        ok &= menu.candidate == 1 && menu.config.ascension == 0;
+        TestPressMenuKey(B_BUTTON);
+        ok &= menu.page == PAGE_SETUP && menu.config.ascension == 0;
+        menu.page = PAGE_ASCENSION; menu.candidate = 0;
+        TestPressMenuKey(A_BUTTON);
+        ok &= menu.page == PAGE_SETUP && menu.config.ascension == 0;
+    }
+    else ok = FALSE;
+    sMenu = previous;
+    sTestSkipDraw = FALSE;
+    gMain.newKeys = oldNew; gMain.newAndRepeatedKeys = oldRepeat;
+    gPaletteFade.active = oldFade;
+    return ok;
+}
+#endif
 
 static void MainCB(void) { RunTasks(); AnimateSprites(); BuildOamBuffer(); UpdatePaletteFade(); }
 static void VBlankCB(void) { LoadOam(); ProcessSpriteCopyRequests(); TransferPlttBuffer(); }
