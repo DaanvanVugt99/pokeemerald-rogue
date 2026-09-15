@@ -6,6 +6,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Remove inherited EX/Vanilla edition labels from the opening, main menu, and save-update greeting; present Divergence as a single standalone game.
+
 - Clarify the initial Pokédex commitment with a draft-preserving confirmation; streamline opening dialogue, restore the guided Quest Board walk with manual recovery, and direct first returns to the Main Hall building tutorial.
 - Make onboarding instructions explicit about Pokémon selection, Bag restoration, fainting rules, route previews, quest rewards, and building; replace vague qualifiers with concrete actions and conditions.
 - Establish the opening story around investigating a shifting realm through a portal from an underground laboratory and hideout; retain the appearance-memory prompt.

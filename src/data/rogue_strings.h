@@ -4,12 +4,6 @@
 // -bump ROGUE_SAVE_VERSION in rogue_save.h if old development saves can be discarded
 const u8 gText_RogueVersion[] = _("v2.0.1a");
 
-#ifdef ROGUE_EXPANSION
-const u8 gText_RogueVersionPrefix[] = _("EX");
-#else
-const u8 gText_RogueVersionPrefix[] = _("Vanilla");
-#endif
-
 #if defined(ROGUE_FEATURE_AUTOMATION)
 const u8 gText_RogueVersionSuffix[] = _("(AUTOMATION)");
 #elif defined(ROGUE_DEBUG)

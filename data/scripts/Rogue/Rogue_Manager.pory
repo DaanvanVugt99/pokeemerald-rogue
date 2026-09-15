@@ -1682,7 +1682,6 @@ script Rogue_QuickSaveVersionWarning
 script Rogue_QuickSaveVersionUpdateMessage
 {
     bufferstring(STR_VAR_1, gText_RogueVersion)
-    bufferstring(STR_VAR_2, gText_RogueVersionPrefix)
     bufferstring(STR_VAR_3, gText_RogueVersionSuffix)
 
     if(flag(FLAG_ROGUE_PRE_RELEASE_COMPAT_WARNING))
@@ -1690,7 +1689,7 @@ script Rogue_QuickSaveVersionUpdateMessage
         msgbox(format("WARNING!\pThis save game was detected to have come from a pre-release patch version.\pIt is not recommended to continue using this save, as you may lock yourself out of new content.\pPlease restore a backup if possible."))
     }
 
-    msgbox(format("Welcome to...\nEmerald Rogue:\pDivergence {STR_VAR_2}!\p{STR_VAR_1} {STR_VAR_3}\pAlways remember to download from the official Divergence sources."), MSGBOX_DEFAULT)
+    msgbox(format("Welcome to...\nEmerald Rogue:\pDivergence!\p{STR_VAR_1} {STR_VAR_3}\pAlways remember to download from the official Divergence sources."), MSGBOX_DEFAULT)
     msgbox(format("I hope you enjoy Divergence!"), MSGBOX_DEFAULT)
 }
 

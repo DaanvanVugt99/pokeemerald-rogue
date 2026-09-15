@@ -481,7 +481,6 @@ static const u8 sTextColor_MenuInfo[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHIT
 static const u8 sTextColor_Version[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
 
 extern const u8 gText_RogueVersion[];
-extern const u8 gText_RogueVersionPrefix[];
 extern const u8 gText_RogueVersionSuffix[];
 extern const u8 gText_RogueVersionSpacer[];
 
@@ -878,9 +877,7 @@ static void Task_DisplayMainMenu(u8 taskId)
         LoadPalette(&palette, 241, 2);
 
         // Setup version text
-        StringCopy(gStringVar1, gText_RogueVersionPrefix);
-        StringAppend(gStringVar1, gText_Space2);
-        StringAppend(gStringVar1, gText_RogueVersion);
+        StringCopy(gStringVar1, gText_RogueVersion);
         StringAppend(gStringVar1, gText_RogueVersionSpacer);
         StringAppend(gStringVar1, gText_RogueVersionSuffix);
 
