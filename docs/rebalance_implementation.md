@@ -870,3 +870,19 @@ separate review; they were not silently broadened into extra distribution.
   row reuse, plus raw empty-slot comparison checks. All 13 filtered Pokédex
   tests pass. Playable debug ROM build and `git diff --check` pass; ROM usage
   is 31,774,852 bytes, with unchanged static EWRAM/IWRAM usage.
+
+### Additional move access — 2026-09-14
+
+- Later user additions: Haxorus Stone Axe at 67; both Stunfisk forms Shore Up
+  at 40; Malamar Psycho Boost at 65; Octillery No Retreat at 70; Heracross
+  tutor Scale Shot; Garchomp Flip Turn at 48 (its normal evolution level).
+- Late-game additions extend the existing final learnset levels. Shore Up
+  accompanies Muddy Water at 40 for both Stunfisk forms. Base profile redirects
+  carry additions to Mega Heracross, Mega Malamar, and both Garchomp Megas;
+  pre-evolutions retain their existing access.
+- Record these later approvals in the manifest without rewriting the original
+  review ledger or refreshing pinned upstream sources.
+- Validation: offline profile `verify` PASS; manifest `--require-complete`
+  COMPLETE (650/650 decisions, 1,056 species/forms); focused Rogue test
+  `Pokedex move markers identify added level access` PASS (1/1); incremental
+  debug playable ROM build PASS; `git diff --check` PASS.

@@ -47,6 +47,11 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Add Stone Axe to Haxorus at level 67, Shore Up to both Stunfisk forms at
+  level 40, Psycho Boost to Malamar at level 65, No Retreat to Octillery at
+  level 70, Flip Turn to Garchomp at level 48, and Scale Shot as a Heracross
+  tutor move. Mega forms inherit their base profiles.
+
 - Correct the nursery sideways couch orientation by moving it to the right of the coffee table; group drinks on the left and clear excess lounge decoration.
 
 - Rework the nursery care gallery into a shared coffee corner with a long couch, Rocket sideways seating, a low table, and dimmed seats for locked capacity upgrades.

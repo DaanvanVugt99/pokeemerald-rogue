@@ -62264,6 +62264,7 @@ static u16 const sTutorMoves_SPECIES_HERACROSS[] =
 	MOVE_ROCK_BLAST,
 	MOVE_ROCK_SLIDE,
 	MOVE_ROCK_TOMB,
+	MOVE_SCALE_SHOT,
 	MOVE_SEISMIC_TOSS,
 	MOVE_SHADOW_CLAW,
 	MOVE_SKITTER_SMACK,
@@ -64787,6 +64788,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_OCTILLERY[] =
 	{ .move=MOVE_HYPER_BEAM, .level=54 },
 	{ .move=MOVE_SNIPE_SHOT, .level=62 },
 	{ .move=MOVE_ZAP_CANNON, .level=65 },
+	{ .move=MOVE_NO_RETREAT, .level=70 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -127800,6 +127802,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_GARCHOMP[] =
 	{ .move=MOVE_BITE, .level=27 },
 	{ .move=MOVE_SLASH, .level=34 },
 	{ .move=MOVE_DRAGON_CLAW, .level=42 },
+	{ .move=MOVE_FLIP_TURN, .level=48 },
 	{ .move=MOVE_DIG, .level=52 },
 	{ .move=MOVE_SANDSTORM, .level=62 },
 	{ .move=MOVE_TAKE_DOWN, .level=72 },
@@ -180359,6 +180362,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_HAXORUS[] =
 	{ .move=MOVE_OUTRAGE, .level=46 },
 	{ .move=MOVE_GUILLOTINE, .level=53 },
 	{ .move=MOVE_GIGA_IMPACT, .level=60 },
+	{ .move=MOVE_STONE_AXE, .level=67 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -182097,6 +182101,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_STUNFISK[] =
 	{ .move=MOVE_BOUNCE, .level=35 },
 	{ .move=MOVE_STATIC_BURST, .level=35 },
 	{ .move=MOVE_MUDDY_WATER, .level=40 },
+	{ .move=MOVE_SHORE_UP, .level=40 },
 	{ .move=MOVE_DISCHARGE, .level=45 },
 	{ .move=MOVE_FLAIL, .level=50 },
 	{ .move=MOVE_FISSURE, .level=55 },
@@ -203806,6 +203811,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_MALAMAR[] =
 	{ .move=MOVE_SUPERPOWER, .level=47 },
 	{ .move=MOVE_ECLIPSE, .level=56 },
 	{ .move=MOVE_FALSE_SURRENDER, .level=60 },
+	{ .move=MOVE_PSYCHO_BOOST, .level=65 },
 	{ .move=MOVE_NONE, .level=0 },
 };
 
@@ -268664,6 +268670,7 @@ static struct LevelUpMove const sLevelUpMoves_SPECIES_STUNFISK_GALARIAN[] =
 	{ .move=MOVE_IRON_DEFENSE, .level=30 },
 	{ .move=MOVE_BOUNCE, .level=35 },
 	{ .move=MOVE_MUDDY_WATER, .level=40 },
+	{ .move=MOVE_SHORE_UP, .level=40 },
 	{ .move=MOVE_SNAP_TRAP, .level=45 },
 	{ .move=MOVE_FLAIL, .level=50 },
 	{ .move=MOVE_FISSURE, .level=55 },
@@ -311942,6 +311949,7 @@ static const u8 sMoveAdditions_SPECIES_HERACROSS[] = {
 	0x00,
 	0x48,
 	0x40,
+	0x20,
 	0x00,
 	0x00,
 	0x00,
@@ -312049,13 +312057,13 @@ static const u8 sMoveAdditions_SPECIES_REMORAID[] = {
 static const u8 sMoveAdditions_SPECIES_OCTILLERY[] = {
 	0x00,
 	0x50,
-	0x32,
+	0x72,
 	0x00,
 	0x00,
 	0x00,
 	0x00,
 	0x00,
-	0x04,
+	0x08,
 };
 static const u8 sMoveAdditions_SPECIES_DELIBIRD[] = {
 	0xF6,
@@ -314426,12 +314434,12 @@ static const u8 sMoveAdditions_SPECIES_GABITE[] = {
 };
 static const u8 sMoveAdditions_SPECIES_GARCHOMP[] = {
 	0x20,
+	0x04,
+	0x01,
+	0x20,
 	0x80,
-	0x00,
-	0x10,
-	0x40,
-	0x12,
-	0x40,
+	0x24,
+	0x80,
 	0x00,
 	0x00,
 	0x00,
@@ -316110,13 +316118,13 @@ static const u8 sMoveAdditions_SPECIES_FRAXURE[] = {
 static const u8 sMoveAdditions_SPECIES_HAXORUS[] = {
 	0x00,
 	0x00,
+	0x04,
+	0x02,
 	0x00,
+	0x21,
 	0x01,
-	0x80,
-	0x90,
 	0x00,
-	0x00,
-	0x08,
+	0x10,
 	0x00,
 };
 static const u8 sMoveAdditions_SPECIES_CUBCHOO[] = {
@@ -316175,7 +316183,7 @@ static const u8 sMoveAdditions_SPECIES_ACCELGOR[] = {
 };
 static const u8 sMoveAdditions_SPECIES_STUNFISK[] = {
 	0x00,
-	0x08,
+	0x28,
 	0x00,
 	0x00,
 	0x00,
@@ -316897,10 +316905,10 @@ static const u8 sMoveAdditions_SPECIES_INKAY[] = {
 static const u8 sMoveAdditions_SPECIES_MALAMAR[] = {
 	0x00,
 	0x00,
-	0xA3,
-	0x08,
-	0x80,
+	0x47,
+	0x11,
 	0x00,
+	0x01,
 	0x00,
 	0x00,
 	0x00,
@@ -319344,12 +319352,12 @@ static const u8 sMoveAdditions_SPECIES_YAMASK_GALARIAN[] = {
 };
 static const u8 sMoveAdditions_SPECIES_STUNFISK_GALARIAN[] = {
 	0x00,
-	0x80,
+	0x10,
+	0x01,
 	0x00,
 	0x00,
 	0x00,
-	0x00,
-	0x20,
+	0x40,
 	0x00,
 	0x00,
 };

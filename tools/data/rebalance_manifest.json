@@ -156,6 +156,32 @@
   ],
   "batches": [
     {
+      "id": "additional-move-access-2026-09-14",
+      "decisions": {},
+      "species": {
+        "SPECIES_MALAMAR": {
+          "level_moves": {
+            "MOVE_PSYCHO_BOOST": 65
+          }
+        },
+        "SPECIES_MALAMAR_MEGA": {
+          "level_moves": {
+            "MOVE_PSYCHO_BOOST": 65
+          }
+        },
+        "SPECIES_HERACROSS": {
+          "add_tutors": [
+            "MOVE_SCALE_SHOT"
+          ]
+        },
+        "SPECIES_HERACROSS_MEGA": {
+          "add_tutors": [
+            "MOVE_SCALE_SHOT"
+          ]
+        }
+      }
+    },
+    {
       "id": "ponyta-fire-pivot-and-shared-kicks",
       "decisions": {
         "Remaining Upstream Revised Pokemon | Ponyta": "5fdec551d9c30207eef2c37e82fe4f9c3050dd5c6ec84a370216930080e173e3",
@@ -1612,7 +1638,10 @@
             9,
             0,
             0
-          ]
+          ],
+          "level_moves": {
+            "MOVE_SHORE_UP": 40
+          }
         },
         "SPECIES_STUNFISK_GALARIAN": {
           "abilities": [
@@ -1621,7 +1650,8 @@
             "ABILITY_NONE"
           ],
           "level_moves": {
-            "MOVE_IRON_HEAD": 55
+            "MOVE_IRON_HEAD": 55,
+            "MOVE_SHORE_UP": 40
           },
           "add_tutors": [
             "MOVE_SPIKES"
@@ -3016,7 +3046,8 @@
             "MOVE_FLY"
           ],
           "level_moves": {
-            "MOVE_DUAL_CHOP": 1
+            "MOVE_DUAL_CHOP": 1,
+            "MOVE_FLIP_TURN": 48
           }
         },
         "SPECIES_GARCHOMP_MEGA": {
@@ -3024,7 +3055,8 @@
             "MOVE_FLY"
           ],
           "level_moves": {
-            "MOVE_DUAL_CHOP": 1
+            "MOVE_DUAL_CHOP": 1,
+            "MOVE_FLIP_TURN": 48
           }
         },
         "SPECIES_GARCHOMP_MEGA_Z": {
@@ -3032,7 +3064,8 @@
             "MOVE_FLY"
           ],
           "level_moves": {
-            "MOVE_DUAL_CHOP": 1
+            "MOVE_DUAL_CHOP": 1,
+            "MOVE_FLIP_TURN": 48
           }
         },
         "SPECIES_OMANYTE": {
@@ -3065,7 +3098,8 @@
           "level_moves": {
             "MOVE_SIGNAL_BEAM": 29,
             "MOVE_ICICLE_SPEAR": 33,
-            "MOVE_ZAP_CANNON": 65
+            "MOVE_ZAP_CANNON": 65,
+            "MOVE_NO_RETREAT": 70
           }
         },
         "SPECIES_SPHEAL": {
@@ -6493,7 +6527,11 @@
         "SPECIES_GALLADE_MEGA": {},
         "SPECIES_AXEW": {},
         "SPECIES_FRAXURE": {},
-        "SPECIES_HAXORUS": {},
+        "SPECIES_HAXORUS": {
+          "level_moves": {
+            "MOVE_STONE_AXE": 67
+          }
+        },
         "SPECIES_DEINO": {},
         "SPECIES_ZWEILOUS": {},
         "SPECIES_HYDREIGON": {},

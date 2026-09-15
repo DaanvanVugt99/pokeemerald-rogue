@@ -1545,6 +1545,42 @@
   "removeLevelUp": [{"id":"rebalance-ekans-remove-level-sludge_bomb","species":"SPECIES_EKANS","move":"MOVE_SLUDGE_BOMB"},{"id":"rebalance-arbok-remove-level-sludge_bomb","species":"SPECIES_ARBOK","move":"MOVE_SLUDGE_BOMB"}],
   "levelUp": [
     {
+      "id": "rebalance-haxorus-stone_axe",
+      "species": "SPECIES_HAXORUS",
+      "move": "MOVE_STONE_AXE",
+      "level": 67
+    },
+    {
+      "id": "rebalance-stunfisk-shore_up",
+      "species": "SPECIES_STUNFISK",
+      "move": "MOVE_SHORE_UP",
+      "level": 40
+    },
+    {
+      "id": "rebalance-stunfisk_galarian-shore_up",
+      "species": "SPECIES_STUNFISK_GALARIAN",
+      "move": "MOVE_SHORE_UP",
+      "level": 40
+    },
+    {
+      "id": "rebalance-malamar-psycho_boost",
+      "species": "SPECIES_MALAMAR",
+      "move": "MOVE_PSYCHO_BOOST",
+      "level": 65
+    },
+    {
+      "id": "rebalance-octillery-no_retreat",
+      "species": "SPECIES_OCTILLERY",
+      "move": "MOVE_NO_RETREAT",
+      "level": 70
+    },
+    {
+      "id": "rebalance-garchomp-flip_turn",
+      "species": "SPECIES_GARCHOMP",
+      "move": "MOVE_FLIP_TURN",
+      "level": 48
+    },
+    {
       "id": "rebalance-horse-ponyta-jump_kick",
       "species": "SPECIES_PONYTA",
       "move": "MOVE_JUMP_KICK",
@@ -7577,6 +7613,11 @@
     }
   ],
   "tutor": [
+    {
+      "id": "rebalance-heracross-scale_shot",
+      "species": "SPECIES_HERACROSS",
+      "move": "MOVE_SCALE_SHOT"
+    },
     {
       "id": "rebalance-aromatisse-tutor-toxic",
       "species": "SPECIES_AROMATISSE",
