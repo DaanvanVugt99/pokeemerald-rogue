@@ -38,7 +38,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
       "x": 20,
-      "y": 21,
+      "y": 24,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
@@ -51,7 +51,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 17,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -64,7 +64,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 18,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -77,7 +77,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 19,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -90,7 +90,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 20,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -103,7 +103,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 21,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -246,7 +246,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 7,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -259,7 +259,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 8,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -272,7 +272,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 9,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -285,7 +285,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 10,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -298,7 +298,7 @@
     {
       "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 11,
-      "y": 15,
+      "y": 22,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
       "movement_range_x": 0,
@@ -366,14 +366,14 @@
     },
     {
       "x": 14,
-      "y": 23,
+      "y": 26,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
     },
     {
       "x": 15,
-      "y": 23,
+      "y": 26,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"
@@ -415,7 +415,7 @@
     },
     {
       "x": 13,
-      "y": 23,
+      "y": 26,
       "elevation": 0,
       "dest_map": "MAP_ROGUE_AREA_FARMING_FIELD",
       "dest_warp_id": "0"

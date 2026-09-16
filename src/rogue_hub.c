@@ -1656,9 +1656,9 @@ static void RogueHub_UpdateFarmingAreaMetatiles()
     }
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        MetatileSet_Tile(12, 21, METATILE_BerryLab_Floor);
-        MetatileSet_Tile(16, 21, METATILE_BerryLab_Floor);
-        MetatileFill_Tile(12, 22, 16, 24, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(12, 24, METATILE_BerryLab_Floor);
+        MetatileSet_Tile(16, 24, METATILE_BerryLab_Floor);
+        MetatileFill_Tile(12, 25, 16, 27, METATILE_BerryLab_Void | MAPGRID_COLLISION_MASK);
     }
     if(RogueHub_GetAreaAtConnection(HUB_AREA_BERRY_FIELD, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
@@ -1671,11 +1671,11 @@ static void RogueHub_UpdateFarmingAreaMetatiles()
     }
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD1))
     {
-        MetatileFill_Tile(17, 15, 21, 15, METATILE_BerryLab_InactiveBed);
+        MetatileFill_Tile(17, 22, 21, 22, METATILE_BerryLab_InactiveBed);
     }
     if(!RogueHub_HasUpgrade(HUB_UPGRADE_BERRY_FIELD_EXTRA_FIELD2))
     {
-        MetatileFill_Tile(7, 15, 11, 15, METATILE_BerryLab_InactiveBed);
+        MetatileFill_Tile(7, 22, 11, 22, METATILE_BerryLab_InactiveBed);
     }
 }
 

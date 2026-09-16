@@ -1565,7 +1565,7 @@
       "id": "LAYOUT_ROGUE_AREA_FARMING_FIELD",
       "name": "Rogue_Area_FarmingField_Layout",
       "width": 29,
-      "height": 25,
+      "height": 28,
       "primary_tileset": "gTileset_HubArchitecture",
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_FarmingField/border.bin",

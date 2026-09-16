@@ -1,6 +1,6 @@
 # Berry Lab
 
-The former Berry Fields is a 29 x 25 indoor greenhouse using
+The former Berry Fields is a compact 29 x 28 indoor greenhouse using
 HubArchitecture + HubFurnishings. The existing FarmingField map/layout IDs,
 hub upgrade IDs, object local IDs, and berry tree IDs are retained.
 
@@ -13,20 +13,27 @@ Clockwise from northwest, their five planting spots retain these assignments:
 | --- | --- | --- | --- |
 | Northwest | (7–11, 7) | HUB_11–15 | Initial |
 | Northeast | (17–21, 7) | HUB_6–10 | EXTRA_FIELD0 |
-| Southeast | (17–21, 15) | HUB_1–5 | EXTRA_FIELD1 |
-| Southwest | (7–11, 15) | HUB_16–20 | EXTRA_FIELD2 |
+| Southeast | (17–21, 22) | HUB_1–5 | EXTRA_FIELD1 |
+| Southwest | (7–11, 22) | HUB_16–20 | EXTRA_FIELD2 |
 
 Locked bays keep their frames and replace soil with inactive floor. All plants
 are individually approachable from the south aisle, including at maturity.
 Active planting spots retain their original impassable collision; inactive
 bay flooring is walkable.
-The merchant (local ID 22) at (8,20), pot (23) at (7,20), and workbench (1) at
-(10,20) share the south service nook. Brewing turns the merchant west toward
-the pot. Menus, recipes, berry growth, prices, yields, and upgrades are unchanged.
+The lower beds sit fifteen tiles south of the upper beds. This matches the
+camera's vertical spawn range, so every camera window contains one five-berry
+bank per side at most (ten berries total), leaving object-event slots for the
+player and service objects.
+The retained table remains the room's single central furnishing. The open floor
+remains clear around the growing banks, leaving the three-wide crossing and all
+service or berry interaction positions unchanged.
+The merchant (local ID 22) at (14,11), pot (23) at (15,11), and workbench (1)
+at (20,24) remain in the authored service positions. Menus, recipes, berry
+growth, prices, yields, and upgrades are unchanged.
 
 ## Hallways and saves
 
-North/east/south/west threshold centers are (14,1), (26,11), (14,23), and (2,11).
+North/east/south/west threshold centers are (14,1), (26,11), (14,26), and (2,11).
 Original warp indices 0–7 remain assigned to those directions; new indices 9–12
 add their third lanes. Index 8 remains the teleport arrival, now (14,18).
 Every exit has a three-wide fade, a warp on the second shade, and private
@@ -83,6 +90,6 @@ including all Berry Lab lanes and legacy save recovery. Interactive verification
 of berry menus, brewing, and a real pre-conversion save is a separate manual
 check; static previews and headless tests do not replace that playthrough.
 
-Shadow-backed pot bottoms and plant tops occupy 0x372�0x373. They reuse the
+Shadow-backed pot bottoms and plant tops occupy 0x372-0x373. They reuse the
 existing FloorShadow backing and plant foregrounds without allocating graphics.
 Top-wall pots use the dark bottom; left-wall plants use both shaded halves.

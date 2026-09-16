@@ -6,6 +6,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Reflow Berry Lab into a compact 29 x 28 layout: upper and lower berry banks are fifteen tiles apart, preserving all four upgrade banks while keeping each camera window within the ten-berry sprite limit.
+
 - Standardize opening setup, appearance editor and Adventure Console controls: Left/Right changes values, A confirms or opens editors, and B returns from editors. A on inline settings leaves both the value and selected row unchanged. Update control hints and cover settings, Pokédex, trainers, Ascension and confirmation input with a focused regression test.
 
 - Call the player's underground home a base in the intro naming dialogue and naming-screen prompt, replacing the inherited village label.

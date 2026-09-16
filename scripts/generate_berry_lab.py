@@ -15,13 +15,19 @@ from generate_hub_tiles import Catalogue
 
 ROOM = 'Rogue_Area_FarmingField'
 OUT = ROOT/'build/berry_lab'
-W, H = 29, 25
+W, H = 29, 28
+OLD_W, OLD_H = 40, 25
 # Clockwise, retaining the historical berry tree IDs and upgrade flags.
 BEDS = [(7,7,11,'0'), (17,7,6,'FLAG_TEMP_1'),
-        (17,15,1,'FLAG_TEMP_2'), (7,15,16,'FLAG_TEMP_3')]
+        (17,22,1,'FLAG_TEMP_2'), (7,22,16,'FLAG_TEMP_3')]
+# The table is the single shared furnishing retained in the current room.
+# Coordinates are the prefab's top-left tile.
+DECORATIONS = [
+    ('Hub / Table and four stools', 8, 11),
+]
 DIRECTIONS = ['NORTH','EAST','SOUTH','WEST']
 VECTORS = [(0,-1),(1,0),(0,1),(-1,0)]
-CENTERS = [(14,1),(26,11),(14,23),(2,11)]
+CENTERS = [(14,1),(26,11),(14,26),(2,11)]
 
 
 def tiles(cat):
@@ -32,6 +38,14 @@ def tiles(cat):
         'WarpWestUpper','WarpEastUpper')}
     names.update(cat.berry_lab)
     return names
+
+
+def apply_decorations(a):
+    """Stamp the shared lab furnishings into the authored room."""
+    prefabs = {p['name']: p for p in json.loads((ROOT/'data/tilesets/hub_prefabs.json').read_text())}
+    for name, x, y in DECORATIONS:
+        for cell in prefabs[name]['metatiles']:
+            a[(y + cell['y']) * W + x + cell['x']] = cell['metatile_id'] | 0x3C00
 
 
 def initialize(cat):
@@ -46,17 +60,17 @@ def initialize(cat):
         v=t[n] if isinstance(n,str) else n
         for y in range(y1,y2+1):
             for x in range(x1,x2+1):a[y*W+x]=v|0x3000|(0xC00 if solid else 0)
-    fill(5,5,23,21,'Floor')
+    fill(5,5,23,24,'Floor')
     fill(4,3,24,3,'Wall',True);fill(5,4,23,4,'WallBase',True)
     for x in (4,24):
         fill(x,4,x,20,'Pillar',True);fill(x,21,x,21,'PillarEnd',True)
     # Main crossing and three-wide exterior fade strips.
-    fill(0,10,28,12,'Floor');fill(13,0,15,24,'Floor')
+    fill(0,10,28,12,'Floor');fill(13,0,15,27,'Floor')
     for x,n in [(0,'FloorDim20'),(1,'FloorDim20'),(2,'WarpWest'),(3,'FloorFadeWest'),
                 (25,'FloorFadeEast'),(26,'WarpEast'),(27,'FloorDim20'),(28,'FloorDim20')]:
         fill(x,10,x,12,n)
     for y,n in [(0,'FloorDim20'),(1,'WarpNorth'),(2,'FloorFadeNorth'),
-                (22,'FloorFadeSouth'),(23,'WarpSouth'),(24,'FloorDim20')]:fill(13,y,15,y,n)
+                (25,'FloorFadeSouth'),(26,'WarpSouth'),(27,'FloorDim20')]:fill(13,y,15,y,n)
     # Side upper lane keeps the same terminal shade as the shared facade rules.
     fill(0,10,1,10,'FloorShadowDim20');fill(27,10,28,10,'FloorShadowDim20')
     fill(2,10,2,10,'WarpWestUpper');fill(26,10,26,10,'WarpEastUpper')
@@ -73,22 +87,22 @@ def initialize(cat):
             mid=cat.mapping['safari_lab'][cat.config['rooms']['safari_lab']['names'][f'Habitat_{sx}_1']]
             fill(px,y,px,y,mid,True)
     plant=next(p for p in json.loads((ROOT/'data/tilesets/hub_prefabs.json').read_text()) if p['name']=='Hub / Plant')
-    for x,y in [(5,5),(23,5),(5,14),(23,14),(17,19),(22,19)]:
+    for x,y in [(5,5),(23,5),(5,21),(23,21),(17,19),(22,19)]:
         for cell in plant['metatiles']:
             fill(x+cell['x'],y+cell['y'],x+cell['x'],y+cell['y'],cell['metatile_id'],True)
     # Finish the initial assembly using the same wall grammar as Research Junction.
     # This runs only during the guarded first conversion, never normal generation.
     def put(x,y,n,solid=True):fill(x,y,x,y,n,solid)
-    for x,y in [(5,5),(23,5),(5,14),(23,14),(17,19),(22,19)]:fill(x,y,x,y+1,'Floor')
+    for x,y in [(5,5),(23,5),(5,21),(23,21),(17,19),(22,19)]:fill(x,y,x,y+1,'Floor')
     fill(4,2,24,5,'Void',True)
     fill(5,3,23,3,'Wall',True);fill(5,4,23,4,'WallBase',True);fill(5,5,23,5,'FloorShadow')
     for x in (4,24):
-        fill(x,2,x,21,'Pillar',True)
-        for y,n in [(2,'PillarCap'),(3,'PillarJoin'),(8,'InnerJoin'),(9,'InnerBase'),(10,'InnerFoot'),(13,'PillarCap'),(14,'PillarJoin'),(21,'PillarEnd')]:put(x,y,n,y!=10)
+        fill(x,2,x,24,'Pillar',True)
+        for y,n in [(2,'PillarCap'),(3,'PillarJoin'),(8,'InnerJoin'),(9,'InnerBase'),(10,'InnerFoot'),(13,'PillarCap'),(14,'PillarJoin'),(24,'PillarEnd')]:put(x,y,n,y!=10)
         fill(x,11,x,12,'Floor')
     for x in (12,16):
         fill(x,0,x,2,'Pillar',True)
-        for y,n in [(3,'InnerJoin'),(4,'InnerBase'),(5,'InnerFoot'),(21,'PillarCap'),(22,'PillarJoin'),(23,'Pillar'),(24,'Pillar')]:put(x,y,n,y!=5)
+        for y,n in [(3,'InnerJoin'),(4,'InnerBase'),(5,'InnerFoot'),(24,'PillarCap'),(25,'PillarJoin'),(26,'Pillar'),(27,'Pillar')]:put(x,y,n,y!=5)
     fill(13,0,15,5,'Floor')
     for y,n in [(0,'FloorDim20'),(1,'WarpNorth'),(2,'FloorFadeNorth')]:fill(13,y,15,y,n)
     for x1,x2 in [(0,3),(25,28)]:fill(x1,8,x2,8,'Wall',True);fill(x1,9,x2,9,'WallBase',True)
@@ -96,12 +110,13 @@ def initialize(cat):
     put(3,10,'FloorShadowFadeWest',False);put(25,10,'FloorShadowFadeEast',False)
     for x,y,_,_ in BEDS:
         fill(x,y,x+4,y,'SoilRim',True);put(x-1,y,'BedEndLeft');put(x+5,y,'BedEndRight')
-    for x in (6,10,18,22):put(x,4,111);put(x,5,'PlantBaseShadow')
+    for x in (6,11,17,22):put(x,4,111);put(x,5,'PlantBaseShadow')
     for x in (7,8,9,19,20,21):put(x,4,'GrowLight')
-    for x,y in [(5,7),(23,7),(5,14),(23,14),(16,16),(22,16),(17,19),(22,19)]:put(x,y,'PlantTopShadow' if x==5 else 'PlantTop');put(x,y+1,'PlantBaseShadow' if x==5 else 'PlantBase')
+    for x,y in [(5,7),(23,7),(5,21),(23,21),(16,23),(22,23),(17,19),(22,19)]:put(x,y,'PlantTopShadow' if x==5 else 'PlantTop');put(x,y+1,'PlantBaseShadow' if x==5 else 'PlantBase')
     for x in range(18,22):put(x,18,'SeedTray');put(x,19,'PropagationBase')
     for y in range(3):
         for x in range(2):put(5+x,17+y,cat.mapping['lab_junction'][cat.config['rooms']['lab_junction']['names'][f'Decor_Cargo_{x}_{y}']])
+    apply_decorations(a)
     (ROOT/layout['blockdata_filepath']).write_bytes(packed(a))
     (ROOT/layout['border_filepath']).write_bytes(packed([t['Void']|0x3C00]*4))
     layout.update(width=W,height=H,primary_tileset='gTileset_HubArchitecture',secondary_tileset='gTileset_HubFurnishings')
@@ -112,11 +127,11 @@ def initialize(cat):
         if ident.startswith('BERRY_TREE_HUB_'):
             bid=int(ident.rsplit('_',1)[1]);x,y,start,flag=next(b for b in BEDS if b[2]<=bid<b[2]+5)
             e.update(x=x+bid-start,y=y,elevation=3)
-        elif e['graphics_id']=='OBJ_EVENT_GFX_WORK_TABLE': e.update(x=10,y=20,elevation=3)
-        elif e['graphics_id']=='OBJ_EVENT_GFX_LINK_RECEPTIONIST': e.update(x=8,y=20,elevation=3,movement_type='MOVEMENT_TYPE_FACE_DOWN')
-        else: e.update(x=7,y=20,elevation=3)
+        elif e['graphics_id']=='OBJ_EVENT_GFX_WORK_TABLE': e.update(x=20,y=24,elevation=3)
+        elif e['graphics_id']=='OBJ_EVENT_GFX_LINK_RECEPTIONIST': e.update(x=14,y=11,elevation=3,movement_type='MOVEMENT_TYPE_FACE_DOWN')
+        else: e.update(x=15,y=11,elevation=3)
     warp=lambda x,y:dict(x=x,y=y,elevation=0,dest_map='MAP_ROGUE_AREA_FARMING_FIELD',dest_warp_id='0')
-    m['warp_events']=[warp(14,1),warp(15,1),warp(26,11),warp(26,12),warp(14,23),warp(15,23),warp(2,11),warp(2,12),warp(14,18),warp(13,1),warp(26,10),warp(13,23),warp(2,10)]
+    m['warp_events']=[warp(14,1),warp(15,1),warp(26,11),warp(26,12),warp(14,26),warp(15,26),warp(2,11),warp(2,12),warp(14,18),warp(13,1),warp(26,10),warp(13,26),warp(2,10)]
     groups_path=ROOT/'data/maps/map_groups.json';groups=json.loads(groups_path.read_text())
     m['connections']=[]
     for suffix,direction,offset,cw,ch in [('Horizontal','left',8,16,8),('Horizontal','right',8,16,8),('North','up',11,8,12),('South','down',11,8,12)]:
@@ -130,6 +145,78 @@ def initialize(cat):
         (folder/'map.json').write_text(json.dumps(facade,indent=2)+'\n');(folder/'scripts.pory').write_text(f'mapscripts {name}_MapScripts {{}}\n')
         groups['gMapGroup_RogueHubAreas'].append(name)
     path.write_text(json.dumps(registry,indent=2)+'\n');groups_path.write_text(json.dumps(groups,indent=2)+'\n');mpath.write_text(json.dumps(m,indent=2)+'\n')
+
+
+def reflow_layout():
+    """Compact the temporary wide room while preserving its authored tiles.
+
+    The temporary 40x25 layout solved the sprite cap by adding a large empty
+    central aisle. Fold that aisle back out, then move the lower growing banks
+    seven tiles south. The lower boundary follows three tiles south as well,
+    leaving the compact room at 29x28 while keeping each camera window to one
+    five-berry bank per side.
+    """
+    layouts_path = ROOT/'data/layouts/layouts.json'
+    registry = json.loads(layouts_path.read_text())
+    layout = next(l for l in registry['layouts'] if l['id']=='LAYOUT_ROGUE_AREA_FARMING_FIELD')
+    assert (layout['width'], layout['height']) == (OLD_W, OLD_H), 'Berry Lab already reflowed'
+    map_path = ROOT/f'data/layouts/{ROOM}/map.bin'
+    raw = map_path.read_bytes()
+    wide = list(words(layout['blockdata_filepath']))
+    assert len(wide) == OLD_W * OLD_H and len(raw) == OLD_W * OLD_H * 2
+    # Recover the original 29x25 authored room from the temporary wide copy.
+    old = []
+    for y in range(OLD_H):
+        row = wide[y * OLD_W:(y + 1) * OLD_W]
+        old.extend(row[:17] + row[28:])
+    void = old[0]
+    floor = old[8 * 29 + 14]
+    new = [void] * (W * H)
+    for y in range(OLD_H):
+        # Keep the side-pillar end at y=21; only the bottom boundary rows move.
+        dest_y = y if y <= 21 else y + 3
+        for x in range(29):
+            new[dest_y * W + x] = old[y * 29 + x]
+    # Restore the compact south aisle and its side-pillar ends below the moved
+    # lower beds. The original y=21 row supplies the authored floor/pillar
+    # tiles, while the old boundary remains three tiles farther south.
+    for x in range(5, 24):
+        new[24 * W + x] = old[21 * 29 + x]
+    for x in (4, 24):
+        new[24 * W + x] = old[21 * 29 + x]
+    # Move the complete lower habitat assembly into the lower section. Its
+    # seven-tile shift keeps the upper and lower berry rows fifteen tiles apart.
+    for y in range(14, 17):
+        for x in range(5, 24):
+            new[y * W + x] = floor
+            new[(y + 7) * W + x] = old[y * 29 + x]
+    # The lower habitat's hanging plant bases extend one row below the bed.
+    # Move that row for the habitat span while leaving the nearby cargo stack
+    # in the service aisle.
+    for x in range(7, 24):
+        value = old[17 * 29 + x]
+        if value & 1023 != floor:
+            new[17 * W + x] = floor
+            new[24 * W + x] = value
+    map_path.write_bytes(packed(new))
+    layout.update(width=W, height=H)
+    for m in (ROOT/f'data/maps/{ROOM}/map.json',):
+        data = json.loads(m.read_text())
+        for event in data['object_events']:
+            ident = event['trainer_sight_or_berry_tree_id']
+            if ident.startswith('BERRY_TREE_HUB_'):
+                bid = int(ident.rsplit('_', 1)[1])
+                x, y, start, _ = next(b for b in BEDS if b[2] <= bid < b[2] + 5)
+                event.update(x=x + bid - start, y=y)
+            elif event['graphics_id'] == 'OBJ_EVENT_GFX_WORK_TABLE':
+                event.update(x=20, y=24)
+        for warp in data['warp_events']:
+            if warp['y'] == 23:
+                warp['y'] = 26
+            elif warp['x'] > 30:
+                warp['x'] = 26
+        m.write_text(json.dumps(data, indent=2) + '\n')
+    layouts_path.write_text(json.dumps(registry, indent=2) + '\n')
 
 
 def patched(base, names, connections, upgrades):
@@ -160,10 +247,11 @@ def patched(base, names, connections, upgrades):
 def check_wall_joins(a,t,connections):
     """Independent assembly checks for the same cap/join/base/foot grammar as Labs."""
     def expect(x,y,name):
-        assert a[y*W+x]&1023==t[name], ('Broken wall assembly',x,y,name,connections)
+        expected = name if isinstance(name, int) else t[name]
+        assert a[y*W+x]&1023==expected, ('Broken wall assembly',x,y,name,connections)
     for x,d in ((4,3),(24,1)):
         expect(x,2,'PillarCap');expect(x,3,'PillarJoin');expect(x,21,'PillarEnd')
-        for y,name in [(8,'InnerJoin'),(9,'InnerBase'),(10,'InnerFoot'),(11,'Floor'),(12,'Floor'),(13,'PillarCap'),(14,'PillarJoin')]:
+        for y,name in [(8,'InnerJoin'),(9,'InnerBase'),(10,'InnerFoot'),(11,'Floor'),(12,7),(13,'PillarJoin'),(14,'Pillar')]:
             expect(x,y,name if connections[d] else 'Pillar')
         for xx in (range(0,4) if x==4 else range(25,29)):
             expect(xx,8,'Wall' if connections[d] else 'Void')
@@ -172,14 +260,15 @@ def check_wall_joins(a,t,connections):
         for y in range(3):expect(x,y,'Pillar' if connections[0] else 'Void')
         for y,opened,closed in [(3,'InnerJoin','Wall'),(4,'InnerBase','WallBase'),(5,'InnerFoot','FloorShadow')]:
             expect(x,y,opened if connections[0] else closed)
-        for y,name in [(21,'PillarCap'),(22,'PillarJoin'),(23,'Pillar'),(24,'Pillar')]:
-            expect(x,y,name if connections[2] else 'Floor' if y==21 else 'Void')
+        for y,name in [(24,7),(25,'PillarJoin'),(26,'Pillar'),(27,'Pillar')]:
+            expect(x,y,name if connections[2] else 'Floor' if y==24 else 'Void')
 
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');ap.add_argument('--init-layout',action='store_true');args=ap.parse_args()
-    assert not(args.check and args.init_layout)
+    ap=argparse.ArgumentParser();ap.add_argument('--check',action='store_true');ap.add_argument('--init-layout',action='store_true');ap.add_argument('--reflow-layout',action='store_true');args=ap.parse_args()
+    assert sum((args.check,args.init_layout,args.reflow_layout)) <= 1
     cat=Catalogue();t=tiles(cat)
+    if args.reflow_layout:reflow_layout()
     if args.init_layout:initialize(cat)
     m=json.loads((ROOT/f'data/maps/{ROOM}/map.json').read_text())
     ls={l['id']:l for l in json.loads((ROOT/'data/layouts/layouts.json').read_text())['layouts']}
@@ -223,7 +312,13 @@ def main():
     for name,donor in [('PlantBaseShadow',112),('PlantTopShadow',111)]:
         assert cat.metas[t[name]][:4]==cat.metas[t['FloorShadow']][:4]
         assert cat.metas[t[name]][4:]==cat.metas[donor][4:]
-    for x,y in [(6,5),(10,5),(18,5),(22,5),(5,8),(5,15)]:
+    prefabs = {p['name']: p for p in json.loads((ROOT/'data/tilesets/hub_prefabs.json').read_text())}
+    for name,x,y in DECORATIONS:
+        for cell in prefabs[name]['metatiles']:
+            assert base[(y + cell['y']) * W + x + cell['x']] & 1023 == cell['metatile_id'], ('Missing lab decoration', name, x, y)
+    expected = base[:]
+    apply_decorations(expected)
+    for x,y in [(6,5),(11,5),(17,5),(22,5),(5,8),(5,22)]:
         assert base[y*W+x]&1023==t['PlantBaseShadow'], 'Wall pot breaks the floor shadow'
     assert cat.metas[t['SoilRim']][4:]==cat.metas[t['InactiveBed']][4:]
     assert len(m['object_events'])==23 and len(m['warp_events'])==13
@@ -231,18 +326,26 @@ def main():
     assert m['object_events'][21]['script']=='Rogue_Area_FarmingField_SpeakBerryMerchant'
     assert m['object_events'][22]['script']=='Rogue_Area_FarmingField_MakePotions'
     for j,e in enumerate(m['object_events'][1:21],1):assert e['trainer_sight_or_berry_tree_id']==f'BERRY_TREE_HUB_{j}'
-    for index,p in [(0,(10,20)),(21,(8,20)),(22,(7,20))]:
+    for index,p in [(0,(20,24)),(21,(14,11)),(22,(15,11))]:
         e=m['object_events'][index];assert (e['x'],e['y'],e['elevation'])==(*p,3)
     assert m['object_events'][21]['movement_type']=='MOVEMENT_TYPE_FACE_DOWN'
     assert m['object_events'][22]['flag']=='FLAG_TEMP_4'
     assert (m['warp_events'][8]['x'],m['warp_events'][8]['y'])==(14,18)
+    berry_positions=[(e['x'],e['y']) for e in m['object_events']
+                     if e['trainer_sight_or_berry_tree_id'].startswith('BERRY_TREE_HUB_')]
+    for py in range(H):
+        for px in range(W):
+            if base[py*W+px]&0xC00:
+                continue
+            visible=sum(px-2 <= x <= px+17 and py <= y <= py+14 for x,y in berry_positions)
+            assert visible <= 10, ('Too many berry sprites in one camera window', px, py, visible)
     count=0
     for connections in itertools.product((False,True),repeat=4):
         for upgrades in itertools.product((False,True),repeat=3):
             a=patched(base,t,connections,upgrades)
             check_wall_joins(a,t,connections)
             for brewing in (False,True):
-                occupied={(10,20),(8,20)}|({(7,20)} if brewing else set())
+                occupied={(20,24),(14,11)}|({(15,11)} if brewing else set())
                 for i,(x,y,_,_) in enumerate(BEDS):
                     if i==0 or upgrades[i-1]:occupied.update((x+j,y) for j in range(5))
                     else:assert all(cat.attrs[a[y*W+x+j]&1023]&255!=0xA0 for j in range(5))
@@ -279,14 +382,14 @@ def main():
     for state,upgrades in [('locked',(False,False,False)),('empty',(True,True,True)),('mature',(True,True,True))]:
         a=patched(base,t,(True,)*4,upgrades);im=Image.new('RGB',(W*16,H*16))
         for i,v in enumerate(a):im.paste(cat.render(v&1023),(i%W*16,i//W*16))
-        sprite(im,'people/link_receptionist',8,20,pal='npc_3')
-        sprite(im,'rogue/work_table',10,20,width=32,pal='npc_1')
-        if state!='locked':sprite(im,'rogue/decor_cauldron',7,20,pal='npc_3')
+        sprite(im,'people/link_receptionist',14,11,pal='npc_3')
+        sprite(im,'rogue/work_table',20,24,width=32,pal='npc_1')
+        if state!='locked':sprite(im,'rogue/decor_cauldron',15,11,pal='npc_3')
         if state=='mature':
             for x,y,_,_ in BEDS:
                 for j,berry in enumerate(['cheri','chesto','pecha','rawst','oran']):sprite(im,'berry_trees/'+berry,x+j,y,frame=4)
         im.save(OUT/f'{state}.png')
-        for label,x,y in [('beds',14,8),('services',12,19)]:
+        for label,x,y in [('beds',14,8),('services',20,21)]:
             im.crop((x*16-120,y*16-80,x*16+120,y*16+80)).resize((720,480),Image.Resampling.NEAREST).save(OUT/f'{state}-{label}-camera.png')
     from PIL import ImageDraw
     sheet=Image.new('RGB',(W*16*4,(H*16+20)*4));draw=ImageDraw.Draw(sheet)
