@@ -153,6 +153,10 @@ struct RogueCatchingContest
 struct RogueUniqueMonPalette
 {
     u16 tempPalette[16];
+    u32 customMonId;
+    const u32 *compressedPal;
+    bool8 isShiny;
+    bool8 valid;
 };
 
 // Temp data only ever stored in RAM
@@ -1841,13 +1845,29 @@ const u32 *Rogue_ModifyMonCompressedPalette(const u32 *compressedPal, u16 specie
 
     if(customMonId != 0)
     {
+        // Palette generation uses several HSV passes and can be requested
+        // repeatedly while battle sprites are reloaded for animations. Keep
+        // the most recent result keyed by its source palette and custom data.
+        if(gRogueLocal.uniqueMonPalette.valid
+         && gRogueLocal.uniqueMonPalette.customMonId == customMonId
+         && gRogueLocal.uniqueMonPalette.compressedPal == compressedPal
+         && gRogueLocal.uniqueMonPalette.isShiny == isShiny)
+            return gMonPalette_FrontPlaceholder;
+
         u16 const *inputPal = (u16 const*)&gPaletteDecompressionBuffer[0];
         LZ77UnCompWram(compressedPal, gPaletteDecompressionBuffer);
 
         if(RogueGift_TryApplyPaletteModify(customMonId, isShiny, inputPal, NULL, gRogueLocal.uniqueMonPalette.tempPalette))
+        {
+            gRogueLocal.uniqueMonPalette.customMonId = customMonId;
+            gRogueLocal.uniqueMonPalette.compressedPal = compressedPal;
+            gRogueLocal.uniqueMonPalette.isShiny = isShiny;
+            gRogueLocal.uniqueMonPalette.valid = TRUE;
             return gMonPalette_FrontPlaceholder;
+        }
     }
 
+    gRogueLocal.uniqueMonPalette.valid = FALSE;
     return compressedPal;
 }
 

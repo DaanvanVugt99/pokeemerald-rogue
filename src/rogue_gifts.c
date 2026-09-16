@@ -1934,9 +1934,24 @@ u16 RogueGift_GetCustomMonUniqueAbility(u32 id)
 {
     if(id & OTID_FLAG_DYNAMIC_CUSTOM_MON)
     {
-        struct DynamicMonData dynamicData;
-        UncompressDynamicMonData(id, &dynamicData);
-        return dynamicData.uniqueAbility;
+        const struct CompressedDynamicData* compressedData = (const struct CompressedDynamicData*)&id;
+        u16 ability;
+
+        // Battle ability checks only need this field. Avoid rebuilding the
+        // regular Ability, moves and types on every lookup.
+        switch(compressedData->format)
+        {
+        case COMPRESSED_FORMAT_ORIGINAL_UNIQUE_ABILITY:
+            ability = ((const struct CompressedDynamicData_OriginalUniqueAbility*)&id)->uniqueAbility;
+            break;
+        case COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY:
+            ability = ((const struct CompressedDynamicData_MonTypeUniqueAbility*)&id)->uniqueAbility;
+            break;
+        default:
+            return ABILITY_NONE;
+        }
+
+        return RogueGift_IsDynamicUniqueAbilityEligible(ability) ? ability : ABILITY_NONE;
     }
 
     return ABILITY_NONE;
@@ -1946,9 +1961,26 @@ u8 RogueGift_GetCustomMonType(u32 id, u8 i)
 {
     if(id & OTID_FLAG_DYNAMIC_CUSTOM_MON)
     {
-        struct DynamicMonData dynamicData;
-        UncompressDynamicMonData(id, &dynamicData);
-        return i < ARRAY_COUNT(dynamicData.types) ? dynamicData.types[i] : TYPE_NONE;
+        const struct CompressedDynamicData* compressedData = (const struct CompressedDynamicData*)&id;
+
+        if(i >= 2)
+            return TYPE_NONE;
+
+        switch(compressedData->format)
+        {
+        case COMPRESSED_FORMAT_MON_TYPE:
+            {
+                const struct CompressedDynamicData_MonType* typedData = (const struct CompressedDynamicData_MonType*)&id;
+                return typedData->typeSlot == i ? typedData->type : TYPE_NONE;
+            }
+        case COMPRESSED_FORMAT_MON_TYPE_UNIQUE_ABILITY:
+            {
+                const struct CompressedDynamicData_MonTypeUniqueAbility* typedData = (const struct CompressedDynamicData_MonTypeUniqueAbility*)&id;
+                return typedData->typeSlot == i ? typedData->type : TYPE_NONE;
+            }
+        default:
+            return TYPE_NONE;
+        }
     }
 
     return TYPE_NONE;

@@ -212,6 +212,47 @@ TEST("Dynamic custom unique ability lookup falls back when the encoded id has no
     EXPECT_EQ(GetUniqueAbilityBySpeciesAndOtId(SPECIES_SHUCKLE, customMonId), ABILITY_SILVER_LINING);
 }
 
+TEST("Dynamic custom unique ability lookup preserves both serialized formats and eligibility")
+{
+    u16 ability;
+    u8 seed;
+
+    // Exercise every encoded Ability, including excluded and out-of-range IDs,
+    // with all adjacent seed bits set in turn. The two layouts use different
+    // offsets for the unique Ability.
+    for(ability = 0; ability < 1024; ++ability)
+    {
+        u16 expected = RogueGift_IsDynamicUniqueAbilityEligible(ability) ? ability : ABILITY_NONE;
+
+        for(seed = 0; seed < 4; ++seed)
+        {
+            u32 originalId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, seed, ability);
+            u32 typedId = DynamicTypeUniqueAbilityCustomMonId(TYPE_DARK, 1, 3, 254, seed, ability);
+
+            EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(originalId), expected);
+            EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(typedId), expected);
+        }
+    }
+
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(CUSTOM_MON_NONE), ABILITY_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonUniqueAbility(DynamicTypeCustomMonId(TYPE_DARK, 0, 0, 1, 2, 0)), ABILITY_NONE);
+}
+
+TEST("Dynamic custom type lookup preserves typed formats without decoding unrelated fields")
+{
+    u32 typedId = DynamicTypeCustomMonId(TYPE_FIRE, 1, 0, 1, 2, 0);
+    u32 typedUniqueId = DynamicTypeUniqueAbilityCustomMonId(TYPE_DARK, 0, 3, 254, 1, ABILITY_UNMOVABLE);
+    u32 originalId = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_UNMOVABLE);
+
+    EXPECT_EQ(RogueGift_GetCustomMonType(typedId, 0), TYPE_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonType(typedId, 1), TYPE_FIRE);
+    EXPECT_EQ(RogueGift_GetCustomMonType(typedId, 2), TYPE_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonType(typedUniqueId, 0), TYPE_DARK);
+    EXPECT_EQ(RogueGift_GetCustomMonType(typedUniqueId, 1), TYPE_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonType(originalId, 0), TYPE_NONE);
+    EXPECT_EQ(RogueGift_GetCustomMonType(originalId, 1), TYPE_NONE);
+}
+
 TEST("Safari reconstruction preserves a unique Pokemon's native ability slot")
 {
     static const u16 sExpectedAbilities[] =

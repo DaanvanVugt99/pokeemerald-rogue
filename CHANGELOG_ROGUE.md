@@ -108,6 +108,11 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Avoid reconstructing Legendary unique Pokemon's regular Ability, moves and
+  types during repeated battle lookups, and cache typed unique palettes while
+  battle sprites reload for animations; preserve saved traits and eligibility
+  checks.
+
 - Audit route-quest dialogue: stop Egg Courier cancellations from falling
   through to acceptance/error text, restore Trade Case and Ability Patch names
   after battles, refresh Apricorn dialogue after reward popups, and correct
