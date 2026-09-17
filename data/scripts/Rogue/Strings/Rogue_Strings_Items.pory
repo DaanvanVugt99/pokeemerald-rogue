@@ -1038,11 +1038,11 @@ text gItemDesc_ConversionCharm
 }
 text gItemDesc_RetaliateCharm
 {
-    format("A fainted ally's replacement gains Attack and Sp. Atk.")
+    format("Once per battle, a fainted ally's replacement gains Attack and Sp. Atk.")
 }
 text gItemDesc_MomentumCharm
 {
-    format("Knocking out a foe raises the attacker's Speed.")
+    format("Once per battle, knocking out a foe raises the attacker's Speed.")
 }
 text gItemDesc_StandCharm
 {

@@ -85,7 +85,8 @@
     method(1005, "xDracolich", 0) \
     method(1006, "J-Treecko", 0) \
     method(1007, "Buch", 0) \
-    method(1008, "", CREDITS_FLAG_BREAK) \
+    method(1008, "marceles", 0) \
+    method(1009, "", CREDITS_FLAG_BREAK) \
     \
     method(1100, "ZacWeavile", 0) \
     method(1101, "Gnomowladny", 0) \

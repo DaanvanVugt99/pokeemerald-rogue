@@ -5487,7 +5487,7 @@ static void Cmd_tryfaintmon(void)
                     gBattleResults.playerFaintCounter++;
                 AdjustFriendshipOnBattleFaint(battler);
                 gSideTimers[B_SIDE_PLAYER].retaliateTimer = 2;
-                if (IsCharmActive(EFFECT_RETALIATE_CHARM))
+                if (IsCharmActive(EFFECT_RETALIATE_CHARM) && !gBattleStruct->retaliateCharmUsed)
                     gSideTimers[B_SIDE_PLAYER].retaliateCharmPending = TRUE;
                 // RogueNote: kill mon
             }
@@ -10297,9 +10297,12 @@ bool32 TryActivateSwitchInCharms(u32 battler)
         gSpecialStatuses[battler].switchInRetaliateCharmDone = TRUE;
         if (((side == B_SIDE_PLAYER && IsCharmActive(EFFECT_RETALIATE_CHARM))
           || (side == B_SIDE_OPPONENT && IsCurseActive(EFFECT_RETALIATE_CHARM)))
+         && (side == B_SIDE_OPPONENT || !gBattleStruct->retaliateCharmUsed)
          && gSideTimers[side].retaliateCharmPending)
         {
             gSideTimers[side].retaliateCharmPending = FALSE;
+            if (side == B_SIDE_PLAYER)
+                gBattleStruct->retaliateCharmUsed = TRUE;
             gBattlerAttacker = battler;
             BattleScriptPushCursorAndCallback(BattleScript_RetaliateCharmActivates);
             return TRUE;
@@ -10309,7 +10312,8 @@ bool32 TryActivateSwitchInCharms(u32 battler)
     if (!gSpecialStatuses[battler].switchInStandCharmDone)
     {
         gSpecialStatuses[battler].switchInStandCharmDone = TRUE;
-        if ((side == B_SIDE_PLAYER && IsCharmActive(EFFECT_STAND_CHARM))
+        if (((side == B_SIDE_PLAYER && IsCharmActive(EFFECT_STAND_CHARM))
+          && !gBattleStruct->standCharmUsed)
          || (side == B_SIDE_OPPONENT && (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && IsCurseActive(EFFECT_STAND_CHARM)))
         {
             for (i = 0; i < PARTY_SIZE; i++)
@@ -10322,6 +10326,8 @@ bool32 TryActivateSwitchInCharms(u32 battler)
 
             if (aliveCount == 1)
             {
+                if (side == B_SIDE_PLAYER)
+                    gBattleStruct->standCharmUsed = TRUE;
                 gBattlerAttacker = battler;
                 BattleScriptPushCursorAndCallback(BattleScript_StandCharmActivates);
                 return TRUE;
@@ -13195,10 +13201,12 @@ static void Cmd_various(void)
          && GetBattlerSide(battler) == B_SIDE_PLAYER
          && GetBattlerSide(gBattlerTarget) == B_SIDE_OPPONENT
          && IsCharmActive(EFFECT_MOMENTUM_CHARM)
+         && !gBattleStruct->momentumCharmUsed
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
          && CompareStat(battler, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
         {
+            gBattleStruct->momentumCharmUsed = TRUE;
             SET_STATCHANGER(STAT_SPEED, 1, FALSE);
             PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
             BattleScriptPush(cmd->nextInstr);

@@ -1,6 +1,6 @@
 {
   "tiles": 1021,
-  "metatiles": 948,
+  "metatiles": 1022,
   "palettes": 13,
   "mapping": {
     "portal_room": {
@@ -801,6 +801,221 @@
     679,
     703
   ],
+  "lab_decor_tile_range": [
+    703,
+    878
+  ],
+  "lab_decor_groups": [
+    {
+      "name": "StatusConsole",
+      "source": [
+        18,
+        2,
+        5,
+        2
+      ],
+      "size": [
+        5,
+        2
+      ],
+      "metatile_start": 948,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "DataDisplay",
+      "source": [
+        23,
+        2,
+        3,
+        2
+      ],
+      "size": [
+        3,
+        2
+      ],
+      "metatile_start": 958,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "StorageUnit",
+      "source": [
+        30,
+        3,
+        3,
+        3
+      ],
+      "size": [
+        3,
+        3
+      ],
+      "metatile_start": 964,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "WallControls",
+      "source": [
+        30,
+        6,
+        3,
+        1
+      ],
+      "size": [
+        3,
+        1
+      ],
+      "metatile_start": 973,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "SpecimenTank",
+      "source": [
+        31,
+        7,
+        2,
+        4
+      ],
+      "size": [
+        2,
+        4
+      ],
+      "metatile_start": 976,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "ServerBank",
+      "source": [
+        33,
+        9,
+        3,
+        3
+      ],
+      "size": [
+        3,
+        3
+      ],
+      "metatile_start": 984,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "SmallMonitor",
+      "source": [
+        26,
+        11,
+        3,
+        2
+      ],
+      "size": [
+        3,
+        2
+      ],
+      "metatile_start": 993,
+      "shadow_start": null,
+      "palette": 6
+    },
+    {
+      "name": "EquipmentTable",
+      "source": [
+        27,
+        13,
+        3,
+        1
+      ],
+      "size": [
+        3,
+        1
+      ],
+      "metatile_start": 999,
+      "shadow_start": null,
+      "palette": 6
+    },
+    {
+      "name": "EquipmentBenchBlue",
+      "source": [
+        27,
+        14,
+        3,
+        1
+      ],
+      "size": [
+        3,
+        1
+      ],
+      "metatile_start": 1002,
+      "shadow_start": null,
+      "palette": 6
+    },
+    {
+      "name": "EquipmentBenchWhite",
+      "source": [
+        27,
+        15,
+        3,
+        1
+      ],
+      "size": [
+        3,
+        1
+      ],
+      "metatile_start": 1005,
+      "shadow_start": null,
+      "palette": 6
+    },
+    {
+      "name": "AnalysisConsole",
+      "source": [
+        33,
+        12,
+        3,
+        4
+      ],
+      "size": [
+        3,
+        4
+      ],
+      "metatile_start": 1008,
+      "shadow_start": null,
+      "palette": 6
+    },
+    {
+      "name": "OrbGreen",
+      "source": [
+        25,
+        14,
+        1,
+        1
+      ],
+      "size": [
+        1,
+        1
+      ],
+      "metatile_start": 1020,
+      "shadow_start": null,
+      "palette": 1
+    },
+    {
+      "name": "OrbRed",
+      "source": [
+        25,
+        15,
+        1,
+        1
+      ],
+      "size": [
+        1,
+        1
+      ],
+      "metatile_start": 1021,
+      "shadow_start": null,
+      "palette": 0
+    }
+  ],
+  "lab_decor_source": "Land of Pixels - Laboratory Tileset PixelArt 16px by marceles (CC BY 4.0)",
   "recolored_donors": [
     "Factory",
     "Galactic",

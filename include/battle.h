@@ -652,6 +652,9 @@ struct BattleStruct
     u8 worldEngineInitialized : 1;
     u8 worldEnginePhase : 3;
     u8 revivalBlessingUsed : 2; // One successful use per side each battle.
+    u8 retaliateCharmUsed : 1;
+    u8 momentumCharmUsed : 1;
+    u8 standCharmUsed : 1;
     u8 savingGraceEligibleBattlers;
     u8 turnCountersTracker;
     u16 wrappedMove[MAX_BATTLERS_COUNT];

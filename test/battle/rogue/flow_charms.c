@@ -129,6 +129,25 @@ SINGLE_BATTLE_TEST("charms: flow - Retaliate Charm consumes its charge on the fi
     }
 }
 
+SINGLE_BATTLE_TEST("charms: flow - Retaliate Charm boosts only one replacement per battle")
+{
+    GIVEN {
+        SetFlowCharms(1, 0, 0);
+        PLAYER(SPECIES_WYNAUT) { HP(1); }
+        PLAYER(SPECIES_WOBBUFFET) { HP(1); }
+        PLAYER(SPECIES_SHUCKLE);
+        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 1); }
+        TURN { MOVE(opponent, MOVE_TACKLE); SEND_OUT(player, 2); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE);
+        EXPECT(gBattleStruct->retaliateCharmUsed);
+        ClearCharmTestState();
+    }
+}
+
 SINGLE_BATTLE_TEST("charms: flow - Retaliate Charm does not boost opposing replacements")
 {
     GIVEN {
@@ -206,7 +225,7 @@ SINGLE_BATTLE_TEST("charms: flow - Momentum Charm excludes residual knockouts")
     }
 }
 
-DOUBLE_BATTLE_TEST("charms: flow - Momentum Charm grants two stages for a spread double knockout")
+DOUBLE_BATTLE_TEST("charms: flow - Momentum Charm grants one stage for a spread double knockout")
 {
     GIVEN {
         SetFlowCharms(0, 1, 0);
@@ -219,7 +238,25 @@ DOUBLE_BATTLE_TEST("charms: flow - Momentum Charm grants two stages for a spread
     } WHEN {
         TURN { MOVE(playerLeft, MOVE_DAZZLING_GLEAM); MOVE(playerRight, MOVE_CELEBRATE); SEND_OUT(opponentLeft, 2); SEND_OUT(opponentRight, 3); }
     } THEN {
-        EXPECT_EQ(playerLeft->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 2);
+        EXPECT_EQ(playerLeft->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+        ClearCharmTestState();
+    }
+}
+
+SINGLE_BATTLE_TEST("charms: flow - Momentum Charm boosts only one knockout per battle")
+{
+    GIVEN {
+        SetFlowCharms(0, 1, 0);
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WYNAUT) { HP(1); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_TACKLE); SEND_OUT(opponent, 2); }
+    } THEN {
+        EXPECT_EQ(player->statStages[STAT_SPEED], DEFAULT_STAT_STAGE + 1);
+        EXPECT(gBattleStruct->momentumCharmUsed);
         ClearCharmTestState();
     }
 }

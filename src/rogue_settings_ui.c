@@ -74,6 +74,7 @@ static const u8 sChooseTrialHelp[] = _("Choose a Trial, or None for a normal run
 #include "gpu_regs.h"
 #include "window.h"
 #include "text.h"
+#include "strings.h"
 #include "script.h"
 #include "string_util.h"
 #include "constants/rgb.h"
@@ -411,6 +412,13 @@ static void Print(u8 x, u8 y, const u8 *str, bool8 selected)
     AddTextPrinterParameterized4(0, FONT_SMALL_NARROW, x, y, 0, 0, selected ? sSelectedColors : sColors, TEXT_SKIP_DRAW, str);
 }
 
+static void PrintSelectable(u8 x, u8 y, const u8 *str, bool8 selected)
+{
+    if (selected)
+        Print(x, y, gText_SelectorArrow, TRUE);
+    Print(x + 10, y, str, selected);
+}
+
 static u8 Cycle(u8 value, u8 count, s8 dir)
 {
     return (value + count + dir) % count;
@@ -474,7 +482,7 @@ static void DrawPool(void)
             if (sMenu->readOnly) label = sAscensionText54;
             break;
         }
-        Print(0, 28 + i * 14, label, i == sMenu->row);
+        PrintSelectable(0, 28 + i * 14, label, i == sMenu->row);
         Print(90, 28 + i * 14, text, i == sMenu->row);
     }
     StringCopy(ConvertIntToDecimalStringN(text, gPokedexVariants[sMenu->pool.variant].speciesCount,
@@ -513,8 +521,8 @@ static void Draw(void)
         Print(0, 38, sIntroConfirmQuestion, FALSE);
         Print(0, 54, sIntroConfirmEffect, FALSE);
         Print(0, 72, sIntroConfirmLock, FALSE);
-        Print(0, 110, sContinue, sMenu->confirmChoice == 0);
-        Print(112, 110, sGoBack, sMenu->confirmChoice == 1);
+        PrintSelectable(0, 110, sContinue, sMenu->confirmChoice == 0);
+        PrintSelectable(112, 110, sGoBack, sMenu->confirmChoice == 1);
         Print(0, 132, sMenu->message != NULL ? sMenu->message : sConfirmControls, FALSE);
     }
     else if (sMenu->page == PAGE_POOL)
@@ -524,7 +532,10 @@ static void Draw(void)
         bool8 baseOnly = sMenu->rows[sMenu->row] == ROW_RULES;
         u8 *end = ConvertIntToDecimalStringN(StringCopy(text, sAscensionText43), sMenu->candidate, STR_CONV_MODE_LEFT_ALIGN, 2);
         if (!RogueAscension_IsUnlocked(sMenu->candidate, sMenu->config.battleFormat)) StringCopy(end, sAscensionText44);
-        Print(0, 0, baseOnly ? sBasePage : text, TRUE);
+        if (baseOnly)
+            Print(0, 0, sBasePage, TRUE);
+        else
+            PrintSelectable(0, 0, text, TRUE);
         ConvertIntToDecimalStringN(StringCopy(text, sAscensionText45), RogueAscension_GetUnlocked(sMenu->config.battleFormat), STR_CONV_MODE_LEFT_ALIGN, 2);
         if (!baseOnly) Print(120, 13, text, FALSE);
         Print(0, 13, baseOnly ? sFixedRules : sMenu->rulesPage >= 2 ? sBasePage : sCumulativePage, FALSE);
@@ -552,13 +563,13 @@ static void Draw(void)
             bool8 selected = i + sMenu->top == sMenu->row;
             if (sMenu->page == PAGE_TRAINERS)
             {
-                Print(0, 22 + 14*i, row == 0 ? sAscensionText50 : sRegions[row-1], selected);
+                PrintSelectable(0, 22 + 14*i, row == 0 ? sAscensionText50 : sRegions[row-1], selected);
                 Print(112, 22 + 14*i, row == 0 ? sOrders[sMenu->config.trainerOrder] : (sMenu->config.trainerRegions & (1 << (row-1))) ? sAscensionText51 : sAscensionText52, selected);
             }
             else
             {
                 const u8 *label = LabelForRow(row);
-                Print(0, 22 + 14*i, label, selected);
+                PrintSelectable(0, 22 + 14*i, label, selected);
                 ValueForRow(row, text);
                 Print(112, 22 + 14*i, text, selected);
             }

@@ -61,6 +61,9 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Limit Retaliate and Momentum Charm stat boosts to one activation per battle;
+  explicitly guard Stand Charm's one-time trigger and update the descriptions.
+
 - Audit manually reworked regular Ability descriptions against their battle effects.
   Correct Solar Power's removed HP drain, Rain Dish healing, Iron Fist/Reckless
   multipliers, Filter reduction, Protean/Libero and Gale Wings restrictions,
