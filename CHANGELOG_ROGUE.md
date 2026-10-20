@@ -113,6 +113,9 @@ Format follows Keep a Changelog loosely:
 
 ### Fixed
 
+- Prevent Scramble from activating against a target that fainted before its
+  delayed move-end effect resolves.
+
 - Avoid reconstructing Legendary unique Pokemon's regular Ability, moves and
   types during repeated battle lookups, and cache typed unique palettes while
   battle sprites reload for animations; preserve saved traits and eligibility

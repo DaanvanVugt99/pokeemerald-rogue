@@ -20598,6 +20598,7 @@ if (triggeringAbility != ABILITY_NONE)
          && TARGET_TURN_DAMAGED
          && IsFinalMultiHitStrike()
          && !IS_MOVE_STATUS(move)
+         && IsBattlerAlive(gBattlerTarget)
          && CanBeConfused(gBattlerTarget)
          && RandomWeighted(RNG_SECONDARY_EFFECT, 70, 30))
         {

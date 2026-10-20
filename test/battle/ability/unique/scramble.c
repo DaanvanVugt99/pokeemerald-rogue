@@ -5,6 +5,7 @@ ASSUMPTIONS
 {
     ASSUME(gBattleMoves[MOVE_TACKLE].split != SPLIT_STATUS);
     ASSUME(gBattleMoves[MOVE_HYPER_VOICE].soundMove);
+    ASSUME(gBattleMoves[MOVE_DRAGON_RAGE].effect == EFFECT_DRAGON_RAGE);
 }
 
 SINGLE_BATTLE_TEST("Scramble sets Psychic Terrain on switch-in")
@@ -69,5 +70,27 @@ SINGLE_BATTLE_TEST("Scramble field lookup preserves opposing move-end ability po
         TURN { MOVE(opponent, MOVE_HYPER_VOICE); MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(opponent, ABILITY_SERENE_VOICE);
+    }
+}
+
+DOUBLE_BATTLE_TEST("Scramble does not activate when its target faints before move-end resolution")
+{
+    GIVEN {
+        PLAYER(SPECIES_SPOINK) { Ability(ABILITY_THICK_FAT); Speed(100); Moves(MOVE_DRAGON_RAGE); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(1); MaxHP(100); Speed(50); Moves(MOVE_CELEBRATE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(1); Moves(MOVE_CELEBRATE); }
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_DRAGON_RAGE, target: opponentLeft, WITH_RNG(RNG_SECONDARY_EFFECT, TRUE));
+            MOVE(playerRight, MOVE_CELEBRATE);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } SCENE {
+        ABILITY_POPUP(playerLeft, ABILITY_SCRAMBLE);
+        NOT ABILITY_POPUP(playerLeft, ABILITY_SCRAMBLE);
+    } THEN {
+        EXPECT_EQ(opponentLeft->hp, 0);
+        EXPECT_EQ(opponentLeft->status2 & STATUS2_CONFUSION, 0);
     }
 }
