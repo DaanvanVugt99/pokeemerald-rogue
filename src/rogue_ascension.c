@@ -7,7 +7,7 @@ static const u8 sAscensionText4[] = _("No advancement: imported charms");
 static const u8 sAscensionText5[] = _("No advancement: debug rules");
 static const u8 sAscensionText6[] = _("Ascension advancement enabled");
 static const u8 sAscensionText7[] = _("Base adventure rules.");
-static const u8 sAscensionText8[] = _("Boss IVs: base +5.");
+static const u8 sAscensionText8[] = _("Neutral natures: all enemies.");
 static const u8 sAscensionText9[] = _("Profile natures: boss aces.");
 static const u8 sAscensionText10[] = _("Competitive moves and matching\nregular Ability: boss aces.");
 static const u8 sAscensionText11[] = _("Profile held items: boss aces.");
@@ -60,6 +60,11 @@ static const u8 sAscensionText57[] = _("EXP All is enabled.");
 static const u8 sAscensionText58[] = _("Standard AI, weather and gimmicks.");
 static const u8 sAscensionText60[] = _("Profile natures, moves and items");
 static const u8 sAscensionText61[] = _("unlock separately by ascension.");
+static const u8 sRandomNatures[] = _("random");
+static const u8 sNeutralNatures[] = _("neutral");
+static const u8 sCompetitiveAceNatures[] = _("neutral; aces competitive");
+static const u8 sCompetitiveBossNatures[] = _("neutral; bosses competitive");
+static const u8 sCompetitiveTrainerNatures[] = _("all competitive");
 #include "event_data.h"
 #include "constants/flags.h"
 #include "constants/vars.h"
@@ -88,7 +93,7 @@ void RogueAscension_Resolve(u8 level, struct RogueAscensionRules *rules)
     rules->natures = Distribution(level, 2, 6, 11);
     rules->moves = Distribution(level, 3, 7, 12);
     rules->items = Distribution(level, 4, 8, 14);
-    rules->bossIvBonus = level >= 13 ? 20 : level >= 5 ? 10 : level >= 1 ? 5 : 0;
+    rules->bossIvBonus = level >= 13 ? 20 : level >= 5 ? 10 : 0;
     rules->trainerIv = level >= 16 ? 20 : level >= 9 ? 10 : 0;
     rules->perfectAces = level >= 17;
     rules->perfectTeams = level >= 18;
@@ -279,7 +284,14 @@ u8 RogueAscension_GetRuleLine(u8 level, u8 line, u8 *dest)
         else ConvertIntToDecimalStringN(StringCopy(dest, sAscensionText36), r.trainerIv, STR_CONV_MODE_LEFT_ALIGN, 2);
         break;
     case 2: StringCopy(dest, r.perfectAces && !r.perfectTeams ? sAscensionText37 : sAscensionText38); break;
-    case 3: StringCopy(StringCopy(dest, sAscensionText39), DistributionText(r.natures)); break;
+    case 3:
+        end = StringCopy(dest, sAscensionText39);
+        if (level == 0) StringCopy(end, sRandomNatures);
+        else if (r.natures == ASCENSION_UPGRADE_NONE) StringCopy(end, sNeutralNatures);
+        else if (r.natures == ASCENSION_UPGRADE_ACES) StringCopy(end, sCompetitiveAceNatures);
+        else if (r.natures == ASCENSION_UPGRADE_BOSSES) StringCopy(end, sCompetitiveBossNatures);
+        else StringCopy(end, sCompetitiveTrainerNatures);
+        break;
     case 4: StringCopy(StringCopy(dest, sAscensionText40), DistributionText(r.moves)); break;
     case 5: StringCopy(StringCopy(dest, sAscensionText41), DistributionText(r.items)); break;
     case 6: StringCopy(dest, r.fullParties ? sAscensionText42 : r.expandedParties ? sAscensionText43 : sAscensionText44); break;

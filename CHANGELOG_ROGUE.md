@@ -61,6 +61,12 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Start A0 enemies with random natures; A1 makes them neutral, with competitive
+  natures still introduced at A2/A6/A11. Replace A1's boss IV bonus with this
+  nature step; the first boss IV bonus is now +10 at A5. Update displayed rules
+  and replay rules version; earlier replay snapshots cannot be replayed under
+  the changed rules. Save layout and unlocked Ascension levels are unchanged.
+
 - Limit Retaliate and Momentum Charm stat boosts to one activation per battle;
   explicitly guard Stand Charm's one-time trigger and update the descriptions.
 

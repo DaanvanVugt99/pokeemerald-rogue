@@ -5,7 +5,7 @@
 
 #define ASCENSION_MAX 20
 #define ASCENSION_NONE 255
-#define ASCENSION_RULES_VERSION 1
+#define ASCENSION_RULES_VERSION 2
 
 enum RogueUpgradeDistribution
 {

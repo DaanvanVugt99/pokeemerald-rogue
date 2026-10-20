@@ -67,7 +67,7 @@ useful throughout the ladder.
 | Ordinary trainer parties | Standard's current progression |
 | Enemy movesets | Viable basic movesets; no curated competitive sets |
 | Enemy ordinary held items | None |
-| Enemy natures | Neutral |
+| Enemy natures | Random |
 | Boss IVs | Standard's stage progression: 0 during gyms, 5 during Elite Four, 10/15 during championship stages |
 | Ordinary trainer IVs | 0 |
 | Resources | Normal hub preparation, starting resources, prices, and rewards |
@@ -87,11 +87,11 @@ must not produce dysfunctional Pokemon just to create room for ascensions.
 
 | Level | Name | New rule |
 | --- | --- | --- |
-| A1 | Better Trained | All boss Pokemon gain +5 IVs in every stat over A0. |
+| A1 | Even Tempered | All enemy Pokemon receive neutral natures. |
 | A2 | Focused Aces | Boss aces have natures from their selected competitive profiles. |
 | A3 | Competitive Aces | Boss aces use competitive movesets. |
 | A4 | Equipped Aces | Boss aces carry suitable held items. |
-| A5 | Further Training | Boss Pokemon gain another +5 IVs: cumulative bonus +10 over A0. |
+| A5 | Further Training | Boss Pokemon gain +10 IVs in every stat over A0. |
 | A6 | Specialized Bosses | All boss Pokemon have natures from their selected competitive profiles. |
 | A7 | Competitive Bosses | All boss Pokemon use competitive movesets. |
 | A8 | Equipped Bosses | All boss Pokemon carry suitable held items. |
@@ -107,6 +107,10 @@ must not produce dysfunctional Pokemon just to create room for ascensions.
 | A18 | Perfect Opposition | All trainer Pokemon have 31 IVs in every stat. Enemy EVs remain disabled. |
 | A19 | Limited Supplies | Replace imported bag supplies and starting money with a fixed expedition kit and fund. Preserve prepared Pokemon, their EVs, and equipped held items. |
 | A20 | Full Opposition | Every boss fields six Pokemon. |
+
+Natures progress from random at A0 to neutral at A1. Competitive natures then
+replace neutral natures for boss aces at A2, all bosses at A6, and all trainers
+at A11. Boss IVs remain at their stage baseline through A4.
 
 All IV bonuses apply to each stat and cap at 31. Higher-level overrides must
 never lower a value established by an earlier rule.
@@ -147,7 +151,7 @@ Conceptual summaries:
 
 ```text
 ASCENSION 1
-Boss IVs:       Base +5
+Natures:        Neutral
 ```
 
 ```text

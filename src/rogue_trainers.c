@@ -1930,7 +1930,9 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
     else
         monCount = CreateTrainerPartyInternal(trainerNum, party, 0, monCapacity, firstTrainer, 0);
 
-    if (!(Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL))
+    // A0 keeps the randomly generated nature; A1+ starts neutral before profile upgrades.
+    if (Rogue_GetAscension() >= 1
+     && !(Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL))
     {
         u8 i;
         for (i = 0; i < monCount; ++i) SetNature(&party[i], NATURE_HARDY);

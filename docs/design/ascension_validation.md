@@ -1,5 +1,21 @@
 # Ascension implementation validation
 
+## Nature progression revision — 2026-10-20
+
+- A0 retains randomly generated enemy natures. A1 neutralizes enemy natures,
+  replacing the former +5 boss IV bonus. Competitive natures still begin at
+  A2 for boss aces, A6 for all bosses, and A11 for all trainers. Boss IV bonuses
+  now begin at +10 at A5, with +20 at A13 unchanged.
+- All 36 focused `Ascension:` tests passed, including seeded generated A0/A1
+  boss and ordinary-trainer parties, all boss categories at five run stages,
+  independent profile gates, IV thresholds, service exclusions, save round
+  trips, and GBA rules-text widths.
+- Incremental playable debug ROM build passed: ROM 31,859,132 bytes; EWRAM
+  261,534 bytes; IWRAM 25,620 bytes. `git diff --check` passed.
+- Rules version is now 2, so older replay snapshots are incompatible. Save
+  layout and unlocked levels are unchanged. No new manual playtest is claimed;
+  the earlier acceptance notes below remain historical.
+
 The approved contract is [ascension.md](ascension.md). This file records checks
 and remaining acceptance work; passing compilation does not imply balance approval.
 

@@ -43,7 +43,7 @@ TEST("Ascension: every cumulative threshold and distribution")
 {
     // Explicit expected rows keep each step independently reviewable.
     static const u8 expected[21][5] = {
-        {0,0,0,0,0}, {0,0,0,5,0}, {1,0,0,5,0}, {1,1,0,5,0}, {1,1,1,5,0},
+        {0,0,0,0,0}, {0,0,0,0,0}, {1,0,0,0,0}, {1,1,0,0,0}, {1,1,1,0,0},
         {1,1,1,10,0}, {2,1,1,10,0}, {2,2,1,10,0}, {2,2,2,10,0}, {2,2,2,10,10},
         {2,2,2,10,10}, {3,2,2,10,10}, {3,3,2,10,10}, {3,3,2,20,10}, {3,3,3,20,10},
         {3,3,3,20,10}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}
@@ -81,6 +81,9 @@ TEST("Ascension: every cumulative threshold and distribution")
         EXPECT_EQ(RogueAscension_Applies(d, TRUE, FALSE), d >= 2);
     }
     EXPECT_EQ(RogueAscension_CalculateIV(0, 8, TRUE, FALSE), 5);
+    EXPECT_EQ(RogueAscension_CalculateIV(1, 0, TRUE, FALSE), 0);
+    EXPECT_EQ(RogueAscension_CalculateIV(4, 8, TRUE, FALSE), 5);
+    EXPECT_EQ(RogueAscension_CalculateIV(5, 8, TRUE, FALSE), 15);
     EXPECT_EQ(RogueAscension_CalculateIV(13, 13, TRUE, FALSE), 31);
     EXPECT_EQ(RogueAscension_CalculateIV(17, 0, TRUE, TRUE), 31);
     EXPECT_EQ(RogueAscension_CalculateIV(17, 0, TRUE, FALSE), 20);
@@ -109,7 +112,7 @@ TEST("Ascension: profile nature is independent from moves Ability and item")
     EXPECT_LT(i, gRoguePokemonProfiles[SPECIES_VENUSAUR].competitiveSetCount);
     profile = &gRoguePokemonProfiles[SPECIES_VENUSAUR].competitiveSets[i];
     CreateMon(&original, SPECIES_VENUSAUR, 100, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
-    SetNature(&original, NATURE_HARDY);
+    SetNature(&original, NATURE_ADAMANT);
     for (role = 0; role < 3; ++role)
     for (a = 0; a <= 20; ++a)
     {
@@ -117,7 +120,7 @@ TEST("Ascension: profile nature is independent from moves Ability and item")
         Rogue_SetRunStartConfigOverride(&config);
         mon = original;
         RogueTest_ApplyAscensionProfile(boss, &mon, profile, role != 2, role == 0);
-        EXPECT_EQ(GetNature(&mon), a >= natureLevels[role] ? profile->nature : NATURE_HARDY);
+        EXPECT_EQ(GetNature(&mon), a >= natureLevels[role] ? profile->nature : NATURE_ADAMANT);
         EXPECT_EQ(GetMonUniqueAbility(&mon), GetMonUniqueAbility(&original));
         if (a < moveLevels[role])
         {
@@ -130,6 +133,53 @@ TEST("Ascension: profile nature is independent from moves Ability and item")
         EXPECT_EQ(GetMonData(&mon, MON_DATA_HELD_ITEM), a >= itemLevels[role] ? profile->heldItem : ITEM_NONE);
     }
     Rogue_ClearRunStartConfigOverride();
+}
+
+TEST("Ascension: generated A0 natures vary and A1 neutralizes bosses and ordinary trainers")
+{
+    struct RogueAdventureConfig config;
+    u16 trainers[2] = {0};
+    u16 t;
+    u8 role, a, i, count;
+    ResetAscensionTest();
+    RogueTest_UseContentTrainers(TRUE);
+    Rogue_CopyAdventureConfig(&config);
+    Rogue_SetCurrentDifficulty(0);
+    for (t = 1; t < gRogueTrainerCount; ++t)
+    {
+        if (!trainers[0] && Rogue_IsBossTrainer(t))
+            trainers[0] = t;
+        if (!trainers[1] && !Rogue_IsKeyTrainer(t)
+         && !(Rogue_GetTrainer(t)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL))
+            trainers[1] = t;
+    }
+    for (role = 0; role < ARRAY_COUNT(trainers); ++role)
+    {
+        bool8 sawNonNeutral = FALSE;
+        EXPECT_NE(trainers[role], 0);
+        for (a = 0; a <= 1; ++a)
+        {
+            config.ascension = a;
+            Rogue_SetRunStartConfigOverride(&config);
+            ZeroEnemyPartyMons();
+            SeedRogueRng(1234);
+            SeedRng(4321);
+            count = Rogue_CreateTrainerParty(trainers[role], gEnemyParty, PARTY_SIZE, TRUE);
+            EXPECT_GT(count, 0);
+            for (i = 0; i < count; ++i)
+            {
+                u8 nature = GetNature(&gEnemyParty[i]);
+                if (a == 0)
+                    sawNonNeutral |= nature % 6 != 0;
+                else
+                    EXPECT_EQ(nature, NATURE_HARDY);
+                EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_ATK_IV), 0);
+            }
+        }
+        EXPECT(sawNonNeutral);
+    }
+    Rogue_ClearRunStartConfigOverride();
+    RogueTest_UseContentTrainers(FALSE);
 }
 
 TEST("Ascension: separate ladders and once-only completion awards")
@@ -205,7 +255,7 @@ TEST("Ascension: save round trip preserves active rules progress and replay")
 
 static void CheckGeneratedBossParty(u8 kind, u8 stage)
 {
-    static const u8 levels[] = {0, 10, 17, 20};
+    static const u8 levels[] = {0, 1, 10, 17, 20};
     struct RogueAdventureConfig config;
     u16 trainers[4] = {0};
     u16 t;
@@ -248,9 +298,10 @@ static void CheckGeneratedBossParty(u8 kind, u8 stage)
                         EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_HP_IV + stat), RogueAscension_CalculateIV(levels[a], stage, TRUE, i == count - 1));
                         EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_HP_EV + stat), 0);
                     }
-                    if (levels[a] == 0)
-                    {
+                    if (levels[a] == 1)
                         EXPECT_EQ(GetNature(&gEnemyParty[i]), NATURE_HARDY);
+                    if (levels[a] <= 1)
+                    {
                         u16 item = GetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM);
                         EXPECT(item == ITEM_NONE || IS_MEGA_STONE_ITEM(item) || item == ITEM_RED_ORB || item == ITEM_BLUE_ORB || (item >= ITEM_NORMALIUM_Z && item <= ITEM_ULTRANECROZIUM_Z));
                     }
@@ -555,7 +606,6 @@ TEST("Ascension: Gauntlet full teams retain A0 profile gates")
     EXPECT_EQ(count, 6);
     for (i = 0; i < count; ++i)
     {
-        EXPECT_EQ(GetNature(&gEnemyParty[i]), NATURE_HARDY);
         EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_LEVEL), 100);
         EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_ATK_EV), 0);
     }
