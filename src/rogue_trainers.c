@@ -597,25 +597,8 @@ bool8 Rogue_IsValidTrainerShinySpecies(u16 trainerNum, u16 species)
 
 bool8 Rogue_ShouldTrainerSmartSwitch(u16 trainerNum)
 {
-    { // Standard baseline
-        if(Rogue_IsKeyTrainer(trainerNum))
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY - 1)
-                return TRUE;
-            else
-                return FALSE;
-        }
-        else
-        {
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
-                return TRUE;
-            else
-                return FALSE;
-        }
-    }
-
-    AGB_ASSERT(FALSE);
-    return FALSE;
+    // Bosses use advanced switching throughout the run; ordinary trainers keep basic switching.
+    return Rogue_IsKeyTrainer(trainerNum);
 }
 
 bool8 Rogue_ShouldTrainerBeDoubleAware(u16 trainerNum)
@@ -643,14 +626,8 @@ bool8 Rogue_ShouldTrainerTrySetup(u16 trainerNum)
 
 bool8 Rogue_ShouldTrainerBeSmart(u16 trainerNum)
 {
-    { // Standard baseline
-        if(Rogue_IsKeyTrainer(trainerNum))
-            return TRUE;
-        else
-            return (Rogue_GetCurrentDifficulty() >= ROGUE_GYM_MID_DIFFICULTY - 1);
-    }
-
-    return FALSE;
+    // Advanced KO, partner-support, and replacement choices are part of the boss role.
+    return Rogue_IsKeyTrainer(trainerNum);
 }
 
 enum

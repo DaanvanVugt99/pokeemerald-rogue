@@ -61,6 +61,10 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Make trainer AI depend on role instead of run stage: ordinary trainers retain
+  basic move evaluation and switching, while bosses use smarter choices and
+  advanced switching throughout the run. Ascension levels do not change AI.
+
 - Start A0 enemies with random natures; A1 makes them neutral, with competitive
   natures still introduced at A2/A6/A11. Replace A1's boss IV bonus with this
   nature step; the first boss IV bonus is now +10 at A5. Update displayed rules

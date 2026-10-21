@@ -49,8 +49,10 @@ At every ascension, retain:
 - Player EVs; no enemy EVs. Convenient hub EV configuration is a future
   preparation improvement, not an ascension penalty or a change implemented
   by this document.
-- Standard's AI behavior and progression. Ascensions do not make the AI
-  progressively smarter or make the baseline AI less capable.
+- Trainer AI flags are based on role, not Ascension. All trainers check for bad
+  moves and score viability; bosses also prioritize knockouts, help partners,
+  prefer first-turn setup, choose replacements more carefully, and use advanced
+  switching throughout the run. Ascension does not change AI flags.
 - Standard's species/evolution eligibility, legendary allowances, weather,
   and battle-gimmick progression, except for the explicit A15 diversity rule.
 - Normal shop prices, rewards, catching, encounter variety, and EXP conveniences.
