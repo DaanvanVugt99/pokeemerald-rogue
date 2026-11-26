@@ -183,7 +183,7 @@ slots. Existing compositions, graphics, palettes and animation slots stay fixed.
 The indoor hub uses the same 48 x 48 brass frame over each room's normal
 floor. The new shared stamps use primary metatiles starting at 0x160. The
 Depot's northwest piece preserves the authored shadow. The main and tutorial
-Safari maps align the paw with the south corridor. The Adventure Gate
+Safari maps align the Pok&eacute; Ball with the south corridor. The Adventure Gate
 keeps its open floor. The Trial trophy is centered on the seam between the
 two stair lanes, using four backing columns for the same 48-pixel circle. Home Base uses its main interior, where
 decorations can cover the inlay like any other floor tile. Park stays outdoors.

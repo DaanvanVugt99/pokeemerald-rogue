@@ -62,7 +62,7 @@ Format follows Keep a Changelog loosely:
 ### Changed
 
 - Add brass floor medallions to the indoor hub districts, with a centered
-  paw in both Safari layouts and a trophy aligned to the Trial staircase.
+  Poké Ball in both Safari layouts and a trophy aligned to the Trial staircase.
   Keep the Adventure Gate floor open.
 
 - Inlay a brass berry medallion in the center aisle of the Berry Lab.

@@ -41,14 +41,13 @@ def mirrored_symbol(image, half):
 
 
 def safari(image):
-    half = Image.new('P', (24, 48))
-    d = ImageDraw.Draw(half)
-    d.ellipse((12, 19, 18, 25), fill=BRASS)
-    d.ellipse((18, 12, 22, 21), fill=GOLD)
-    d.polygon(((13, 31), (17, 27), (21, 24), (23, 24), (23, 34),
-               (19, 34), (15, 35), (13, 34)), fill=GOLD)
-    d.line(((15, 32), (19, 29), (21, 28)), fill=BRASS, width=2)
-    mirrored_symbol(image, half)
+    pen = ImageDraw.Draw(image)
+    ball = (12, 12, 35, 35)
+    pen.pieslice(ball, 180, 360, fill=BRASS)
+    pen.ellipse(ball, outline=GOLD, width=2)
+    pen.rectangle((13, 23, 34, 24), fill=GOLD)
+    pen.ellipse((19, 19, 28, 28), fill=5, outline=GOLD, width=2)
+    pen.ellipse((22, 22, 25, 25), fill=GOLD)
 
 
 def supplies(image):
