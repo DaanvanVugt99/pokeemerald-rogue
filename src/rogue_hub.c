@@ -1120,10 +1120,10 @@ static void RogueHub_UpdateSafariAreaMetatiles()
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_SAFARI_ZONE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
-        // Continue the authored floor edge; remove the corridor and its caps.
-        MetatileSet_Tile(16, 22, METATILE_SafariLab_Floor);
-        MetatileSet_Tile(20, 22, METATILE_SafariLab_Floor);
-        MetatileFill_Tile(16, 23, 20, 31, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
+        // Remove the pillar caps on the last floor row and seal the corridor flush.
+        MetatileSet_Tile(16, 21, METATILE_SafariLab_Floor);
+        MetatileSet_Tile(20, 21, METATILE_SafariLab_Floor);
+        MetatileFill_Tile(16, 22, 20, 31, METATILE_SafariLab_Void | MAPGRID_COLLISION_MASK);
     }
     if (gMapHeader.mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE
         && RogueHub_HasUpgrade(HUB_UPGRADE_SAFARI_ZONE_LEGENDS_CAVE))

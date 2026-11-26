@@ -64,6 +64,8 @@ Format follows Keep a Changelog loosely:
 
 ## Unreleased
 
+- Make the closed south passage meet the floor edge in both Safari maps, clearing the leftover pillar caps.
+
 ### Added
 
 - Add three Treasure rewards with their existing sprites: Clear Armor reduces
