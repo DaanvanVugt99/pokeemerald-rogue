@@ -5,6 +5,7 @@
 #include "constants/rogue.h"
 #include "constants/rogue_hub.h"
 #include "constants/map_types.h"
+#include "constants/main_hall_tiles.h"
 #include "constants/metatile_behaviors.h"
 #include "constants/songs.h"
 #include "event_data.h"
@@ -52,6 +53,20 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                 for (x = 0; x < 36; ++x)
                     grid[(y + MAP_OFFSET) * gBackupMapLayout.width + x + MAP_OFFSET] = header->mapLayout->map[y * 36 + x];
             RogueHub_ApplyMapMetatiles();
+            for (x = 16; x <= 20; x += 4)
+            {
+                u16 expected = (mask & 4)
+                    ? header->mapLayout->map[24 * 36 + x] & MAPGRID_METATILE_ID_MASK
+                    : METATILE_MainHall_Floor;
+                EXPECT_EQ(MapGridGetMetatileIdAt(x + MAP_OFFSET, 24 + MAP_OFFSET), expected);
+                EXPECT(!MapGridIsImpassableAt(x + MAP_OFFSET, 24 + MAP_OFFSET));
+            }
+            for (y = 17; y <= 18; ++y)
+            {
+                EXPECT_EQ(MapGridGetMetatileIdAt(4 + MAP_OFFSET, y + MAP_OFFSET),
+                    mask & 8 ? METATILE_MainHall_Floor : METATILE_MainHall_FloorShadow);
+                EXPECT(!MapGridIsImpassableAt(4 + MAP_OFFSET, y + MAP_OFFSET));
+            }
             for (i = 0; i < header->events->warpCount; ++i)
             {
                 const struct WarpEvent *warp = &header->events->warps[i];

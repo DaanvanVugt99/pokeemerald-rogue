@@ -102,6 +102,9 @@ def check_states():
                 if not state[direction]:
                     if direction == 'SOUTH':
                         x1, x2, row = geometry
+                        if room == 'TownSquare':
+                            for x in (x1, x2):
+                                expect(x, row - 1, 'Floor', solid=False)
                         for y in range(row, h):
                             for x in range(x1, x2+1):
                                 # The authored floor/void edge beside the opening is the reference.
@@ -113,6 +116,9 @@ def check_states():
                     else:
                         wall, y1, y2 = geometry
                         for y in range(y1, y2+1): expect(wall, y, 'Pillar')
+                        if room == 'TownSquare' and direction == 'WEST':
+                            for y in (cy, cy + 1):
+                                expect(wall + 1, y, 'FloorShadow', solid=False)
                         if room == 'AdventureEntrance':
                             expect(wall, 12, 'PillarEnd')
                             for y in range(13, h): expect(wall, y, 'Void')

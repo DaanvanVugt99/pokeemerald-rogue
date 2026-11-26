@@ -1269,12 +1269,15 @@ static void RogueHub_UpdateTownSquareAreaMetatiles()
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
     {
+        MetatileSet_Tile(16, 24, METATILE_MainHall_Floor);
+        MetatileSet_Tile(20, 24, METATILE_MainHall_Floor);
         MetatileFill_Tile(16, 25, 20, 29, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
     }
     if (RogueHub_GetAreaAtConnection(HUB_AREA_TOWN_SQUARE, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
     {
         MetatileFill_Tile(0, 14, 2, 21, METATILE_MainHall_Void | MAPGRID_COLLISION_MASK);
         MetatileFill_Tile(3, 14, 3, 19, METATILE_MainHall_Pillar | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(4, 17, 4, 18, METATILE_MainHall_FloorShadow);
     }
     if (!RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL))
         MetatileSet_Tile(9, 4, METATILE_MainHall_ClosedDoor | MAPGRID_COLLISION_MASK);
