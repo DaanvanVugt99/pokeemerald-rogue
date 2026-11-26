@@ -1,70 +1,63 @@
-#include "constants/moves.h"
 #include "global.h"
 #include "test/battle.h"
 
-ASSUMPTIONS
+SINGLE_BATTLE_TEST("Heartthrob passes swapped stat boosts and can activate again")
 {
-    ASSUME(gBattleMoves[MOVE_DRAINING_KISS].kissingMove);
-    ASSUME(gBattleMoves[MOVE_SWEET_KISS].kissingMove);
-    ASSUME(gBattleMoves[MOVE_LOVELY_KISS].kissingMove);
-    ASSUME(!gBattleMoves[MOVE_TACKLE].kissingMove);
-    ASSUME(gBattleMoves[MOVE_ATTRACT].effect == EFFECT_ATTRACT);
-}
-
-SINGLE_BATTLE_TEST("Heartthrob makes kissing moves use Attract afterwards")
-{
-    u16 move;
-
-    PARAMETRIZE { move = MOVE_DRAINING_KISS; }
-    PARAMETRIZE { move = MOVE_SWEET_KISS; }
-    PARAMETRIZE { move = MOVE_LOVELY_KISS; }
-
-    PASSES_RANDOMLY(gBattleMoves[move].accuracy, 100, RNG_ACCURACY);
-
     GIVEN {
-        PLAYER(SPECIES_LUVDISC) { Gender(MON_FEMALE); Ability(ABILITY_SWIFT_SWIM); Moves(move); }
-        OPPONENT(SPECIES_WOBBUFFET) { Gender(MON_MALE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_LUVDISC) { Speed(80); Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_HEARTTHROB); Moves(MOVE_HEART_SWAP, MOVE_CELEBRATE); }
+        PLAYER(SPECIES_ODDISH) { Speed(40); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); Ability(ABILITY_TELEPATHY); Moves(MOVE_SWORDS_DANCE); }
     } WHEN {
-        TURN { MOVE(player, move); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_SWORDS_DANCE); MOVE(player, MOVE_HEART_SWAP); SEND_OUT(player, 1); }
+        TURN { SWITCH(player, 0); MOVE(opponent, MOVE_SWORDS_DANCE); }
+        TURN { MOVE(opponent, MOVE_SWORDS_DANCE); MOVE(player, MOVE_HEART_SWAP); SEND_OUT(player, 1); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, move, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HEART_SWAP, player);
         ABILITY_POPUP(player, ABILITY_HEARTTHROB);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_ATTRACT, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BATON_PASS, player);
+        MESSAGE("Go! Oddish!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HEART_SWAP, player);
+        ABILITY_POPUP(player, ABILITY_HEARTTHROB);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BATON_PASS, player);
+        MESSAGE("Go! Oddish!");
     } THEN {
-        EXPECT(opponent->status2 & STATUS2_INFATUATION);
+        EXPECT_EQ(player->species, SPECIES_ODDISH);
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 4);
+        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
     }
 }
 
-SINGLE_BATTLE_TEST("Heartthrob does not trigger for non-kissing moves")
+SINGLE_BATTLE_TEST("Heartthrob does not activate after a blocked Heart Swap")
 {
     GIVEN {
-        PLAYER(SPECIES_LUVDISC) { Gender(MON_FEMALE); Ability(ABILITY_SWIFT_SWIM); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Gender(MON_MALE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_LUVDISC) { Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_HEARTTHROB); Moves(MOVE_HEART_SWAP); }
+        PLAYER(SPECIES_ODDISH);
+        OPPONENT(SPECIES_WYNAUT) { Moves(MOVE_PROTECT); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_PROTECT); MOVE(player, MOVE_HEART_SWAP, hit: FALSE); }
     } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PROTECT, opponent);
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_HEARTTHROB);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_ATTRACT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_BATON_PASS, player);
         }
-    } THEN {
-        EXPECT(!(opponent->status2 & STATUS2_INFATUATION));
     }
 }
 
-SINGLE_BATTLE_TEST("Heartthrob does not trigger if Attract cannot apply")
+SINGLE_BATTLE_TEST("Heartthrob leaves Heart Swap usable without a reserve ally")
 {
     GIVEN {
-        PLAYER(SPECIES_LUVDISC) { Gender(MON_FEMALE); Ability(ABILITY_SWIFT_SWIM); Moves(MOVE_DRAINING_KISS); }
-        OPPONENT(SPECIES_SLOWPOKE) { Ability(ABILITY_OBLIVIOUS); Gender(MON_MALE); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_LUVDISC) { Speed(80); Ability(ABILITY_SWIFT_SWIM); UniqueAbility(ABILITY_HEARTTHROB); Moves(MOVE_HEART_SWAP); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); Moves(MOVE_SWORDS_DANCE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_DRAINING_KISS); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_SWORDS_DANCE); MOVE(player, MOVE_HEART_SWAP); }
     } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HEART_SWAP, player);
         NONE_OF {
             ABILITY_POPUP(player, ABILITY_HEARTTHROB);
-            ANIMATION(ANIM_TYPE_MOVE, MOVE_ATTRACT, player);
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_BATON_PASS, player);
         }
     } THEN {
-        EXPECT(!(opponent->status2 & STATUS2_INFATUATION));
+        EXPECT_EQ(player->statStages[STAT_ATK], DEFAULT_STAT_STAGE + 2);
     }
 }

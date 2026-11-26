@@ -19490,24 +19490,20 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_HEARTTHROB)
-         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && IsFinalMultiHitStrike()
-         && gBattleMoves[move].kissingMove
-         && !(gBattleMons[gBattlerTarget].status2 & STATUS2_INFATUATION)
-         && !HasBattlerAbility(gBattlerTarget, ABILITY_OBLIVIOUS)
-         && AreBattlersOfOppositeGender(battler, gBattlerTarget)
-         && !IsAbilityOnSide(gBattlerTarget, ABILITY_AROMA_VEIL)
-         && CanUseExtraMove(battler, gBattlerTarget))
+         && move == MOVE_HEART_SWAP
+         && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+         && CanUseSelfExtraMove(battler)
+         && CanBattlerSwitch(battler))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_HEARTTHROB);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_ATTRACT;
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_BATON_PASS;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScript();
             effect++;
         }
 
