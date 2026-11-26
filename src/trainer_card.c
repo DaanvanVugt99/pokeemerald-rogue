@@ -641,6 +641,8 @@ static void CB2_InitTrainerCard(void)
         gMain.state++;
         break;
     case 6:
+        if (FreeTempTileDataBuffersIfPossible())
+            break;
         if (LoadCardGfx() == TRUE)
             gMain.state++;
         break;
@@ -1432,7 +1434,8 @@ static void LoadMonIconGfx(void)
     for (i = 0; i < PARTY_SIZE; i++)
     {
         if (sData->trainerCard.monSpecies[i])
-            LoadBgTiles(3, GetMonIconTiles(sData->trainerCard.monSpecies[i], 0, MON_MALE), 512, 16 * i + 32);
+            DecompressAndCopyTileDataToVram(3, GetMonIconCompressedFrame(sData->trainerCard.monSpecies[i], 0, MON_MALE, 0),
+                                           0, 16 * i + 32, 0);
     }
 }
 

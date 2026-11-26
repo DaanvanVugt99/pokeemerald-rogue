@@ -122,7 +122,7 @@ struct ContestResults
     struct ContestMonResults (*monResults)[CONTESTANT_COUNT];
     u8 *unusedBg; // Allocated/freed, never used
     u8 *tilemapBuffers[4];
-    u8 *unused; // Allocated/freed, never used
+    u8 *monIconFrames;
 };
 
 static EWRAM_DATA struct ContestResults *sContestResults = NULL;
@@ -1093,8 +1093,10 @@ static void LoadContestMonIcon(u16 species, u8 monIndex, u8 srcOffset, u8 useDma
     u16 var0, var1;
     u8 gender = GetGenderForSpecies(species, 0); // RogueNote: TODO
 
-    iconPtr = GetMonIconPtr(species, personality, gender);
-    iconPtr += srcOffset * 0x200 + 0x80;
+    // Preserve each decoded frame until the queued DMA copy runs.
+    u8 *frame = (u8 *)sContestResults->monIconFrames + monIndex * 0x200;
+    LZ77UnCompWram(GetMonIconCompressedFrame(species, personality, gender, srcOffset), frame);
+    iconPtr = frame + 0x80;
     if (useDmaNow)
     {
         RequestDma3Copy(iconPtr, (void *)BG_CHAR_ADDR(1) + monIndex * 0x200, 0x180, 1);
@@ -1896,7 +1898,7 @@ static void AllocContestResults(void)
     sContestResults->tilemapBuffers[1] = AllocZeroed(BG_SCREEN_SIZE);
     sContestResults->tilemapBuffers[2] = AllocZeroed(BG_SCREEN_SIZE);
     sContestResults->tilemapBuffers[3] = AllocZeroed(BG_SCREEN_SIZE);
-    sContestResults->unused = AllocZeroed(0x1000);
+    sContestResults->monIconFrames = Alloc(CONTESTANT_COUNT * 0x200);
     AllocateMonSpritesGfx();
 }
 
@@ -1909,7 +1911,7 @@ static void FreeContestResults(void)
     FREE_AND_SET_NULL(sContestResults->tilemapBuffers[1]);
     FREE_AND_SET_NULL(sContestResults->tilemapBuffers[2]);
     FREE_AND_SET_NULL(sContestResults->tilemapBuffers[3]);
-    FREE_AND_SET_NULL(sContestResults->unused);
+    FREE_AND_SET_NULL(sContestResults->monIconFrames);
     FREE_AND_SET_NULL(sContestResults);
     FreeMonSpritesGfx();
 }

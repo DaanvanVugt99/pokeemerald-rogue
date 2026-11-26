@@ -11562,7 +11562,7 @@ static void PutMonIconOnLvlUpBanner(void)
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
     u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
 
-    iconSheet.data = GetMonIconPtr(species, personality, GetMonGender(mon));
+    iconSheet.data = DecompressMonIconFrame(species, personality, GetMonGender(mon), 0);
     iconSheet.size = 0x200;
     iconSheet.tag = TAG_LVLUP_BANNER_MON_ICON;
 

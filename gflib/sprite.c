@@ -6,6 +6,7 @@
 #include "rogue_controller.h"
 
 #define MAX_SPRITE_COPY_REQUESTS 64
+#define SPRITE_COPY_LZ77 0xFFFF
 
 #define OAM_MATRIX_COUNT 32
 
@@ -740,7 +741,11 @@ void ProcessSpriteCopyRequests(void)
 
         while (sSpriteCopyRequestCount > 0)
         {
-            CpuCopy16(sSpriteCopyRequests[i].src, sSpriteCopyRequests[i].dest, sSpriteCopyRequests[i].size);
+            const struct SpriteCopyRequest *request = &sSpriteCopyRequests[i];
+            if (request->size == SPRITE_COPY_LZ77)
+                LZ77UnCompVram((const u32 *)request->src, request->dest);
+            else
+                CpuCopy16(request->src, request->dest, request->size);
             sSpriteCopyRequestCount--;
             i++;
         }
@@ -769,6 +774,11 @@ void RequestSpriteCopy(const u8 *src, u8 *dest, u16 size)
         sSpriteCopyRequests[sSpriteCopyRequestCount].size = size;
         sSpriteCopyRequestCount++;
     }
+}
+
+void RequestCompressedSpriteCopy(const u32 *src, void *dest)
+{
+    RequestSpriteCopy((const u8 *)src, dest, SPRITE_COPY_LZ77);
 }
 
 void CopyFromSprites(u8 *dest)

@@ -419,7 +419,7 @@ struct PokemonStorageSystemData
     u16 partyMenuTilemapBuffer[0x108];
     u16 partyMenuUnused1; // Never read
     u16 partyMenuY;
-    u8 partyMenuUnused2; // Unused
+    u8 stateAfterPortraitRefresh;
     u8 partyMenuMoveTimer;
     u8 showPartyMenuState;
     bool8 closeBoxFlashing;
@@ -860,6 +860,9 @@ static void CreateWaveformSprites(void);
 static void ClearBottomWindow(void);
 static void InitSupplementalTilemaps(void);
 static void PrintDisplayMonInfo(void);
+static void RenderDisplayMonInfo(bool8 lowerRows);
+static void PublishDisplayMonInfo(void);
+static void PublishDisplayMon(void);
 static void UpdateWaveformAnimation(void);
 static void SetPartySlotTilemaps(void);
 static void StopFlashingCloseBoxButton(void);
@@ -868,6 +871,7 @@ static void UpdatePartySlotColors(void);
 static void StartFlashingCloseBoxButton(void);
 static void SetUpDoShowPartyMenu(void);
 static void StartDisplayMonMosaicEffect(void);
+static void AnimateDisplayMonMosaic(void);
 static bool8 InitPokeStorageWindows(void);
 static bool8 DoShowPartyMenu(void);
 static bool8 HidePartyMenu(void);
@@ -2298,7 +2302,16 @@ enum {
     MSTATE_MULTIMOVE_RUN_MOVED,
     MSTATE_SCROLL_BOX_ITEM,
     MSTATE_WAIT_ITEM_ANIM,
+    MSTATE_DRAW_PORTRAIT_INFO_TOP,
+    MSTATE_DRAW_PORTRAIT_INFO_BOTTOM,
+    MSTATE_SHOW_PORTRAIT,
 };
+
+static void BeginDisplayMonRefresh(u8 nextState)
+{
+    sStorage->stateAfterPortraitRefresh = nextState;
+    sStorage->state = MSTATE_DRAW_PORTRAIT_INFO_TOP;
+}
 
 static void Task_PokeStorageMain(u8 taskId)
 {
@@ -2512,30 +2525,45 @@ static void Task_PokeStorageMain(u8 taskId)
                 StopFlashingCloseBoxButton();
 
             if (sStorage->setMosaic)
-                StartDisplayMonMosaicEffect();
-            sStorage->state = MSTATE_HANDLE_INPUT;
+                BeginDisplayMonRefresh(MSTATE_HANDLE_INPUT);
+            else
+                sStorage->state = MSTATE_HANDLE_INPUT;
         }
         break;
     case MSTATE_SCROLL_BOX:
         if (!ScrollToBox())
         {
+            u8 nextState = sStorage->boxOption == OPTION_MOVE_ITEMS ? MSTATE_WAIT_ITEM_ANIM : MSTATE_HANDLE_INPUT;
+
             SetCurrentBox(sStorage->newCurrBoxId);
             if (!sInPartyMenu && !IsMonBeingMoved())
             {
                 RefreshDisplayMon();
-                StartDisplayMonMosaicEffect();
-            }
-
-            if (sStorage->boxOption == OPTION_MOVE_ITEMS)
-            {
-                TryShowItemAtCursor();
-                sStorage->state = MSTATE_WAIT_ITEM_ANIM;
+                BeginDisplayMonRefresh(nextState);
             }
             else
             {
-                sStorage->state = MSTATE_HANDLE_INPUT;
+                if (nextState == MSTATE_WAIT_ITEM_ANIM)
+                    TryShowItemAtCursor();
+                sStorage->state = nextState;
             }
         }
+        break;
+    case MSTATE_DRAW_PORTRAIT_INFO_TOP:
+        // Keep the old portrait and text on screen until both halves are ready.
+        RenderDisplayMonInfo(FALSE);
+        sStorage->state = MSTATE_DRAW_PORTRAIT_INFO_BOTTOM;
+        break;
+    case MSTATE_DRAW_PORTRAIT_INFO_BOTTOM:
+        RenderDisplayMonInfo(TRUE);
+        sStorage->state = MSTATE_SHOW_PORTRAIT;
+        break;
+    case MSTATE_SHOW_PORTRAIT:
+        PublishDisplayMon();
+        AnimateDisplayMonMosaic();
+        sStorage->state = sStorage->stateAfterPortraitRefresh;
+        if (sStorage->state == MSTATE_WAIT_ITEM_ANIM)
+            TryShowItemAtCursor();
         break;
     case MSTATE_WAIT_MSG:
         if (JOY_NEW(A_BUTTON | B_BUTTON | DPAD_ANY))
@@ -4058,8 +4086,15 @@ static void CreateWaveformSprites(void)
 
 static void RefreshDisplayMonData(void)
 {
+    RenderDisplayMonInfo(FALSE);
+    RenderDisplayMonInfo(TRUE);
+    PublishDisplayMon();
+}
+
+static void PublishDisplayMon(void)
+{
     LoadDisplayMonGfx(sStorage->displayMonSpecies, sStorage->displayMonPersonality, sStorage->displayMonGender);
-    PrintDisplayMonInfo();
+    PublishDisplayMonInfo();
     UpdateWaveformAnimation();
     ScheduleBgCopyTilemapToVram(0);
 }
@@ -4067,6 +4102,11 @@ static void RefreshDisplayMonData(void)
 static void StartDisplayMonMosaicEffect(void)
 {
     RefreshDisplayMonData();
+    AnimateDisplayMonMosaic();
+}
+
+static void AnimateDisplayMonMosaic(void)
+{
     if (sStorage->displayMonSprite)
     {
         sStorage->displayMonSprite->oam.mosaic = TRUE;
@@ -4164,30 +4204,42 @@ static void LoadDisplayMonGfx(u16 species, u32 pid, u8 gender)
 
 static void PrintDisplayMonInfo(void)
 {
-    bool8 isOutsideSelectedPokedex = IsSpeciesOutsideSelectedPokedex(sStorage->displayMonSpecies);
+    RenderDisplayMonInfo(FALSE);
+    RenderDisplayMonInfo(TRUE);
+    PublishDisplayMonInfo();
+}
 
-    FillWindowPixelBuffer(WIN_DISPLAY_INFO, PIXEL_FILL(1));
-    if (sStorage->boxOption != OPTION_MOVE_ITEMS)
+static void RenderDisplayMonInfo(bool8 lowerRows)
+{
+    bool8 itemMode = sStorage->boxOption == OPTION_MOVE_ITEMS;
+
+    if (!lowerRows)
     {
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, 0, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 15, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 29, TEXT_SKIP_DRAW, NULL);
-
-        // The panel only has room for four rows. Use the empty held-item row for
-        // the warning so the other rows retain their normal spacing.
-        if (isOutsideSelectedPokedex && sStorage->displayMonItemId == ITEM_NONE)
-            AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sText_NotInCurrentDex, 6, 43, TEXT_SKIP_DRAW, NULL);
-        else
-            AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, 43, TEXT_SKIP_DRAW, NULL);
+        FillWindowPixelBuffer(WIN_DISPLAY_INFO, PIXEL_FILL(1));
+        if (itemMode)
+            AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonItemName, 6, 0, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, itemMode ? 13 : 0, TEXT_SKIP_DRAW, NULL);
+        if (!itemMode)
+            AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 15, TEXT_SKIP_DRAW, NULL);
     }
     else
     {
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, 0, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_NORMAL, sStorage->displayMonNameText, 6, 13, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 28, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 42, TEXT_SKIP_DRAW, NULL);
+        if (itemMode)
+            AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonSpeciesName, 6, 28, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, itemMode ? 42 : 29, TEXT_SKIP_DRAW, NULL);
+        if (!itemMode)
+        {
+            // The legality warning uses the held-item row when it is empty.
+            if (sStorage->displayMonItemId == ITEM_NONE && IsSpeciesOutsideSelectedPokedex(sStorage->displayMonSpecies))
+                AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sText_NotInCurrentDex, 6, 43, TEXT_SKIP_DRAW, NULL);
+            else
+                AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SMALL, sStorage->displayMonItemName, 6, 43, TEXT_SKIP_DRAW, NULL);
+        }
     }
+}
 
+static void PublishDisplayMonInfo(void)
+{
     CopyWindowToVram(WIN_DISPLAY_INFO, COPYWIN_GFX);
     if (sStorage->displayMonSpecies != SPECIES_NONE)
     {
@@ -5324,7 +5376,7 @@ static u16 TryLoadMonIconTiles(u16 species, u32 personality, u8 gender)
     sStorage->numIconsPerSpecies[i]++;
     offset = 16 * i;
     species &= GENDER_MASK;
-    CpuCopy32(GetMonIconTiles(species, personality, gender), (void *)(OBJ_VRAM0) + offset * TILE_SIZE_4BPP, 0x200);
+    LZ77UnCompVram(GetMonIconCompressedFrame(species, personality, gender, 0), (void *)(OBJ_VRAM0 + offset * TILE_SIZE_4BPP));
 
     return offset;
 }
@@ -7228,7 +7280,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonMarkings = GetMonData(mon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
             sStorage->displayMonPalette = GetMonFrontSpritePal(mon);
-            gender = GetMonGender(mon);
+            gender = sStorage->displayMonGender;
             sStorage->displayMonItemId = GetMonData(mon, MON_DATA_HELD_ITEM);
         }
     }
@@ -7236,9 +7288,9 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
     {
         struct BoxPokemon *boxMon = (struct BoxPokemon *)pokemon;
 
-        sStorage->displayMonSpecies = GetBoxMonData(pokemon, MON_DATA_SPECIES_OR_EGG);
-        sStorage->displayMonIsShiny = GetMonData(pokemon, MON_DATA_IS_SHINY);
-        sStorage->displayMonGender = GetMonGender(pokemon);
+        sStorage->displayMonSpecies = GetBoxMonData(boxMon, MON_DATA_SPECIES_OR_EGG);
+        sStorage->displayMonIsShiny = GetBoxMonData(boxMon, MON_DATA_IS_SHINY);
+        sStorage->displayMonGender = GetBoxMonGender(boxMon);
         if (sStorage->displayMonSpecies != SPECIES_NONE)
         {
             sanityIsBadEgg = GetBoxMonData(boxMon, MON_DATA_SANITY_IS_BAD_EGG);
@@ -7254,7 +7306,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonMarkings = GetBoxMonData(boxMon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetBoxMonData(boxMon, MON_DATA_PERSONALITY);
             sStorage->displayMonPalette = GetMonSpritePalFromSpecies(sStorage->displayMonSpecies, sStorage->displayMonGender, sStorage->displayMonIsShiny, GetBoxMonData(boxMon, MON_DATA_OT_ID));
-            gender = GetBoxMonGender(boxMon);
+            gender = sStorage->displayMonGender;
             sStorage->displayMonItemId = GetBoxMonData(boxMon, MON_DATA_HELD_ITEM);
         }
     }
@@ -8790,7 +8842,7 @@ static void MultiMove_SetIconToBg(u8 x, u8 y)
 
     if (species != SPECIES_NONE)
     {
-        const u8 *iconGfx = GetMonIconPtr(species, personality, gender);
+        const u8 *iconGfx = DecompressMonIconFrame(species, personality, gender, 0);
         u8 index = GetValidMonIconPalIndex(species) + 8;
 
         BlitBitmapRectToWindow4BitTo8Bit(sStorage->multiMoveWindowId,

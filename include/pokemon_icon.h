@@ -3,10 +3,12 @@
 
 extern const struct SpritePalette gMonIconPaletteTable[];
 
-const u8 *GetMonIconTiles(u16 species, u32 personality, u8 gender);
+const u32 *GetMonIconCompressedFrame(u16 species, u32 personality, u8 gender, u8 frame);
+// The returned scratch buffer must be consumed before another decompression.
+const u8 *DecompressMonIconFrame(u16 species, u32 personality, u8 gender, u8 frame);
+const u16 *GetColoredMonIconPalette(u16 species, u32 personality, u8 gender, bool8 shiny, u32 otId, u16 *tintedPalette);
 void TryLoadAllMonIconPalettesAtOffset(u16 offset);
 u8 GetValidMonIconPalIndex(u16 species);
-const u8 *GetMonIconPtr(u16 speciesId, u32 personality, u8 gender);
 const u16 *GetValidMonIconPalettePtr(u16 speciesId);
 u16 GetIconSpecies(u16 species, u32 personality);
 u16 GetUnownLetterByPersonality(u32 personality);
@@ -23,6 +25,7 @@ void FreeMonIconPalette(u16 species);
 void FreeMonIconPaletteCustomOffset(u16 species, u16 paletteOffset);
 void FreeAndDestroyMonIconSprite(struct Sprite *sprite);
 u8 CreateMonIcon(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u8 subpriority, u32 personality, u8 gender);
+u8 CreatePartyMonIcon(u16 species, s16 x, s16 y, u32 personality, u8 gender);
 u8 UpdateMonIconFrame(struct Sprite *sprite);
 void LoadMonIconPalette(u16 species);
 void LoadMonIconPaletteGender(u16 species, u8 gender);

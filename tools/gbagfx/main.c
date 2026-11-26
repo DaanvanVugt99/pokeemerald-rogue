@@ -586,6 +586,76 @@ void HandleHuffDecompressCommand(char *inputPath, char *outputPath, int argc UNU
     free(uncompressedData);
 }
 
+static bool ReadShinyIconPalette(const char *filename, const char *inputPath, unsigned char palette[32])
+{
+    FILE *file = fopen(filename, "r");
+    char line[1024];
+
+    if (file == NULL)
+        FATAL_ERROR("Could not open icon palettes: %s\n", filename);
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        char *path = strtok(line, " \t\r\n");
+        if (path == NULL || strcmp(path, inputPath) != 0)
+            continue;
+
+        for (int i = 0; i < 16; i++)
+        {
+            char *token = strtok(NULL, " \t\r\n");
+            char *end;
+            unsigned long rgb;
+            if (token == NULL)
+                FATAL_ERROR("Expected 16 RGB555 colors for %s\n", inputPath);
+            rgb = strtoul(token, &end, 16);
+            if (*end != '\0' || rgb > 0x7FFF)
+                FATAL_ERROR("Invalid RGB555 color %s for %s\n", token, inputPath);
+            palette[2 * i] = rgb;
+            palette[2 * i + 1] = rgb >> 8;
+        }
+        fclose(file);
+        return true;
+    }
+    fclose(file);
+    return false;
+}
+
+static void HandleIconCompressCommand(char *inputPath, char *outputPath, int argc, char **argv)
+{
+    enum { FRAME_SIZE = 512, FRAME_COUNT = 2 };
+    int inputSize, sizes[FRAME_COUNT], offsets[FRAME_COUNT];
+    unsigned char *input = ReadWholeFile(inputPath, &inputSize);
+    unsigned char *frames[FRAME_COUNT];
+    unsigned char palette[32];
+    bool hasPalette = argc > 3 && ReadShinyIconPalette(argv[3], inputPath, palette);
+    int outputSize = 4 + (hasPalette ? sizeof(palette) : 0);
+
+    if (inputSize != FRAME_SIZE * FRAME_COUNT)
+        FATAL_ERROR("An icon must contain two 32x32 4bpp frames: %s\n", inputPath);
+
+    for (int i = 0; i < FRAME_COUNT; i++)
+    {
+        offsets[i] = outputSize;
+        frames[i] = LZCompress(input + i * FRAME_SIZE, FRAME_SIZE, &sizes[i], 2);
+        outputSize += (sizes[i] + 3) & ~3;
+    }
+
+    // Store both offsets and keep the optional RGB555 palette word aligned.
+    unsigned char *output = calloc(outputSize, 1);
+    output[0] = offsets[1] & 0xFF;
+    output[1] = offsets[1] >> 8;
+    output[2] = offsets[0];
+    if (hasPalette)
+        memcpy(output + 4, palette, sizeof(palette));
+    for (int i = 0; i < FRAME_COUNT; i++)
+    {
+        memcpy(output + offsets[i], frames[i], sizes[i]);
+        free(frames[i]);
+    }
+    WriteWholeFile(outputPath, output, outputSize);
+    free(output);
+    free(input);
+}
+
 int main(int argc, char **argv)
 {
     char converted = 0;
@@ -613,6 +683,7 @@ int main(int argc, char **argv)
         { "png", "fwjpnfont", HandlePngToFullwidthJapaneseFontCommand },
         { NULL, "huff", HandleHuffCompressCommand },
         { NULL, "lz", HandleLZCompressCommand },
+        { "4bpp", "iconlz", HandleIconCompressCommand },
         { "huff", NULL, HandleHuffDecompressCommand },
         { "lz", NULL, HandleLZDecompressCommand },
         { NULL, "rl", HandleRLCompressCommand },

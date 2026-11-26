@@ -1,13 +1,18 @@
 #include "global.h"
+#include "decompress.h"
 #include "graphics.h"
 #include "mail.h"
 #include "palette.h"
 #include "pokemon_debug.h"
 #include "pokemon_icon.h"
+#include "rogue_gifts.h"
 #include "sprite.h"
 #include "data.h"
 
 #define POKE_ICON_BASE_PAL_TAG 56000
+#define MON_ICON_FRAME_SIZE (16 * TILE_SIZE_4BPP)
+
+static const struct SpriteFrameImage sPreloadedIconFrames = {NULL, 2 * MON_ICON_FRAME_SIZE};
 
 struct MonIconSpriteTemplate
 {
@@ -17,8 +22,11 @@ struct MonIconSpriteTemplate
     const union AffineAnimCmd *const *affineAnims;
     void (*callback)(struct Sprite *);
     u16 paletteTag;
+    bool8 preloadFrames;
 };
 
+static const u8 *GetMonIconData(u16 species, u8 gender);
+static const u32 *GetCompressedFrame(const u8 *icon, u8 frame);
 static u8 CreateMonIconSprite(struct MonIconSpriteTemplate *, s16, s16, u8);
 static void FreeAndDestroyMonIconSprite_(struct Sprite *sprite);
 
@@ -1611,32 +1619,47 @@ static const u16 sSpriteImageSizes[3][4] =
     },
 };
 
-u8 CreateMonIcon(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u8 subpriority, u32 personality, u8 gender)
+static u8 CreateMonIconInternal(u16 species, SpriteCallback callback, s16 x, s16 y, u8 subpriority, u32 personality, u8 gender, bool8 preloadFrames)
 {
     u8 spriteId;
     struct MonIconSpriteTemplate iconTemplate =
     {
         .oam = &sMonIconOamData,
-        .image = GetMonIconPtr(species, personality, gender),
+        .image = GetMonIconData(GetIconSpecies(species, personality), gender),
         .anims = sMonIconAnims,
         .affineAnims = sMonIconAffineAnims,
         .callback = callback,
-        .paletteTag = POKE_ICON_BASE_PAL_TAG + gSpeciesInfo[species].iconPalIndex,
+        .paletteTag = TAG_NONE,
+        .preloadFrames = preloadFrames,
     };
-    species = SanitizeSpeciesId(species);
 
-    if (species > NUM_SPECIES)
-        iconTemplate.paletteTag = POKE_ICON_BASE_PAL_TAG;
-    else if (gSpeciesInfo[species].iconSpriteFemale != NULL && gender == MON_FEMALE)
-        iconTemplate.paletteTag = POKE_ICON_BASE_PAL_TAG + gSpeciesInfo[species].iconPalIndexFemale;
+    species = SanitizeSpeciesId(species);
+    if (!preloadFrames)
+    {
+        if (gSpeciesInfo[species].iconSpriteFemale != NULL && gender == MON_FEMALE)
+            iconTemplate.paletteTag = POKE_ICON_BASE_PAL_TAG + gSpeciesInfo[species].iconPalIndexFemale;
+        else
+            iconTemplate.paletteTag = POKE_ICON_BASE_PAL_TAG + gSpeciesInfo[species].iconPalIndex;
+    }
 
     spriteId = CreateMonIconSprite(&iconTemplate, x, y, subpriority);
 
-    UpdateMonIconFrame(&gSprites[spriteId]);
+    if (spriteId != MAX_SPRITES)
+        UpdateMonIconFrame(&gSprites[spriteId]);
 
     return spriteId;
 }
 
+
+u8 CreateMonIcon(u16 species, SpriteCallback callback, s16 x, s16 y, u8 subpriority, u32 personality, u8 gender)
+{
+    return CreateMonIconInternal(species, callback, x, y, subpriority, personality, gender, FALSE);
+}
+
+u8 CreatePartyMonIcon(u16 species, s16 x, s16 y, u32 personality, u8 gender)
+{
+    return CreateMonIconInternal(species, SpriteCB_MonIcon, x, y, 4, personality, gender, TRUE);
+}
 
 u8 CreateMonIconNoPersonality(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u8 subpriority)
 {
@@ -1651,7 +1674,7 @@ u8 CreateMonIconNoPersonality(u16 species, void (*callback)(struct Sprite *), s1
         .paletteTag = POKE_ICON_BASE_PAL_TAG + gSpeciesInfo[species].iconPalIndex,
     };
 
-    iconTemplate.image = GetMonIconTiles(species, 0, GetGenderForSpecies(species, 0));
+    iconTemplate.image = GetMonIconData(species, GetGenderForSpecies(species, 0));
     spriteId = CreateMonIconSprite(&iconTemplate, x, y, subpriority);
 
     UpdateMonIconFrame(&gSprites[spriteId]);
@@ -1675,7 +1698,7 @@ u8 CreateMonIconCustomPaletteOffset(u16 species, void (*callback)(struct Sprite 
         .paletteTag = PAL_TAG_CUSTOM + paletteOffset,
     };
 
-    iconTemplate.image = GetMonIconTiles(species, TRUE, GetGenderForSpecies(species, 0));
+    iconTemplate.image = GetMonIconData(species, GetGenderForSpecies(species, 0));
     spriteId = CreateMonIconSprite(&iconTemplate, x, y, subpriority);
 
     UpdateMonIconFrame(&gSprites[spriteId]);
@@ -1727,11 +1750,6 @@ u16 GetIconSpeciesNoPersonality(u16 species)
     if (MailSpeciesToSpecies(species, &species) == SPECIES_UNOWN)
         return species += SPECIES_UNOWN_B; // TODO
     return GetIconSpecies(species, 0);
-}
-
-const u8 *GetMonIconPtr(u16 species, u32 personality, u8 gender)
-{
-    return GetMonIconTiles(GetIconSpecies(species, personality), personality, gender);
 }
 
 void FreeAndDestroyMonIconSprite(struct Sprite *sprite)
@@ -1816,7 +1834,7 @@ void SpriteCB_MonIcon(struct Sprite *sprite)
     UpdateMonIconFrame(sprite);
 }
 
-const u8 *GetMonIconTiles(u16 species, u32 personality, u8 gender)
+static const u8 *GetMonIconData(u16 species, u8 gender)
 {
     const u8 *iconSprite;
 
@@ -1831,6 +1849,48 @@ const u8 *GetMonIconTiles(u16 species, u32 personality, u8 gender)
         iconSprite = gSpeciesInfo[SPECIES_NONE].iconSprite;
 
     return iconSprite;
+}
+
+static const u32 *GetCompressedFrame(const u8 *icon, u8 frame)
+{
+    u16 offset = frame == 0 ? icon[2] : (icon[0] | (icon[1] << 8));
+    return (const u32 *)(icon + offset);
+}
+
+const u32 *GetMonIconCompressedFrame(u16 species, u32 personality, u8 gender, u8 frame)
+{
+    return GetCompressedFrame(GetMonIconData(GetIconSpecies(species, personality), gender), frame);
+}
+
+const u8 *DecompressMonIconFrame(u16 species, u32 personality, u8 gender, u8 frame)
+{
+    LZ77UnCompWram(GetMonIconCompressedFrame(species, personality, gender, frame), gDecompressionBuffer);
+    return gDecompressionBuffer;
+}
+
+const u16 *GetColoredMonIconPalette(u16 species, u32 personality, u8 gender, bool8 shiny, u32 otId, u16 *tintedPalette)
+{
+    u16 iconSpecies = GetIconSpecies(species, personality);
+    const u8 *icon = GetMonIconData(iconSpecies, gender);
+    u8 paletteIndex = gSpeciesInfo[iconSpecies].iconPalIndex;
+    const u16 *palette;
+    u32 uniqueId;
+
+    if (gSpeciesInfo[iconSpecies].iconSpriteFemale != NULL && gender == MON_FEMALE)
+        paletteIndex = gSpeciesInfo[iconSpecies].iconPalIndexFemale;
+
+    palette = gMonIconPaletteTable[paletteIndex].data;
+    if (shiny && icon[2] > 4)
+        palette = (const u16 *)(icon + 4);
+
+    if (species != SPECIES_EGG)
+    {
+        uniqueId = RogueGift_GetCustomMonIdBySpecies(species, otId);
+        if (uniqueId != 0 && RogueGift_TryApplyPaletteModify(uniqueId, shiny, palette, NULL, tintedPalette))
+            return tintedPalette;
+    }
+
+    return palette;
 }
 
 void TryLoadAllMonIconPalettesAtOffset(u16 offset)
@@ -1877,13 +1937,11 @@ u8 UpdateMonIconFrame(struct Sprite *sprite)
             sprite->animCmdIndex = 0;
             break;
         default:
-            RequestSpriteCopy(
-                // pointer arithmetic is needed to get the correct pointer to perform the sprite copy on.
-                // because sprite->images is a struct def, it has to be casted to (u8 *) before any
-                // arithmetic can be performed.
-                (u8 *)sprite->images + (sSpriteImageSizes[sprite->oam.shape][sprite->oam.size] * frame),
-                (u8 *)(OBJ_VRAM0 + sprite->oam.tileNum * TILE_SIZE_4BPP),
-                sSpriteImageSizes[sprite->oam.shape][sprite->oam.size]);
+            if (sprite->images == &sPreloadedIconFrames)
+                sprite->oam.tileNum = sprite->sheetTileStart + frame * (MON_ICON_FRAME_SIZE / TILE_SIZE_4BPP);
+            else
+                RequestCompressedSpriteCopy(GetCompressedFrame((const u8 *)sprite->images, frame),
+                                            (void *)(OBJ_VRAM0 + sprite->oam.tileNum * TILE_SIZE_4BPP));
             sprite->animDelayCounter = sprite->anims[sprite->animNum][sprite->animCmdIndex].frame.duration & 0xFF;
             sprite->animCmdIndex++;
             result = sprite->animCmdIndex;
@@ -1909,22 +1967,38 @@ static u8 CreateMonIconSprite(struct MonIconSpriteTemplate *iconTemplate, s16 x,
         .paletteTag = iconTemplate->paletteTag,
         .oam = iconTemplate->oam,
         .anims = iconTemplate->anims,
-        .images = &image,
+        .images = iconTemplate->preloadFrames ? &sPreloadedIconFrames : &image,
         .affineAnims = iconTemplate->affineAnims,
         .callback = iconTemplate->callback,
     };
 
     spriteId = CreateSprite(&spriteTemplate, x, y, subpriority);
+    if (spriteId == MAX_SPRITES)
+        return spriteId;
     gSprites[spriteId].animPaused = TRUE;
     gSprites[spriteId].animBeginning = FALSE;
-    gSprites[spriteId].images = (const struct SpriteFrameImage *)iconTemplate->image;
+    if (iconTemplate->preloadFrames)
+    {
+        struct Sprite *sprite = &gSprites[spriteId];
+        u8 *tiles = (u8 *)(OBJ_VRAM0 + sprite->oam.tileNum * TILE_SIZE_4BPP);
+
+        // Party animations select tiles through OAM and need no VBlank decoding.
+        sprite->sheetTileStart = sprite->oam.tileNum;
+        LZ77UnCompVram(GetCompressedFrame(iconTemplate->image, 0), tiles);
+        LZ77UnCompVram(GetCompressedFrame(iconTemplate->image, 1), tiles + MON_ICON_FRAME_SIZE);
+    }
+    else
+        gSprites[spriteId].images = (const struct SpriteFrameImage *)iconTemplate->image;
     return spriteId;
 }
 
 static void FreeAndDestroyMonIconSprite_(struct Sprite *sprite)
 {
     struct SpriteFrameImage image = { NULL, sSpriteImageSizes[sprite->oam.shape][sprite->oam.size] };
-    sprite->images = &image;
+    if (sprite->images == &sPreloadedIconFrames)
+        sprite->oam.tileNum = sprite->sheetTileStart;
+    else
+        sprite->images = &image;
     DestroySprite(sprite);
 }
 

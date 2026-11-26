@@ -506,6 +506,8 @@ include $(OBJEVENTGFXDIR)/pokemon_ow/include/spritesheet_rules_gen.mk
 %.gbapal: %.png ; $(GFX) $< $@
 %.lz: % ; $(GFX) $< $@
 %.rl: % ; $(GFX) $< $@
+MON_ICON_PALETTES := graphics/pokemon/shiny_icon_palettes.txt
+%.iconlz: %.4bpp $(MON_ICON_PALETTES) $(GFX) ; $(GFX) $< $@ $(MON_ICON_PALETTES)
 
 $(CRY_SUBDIR)/uncomp_%.bin: $(CRY_SUBDIR)/uncomp_%.aif ; $(AIF) $< $@
 $(CRY_SUBDIR)/%.bin: $(CRY_SUBDIR)/%.aif ; $(AIF) $< $@ --compress

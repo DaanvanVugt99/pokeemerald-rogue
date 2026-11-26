@@ -2191,7 +2191,7 @@ static void UNUSED LoadMonIconPalAtOffset(u8 palOffset, u16 speciesId)
 static void UNUSED DrawMonIconAtPos(u8 windowId, u16 species, u32 personality, u16 x, u16 y)
 {
     u8 gender = GetGenderForSpecies(species, 0); // RogueNote: TODO
-    BlitBitmapToWindow(windowId, GetMonIconPtr(species, personality, gender), x, y, 32, 32);
+    BlitBitmapToWindow(windowId, DecompressMonIconFrame(species, personality, gender, 0), x, y, 32, 32);
 }
 
 void ListMenuLoadStdPalAt(u8 palOffset, u8 palId)

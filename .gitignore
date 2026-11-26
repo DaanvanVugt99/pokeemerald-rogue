@@ -62,3 +62,6 @@ docs/design/~$pokemon_romhack_tracker.xlsx
 
 # Local Python tooling bytecode.
 __pycache__/
+
+# Generated compressed Pokemon icon frames.
+*.iconlz

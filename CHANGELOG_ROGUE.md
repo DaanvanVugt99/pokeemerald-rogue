@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Spread PC portrait refreshes across frames when moving the cursor or switching boxes to keep navigation smooth.
+
+- Show shiny and Unique Pokémon colors in party icons using losslessly compressed icon frames.
+
 - Clear unique follower tints on map changes so ordinary Pokémon keep their own colors.
 
 - Restrict Alola’s Mina to Gym 7.
