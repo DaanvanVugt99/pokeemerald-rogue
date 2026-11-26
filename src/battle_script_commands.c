@@ -2161,9 +2161,6 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
     if (gFieldStatuses & STATUS_FIELD_GRAVITY)
         calc = (calc * 5) / 3; // 1.66 Gravity acc boost
 
-    if (B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(battlerDef) == AFFECTION_FIVE_HEARTS)
-        calc = (calc * 90) / 100;
-
     return calc;
 }
 
@@ -2501,7 +2498,6 @@ s32 CalcCritChanceStageArgs(u32 battlerAtk, u32 battlerDef, u32 move, bool32 rec
                     + (holdEffectAtk == HOLD_EFFECT_SCOPE_LENS)
                     + 2 * (holdEffectAtk == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[battlerAtk].species == SPECIES_CHANSEY)
                     + 2 * BENEFITS_FROM_LEEK(battlerAtk, holdEffectAtk)
-                    //+ 2 * (B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(battlerAtk) == AFFECTION_FIVE_HEARTS) // TODO -MAKE THIS A FLAT 10% BECAUSE THIS IS CRAZY
                     + (abilityAtk == ABILITY_SUPER_LUCK)
                     + (HasBattlerAbility(battlerAtk, ABILITY_OMEN)
                        && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_ECLIPSE))
@@ -2566,14 +2562,7 @@ static void Cmd_critcalc(void)
     else
     {
         u8 currentCritRate = sCriticalHitChance[critChance];
-
-        if(B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(gBattlerAttacker) == AFFECTION_FIVE_HEARTS)
-        {
-            currentCritRate = max(1, currentCritRate / 2);
-        }
-
         gIsCriticalHit = RandomWeighted(RNG_CRITICAL_HIT, currentCritRate - 1, 1);
-
     }
 
     // Counter for EVO_CRITICAL_HITS.
@@ -2724,7 +2713,6 @@ static void Cmd_adjustdamage(void)
 
     u8 holdEffect, param;
     u32 moveType;
-    u32 affectionScore = GetBattlerAffectionHearts(gBattlerTarget);
     u32 rand = Random() % 100;
     bool8 endureCharmActive = FALSE;
     bool8 divineFavorActive = FALSE;
@@ -2812,13 +2800,6 @@ static void Cmd_adjustdamage(void)
         RecordAbilityBattle(gBattlerTarget, ABILITY_DIVINE_FAVOR);
         divineFavorActive = TRUE;
     }
-    else if (B_AFFECTION_MECHANICS == TRUE && GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER && affectionScore >= AFFECTION_THREE_HEARTS)
-    {
-        if ((affectionScore == AFFECTION_FIVE_HEARTS && rand < 20)
-         || (affectionScore == AFFECTION_FOUR_HEARTS && rand < 15)
-         || (affectionScore == AFFECTION_THREE_HEARTS && rand < 10))
-            gSpecialStatuses[gBattlerTarget].affectionEndured = TRUE;
-    }
     else
     {
         endureCharmActive = ActivateEndureCharm(gBattlerTarget);
@@ -2832,7 +2813,6 @@ static void Cmd_adjustdamage(void)
      && !gSpecialStatuses[gBattlerTarget].focusSashed
      && !gSpecialStatuses[gBattlerTarget].sturdied
      && !divineFavorActive
-     && (B_AFFECTION_MECHANICS == FALSE || !gSpecialStatuses[gBattlerTarget].affectionEndured)
      && !endureCharmActive
      && !gProtectStructs[gBattlerTarget].confusionSelfDmg
      && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE)
@@ -2847,7 +2827,6 @@ static void Cmd_adjustdamage(void)
         && !gProtectStructs[gBattlerTarget].endured
         && !gSpecialStatuses[gBattlerTarget].focusBanded
         && !gSpecialStatuses[gBattlerTarget].focusSashed
-        && (B_AFFECTION_MECHANICS == FALSE || !gSpecialStatuses[gBattlerTarget].affectionEndured)
         && !gSpecialStatuses[gBattlerTarget].sturdied
         && !divineFavorActive
         && !endureCharmActive)
@@ -2876,10 +2855,6 @@ static void Cmd_adjustdamage(void)
         gMoveResultFlags |= MOVE_RESULT_STURDIED;
         SetBattlerTriggeredAbility(gBattlerTarget, ABILITY_DIVINE_FAVOR);
         gBattleStruct->uniqueAbilityUsed[GetBattlerSide(gBattlerTarget)] |= gBitTable[gBattlerPartyIndexes[gBattlerTarget]];
-    }
-    else if (B_AFFECTION_MECHANICS == TRUE && gSpecialStatuses[gBattlerTarget].affectionEndured)
-    {
-        gMoveResultFlags |= MOVE_RESULT_FOE_ENDURED_AFFECTION;
     }
     else if (endureCharmActive)
     {
@@ -3581,14 +3556,6 @@ static void Cmd_resultmessage(void)
             else if (gMoveResultFlags & MOVE_RESULT_FAILED)
             {
                 stringId = STRINGID_BUTITFAILED;
-            }
-            else if (B_AFFECTION_MECHANICS == TRUE && (gMoveResultFlags & MOVE_RESULT_FOE_ENDURED_AFFECTION))
-            {
-                gSpecialStatuses[gBattlerTarget].affectionEndured = FALSE;
-                gMoveResultFlags &= ~MOVE_RESULT_FOE_ENDURED_AFFECTION;
-                BattleScriptPushCursor();
-                gBattlescriptCurrInstr = BattleScript_AffectionBasedEndurance;
-                return;
             }
             else
             {
@@ -17046,11 +17013,6 @@ static void Cmd_tryKO(void)
                 gMoveResultFlags |= MOVE_RESULT_FOE_HUNG_ON;
                 gLastUsedItem = gBattleMons[gBattlerTarget].item;
             }
-            else if (B_AFFECTION_MECHANICS == TRUE && gSpecialStatuses[gBattlerTarget].affectionEndured)
-            {
-                gBattleMoveDamage = gBattleMons[gBattlerTarget].hp - 1;
-                gMoveResultFlags |= MOVE_RESULT_FOE_ENDURED_AFFECTION;
-            }
             else if (endureCharmActive)
             {
                 gBattleMoveDamage = gBattleMons[gBattlerTarget].hp - 1;
@@ -21296,8 +21258,6 @@ void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBat
     if (holdEffect == HOLD_EFFECT_LUCKY_EGG)
         *expAmount = (*expAmount * 150) / 100;
     if (B_UNEVOLVED_EXP_MULTIPLIER >= GEN_6 && IsMonPastEvolutionLevel(&gPlayerParty[expGetterMonId]))
-        *expAmount = (*expAmount * 4915) / 4096;
-    if (B_AFFECTION_MECHANICS == TRUE && GetBattlerAffectionHearts(expGetterMonId) >= AFFECTION_FOUR_HEARTS)
         *expAmount = (*expAmount * 4915) / 4096;
     if (CheckBagHasItem(ITEM_EXP_CHARM, 1)) //is also for other exp boosting Powers if/when implemented
         *expAmount = (*expAmount * 150) / 100;

@@ -2375,25 +2375,6 @@ u8 GetImprisonedMovesCount(u32 battler, u16 move)
     return imprisonedMoves;
 }
 
-u32 GetBattlerAffectionHearts(u32 battler)
-{
-    u8 side = GetBattlerSide(battler);
-    struct Pokemon *party = GetSideParty(side);
-    u16 species = GetMonData(&party[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES);
-
-    if (side != B_SIDE_PLAYER)
-        return AFFECTION_NO_HEARTS;
-    else if (gSpeciesInfo[species].isMegaEvolution
-          || (gBattleTypeFlags & (BATTLE_TYPE_EREADER_TRAINER
-                                | BATTLE_TYPE_FRONTIER
-                                | BATTLE_TYPE_LINK
-                                | BATTLE_TYPE_RECORDED_LINK
-                                | BATTLE_TYPE_SECRET_BASE)))
-        return AFFECTION_NO_HEARTS;
-
-    return GetMonAffectionHearts(&party[gBattlerPartyIndexes[battler]]);
-}
-
 static void TryToRevertMimicryAndFlags(void)
 {
     u32 i;
@@ -2443,7 +2424,6 @@ enum
     ENDTURN_FAIRY_LOCK,
     ENDTURN_RETALIATE,
     ENDTURN_WEATHER_FORM,
-    ENDTURN_STATUS_HEAL,
     ENDTURN_RAINBOW,
     ENDTURN_SEA_OF_FIRE,
     ENDTURN_SWAMP,
@@ -3027,21 +3007,6 @@ u8 DoFieldEndTurnEffects(void)
             }
             if (effect == 0)
                 gBattleStruct->turnCountersTracker++;
-            break;
-        case ENDTURN_STATUS_HEAL:
-            for (gBattlerAttacker = 0; gBattlerAttacker < gBattlersCount; gBattlerAttacker++)
-            {
-                if (B_AFFECTION_MECHANICS == TRUE
-                 && GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
-                 && GetBattlerAffectionHearts(gBattlerAttacker) >= AFFECTION_FOUR_HEARTS
-                 && (Random() % 100 < 20))
-                {
-                    gBattleCommunication[MULTISTRING_CHOOSER] = 1;
-                    BattleScriptExecute(BattleScript_AffectionBasedStatusHeal);
-                    break;
-                }
-            }
-            gBattleStruct->turnCountersTracker++;
             break;
         case ENDTURN_RAINBOW:
             while (gBattleStruct->turnSideTracker < 2)

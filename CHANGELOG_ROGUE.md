@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Remove battle affection bonuses, scripts, and animations. Friendship still drives evolutions, moves, and summary stars.
+
 - Fix Rogue CI tests for the dressing-room warp, compact hub upgrade flags, and deterministic route scene payloads.
 
 - Remove Home Base, its decorating system, eight decoration quest rewards, and manual time and season controls. All affected quests retain other rewards, and time and seasons still advance automatically.

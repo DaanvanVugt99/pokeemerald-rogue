@@ -1824,7 +1824,6 @@ static const u8 sText_RunReviewBattleBagLabel[] = _("{COLOR BLUE}Battle Bag:");
 static const u8 sText_RunReviewSpeciesClauseLabel[] = _("{COLOR BLUE}Species Clause:");
 static const u8 sText_RunReviewHeldItemClauseLabel[] = _("{COLOR BLUE}Held Item Clause:");
 static const u8 sText_RunReviewLegendaryClauseLabel[] = _("{COLOR BLUE}Legendary Clause:");
-static const u8 sText_RunReviewAffectionLabel[] = _("{COLOR BLUE}Affection:");
 static const u8 sText_RunReviewTrainerTeamsLabel[] = _("{COLOR BLUE}Trainer teams:");
 static const u8 sText_RunReviewRewardOpen[] = _(" (");
 static const u8 sText_RunReviewRewardClose[] = _(" rewards)");

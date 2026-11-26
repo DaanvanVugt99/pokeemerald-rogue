@@ -642,15 +642,6 @@ bool8 Rogue_EnableExpGain(void)
     return TRUE;
 }
 
-bool8 Rogue_EnableAffectionMechanics(void)
-{
-#ifdef ROGUE_EXPANSION
-    return Rogue_GetConfigToggle(CONFIG_TOGGLE_AFFECTION);
-#else
-    return FALSE;
-#endif
-}
-
 bool8 Rogue_ShouldReleaseFaintedMons(void)
 {
     return Rogue_GetConfigToggle(CONFIG_TOGGLE_RELEASE_MONS);

@@ -562,7 +562,6 @@
 #define B_ANIM_BEAK_BLAST_SETUP         32
 #define B_ANIM_SHELL_TRAP_SETUP         33
 #define B_ANIM_ZMOVE_ACTIVATE           34 // Using Z Moves
-#define B_ANIM_AFFECTION_HANGED_ON      35
 #define B_ANIM_SNOW_CONTINUES           36
 #define B_ANIM_ULTRA_BURST              37
 #define B_ANIM_SALT_CURE_DAMAGE         38

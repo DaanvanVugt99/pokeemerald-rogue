@@ -56,7 +56,6 @@ u32 Rogue_GetVictoryLapHistoryBufferSize();
 
 bool8 Rogue_ForceExpAll(void);
 bool8 Rogue_EnableExpGain(void);
-bool8 Rogue_EnableAffectionMechanics(void);
 bool8 Rogue_ShouldReleaseFaintedMons(void);
 bool8 Rogue_FastBattleAnims(void);
 u8 Rogue_GetBattleSpeedScale(bool8 forHealthbar);

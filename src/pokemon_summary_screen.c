@@ -181,7 +181,6 @@ static EWRAM_DATA struct PokemonSummaryScreenData
         u16 speedEV; // ??
         u16 item; // 0x2E
         u16 friendship : 8; // 0x30
-        u16 affection : 8; // 0x30
         u8 OTGender; // 0x32
         u8 nature; // 0x33
         u8 ppBonuses; // 0x34
@@ -1919,7 +1918,6 @@ static bool8 ExtractMonDataToSummaryStruct(struct Pokemon *mon)
         sum->metLevel = GetMonData(mon, MON_DATA_MET_LEVEL);
         sum->metGame = GetMonData(mon, MON_DATA_MET_GAME);
         sum->friendship = GetMonData(mon, MON_DATA_FRIENDSHIP);
-        sum->affection = GetMonAffectionHearts(mon);
         break;
     default:
         sum->ribbonCount = GetMonData(mon, MON_DATA_RIBBON_COUNT);
@@ -4570,21 +4568,17 @@ static void PrintFriendship(void)
 {
     const u8 bgColour[] = _("{COLOR BLUE}{SHADOW DARK_GRAY}");
     const u8 starIcon[] = _("{STAR_ICON}");
-    u8 *text;
+    static const u8 starThresholds[] = {80, 130, 180, 220, MAX_FRIENDSHIP};
+    u8 friendship = sMonSummaryScreen->summary.friendship;
+    u8 *text = StringCopy(gStringVar1, bgColour);
+    u32 i;
     int x;
-    u16 i;
 
-    text = StringCopy(gStringVar1, bgColour);
-
-    if(sMonSummaryScreen->summary.affection == 0)
-    {
-        text = StringAppend(gStringVar1, gText_Dash);
-    }
+    if (friendship < starThresholds[0])
+        StringAppend(text, gText_Dash);
     else
-    {
-        for(i = 0; i < sMonSummaryScreen->summary.affection; ++i)
+        for (i = 0; i < ARRAY_COUNT(starThresholds) && friendship >= starThresholds[i]; i++)
             text = StringAppend(text, starIcon);
-    }
 
     text = gStringVar1;
 

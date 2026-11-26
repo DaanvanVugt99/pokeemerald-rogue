@@ -666,7 +666,7 @@
 #define CONFIG_TOGGLE_BAG_WIPE              4
 #define CONFIG_TOGGLE_SWITCH_MODE           5
 #define CONFIG_TOGGLE_DIVERSE_TRAINERS      6
-#define CONFIG_TOGGLE_AFFECTION             7
+// Toggle 7 is reserved for saved adventure settings.
 #define CONFIG_TOGGLE_RELEASE_MONS          8
 #define CONFIG_TOGGLE_BAG_CLAUSE            9
 #define CONFIG_TOGGLE_SPECIES_CLAUSE        10
