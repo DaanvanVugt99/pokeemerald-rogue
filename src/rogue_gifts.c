@@ -495,6 +495,7 @@ static const u16 sDynamicSynergyOnlyMoves[] =
     MOVE_CHARGE,
     MOVE_MAGNET_RISE,
     MOVE_SWEET_KISS,
+    MOVE_WATER_PULSE,
 };
 #endif
 
