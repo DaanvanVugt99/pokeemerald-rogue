@@ -2,7 +2,15 @@ mapscripts Rogue_Interior_DressingRoom_MapScripts {}
 
 script Rogue_DressingRoom_Sign
 {
-    msgbox(format("DRESSING ROOM\nChange your outfit or name."), MSGBOX_SIGN)
+    specialvar(VAR_RESULT, RogueHub_IsDressingRoomOpen)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("DRESSING ROOM\nChange your outfit or name."), MSGBOX_SIGN)
+    }
+    else
+    {
+        msgbox(format("DRESSING ROOM\nThis room is not open yet."), MSGBOX_SIGN)
+    }
 }
 
 script Rogue_DressingRoom_ChangeClothes

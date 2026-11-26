@@ -301,11 +301,11 @@ script Rogue_Area_TownSquare_SchoolSign
     hubupgradeunlocked(HUB_UPGRADE_TOWN_SQUARE_SCHOOL)
     if(var(VAR_RESULT) == YES)
     {
-        msgbox(format("Trainer School\nLearning wing"))
+        msgbox(format("Trainer School\nLearning wing"), MSGBOX_SIGN)
     }
     else
     {
-        msgbox(format("Trainer School\nThis wing is not open yet."))
+        msgbox(format("Trainer School\nThis wing is not open yet."), MSGBOX_SIGN)
     }
     releaseall
 }

@@ -4,6 +4,7 @@
 #include "constants/vars.h"
 #include "constants/rogue.h"
 #include "constants/rogue_hub.h"
+#include "constants/rogue_quests.h"
 #include "constants/map_types.h"
 #include "constants/main_hall_tiles.h"
 #include "constants/metatile_behaviors.h"
@@ -16,6 +17,7 @@
 #include "overworld.h"
 #include "rogue_controller.h"
 #include "rogue_hub.h"
+#include "rogue_quest.h"
 #include "rogue_save.h"
 #include "test/test.h"
 
@@ -28,6 +30,8 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
     u16 *grid = Alloc((36 + MAP_OFFSET_W) * (30 + MAP_OFFSET_H) * sizeof(u16));
     u8 mask, school, tutors, x, y, i, intro;
     u16 oldIntro = VarGet(VAR_ROGUE_INTRO_STATE);
+    bool8 oldAdventureComplete = RogueQuest_GetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE);
+    bool8 oldAdventurePending = RogueQuest_GetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_PENDING_REWARDS);
     static const u8 bits[] = {1, 2, 4, 8};
     EXPECT(oldHub != NULL && grid != NULL);
     if (oldHub == NULL || grid == NULL) { Free(oldHub); Free(grid); return; }
@@ -37,6 +41,7 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
     gBackupMapLayout.height = 30 + MAP_OFFSET_H;
     gBackupMapLayout.map = grid;
     VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_REPORT_TO_PROF);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, FALSE);
     for (mask = 0; mask < 16; ++mask)
     {
         memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
@@ -121,8 +126,9 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
             EXPECT_EQ(FieldAnimateDoorOpen(9 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
             EXPECT_EQ(MapGridGetMetatileBehaviorAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), school ? MB_NON_ANIMATED_DOOR : MB_NORMAL);
             EXPECT_EQ(MapGridGetElevationAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), 5);
-            EXPECT(!MapGridIsImpassableAt(23 + MAP_OFFSET, 4 + MAP_OFFSET));
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_NON_ANIMATED_DOOR);
+            EXPECT(MapGridIsImpassableAt(23 + MAP_OFFSET, 4 + MAP_OFFSET));
+            EXPECT_EQ(MapGridGetMetatileIdAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), METATILE_MainHall_Shutter);
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_NORMAL);
             EXPECT_EQ(FieldAnimateDoorOpen(23 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
             for (x = 4; x <= 32; ++x)
                 for (y = 8; y <= 9; ++y)
@@ -151,6 +157,15 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
         EXPECT_EQ(MapGridGetMetatileIdAt(28 + MAP_OFFSET, 4 + MAP_OFFSET), METATILE_MainHall_ShutterRight);
         EXPECT_EQ(FieldAnimateDoorOpen(27 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
     }
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, TRUE);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_PENDING_REWARDS, TRUE);
+    RogueHub_ApplyMapMetatiles();
+    EXPECT(!MapGridIsImpassableAt(23 + MAP_OFFSET, 4 + MAP_OFFSET));
+    EXPECT_EQ(MapGridGetMetatileIdAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), METATILE_MainHall_Door);
+    EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_NON_ANIMATED_DOOR);
+    EXPECT_EQ(MapGridGetMetatileIdAt(22 + MAP_OFFSET, 3 + MAP_OFFSET), METATILE_MainHall_FrameTopLeft);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, oldAdventureComplete);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_PENDING_REWARDS, oldAdventurePending);
     VarSet(VAR_ROGUE_INTRO_STATE, oldIntro);
     EXPECT_EQ(header->mapType, MAP_TYPE_INDOOR);
     gRogueSaveBlock->hubMap = *oldHub; gMapHeader = oldHeader; gBackupMapLayout = oldBackup;

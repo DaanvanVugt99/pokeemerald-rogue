@@ -10,6 +10,7 @@
 #include "constants/event_objects.h"
 #include "constants/layouts.h"
 #include "constants/metatile_labels.h"
+#include "constants/rogue_quests.h"
 
 #include "event_data.h"
 #include "field_camera.h"
@@ -1374,6 +1375,11 @@ static void RogueHub_UpdateMartsAreaMetatiles()
     }
 }
 
+bool8 RogueHub_IsDressingRoomOpen(void)
+{
+    return RogueQuest_GetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE);
+}
+
 static void RogueHub_SetMainHallDoor(u16 x, bool8 open)
 {
     static const u16 tiles[2][6] =
@@ -1423,6 +1429,7 @@ static void RogueHub_UpdateTownSquareAreaMetatiles()
         MetatileFill_Tile(4, 17, 4, 18, METATILE_MainHall_FloorShadow);
     }
     RogueHub_SetMainHallDoor(9, RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL));
+    RogueHub_SetMainHallDoor(23, RogueHub_IsDressingRoomOpen());
     RogueHub_SetMainHallDoor(27, FALSE); // Poké Connect is closed while multiplayer is unsupported.
 }
 

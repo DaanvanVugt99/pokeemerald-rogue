@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Open the Main Hall Dressing Room after the player returns from their first Adventure.
+
 - Keep the Poké Connect wing shuttered and explain on its sign that multiplayer is currently unsupported.
 
 - Show grey shutters behind sprites on locked Main Hall doors and use static doorways in the Main Hall and Lab Junction.

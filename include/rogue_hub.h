@@ -49,6 +49,7 @@ void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct 
 bool8 RogueHub_AcceptMapConnection(struct MapHeader *mapHeader, const struct MapConnection *connection);
 void RogueHub_ApplyMapMetatiles();
 u8 RogueHub_GetStatueLevel();
+bool8 RogueHub_IsDressingRoomOpen(void);
 
 void RogueHub_ReloadObjectsAndTiles();
 
