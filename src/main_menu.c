@@ -14,6 +14,7 @@
 #include "link.h"
 #include "main.h"
 #include "main_menu.h"
+#include "main_menu_crystal.h"
 #include "menu.h"
 #include "list_menu.h"
 #include "naming_screen.h"
@@ -224,6 +225,8 @@ static void Task_NewGameBirchSpeech_BoyOrGirl(u8);
 static void LoadMainMenuWindowFrameTiles(u8, u16);
 static void DrawMainMenuWindowBorder(const struct WindowTemplate *, u16);
 static void Task_HighlightSelectedMainMenuItem(u8);
+static void Task_RevealCrystalMenu(u8);
+static void Task_WaitForCrystalMenuFade(u8);
 static void Task_NewGameBirchSpeech_WaitToShowGenderMenu(u8);
 static void Task_NewGameBirchSpeech_ChooseGender(u8);
 static void NewGameBirchSpeech_ShowGenderMenu(void);
@@ -627,6 +630,8 @@ enum
 };
 
 #define MAIN_MENU_BORDER_TILE   0x1D5
+#define tCrystalMenuActive data[10]
+#define tPlayCrystalEntrance data[11]
 
 static void CB2_MainMenu(void)
 {
@@ -672,7 +677,7 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
 
     DmaFill16(3, 0, (void *)VRAM, VRAM_SIZE);
     DmaFill32(3, 0, (void *)OAM, OAM_SIZE);
-    DmaFill16(3, 0, (void *)(PLTT + 2), PLTT_SIZE - 2);
+    DmaFill16(3, 0, (void *)PLTT, PLTT_SIZE);
 
     ResetPaletteFade();
     LoadPalette(sMainMenuBgPal, BG_PLTT_ID(0), PLTT_SIZE_4BPP);
@@ -681,10 +686,6 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     ResetTasks();
     ResetSpriteData();
     FreeAllSpritePalettes();
-    if (returningFromOptionsMenu)
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_BLACK); // fade to black
-    else
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_WHITEALPHA); // fade to white
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sMainMenuBgTemplates, ARRAY_COUNT(sMainMenuBgTemplates));
     ChangeBgX(0, 0, BG_COORD_SET);
@@ -694,6 +695,7 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     InitWindows(sWindowTemplates_MainMenu);
     DeactivateAllTextPrinters();
     LoadMainMenuWindowFrameTiles(0, MAIN_MENU_BORDER_TILE);
+    BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
 
     SetGpuReg(REG_OFFSET_WIN0H, 0);
     SetGpuReg(REG_OFFSET_WIN0V, 0);
@@ -706,10 +708,8 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     EnableInterrupts(1);
     SetVBlankCallback(VBlankCB_MainMenu);
     SetMainCallback2(CB2_MainMenu);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
-    ShowBg(0);
-    HideBg(1);
-    CreateTask(Task_MainMenuCheckSaveFile, 0);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_1D_MAP);
+    gTasks[CreateTask(Task_MainMenuCheckSaveFile, 0)].tPlayCrystalEntrance = !returningFromOptionsMenu;
 
     return 0;
 }
@@ -859,6 +859,16 @@ static void Task_DisplayMainMenu(u8 taskId)
 
     if (!gPaletteFade.active)
     {
+        if (tMenuType == HAS_SAVED_GAME || tMenuType == HAS_NO_SAVED_GAME)
+        {
+            tCrystalMenuActive = TRUE;
+            HideBg(0);
+            MainMenuCrystal_Load(tMenuType == HAS_SAVED_GAME, tCurrItem);
+            BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_RevealCrystalMenu;
+            return;
+        }
+
         SetGpuReg(REG_OFFSET_WIN0H, 0);
         SetGpuReg(REG_OFFSET_WIN0V, 0);
         SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0 | WININ_WIN0_OBJ);
@@ -995,13 +1005,42 @@ static void Task_DisplayMainMenu(u8 taskId)
                 break;
         }
 
+        BlendPalettes(PALETTES_ALL, 0, RGB_BLACK);
+        ShowBg(0);
+        SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
         gTasks[taskId].func = Task_HighlightSelectedMainMenuItem;
+    }
+}
+
+static void Task_RevealCrystalMenu(u8 taskId)
+{
+    // Give VBlank time to upload the text, selection marker, and Sableye.
+    if (IsDma3ManagerBusyWithBgCopy())
+        return;
+
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+    ShowBg(0);
+    ShowBg(1);
+    SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
+    gTasks[taskId].func = Task_WaitForCrystalMenuFade;
+}
+
+static void Task_WaitForCrystalMenuFade(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        if (gTasks[taskId].tPlayCrystalEntrance)
+            MainMenuCrystal_PlayEntrance();
+        gTasks[taskId].func = Task_HandleMainMenuInput;
     }
 }
 
 static void Task_HighlightSelectedMainMenuItem(u8 taskId)
 {
-    HighlightSelectedMainMenuItem(gTasks[taskId].tMenuType, gTasks[taskId].tCurrItem, gTasks[taskId].tIsScrolled);
+    if (gTasks[taskId].tCrystalMenuActive)
+        MainMenuCrystal_SetSelection(gTasks[taskId].tMenuType == HAS_SAVED_GAME, gTasks[taskId].tCurrItem);
+    else
+        HighlightSelectedMainMenuItem(gTasks[taskId].tMenuType, gTasks[taskId].tCurrItem, gTasks[taskId].tIsScrolled);
     gTasks[taskId].func = Task_HandleMainMenuInput;
 }
 
@@ -1012,17 +1051,29 @@ static bool8 HandleMainMenuInput(u8 taskId)
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
-        IsWirelessAdapterConnected();   // why bother calling this here? debug? Task_HandleMainMenuAPressed will check too
+        if (tCrystalMenuActive)
+            MainMenuCrystal_EndEntrance();
+        else
+            IsWirelessAdapterConnected();
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
         gTasks[taskId].func = Task_HandleMainMenuAPressed;
     }
     else if (JOY_NEW(B_BUTTON))
     {
         PlaySE(SE_SELECT);
+        if (tCrystalMenuActive)
+            MainMenuCrystal_EndEntrance();
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_WHITEALPHA);
         SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, DISPLAY_WIDTH));
         SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(0, DISPLAY_HEIGHT));
         gTasks[taskId].func = Task_HandleMainMenuBPressed;
+    }
+    else if (tCrystalMenuActive && tMenuType == HAS_SAVED_GAME
+        && ((tCurrItem == 1 && JOY_NEW(DPAD_RIGHT)) || (tCurrItem == 2 && JOY_NEW(DPAD_LEFT))))
+    {
+        tCurrItem = tCurrItem == 1 ? 2 : 1;
+        sCurrItemAndOptionMenuCheck = tCurrItem;
+        return TRUE;
     }
     else if ((JOY_NEW(DPAD_UP)) && tCurrItem > 0)
     {
@@ -1032,7 +1083,10 @@ static bool8 HandleMainMenuInput(u8 taskId)
             ChangeBgY(1, 0x2000, BG_COORD_SUB);
             gTasks[tScrollArrowTaskId].tArrowTaskIsScrolled = tIsScrolled = FALSE;
         }
-        tCurrItem--;
+        if (tCrystalMenuActive && tMenuType == HAS_SAVED_GAME)
+            tCurrItem = 0;
+        else
+            tCurrItem--;
         sCurrItemAndOptionMenuCheck = tCurrItem;
         return TRUE;
     }
@@ -1054,7 +1108,10 @@ static bool8 HandleMainMenuInput(u8 taskId)
 static void Task_HandleMainMenuInput(u8 taskId)
 {
     if (HandleMainMenuInput(taskId))
+    {
+        PlaySE(SE_SELECT);
         gTasks[taskId].func = Task_HighlightSelectedMainMenuItem;
+    }
 }
 
 static void Task_HandleMainMenuAPressed(u8 taskId)
@@ -1066,15 +1123,15 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
     {
         if (gTasks[taskId].tMenuType == HAS_MYSTERY_EVENTS)
             RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
-        ClearStdWindowAndFrame(0, TRUE);
-        ClearStdWindowAndFrame(1, TRUE);
-        ClearStdWindowAndFrame(2, TRUE);
-        ClearStdWindowAndFrame(3, TRUE);
-        ClearStdWindowAndFrame(4, TRUE);
-        ClearStdWindowAndFrame(5, TRUE);
-        ClearStdWindowAndFrame(6, TRUE);
-        ClearStdWindowAndFrame(7, TRUE);
-        wirelessAdapterConnected = IsWirelessAdapterConnected();
+        if (gTasks[taskId].tCrystalMenuActive)
+            MainMenuCrystal_Destroy();
+        else
+        {
+            u8 i;
+            for (i = 0; i < 8; ++i)
+                ClearStdWindowAndFrame(i, TRUE);
+        }
+        wirelessAdapterConnected = !gTasks[taskId].tCrystalMenuActive && IsWirelessAdapterConnected();
         switch (gTasks[taskId].tMenuType)
         {
             case HAS_NO_SAVED_GAME:
@@ -1226,6 +1283,8 @@ static void Task_HandleMainMenuBPressed(u8 taskId)
     {
         if (gTasks[taskId].tMenuType == HAS_MYSTERY_EVENTS)
             RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
+        if (gTasks[taskId].tCrystalMenuActive)
+            MainMenuCrystal_Destroy();
         sCurrItemAndOptionMenuCheck = 0;
         FreeAllWindowBuffers();
         SetMainCallback2(CB2_InitTitleScreen);
@@ -1277,6 +1336,8 @@ static void Task_DisplayMainMenuInvalidActionError(u8 taskId)
 #undef tItemCount
 #undef tScrollArrowTaskId
 #undef tIsScrolled
+#undef tCrystalMenuActive
+#undef tPlayCrystalEntrance
 #undef tWirelessAdapterConnected
 
 #undef tArrowTaskIsScrolled
@@ -2471,6 +2532,11 @@ static void CreateMainMenuErrorWindow(const u8 *str)
     DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[7], MAIN_MENU_BORDER_TILE);
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(9, DISPLAY_WIDTH - 9));
     SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(113, DISPLAY_HEIGHT - 1));
+    if (!(GetGpuReg(REG_OFFSET_DISPCNT) & DISPCNT_BG0_ON))
+    {
+        BlendPalettes(PALETTES_ALL, 0, RGB_BLACK);
+        ShowBg(0);
+    }
 }
 
 static void MainMenu_FormatSavegameText(void)

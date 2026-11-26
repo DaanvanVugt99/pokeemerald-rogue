@@ -5,6 +5,16 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Move New Game and Options closer to the title on the menu shown before the first save.
+
+- Move directly to Continue when pressing Up from either bottom button and fade in the full main menu after it loads.
+
+- Align the main menu labels with their selection diamonds and give the bottom buttons more space.
+
+- Carry the title music into the main menu and play the standard UI sound when the selection moves.
+
+- Redesign the main menu with a crystal cave and play Sableye’s front animation and cry when opening it.
+
 - Move the Lab Junction flask medallion four tiles north.
 
 - Continue the Safari Lab wall shadows beneath the adjoining tables and stools.
