@@ -619,7 +619,7 @@
 #define ABILITY_INVERSION              676
 #define ABILITY_BARNACLE_WALL          677
 #define ABILITY_ALGAE_BLOOM            678
-#define ABILITY_DEADLY_SHOT            679
+#define ABILITY_BREACHING_SHOT            679
 #define ABILITY_FORECAST_FRILL         698
 #define ABILITY_MOONGLASS              684
 #define ABILITY_SLUDGE_SHIFT           686

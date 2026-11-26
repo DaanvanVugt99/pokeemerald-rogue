@@ -19250,6 +19250,24 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BREACHING_SHOT)
+         && move == MOVE_WATER_PULSE
+         && IsBattlerAlive(battler)
+         && IsBattlerAlive(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && CanBattlerSwitch(gBattlerTarget)
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_BREACHING_SHOT);
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_BreachingShotActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
          && gBattleMoves[move].slicingMove
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -26855,12 +26873,6 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
      && IsAnyActiveBattlerBelowHalfHp())
     {
         return uq4_12_divide(UQ_4_12(1.0), typeEffectivenessModifier);
-    }
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_DEADLY_SHOT)
-     && typeEffectivenessModifier >= UQ_4_12(2.0))
-    {
-        return UQ_4_12(1.35);
     }
 
     switch (abilityAtk)

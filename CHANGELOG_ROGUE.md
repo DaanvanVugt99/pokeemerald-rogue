@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Breaching Shot forces a foe out with the first damaging Water Pulse each switch-in.
+
 - Aftershock follows a successful Ground move with Magnitude 4, 5, 6, or 7 at 20%, 50%, 20%, and 10% odds, respectively.
 
 - Beacon sets Ion Deluge on switch-in and uses Wish once per battle after its holder survives a resisted hit.
