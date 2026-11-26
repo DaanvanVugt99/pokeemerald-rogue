@@ -385,6 +385,11 @@ u16 FollowMon_GetGraphics(u16 id)
     return VarGet(VAR_FOLLOW_MON_0 + id);
 }
 
+void FollowMon_ResetSlotPalettes(void)
+{
+    memset(sFollowMonData.slotUniqueIds, 0, sizeof(sFollowMonData.slotUniqueIds));
+}
+
 extern EWRAM_DATA u8 gPaletteDecompressionBuffer[];
 
 u16 const* FollowMon_GetGraphicsForPalSlot(u16 palSlot)

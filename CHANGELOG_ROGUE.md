@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Clear unique follower tints on map changes so ordinary Pokémon keep their own colors.
+
+- Restrict Alola’s Mina to Gym 7.
+
 - Remove battle affection bonuses, scripts, and animations. Friendship still drives evolutions, moves, and summary stars.
 
 - Fix Rogue CI tests for the dressing-room warp, compact hub upgrade flags, and deterministic route scene payloads.

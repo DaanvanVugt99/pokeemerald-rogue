@@ -1,17 +1,22 @@
 #include "global.h"
 #include "constants/abilities.h"
+#include "constants/map_groups.h"
 #include "constants/moves.h"
 #include "constants/rogue.h"
 #include "constants/rgb.h"
 #include "constants/species.h"
 #include "constants/pokemon.h"
+#include "event_data.h"
+#include "overworld.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
 #include "rogue_colour_utils.h"
 #include "rogue_controller.h"
+#include "rogue_followmon.h"
 #include "rogue_gifts.h"
 #include "rogue_safari.h"
+#include "script.h"
 #include "test/test.h"
 
 #define TEST_FORMAT_MON_TYPE                    1
@@ -125,6 +130,45 @@ static u32 DynamicTypeCustomMonId(u32 type, u32 typeSlot, u32 typeMoveChoice, u3
         | (payload << 8)
         | (rarity << 26)
         | (TEST_FORMAT_MON_TYPE << 28);
+}
+
+TEST("Unique follower tint does not carry into the Cafe")
+{
+    struct MapHeader oldHeader = gMapHeader;
+    struct WarpData oldLocation = gSaveBlock1Ptr->location;
+    struct WarpData oldLastWarp = gLastUsedWarp;
+    u16 oldGraphics = FollowMon_GetGraphics(0);
+    bool8 oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    const u16 *normalPalette;
+    u32 uniqueId = DynamicTypeCustomMonId(TYPE_FIRE, 0, 0, 0, 0, 0);
+
+    FollowMon_SetGraphics(0, SPECIES_SMEARGLE, FALSE, 0);
+    normalPalette = FollowMon_GetGraphicsForPalSlot(1);
+    FollowMon_SetGraphics(0, SPECIES_BULBASAUR, FALSE, uniqueId);
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    gSaveBlock1Ptr->location.mapGroup = MAP_GROUP(ROGUE_AREA_TOWN_SQUARE);
+    gSaveBlock1Ptr->location.mapNum = MAP_NUM(ROGUE_AREA_TOWN_SQUARE);
+    SetWarpDestination(MAP_GROUP(ROGUE_INTERIOR_CAFE), MAP_NUM(ROGUE_INTERIOR_CAFE), WARP_ID_NONE, 4, 4);
+    ApplyCurrentWarp();
+    gMapHeader = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_INTERIOR_CAFE), MAP_NUM(ROGUE_INTERIOR_CAFE));
+    RunOnLoadMapScript();
+
+    EXPECT_EQ(FollowMon_GetGraphics(0), SPECIES_SMEARGLE);
+    EXPECT_EQ(memcmp(FollowMon_GetGraphicsForPalSlot(1), normalPalette, 16 * sizeof(u16)), 0);
+
+    FollowMon_SetGraphics(0, SPECIES_SMEARGLE, FALSE, uniqueId);
+    EXPECT(memcmp(FollowMon_GetGraphicsForPalSlot(1), normalPalette, 16 * sizeof(u16)) != 0);
+    SetWarpDestination(MAP_GROUP(ROGUE_INTERIOR_CAFE), MAP_NUM(ROGUE_INTERIOR_CAFE), WARP_ID_NONE, 5, 4);
+    ApplyCurrentWarp();
+    EXPECT(memcmp(FollowMon_GetGraphicsForPalSlot(1), normalPalette, 16 * sizeof(u16)) != 0);
+
+    FollowMon_SetGraphicsRaw(0, oldGraphics, 0);
+    gMapHeader = oldHeader;
+    gSaveBlock1Ptr->location = oldLocation;
+    gLastUsedWarp = oldLastWarp;
+    if (oldRun)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
 }
 
 static u32 DynamicOriginalUniqueAbilityCustomMonId(u32 move1, u32 move2, u32 abilitySeed, u32 uniqueAbility)

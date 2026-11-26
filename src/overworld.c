@@ -626,6 +626,11 @@ void ApplyCurrentWarp(void)
 {
     gLastUsedWarp = gSaveBlock1Ptr->location;
     gSaveBlock1Ptr->location = sWarpDestination;
+
+    // Map scripts can set follower graphics variables without supplying a unique ID.
+    if (gLastUsedWarp.mapGroup != sWarpDestination.mapGroup || gLastUsedWarp.mapNum != sWarpDestination.mapNum)
+        FollowMon_ResetSlotPalettes();
+
     sFixedDiveWarp = sDummyWarpData;
     sFixedHoleWarp = sDummyWarpData;
 }
