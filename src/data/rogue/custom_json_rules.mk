@@ -10,9 +10,7 @@ CUSTOM_JSON_TARGETS := \
 	$(ROGUEPORYSCRIPTSDIR)/Generated/trainers.pory \
 	$(ROGUEPORYSCRIPTSDIR)/Generated/quests.pory \
 	$(DATA_SRC_SUBDIR)/rogue/custom_mons.h \
-	include/constants/generated/custom_mons.h \
-	$(DATA_SRC_SUBDIR)/rogue/decorations.h \
-	include/constants/generated/decorations.h
+	include/constants/generated/custom_mons.h
 
 $(CUSTOM_JSON_TARGETS): | customjson-tool
 
@@ -49,9 +47,3 @@ $(DATA_SRC_SUBDIR)/rogue/custom_mons.h: $(DATA_SRC_SUBDIR)/rogue/custom_mons.jso
 
 include/constants/generated/custom_mons.h: $(DATA_SRC_SUBDIR)/rogue/custom_mons.json
 	$(CUSTOMJSON) custom_mons_h $^ $@
-
-$(DATA_SRC_SUBDIR)/rogue/decorations.h: $(DATA_SRC_SUBDIR)/rogue/decorations.json $(DATA_SRC_SUBDIR)/rogue/decorations/*.json
-	$(CUSTOMJSON) decoration_c $(DATA_SRC_SUBDIR)/rogue/decorations.json $@
-
-include/constants/generated/decorations.h: $(DATA_SRC_SUBDIR)/rogue/decorations.json $(DATA_SRC_SUBDIR)/rogue/decorations/*.json
-	$(CUSTOMJSON) decoration_h $(DATA_SRC_SUBDIR)/rogue/decorations.json $@

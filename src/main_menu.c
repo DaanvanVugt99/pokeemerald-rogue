@@ -183,6 +183,8 @@ static u8 sBirchSpeechMainTaskId;
 
 // Static ROM declarations
 
+static const u8 sText_IncompatibleSave[] = _("This save is from an earlier\nbuild. Please start a new game.");
+
 static u32 InitMainMenu(bool8);
 static void Task_MainMenuCheckSaveFile(u8);
 static void Task_MainMenuCheckBattery(u8);
@@ -754,6 +756,11 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
                 break;
             case SAVE_STATUS_CORRUPT:
                 CreateMainMenuErrorWindow(gText_SaveFileErased);
+                tMenuType = HAS_NO_SAVED_GAME;
+                gTasks[taskId].func = Task_WaitForSaveFileErrorWindow;
+                break;
+            case SAVE_STATUS_INCOMPATIBLE:
+                CreateMainMenuErrorWindow(sText_IncompatibleSave);
                 tMenuType = HAS_NO_SAVED_GAME;
                 gTasks[taskId].func = Task_WaitForSaveFileErrorWindow;
                 break;

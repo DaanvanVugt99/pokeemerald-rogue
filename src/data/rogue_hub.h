@@ -6,19 +6,11 @@
 extern const u8 gHubAreaDesc_Todo[];
 extern const u8 gHubAreaDesc_TrialFrontier[];
 extern const u8 gHubAreaDesc_BerryField[];
-extern const u8 gHubAreaDesc_Home[];
 extern const u8 gHubAreaDesc_Marts[];
 extern const u8 gHubAreaDesc_RideTraining[];
 extern const u8 gHubAreaDesc_DayCare[];
 extern const u8 gHubAreaDesc_Market[];
 
-extern const u8 gHubUpgradeDesc_Home_LowerFloor[];
-extern const u8 gHubUpgradeDesc_Home_UpperFloor[];
-extern const u8 gHubUpgradeDesc_Home_TownStyle[];
-extern const u8 gHubUpgradeDesc_Home_BerryField1[];
-extern const u8 gHubUpgradeDesc_Home_BerryField2[];
-extern const u8 gHubUpgradeDesc_Home_GrassField[];
-extern const u8 gHubUpgradeDesc_Home_FieldShed[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonSlots0[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonSlots1[];
 extern const u8 gHubUpgradeDesc_Lab_UniqueMonRarity0[];
@@ -103,25 +95,6 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
         },
         .iconImage = gItemIcon_PokeBall,
         .iconPalette = gItemIconPalette_PokeBall,
-    },
-    [HUB_AREA_HOME] = 
-    {
-        SET_AREA_PRIMARY_MAP(ROGUE_AREA_HOME),
-        .areaName = _("Home Base"),
-        .descText = gHubAreaDesc_Home,
-        .requiredUpgrades = { HUB_UPGRADE_NONE },
-        .buildCost = 15,
-        .connectionWarps = 
-        {
-            [HUB_AREA_CONN_NORTH] = { 0, 1 },
-            [HUB_AREA_CONN_EAST] = { 2, 3 },
-            [HUB_AREA_CONN_SOUTH] = { 4, 5 },
-            [HUB_AREA_CONN_WEST] = { 6, 7 },
-
-            [HUB_AREA_CONN_TELEPORT] = { 9 },
-        },
-        .iconImage = gItemIcon_BasementKey,
-        .iconPalette = gItemIconPalette_OldKey,
     },
     [HUB_AREA_BERRY_FIELD] = 
     {
@@ -283,33 +256,6 @@ const struct RogueHubArea gRogueHubAreas[HUB_AREA_COUNT] =
 
 const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] = 
 {
-    // HUB_AREA_HOME
-    //
-    [HUB_UPGRADE_HOME_LOWER_FLOOR] = 
-    {
-        .upgradeName = _("Interior Base"),
-        .targetArea = HUB_AREA_HOME,
-        .buildCost = 3,
-        .descText = gHubUpgradeDesc_Home_LowerFloor,
-        .requiredUpgrades = { HUB_UPGRADE_NONE }
-    },
-    [HUB_UPGRADE_HOME_UPPER_FLOOR] = 
-    {
-        .upgradeName = _("Upper Floor"),
-        .targetArea = HUB_AREA_HOME,
-        .buildCost = 0,
-        .descText = gHubUpgradeDesc_Home_UpperFloor,
-        .requiredUpgrades = { HUB_UPGRADE_HOME_UPPER_FLOOR, HUB_UPGRADE_NONE } // reserved
-    },
-    [HUB_UPGRADE_HOME_EDIT_STYLE] = 
-    {
-        .upgradeName = _("Town Style"),
-        .targetArea = HUB_AREA_HOME,
-        .buildCost = 3,
-        .descText = gHubUpgradeDesc_Home_TownStyle,
-        .requiredUpgrades = { HUB_UPGRADE_HOME_LOWER_FLOOR, HUB_UPGRADE_NONE }
-    },
-
     // HUB_AREA_LABS
     //
     [HUB_UPGRADE_LAB_UNIQUE_MON_LAB] = 
@@ -377,7 +323,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
         .descText = gHubUpgradeDesc_Lab_UniqueMonRarity3,
         .requiredUpgrades = { HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_EPIC, HUB_UPGRADE_NONE },
     },
-    [HUB_UPGRADE_UNUSED_48] =
+    [HUB_UPGRADE_UNUSED_45] =
     {
         .upgradeName = _("Reserved"),
         .targetArea = HUB_AREA_LABS,
@@ -426,7 +372,7 @@ const struct RogueAreaUpgrade gRogueHubUpgrades[HUB_UPGRADE_COUNT] =
     [HUB_UPGRADE_BERRY_FIELD_BREWING_UPGRADE] = 
     {
         .upgradeName = _("PotionCauldron+"),
-        .targetArea = HUB_AREA_HOME,
+        .targetArea = HUB_AREA_BERRY_FIELD,
         .buildCost = 0,
         .descText = gHubUpgradeDesc_BerryField_Brewing,
         .requiredUpgrades = { HUB_UPGRADE_BERRY_FIELD_BREWING_UPGRADE, HUB_UPGRADE_NONE } // reserved

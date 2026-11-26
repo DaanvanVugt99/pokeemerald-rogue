@@ -507,13 +507,6 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_UniqueDenGrass;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ItemMachinePart;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_FlagAdventure;
 
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorBed;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorDrawers;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomFan;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomFrost;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomHeat;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorRotomMow;
-const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_RotomWash;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorWardrobe;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_DecorCauldron;
 
@@ -1153,13 +1146,6 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_ITEM_MACHINE_PART] =        &gObjectEventGraphicsInfo_ItemMachinePart,
     [OBJ_EVENT_GFX_FLAG_ADVENTURE] =           &gObjectEventGraphicsInfo_FlagAdventure,
 
-    [OBJ_EVENT_GFX_DECOR_BED] =                &gObjectEventGraphicsInfo_DecorBed,
-    [OBJ_EVENT_GFX_DECOR_DRAWERS] =            &gObjectEventGraphicsInfo_DecorDrawers,
-    [OBJ_EVENT_GFX_DECOR_ROTOM_FAN] =          &gObjectEventGraphicsInfo_DecorRotomFan,
-    [OBJ_EVENT_GFX_DECOR_ROTOM_FROST] =        &gObjectEventGraphicsInfo_DecorRotomFrost,
-    [OBJ_EVENT_GFX_DECOR_ROTOM_HEAT] =         &gObjectEventGraphicsInfo_DecorRotomHeat,
-    [OBJ_EVENT_GFX_DECOR_ROTOM_MOW] =          &gObjectEventGraphicsInfo_DecorRotomMow,
-    [OBJ_EVENT_GFX_DECOR_ROTOM_WASH] =         &gObjectEventGraphicsInfo_RotomWash,
     [OBJ_EVENT_GFX_DECOR_WARDROBE] =           &gObjectEventGraphicsInfo_DecorWardrobe,
     [OBJ_EVENT_GFX_DECOR_CAULDRON] =           &gObjectEventGraphicsInfo_DecorCauldron,
 

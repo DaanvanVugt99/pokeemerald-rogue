@@ -1226,7 +1226,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
-                    { "decor": "DECOR_ID_APPLIANCES" }
+                    { "item": "ITEM_ROTOM_CATALOG", "count": "1" }
                 ]
             },
             {

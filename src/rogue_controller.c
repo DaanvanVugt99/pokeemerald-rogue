@@ -1112,16 +1112,6 @@ u16 Rogue_ModifyPlayBGM(u16 songNum)
             }
         }
 
-        if(VarGet(VAR_ROGUE_SPECIAL_MODE) == ROGUE_SPECIAL_MODE_DECORATING)
-        {
-            switch (songNum)
-            {
-            case MUS_LITTLEROOT:
-                songNum = MUS_DP_UNDERGROUND;
-                break;
-            }
-        }
-
         switch (songNum)
         {
         case MUS_LITTLEROOT:
@@ -2231,18 +2221,6 @@ bool8 Rogue_UseFastLevelUpAnim()
     return gSaveBlock2Ptr->optionsTextSpeed != OPTIONS_TEXT_SPEED_SLOW;
 }
 
-const u8* Rogue_ModifyOverworldInteractionScript(struct MapPosition *position, u16 metatileBehavior, u8 direction, u8 const* script)
-{
-    u16 specialState = VarGet(VAR_ROGUE_SPECIAL_MODE);
-
-    if(specialState == ROGUE_SPECIAL_MODE_DECORATING)
-    {
-        script = RogueHub_GetDecoratingScriptFor(gMapHeader.mapLayoutId, position, metatileBehavior, direction, script);
-    }
-
-    return script;
-}
-
 u16 Rogue_ModifyOverworldMapWeather(u16 weather)
 {
     if(gMapHeader.mapType != MAP_TYPE_INDOOR && gMapHeader.mapType != MAP_TYPE_UNDERGROUND)
@@ -2336,18 +2314,6 @@ u16 Rogue_ModifyOverworldMapWeather(u16 weather)
     }
 
     return weather;
-}
-
-const struct Tileset * Rogue_ModifyOverworldTileset(const struct Tileset * tileset)
-{
-    if(Rogue_IsRunActive())
-    {
-        return tileset;
-    }
-    else
-    {
-        return RogueHub_ModifyOverworldTileset(tileset);
-    }
 }
 
 bool8 Rogue_CanRenameMon(struct Pokemon* mon)
@@ -3960,14 +3926,6 @@ bool8 Rogue_IsObjectEventExcludedFromSave(struct ObjectEvent* objectEvent)
     // Don't save MP objects
     if(objectEvent->localId >= OBJ_EVENT_ID_MULTIPLAYER_FIRST && objectEvent->localId <= OBJ_EVENT_ID_MULTIPLAYER_LAST)
         return TRUE;
-
-    // We probably don't need this, as the template should still be setup in the same order they're saved in so this should be fine
-    //if(RogueHub_IsPlayerBaseLayout(gMapHeader.mapLayoutId))
-    //{
-    //    // To avoid scripts being setup incorrectly, always reload the props dynamically
-    //    if(objectEvent->localId != OBJ_EVENT_ID_PLAYER && objectEvent->localId != OBJ_EVENT_ID_FOLLOWER)
-    //        return TRUE;
-    //}
 
     return FALSE;
 }
@@ -5706,7 +5664,6 @@ static void EndRogueRun(void)
     }
 
     RogueQuest_CheckQuestRequirements();
-    RogueHub_UpdateWanderMons();
 }
 
 static u16 SelectLegendarySpecies(u8 legendId)
@@ -7910,25 +7867,7 @@ void Rogue_OnWarpIntoMap(void)
     }
     else
     {
-        u16 specialState = VarGet(VAR_ROGUE_SPECIAL_MODE);
-
-        if(specialState != ROGUE_SPECIAL_MODE_NONE)
-        {
-            if(specialState == ROGUE_SPECIAL_MODE_DECORATING)
-            {
-                // Maintain special state provided we're still in any player home area
-                bool8 inHomeMap = RogueHub_IsPlayerBaseLayout(gMapHeader.mapLayoutId);
-
-                if(!inHomeMap)
-                    VarSet(VAR_ROGUE_SPECIAL_MODE, ROGUE_SPECIAL_MODE_NONE);
-            }
-            else
-            {
-                // Clear map state
-                VarSet(VAR_ROGUE_SPECIAL_MODE, ROGUE_SPECIAL_MODE_NONE);
-            }
-        }
-
+        VarSet(VAR_ROGUE_SPECIAL_MODE, ROGUE_SPECIAL_MODE_NONE);
 
         // In the hub, clients just copy host state
         if(RogueMP_IsActive() && RogueMP_IsClient())
@@ -8409,7 +8348,7 @@ bool8 Rogue_AcceptMapConnection(struct MapHeader *mapHeader, const struct MapCon
 
 static bool8 IsHubMapGroup()
 {
-    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_HUB) || gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_AREA_HOME) || gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_INTERIOR_HOME);
+    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_HUB) || gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_AREA_LABS) || gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROGUE_INTERIOR_DRESSING_ROOM);
 }
 
 static bool8 ShouldAdjustRouteObjectEvents()
@@ -8981,13 +8920,6 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
                     break;
                 }
             }
-        }
-    }
-    else
-    {
-        if(RogueHub_IsPlayerBaseLayout(mapHeader->mapLayoutId))
-        {
-            RogueHub_ModifyPlayerBaseObjectEvents(mapHeader->mapLayoutId, loadingFromSave, objectEvents, objectEventCount, objectEventCapacity);
         }
     }
 }

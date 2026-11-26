@@ -1,0 +1,42 @@
+mapscripts Rogue_Interior_DressingRoom_MapScripts {}
+
+script Rogue_DressingRoom_Sign
+{
+    msgbox(format("DRESSING ROOM\nChange your outfit or name."), MSGBOX_SIGN)
+}
+
+script Rogue_DressingRoom_ChangeClothes
+{
+    lockall
+    faceplayer
+
+    specialvar(VAR_RESULT, RoguePlayer_HandleEasterEggOutfitUnlocks)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        call(Rogue_Common_DisplayPopups)
+    }
+
+    message(format("What would you like to do?"))
+    waitmessage
+
+    multichoice(20, 6, MULTI_CHANGE_CLOTHES, NO)
+
+    switch(var(VAR_RESULT))
+    {
+        case 0: // change outfit
+            fadescreen(FADE_TO_BLACK)
+            special(Special_ViewPlayerCustomisationMenu)
+            waitstate
+
+        case 1: // change name
+            fadescreen(FADE_TO_BLACK)
+            special(ChangePlayerNickname)
+            waitstate
+
+        // Fallthrough and exit
+    }
+
+    special(Rogue_FixPartyMonDetails)
+    releaseall
+}

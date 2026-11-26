@@ -1273,7 +1273,7 @@ static void BuyMenuDrawMapBg(void)
             }
             else
             {
-                BuyMenuDrawMapMetatile(i, j, (u16*)Rogue_ModifyOverworldTileset(mapLayout->secondaryTileset)->metatiles + ((metatile - NUM_METATILES_IN_PRIMARY) * 8), metatileLayerType);
+                BuyMenuDrawMapMetatile(i, j, (u16*)mapLayout->secondaryTileset->metatiles + ((metatile - NUM_METATILES_IN_PRIMARY) * 8), metatileLayerType);
             }
         }
     }

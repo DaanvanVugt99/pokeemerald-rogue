@@ -276,8 +276,6 @@ static bool8 TryStartInteractionScript(struct MapPosition *position, u16 metatil
 {
     const u8 *script = GetInteractionScript(position, metatileBehavior, direction);
 
-    script = Rogue_ModifyOverworldInteractionScript(position, metatileBehavior, direction, script);
-
     if (script == NULL)
         return FALSE;
 

@@ -224,7 +224,7 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
         {MAP_NUM(ROGUE_AREA_FARMING_FIELD),8},
-        {MAP_NUM(ROGUE_AREA_HOME),0},{MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
+        {MAP_NUM(ROGUE_AREA_TOWN_SQUARE),15},{MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
     u8 i;
@@ -248,6 +248,25 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
     x = 18; y = 18;
     EXPECT(!RogueHub_RecoverHallwayPosition(safari, &x, &y));
     EXPECT_EQ(x, 18); EXPECT_EQ(y, 18);
+}
+
+TEST("Hub hallways: dressing room uses the Main Hall door in both directions")
+{
+    const struct MapHeader *hall = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_TOWN_SQUARE), MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+    const struct MapHeader *dressing = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_INTERIOR_DRESSING_ROOM), MAP_NUM(ROGUE_INTERIOR_DRESSING_ROOM));
+    const struct WarpEvent *entrance = &hall->events->warps[15];
+    const struct WarpEvent *exit = &dressing->events->warps[0];
+    s16 x, y;
+
+    EXPECT_EQ(entrance->mapGroup, MAP_GROUP(ROGUE_INTERIOR_DRESSING_ROOM));
+    EXPECT_EQ(entrance->mapNum, MAP_NUM(ROGUE_INTERIOR_DRESSING_ROOM));
+    EXPECT_EQ(entrance->warpId, 0);
+    EXPECT_EQ(exit->mapGroup, MAP_GROUP(ROGUE_AREA_TOWN_SQUARE));
+    EXPECT_EQ(exit->mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+    EXPECT_EQ(exit->warpId, 15);
+    EXPECT(!RogueHub_GetWarpArrivalPosition(hall, 15, &x, &y));
+    EXPECT(!RogueHub_GetWarpArrivalPosition(dressing, 0, &x, &y));
+    EXPECT_EQ(dressing->events->objectEventCount, 2);
 }
 
 TEST("Hub hallways: Park rock scenery remains visible independently of links")

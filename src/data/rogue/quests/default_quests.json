@@ -460,7 +460,6 @@
                     { "money": "QUEST_REWARD_SMALL_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_NORMAL", "count": "5" },
-                    { "decor": "DECOR_ID_PC" },
                     { "quest": "Collector +" },
                     { "quest": "Collector S" },
                     { "quest": "Collector X" }
@@ -489,8 +488,7 @@
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_FIRE", "count": "5" },
                     { "item": "ITEM_POKEBLOCK_WATER", "count": "5" },
-                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" },
-                    { "decor": "DECOR_ID_CUSHIONS" }
+                    { "item": "ITEM_POKEBLOCK_GRASS", "count": "5" }
                 ]
             },
             {
@@ -571,8 +569,7 @@
                 [
                     { "money": "QUEST_REWARD_LARGE_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_MEDIUM_BUILD_AMOUNT" },
-                    { "item": "ITEM_POKEBLOCK_FAIRY", "count": "5" },
-                    { "decor": "DECOR_ID_DOLL" }
+                    { "item": "ITEM_POKEBLOCK_FAIRY", "count": "5" }
                 ]
             },
             {
@@ -595,8 +592,7 @@
                 "rewards":
                 [
                     { "money": "QUEST_REWARD_HUGE_MONEY" },
-                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" },
-                    { "decor": "DECOR_ID_PC_WANDERING_PKMN" }
+                    { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_LARGE_BUILD_AMOUNT" }
                 ]
             },
             {
@@ -666,7 +662,6 @@
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_STEEL", "count": "5" },
-                    { "decor": "DECOR_ID_CUSHIONS" },
                     { "quest": "Big Saver" }
                 ]
             },
@@ -916,8 +911,7 @@
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_POISON", "count": "5" },
-                    { "item": "ITEM_POKEBLOCK_GHOST", "count": "5" },
-                    { "decor": "DECOR_ID_FLAG" }
+                    { "item": "ITEM_POKEBLOCK_GHOST", "count": "5" }
                 ]
             },
             {
@@ -937,8 +931,7 @@
                     { "money": "QUEST_REWARD_MEDIUM_MONEY" },
                     { "item": "ITEM_BUILDING_SUPPLIES", "count": "QUEST_REWARD_SMALL_BUILD_AMOUNT" },
                     { "item": "ITEM_POKEBLOCK_FIRE", "count": "5" },
-                    { "item": "ITEM_POKEBLOCK_FLYING", "count": "5" },
-                    { "decor": "DECOR_ID_BED" }
+                    { "item": "ITEM_POKEBLOCK_FLYING", "count": "5" }
                 ]
             },
 

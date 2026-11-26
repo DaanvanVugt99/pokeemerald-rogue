@@ -805,12 +805,6 @@ EventScript_VsSeekerChargingDone::
 
 	.include "data/maps/Rogue_HallwayFacade_Vertical/scripts.inc"
 
-	.include "data/maps/Rogue_Area_Home/scripts.inc"
-
-	.include "data/maps/Rogue_Interior_Home/scripts.inc"
-
-	.include "data/maps/Rogue_Interior_HomeUpper/scripts.inc"
-
 	.include "data/maps/Rogue_Area_FarmingField/scripts.inc"
 
 	.include "data/maps/Rogue_Area_Labs/scripts.inc"
@@ -826,6 +820,8 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Area_SafariZone/scripts.inc"
 
 	.include "data/maps/Rogue_Interior_PokeConnect/scripts.inc"
+
+	.include "data/maps/Rogue_Interior_DressingRoom/scripts.inc"
 
 	.include "data/maps/Rogue_Area_RideTraining/scripts.inc"
 
@@ -860,14 +856,6 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Encounter_RocketHideout/scripts.inc"
 
 	.include "data/maps/Rogue_Boss_Final/scripts.inc"
-
-	.include "data/maps/Rogue_Template_Homes/scripts.inc"
-
-	.include "data/maps/Rogue_Template_Home_Flowers/scripts.inc"
-
-	.include "data/maps/Rogue_Template_Home_Base/scripts.inc"
-
-	.include "data/maps/Rogue_Template_Home_Grass/scripts.inc"
 
 	.include "data/maps/Rogue_Encounter_Shrine/scripts.inc"
 
@@ -909,8 +897,6 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Route_Sinnoh_212/scripts.inc"
 
 	.include "data/maps/Rogue_Interior_BillsLab/scripts.inc"
-
-	.include "data/maps/Rogue_Template_Home_Interior/scripts.inc"
 
 	.include "data/maps/Rogue_Area_Market/scripts.inc"
 

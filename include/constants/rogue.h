@@ -919,7 +919,6 @@
 // Special modes
 #define ROGUE_SPECIAL_MODE_NONE           0
 #define ROGUE_SPECIAL_MODE_PLANTING       1
-#define ROGUE_SPECIAL_MODE_DECORATING     2
 
 // Placeholder gfx
 #define TRAINER_PIC_PLACEHOLDER_NPC         TRAINER_PIC_COLLECTOR
@@ -939,11 +938,6 @@
 #define SEASON_WINTER   3
 #define SEASON_COUNT    4
 
-#define TIME_PRESET_DAWN        0
-#define TIME_PRESET_MIDDAY      1
-#define TIME_PRESET_DUSK        2
-#define TIME_PRESET_MIDNIGHT    3
-#define TIME_PRESET_COUNT       4
 
 // Pies
 #define PIE_SIZE_SMALL      0

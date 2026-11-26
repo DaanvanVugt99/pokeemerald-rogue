@@ -53,7 +53,6 @@
 #include "rogue_controller.h"
 #include "rogue_charms.h"
 #include "rogue_debug.h"
-#include "rogue_hub.h"
 #include "rogue_multiplayer.h"
 #include "rogue_player_customisation.h"
 #include "rogue_pokedex.h"
@@ -80,7 +79,6 @@ enum
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_QUICK_SAVE,
     MENU_ACTION_QUESTS,
-    MENU_ACTION_DECORATE,
     MENU_ACTION_DEBUG,
 };
 
@@ -116,7 +114,6 @@ EWRAM_DATA static bool8 sBufferedAButton = FALSE;
 static bool8 StartMenuPokedexCallback(void);
 static bool8 StartMenuPokemonCallback(void);
 static bool8 StartMenuQuestsCallback(void);
-static bool8 StartMenuDecorateCallback(void);
 static bool8 StartMenuBagCallback(void);
 static bool8 StartMenuPokeNavCallback(void);
 static bool8 StartMenuPlayerNameCallback(void);
@@ -237,7 +234,6 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_DEBUG]           = {sText_MenuDebug,       {.u8_void = StartMenuDebugCallback}},
     [MENU_ACTION_QUICK_SAVE]      = {gText_MenuQuickSave,   {.u8_void = StartMenuQuickSaveCallback}},
     [MENU_ACTION_QUESTS]          = {gText_MenuQuests,      {.u8_void = StartMenuQuestsCallback}},
-    [MENU_ACTION_DECORATE]        = {gText_MenuDecorate,    {.u8_void = StartMenuDecorateCallback}},
 };
 
 static const struct BgTemplate sBgTemplates_LinkBattleSave[] =
@@ -393,11 +389,6 @@ static void BuildNormalStartMenu(void)
         AddStartMenuAction(MENU_ACTION_QUESTS);
     }
 
-    if (RogueHub_IsPlayerBaseLayout(gMapHeader.mapLayoutId) && !RogueMP_IsClient())
-    {
-        AddStartMenuAction(MENU_ACTION_DECORATE);
-    }
-
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
 
@@ -431,11 +422,6 @@ static void BuildRogueRunStartMenu(void)
     if (FlagGet(FLAG_SYS_QUEST_LOG_GET) == TRUE)
     {
         AddStartMenuAction(MENU_ACTION_QUESTS);
-    }
-
-    if (RogueHub_IsPlayerBaseLayout(gMapHeader.mapLayoutId) && !RogueMP_IsClient())
-    {
-        AddStartMenuAction(MENU_ACTION_DECORATE);
     }
 
 
@@ -1017,17 +1003,6 @@ static bool8 StartMenuQuestsCallback(void)
     return FALSE;
 }
 
-extern const u8 Rogue_Area_Home_DecorateFromMenu[];
-
-static bool8 StartMenuDecorateCallback(void)
-{
-    RemoveExtraStartMenuWindows();
-    HideStartMenu();
-
-    ScriptContext_SetupScript(Rogue_Area_Home_DecorateFromMenu);
-
-    return TRUE;
-}
 
 static bool8 StartMenuBagCallback(void)
 {

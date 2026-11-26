@@ -131,8 +131,6 @@
 #define MULTI_REGION_FULL                  116
 #define MULTI_WORKBENCH_OPTIONS            117
 #define MULTI_CHANGE_CLOTHES               118
-#define MULTI_SELECT_SEASON                119
-#define MULTI_SELECT_TIME                  120
 #define MULTI_SELECT_PIE_FILLING           121
 #define MULTI_CLASSIC_MODERN               123
 #define MULTI_BATTLE_WAGER                 124

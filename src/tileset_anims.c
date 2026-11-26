@@ -625,7 +625,7 @@ static void _InitPrimaryTilesetAnimation(void)
 
 static void _InitSecondaryTilesetAnimation(void)
 {
-    const struct Tileset* secondaryTileset = Rogue_ModifyOverworldTileset(gMapHeader.mapLayout->secondaryTileset);
+    const struct Tileset* secondaryTileset = gMapHeader.mapLayout->secondaryTileset;
     sSecondaryTilesetAnimCounter = 0;
     sSecondaryTilesetAnimCounterMax = 0;
     sSecondaryTilesetAnimCallback = NULL;

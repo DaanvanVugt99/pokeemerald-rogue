@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Home and Trial medallion assets and verify authored hub placements."""
+"""Build the Trial medallion assets and verify authored hub placements."""
 
 import argparse
 import json
@@ -8,21 +8,16 @@ from PIL import Image, ImageDraw
 
 from generate_hub_tiles import Catalogue, render
 from generate_portal_room import ROOT, Source, packed, png, words
-from hub_medallions import InlayTiles, SHARED_BANK, home, trial
+from hub_medallions import InlayTiles, SHARED_BANK, trial
 
-HOME = 'data/tilesets/primary/home_architecture'
 TRIAL = 'data/tilesets/secondary/trial_equipment'
 TRIAL_ART = range(0x220, 0x240)
-HOME_ART = range(480, 512)
-HOME_STYLES = ('red_cave', 'blue_cave', 'brown_cave', 'yellow_cave', 'shrub', 'tree')
-HOME_METAS = 'data/tilesets/secondary/secret_base'
 
 # Positions follow the room's floor plan. The Safari stamp is centered on its
 # southern corridor and Trial is centered on the gallery north of the basin.
 PLACEMENTS = (
     ('Main Hall', 'Rogue_Area_TownSquare', 'MainHall', (18, 15)),
     ('Labs', 'Rogue_Area_Labs', 'Labs', (14, 12)),
-    ('Home Base', 'Rogue_Interior_Home', 'Home', (6, 6)),
     ('Berry Lab', 'Rogue_Area_FarmingField', 'Berry', (14, 14)),
     ('Market', 'Rogue_Area_Market', 'Market', (18, 15)),
     ('Supply Depot', 'Rogue_Area_Marts', 'SupplyDepot', (18, 15)),
@@ -36,34 +31,6 @@ PLACEMENTS = (
 def palette_bytes(colors):
     lines = ['JASC-PAL', '0100', '16'] + [' '.join(map(str, c)) for c in colors]
     return ('\r\n'.join(lines) + '\r\n').encode()
-
-
-def home_assets(colors):
-    base = Source('secret_base', 'secret_base/red_cave', metatiles=HOME_METAS)
-    existing_words = base.meta[0] + base.meta[1]
-    assert not set(HOME_ART) & {word & 1023 for word in existing_words}
-    bank_zero = [word for word in existing_words if word >> 12 == 0]
-    for style in HOME_STYLES:
-        src = Source('secret_base', f'secret_base/{style}', metatiles=HOME_METAS)
-        assert not any(any(src.tile(word)) for word in bank_zero), style
-
-    tiles = [base.tile(i) for i in range(512)]
-    pool = InlayTiles(tiles, HOME_ART, 0)
-    floor = base.meta[1][0x0A * 8:0x0A * 8 + 4]
-    assert base.attrs[1][0x0A] == 0
-    metas = base.meta[0] + [word for art in pool.pieces(home) for word in floor + art]
-    attrs = base.attrs[0] + [0x1000] * 9
-    assert len(base.attrs[0]) == 2
-    outputs = {
-        f'{HOME}/tiles.png': png(tiles),
-        f'{HOME}/metatiles.bin': packed(metas),
-        f'{HOME}/metatile_attributes.bin': packed(attrs),
-        f'{HOME}/palettes/00.pal': palette_bytes(base.pal(0)[:1] + colors[1:]),
-    }
-    for bank in range(1, 6):
-        path = f'palettes/{bank:02}.pal'
-        outputs[f'{HOME}/{path}'] = (ROOT / base.paths[0] / path).read_bytes()
-    return outputs
 
 
 def trial_assets(colors):
@@ -92,8 +59,6 @@ def trial_assets(colors):
 
 
 def metatiles(cat, name):
-    if name == 'Home':
-        return list(range(2, 11))
     if name == 'Trial':
         return list(range(523, 535))
     catalogue = {'Berry': cat.berry_lab, 'Market': cat.market}.get(name, cat.medallions)
@@ -103,7 +68,6 @@ def metatiles(cat, name):
 
 def preview_and_check(cat):
     layouts = {l['id']: l for l in json.loads((ROOT/'data/layouts/layouts.json').read_text())['layouts']}
-    home_src = Source('home_architecture', 'secret_base/red_cave', metatiles=HOME_METAS)
     trial_src = Source('trial_architecture', 'trial_equipment')
     sheet = Image.new('RGB', (4 * 252, 3 * 190), '#141c22')
     labels = ImageDraw.Draw(sheet)
@@ -114,7 +78,7 @@ def preview_and_check(cat):
         width, height = layout['width'], layout['height']
         grid = words(layout['blockdata_filepath'])
         art = metatiles(cat, symbol)
-        source = {'Home': home_src, 'Trial': trial_src}.get(symbol)
+        source = trial_src if symbol == 'Trial' else None
         columns = 4 if symbol == 'Trial' else 3
         left = x - columns // 2
         if symbol == 'Trial':
@@ -154,7 +118,7 @@ def main():
     args = parser.parse_args()
     cat = Catalogue()
     colors = cat.pals[SHARED_BANK]
-    for filename, data in {**home_assets(colors), **trial_assets(colors)}.items():
+    for filename, data in trial_assets(colors).items():
         path = ROOT / filename
         if args.check:
             assert path.read_bytes() == data, f'Stale medallion asset: {filename}'

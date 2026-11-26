@@ -46,8 +46,8 @@
       "x": 5,
       "y": 11,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_HOME",
-      "dest_warp_id": 0
+      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "dest_warp_id": 10
     },
     {
       "x": 9,
@@ -60,8 +60,8 @@
       "x": 5,
       "y": 10,
       "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_HOME",
-      "dest_warp_id": 0
+      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "dest_warp_id": 10
     },
     {
       "x": 10,

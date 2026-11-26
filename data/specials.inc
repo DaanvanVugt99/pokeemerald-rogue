@@ -312,7 +312,6 @@ gSpecials::
 	def_special Rogue_BufferCampaignName
 	def_special Rogue_CheckMonCombo
 	def_special Rogue_ApplyMonCombo
-	def_special Rogue_TryInteractFormChange
 	def_special Rogue_GetFollowMonSpecies
 	def_special Rogue_SetupFollowMonFromParty
 	def_special Rogue_TryEnqueueWildBattleMon
@@ -367,7 +366,6 @@ gSpecials::
 	def_special Rogue_RunRewardLvls
 	def_special Rogue_RunRewardMoney
 	def_special Rogue_RunRewardPokeblocks
-	def_special Rogue_SetTimeAndSeason
 	def_special Popup_CannotTakeItem
 	def_special Popup_NewBadgeGet
 	def_special Rogue_TryClaimItemRoomReward
@@ -421,18 +419,6 @@ gSpecials::
 	def_special Rogue_DisplayPopupsFromScriptSkippable
 	def_special RogueGift_ClearDynamicCustomMons
 	def_special RogueHub_GetStatueLevel
-	def_special RogueHub_SetupDecorationMultichoice
-	def_special RogueHub_HandleDecorationMultichoiceResult
-	def_special RogueHub_ClearAllDecorations
-	def_special RogueHub_PlaceHomeDecor
-	def_special RogueHub_RemoveHomeDecor
-	def_special RogueHub_IsRemovingDecor
-	def_special RogueHub_AppendChangeStyle_Paths
-	def_special RogueHub_HandleChangeStyle_Paths
-	def_special RogueHub_AppendChangeStyle_Exterior
-	def_special RogueHub_HandleChangeStyle_Exterior
-	def_special RogueHub_AppendChangeStyle_Interior
-	def_special RogueHub_HandleChangeStyle_Interior
 	def_special RogueAdv_ApplyAdventureMetatiles
 	def_special RogueAdv_GetLastInteractedRoomParams
 	def_special RogueAdv_WarpLastInteractedRoom

@@ -2,7 +2,6 @@
 #define ROGUE_HUB_H
 
 #include "global.h"
-#include "constants/generated/decorations.h"
 
 void RogueHub_Enter();
 void RogueHub_Exit();
@@ -37,7 +36,6 @@ void RogueHub_OnNewDayStarted();
 void RogueHub_UpdateWeatherState();
 void RogueHub_UpdateWarpStates();
 u16 RogueHub_GetWeatherState();
-void RogueHub_UpdateWanderMons();
 
 bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y);
 bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x, s16 *y);
@@ -45,14 +43,6 @@ void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct 
 bool8 RogueHub_AcceptMapConnection(struct MapHeader *mapHeader, const struct MapConnection *connection);
 void RogueHub_ApplyMapMetatiles();
 u8 RogueHub_GetStatueLevel();
-
-bool8 RogueHub_IsPlayerBaseLayout(u16 layoutId);
-void RogueHub_ModifyPlayerBaseObjectEvents(u16 layoutId, bool8 loadingFromSave, struct ObjectEventTemplate *objectEvents, u8* objectEventCount, u8 objectEventCapacity);
-const struct Tileset * RogueHub_ModifyOverworldTileset(const struct Tileset * tileset);
-const u8* RogueHub_GetDecoratingScriptFor(u16 layoutId, struct MapPosition *position, u16 metatileBehavior, u8 direction, u8 const* existingScript);
-
-u8 const* RogueHub_GetDecorName(u16 decorId);
-u8 const* RogueHub_GetDecorVariantName(u16 decorVariantId);
 
 void RogueHub_ReloadObjectsAndTiles();
 

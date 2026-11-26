@@ -13,8 +13,6 @@ enum class QuestRewardType
 	QuestUnlock,
 	Flag,
 	HubUpgrade,
-	Decor,
-	DecorVariant,
 	OutfitUnlock
 };
 
@@ -70,14 +68,6 @@ struct QuestReward
 	{
 		std::string upgradeId;
 	} hubUpgrade;
-	struct
-	{
-		std::string decorId;
-	} decor;
-	struct
-	{
-		std::string decorVariantId;
-	} decorVariant;
 	struct
 	{
 		std::string outfitUnlockId;
@@ -380,24 +370,6 @@ void ExportQuestData_C(std::ofstream& fileStream, std::string const& dataPath, j
 				fileStream << c_TabSpacing2 << "}\n";
 				break;
 
-
-			case QuestRewardType::Decor:
-				fileStream << c_TabSpacing2 << ".type = QUEST_REWARD_DECOR,\n";
-				fileStream << c_TabSpacing2 << ".perType = {\n";
-				fileStream << c_TabSpacing3 << ".decor = {\n";
-				fileStream << c_TabSpacing4 << ".decorId = " << rewardInfo.decor.decorId << ",\n";
-				fileStream << c_TabSpacing3 << "}\n";
-				fileStream << c_TabSpacing2 << "}\n";
-				break;
-
-			case QuestRewardType::DecorVariant:
-				fileStream << c_TabSpacing2 << ".type = QUEST_REWARD_DECOR_VARIANT,\n";
-				fileStream << c_TabSpacing2 << ".perType = {\n";
-				fileStream << c_TabSpacing3 << ".decorVariant = {\n";
-				fileStream << c_TabSpacing4 << ".decorVariantId = " << rewardInfo.decorVariant.decorVariantId << ",\n";
-				fileStream << c_TabSpacing3 << "}\n";
-				fileStream << c_TabSpacing2 << "}\n";
-				break;
 
 			case QuestRewardType::OutfitUnlock:
 				fileStream << c_TabSpacing2 << ".type = QUEST_REWARD_OUTFIT_UNLOCK,\n";
@@ -915,24 +887,6 @@ static QuestReward ParseQuestReward(json const& jsonData)
 		reward.type = QuestRewardType::Flag;
 
 		reward.flagParams.flag = FormatQuestId(jsonData["flag"].get<std::string>());
-
-		return reward;
-	}
-
-	if (jsonData.contains("decor"))
-	{
-		reward.type = QuestRewardType::Decor;
-
-		reward.decor.decorId = jsonData["decor"].get<std::string>();
-
-		return reward;
-	}
-
-	if (jsonData.contains("decor_variant"))
-	{
-		reward.type = QuestRewardType::DecorVariant;
-
-		reward.decorVariant.decorVariantId = jsonData["decor_variant"].get<std::string>();
 
 		return reward;
 	}

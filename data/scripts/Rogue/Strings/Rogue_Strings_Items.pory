@@ -1177,11 +1177,6 @@ text gHubAreaDesc_BerryField
     format("An indoor greenhouse for Berries and basic Potions.")
 }
 
-text gHubAreaDesc_Home
-{
-    format("Personal area to Decorate & change Outfits.")
-}
-
 text gHubAreaDesc_Marts
 {
     format("Indoor departments for supplies, Balls and TMs.")
@@ -1200,41 +1195,6 @@ text gHubAreaDesc_DayCare
 text gHubAreaDesc_Market
 {
     format("Blend {POKEBLOCK} and improve {PKMN} IVs.")
-}
-
-text gHubUpgradeDesc_Home_LowerFloor
-{
-    format("An Interior space to decorate in the Home Base.")
-}
-
-text gHubUpgradeDesc_Home_UpperFloor
-{
-    format("A 2nd floor with a bed allowing you to rest until a specific time.")
-}
-
-text gHubUpgradeDesc_Home_TownStyle
-{
-    format("Change styles from Home Base e.g. Path")
-}
-
-text gHubUpgradeDesc_Home_BerryField1
-{
-    format("A small plot to plant berries.")
-}
-
-text gHubUpgradeDesc_Home_BerryField2
-{
-    format("A 2nd small plot to plant berries. (Unlocks Berry Lab area)")
-}
-
-text gHubUpgradeDesc_Home_GrassField
-{
-    format("A small cosmetic garden your caught {PKMN} can roam in.")
-}
-
-text gHubUpgradeDesc_Home_FieldShed
-{
-    format("TODO - Desc")
 }
 
 text gHubUpgradeDesc_Lab_UniqueMonSlots0

@@ -871,22 +871,6 @@ static const struct MenuAction MultichoiceList_ChangeClothes[] =
     {gText_Exit},
 };
 
-static const struct MenuAction MultichoiceList_SelectSeason[] =
-{
-    {gText_SeasonSpring},
-    {gText_SeasonSummer},
-    {gText_SeasonAutumn},
-    {gText_SeasonWinter},
-};
-
-static const struct MenuAction MultichoiceList_SelectTime[] =
-{
-    {gText_TimeDawn},
-    {gText_TimeMidday},
-    {gText_TimeDusk},
-    {gText_TimeMidnight},
-};
-
 static const struct MenuAction MultichoiceList_SelectPieFilling[] =
 {
     {gText_PieSmall},
@@ -1041,8 +1025,6 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_REGION_FULL]                = MULTICHOICE(MultichoiceList_RegionFull),
     [MULTI_WORKBENCH_OPTIONS]          = MULTICHOICE(MultichoiceList_WorkbenchOptions),
     [MULTI_CHANGE_CLOTHES]             = MULTICHOICE(MultichoiceList_ChangeClothes),
-    [MULTI_SELECT_SEASON]              = MULTICHOICE(MultichoiceList_SelectSeason),
-    [MULTI_SELECT_TIME]                = MULTICHOICE(MultichoiceList_SelectTime),
     [MULTI_SELECT_PIE_FILLING]         = MULTICHOICE(MultichoiceList_SelectPieFilling),
     [MULTI_CLASSIC_MODERN]             = MULTICHOICE(MultichoiceList_ClassicModern),
     [MULTI_BATTLE_WAGER]               = MULTICHOICE(MultichoiceList_BattleWager),

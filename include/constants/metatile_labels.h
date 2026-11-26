@@ -1744,15 +1744,6 @@
 #define METATILE_HubArchitecture_Medallion_Nursery_0_2 0x193
 #define METATILE_HubArchitecture_Medallion_Nursery_1_2 0x194
 #define METATILE_HubArchitecture_Medallion_Nursery_2_2 0x195
-#define METATILE_HomeArchitecture_Medallion_0_0 0x002
-#define METATILE_HomeArchitecture_Medallion_1_0 0x003
-#define METATILE_HomeArchitecture_Medallion_2_0 0x004
-#define METATILE_HomeArchitecture_Medallion_0_1 0x005
-#define METATILE_HomeArchitecture_Medallion_1_1 0x006
-#define METATILE_HomeArchitecture_Medallion_2_1 0x007
-#define METATILE_HomeArchitecture_Medallion_0_2 0x008
-#define METATILE_HomeArchitecture_Medallion_1_2 0x009
-#define METATILE_HomeArchitecture_Medallion_2_2 0x00A
 #define METATILE_TrialEquipment_Medallion_0_0 0x20B
 #define METATILE_TrialEquipment_Medallion_1_0 0x20C
 #define METATILE_TrialEquipment_Medallion_2_0 0x20D

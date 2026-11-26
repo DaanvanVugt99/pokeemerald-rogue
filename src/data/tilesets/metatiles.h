@@ -219,9 +219,6 @@ const u16 gMetatileAttributes_EternaForest[] = INCBIN_U16("data/tilesets/seconda
 const u16 gMetatiles_FacilityRocket[] = INCBIN_U16("data/tilesets/secondary/facility_rocket/metatiles.bin");
 const u16 gMetatileAttributes_FacilityRocket[] = INCBIN_U16("data/tilesets/secondary/facility_rocket/metatile_attributes.bin");
 
-const u16 gMetatiles_PlayerHome[] = INCBIN_U16("data/tilesets/secondary/player_home/metatiles.bin");
-const u16 gMetatileAttributes_PlayerHome[] = INCBIN_U16("data/tilesets/secondary/player_home/metatile_attributes.bin");
-
 const u16 gMetatiles_Restaurant[] = INCBIN_U16("data/tilesets/secondary/restaurant/metatiles.bin");
 const u16 gMetatileAttributes_Restaurant[] = INCBIN_U16("data/tilesets/secondary/restaurant/metatile_attributes.bin");
 
@@ -248,6 +245,3 @@ const u16 gMetatileAttributes_TrialArchitecture[] = INCBIN_U16("data/tilesets/pr
 
 const u16 gMetatiles_TrialEquipment[] = INCBIN_U16("data/tilesets/secondary/trial_equipment/metatiles.bin");
 const u16 gMetatileAttributes_TrialEquipment[] = INCBIN_U16("data/tilesets/secondary/trial_equipment/metatile_attributes.bin");
-
-const u16 gMetatiles_HomeArchitecture[] = INCBIN_U16("data/tilesets/primary/home_architecture/metatiles.bin");
-const u16 gMetatileAttributes_HomeArchitecture[] = INCBIN_U16("data/tilesets/primary/home_architecture/metatile_attributes.bin");

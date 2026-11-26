@@ -4,7 +4,6 @@
     "gMapGroup_RogueHub",
     "gMapGroup_RogueHubAreas",
     "gMapGroup_RogueHubInteriors",
-    "gMapGroup_RogueHubTemplates",
     "gMapGroup_RogueHubTesting",
     "gMapGroup_RogueRun",
     "gMapGroup_RogueAdventureEncounters",
@@ -38,7 +37,6 @@
     "Rogue_HallwayFacade_Horizontal",
     "Rogue_HallwayFacade_Vertical",
     "Rogue_Area_Labs",
-    "Rogue_Area_Home",
     "Rogue_Area_FarmingField",
     "Rogue_Area_AdventureEntrance",
     "Rogue_Area_SafariZone",
@@ -80,8 +78,6 @@
     "Rogue_TrialCorridor_West"
   ],
   "gMapGroup_RogueHubInteriors": [
-    "Rogue_Interior_Home",
-    "Rogue_Interior_HomeUpper",
     "Rogue_Interior_ProfLab",
     "Rogue_Interior_ConfigLab",
     "Rogue_Interior_PokeConnect",
@@ -90,14 +86,8 @@
     "Rogue_Interior_Cafe",
     "Rogue_Interior_School",
     "Rogue_Interior_TrialFrontier",
-    "Rogue_Interior_BillsLab"
-  ],
-  "gMapGroup_RogueHubTemplates": [
-    "Rogue_Template_Homes",
-    "Rogue_Template_Home_Base",
-    "Rogue_Template_Home_Flowers",
-    "Rogue_Template_Home_Grass",
-    "Rogue_Template_Home_Interior"
+    "Rogue_Interior_BillsLab",
+    "Rogue_Interior_DressingRoom"
   ],
   "gMapGroup_RogueHubTesting": [
     "Rogue_Tile_Test1",

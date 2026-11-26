@@ -211,29 +211,6 @@ void RogueToD_SetSeasonCounter(u8 value)
     gRogueSaveBlock->seasonCounter = (value) % (DAYS_PER_SEASON * SEASON_COUNT);
 }
 
-void RogueToD_SetTimePreset(u8 time, u8 season)
-{
-    u8 i;
-
-    if(time < TIME_CODE_COUNT)
-    {
-        // Skip first as it's the end of night not the start
-        for(i = 1; i < ARRAY_COUNT(sToDPaletteLookup); ++i)
-        {
-            if(sToDPaletteLookup[i].timeCode == time)
-            {
-                RogueToD_SetTime(sToDPaletteLookup[i].time);
-                break;
-            }
-        }
-    }
-
-    if(season < SEASON_COUNT)
-    {
-        RogueToD_SetSeason(season);
-    }
-}
-
 u16 RogueToD_GetHours()
 {
     return CALC_HOUR_FROM_TIME(gRogueSaveBlock->timeOfDayMinutes);

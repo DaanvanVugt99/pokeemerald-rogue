@@ -7,6 +7,7 @@
 #include "new_game.h"
 #include "overworld.h"
 #include "malloc.h"
+#include "title_screen.h"
 
 #include "rogue_save.h"
 
@@ -30,5 +31,8 @@ void ReloadSave(void)
         Sav2_ClearSetDefault();
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
     InitHeap(gHeap, HEAP_SIZE);
-    SetMainCallback2(CB2_ContinueSavedGame);
+    if (gSaveFileStatus == SAVE_STATUS_INCOMPATIBLE)
+        SetMainCallback2(CB2_InitTitleScreen);
+    else
+        SetMainCallback2(CB2_ContinueSavedGame);
 }

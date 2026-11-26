@@ -5,6 +5,11 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Remove Home Base, its decorating system, eight decoration quest rewards, and manual time and season controls. All affected quests retain other rewards, and time and seasons still advance automatically.
+- Add a staffed dressing room in the Main Hall for outfit changes and player renaming. Open it from the first visit.
+- Give Rotom Mastery the Rotom Catalog so players can still change Rotom’s forms.
+- Bump the development save schema to 11. Earlier saves require starting a new game.
+
 - Retire the Windows and WSL development launchers and their editor tasks.
 
 - Document macOS development setup and build the native headless test runner with `./init_deps.sh --with-tests`.

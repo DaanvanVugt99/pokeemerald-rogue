@@ -103,10 +103,8 @@ const u8* Rogue_ModifyFieldMessage(const u8* str);
 const u8* Rogue_ModifyBattleMessage(const u8* str);
 void Rogue_ModifyBattleMon(u8 monId, struct BattlePokemon* battleMon, bool8 isPlayer);
 
-const u8* Rogue_ModifyOverworldInteractionScript(struct MapPosition *position, u16 metatileBehavior, u8 direction, u8 const* script);
 u16 Rogue_ModifyOverworldMapWeather(u16 weather);
 
-const struct Tileset * Rogue_ModifyOverworldTileset(const struct Tileset * tileset);
 
 bool8 Rogue_CanRenameMon(struct Pokemon* mon);
 

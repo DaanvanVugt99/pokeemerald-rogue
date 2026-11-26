@@ -881,17 +881,6 @@ const struct Tileset gTileset_FacilityRocket =
     .callback = NULL,
 };
 
-const struct Tileset gTileset_PlayerHome =
-{
-    .isCompressed = TRUE,
-    .isSecondary = TRUE,
-    .tiles = gTilesetTiles_PlayerHome,
-    .palettes = gTilesetPalettes_PlayerHome,
-    .metatiles = gMetatiles_PlayerHome,
-    .metatileAttributes = gMetatileAttributes_PlayerHome,
-    .callback = NULL,
-};
-
 const struct Tileset gTileset_Restaurant =
 {
     .isCompressed = TRUE,
@@ -987,14 +976,4 @@ const struct Tileset gTileset_TrialEquipment =
     .palettes = gTilesetPalettes_Trial,
     .metatiles = gMetatiles_TrialEquipment,
     .metatileAttributes = gMetatileAttributes_TrialEquipment,
-};
-
-const struct Tileset gTileset_HomeArchitecture =
-{
-    .isCompressed = TRUE,
-    .isSecondary = FALSE,
-    .tiles = gTilesetTiles_HomeArchitecture,
-    .palettes = gTilesetPalettes_HomeArchitecture,
-    .metatiles = gMetatiles_HomeArchitecture,
-    .metatileAttributes = gMetatileAttributes_HomeArchitecture,
 };

@@ -1741,7 +1741,7 @@ script Rogue_Debug_SetWeather
 
 script Rogue_Debug_ChangeOutfit
 {
-    call(Rogue_Interior_Home_ChangeClothes)
+    call(Rogue_DressingRoom_ChangeClothes)
 }
 
 script Rogue_Debug_RandomTradeTeam

@@ -45,7 +45,6 @@
 #include "constants/songs.h"
 
 #include "rogue_controller.h"
-#include "rogue_hub.h"
 
 /*
     NOTE: This file is large. Some general groups of functions have
@@ -3878,7 +3877,6 @@ static void Task_OnBPressed(u8 taskId)
         if (!IsComputerScreenCloseEffectActive())
         {
             UpdateBoxToSendMons();
-            RogueHub_UpdateWanderMons();
             gPlayerPartyCount = CalculatePlayerPartyCount();
             sStorage->screenChangeType = SCREEN_CHANGE_EXIT_BOX;
             SetPokeStorageTask(Task_ChangeScreen);

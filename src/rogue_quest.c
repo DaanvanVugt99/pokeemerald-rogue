@@ -462,16 +462,6 @@ static bool8 GiveRewardInternal(struct RogueQuestReward const* rewardInfo)
         AGB_ASSERT(mutePopups); // force custom popups for now, as this is already an edge case anyway
         break;
 
-    case QUEST_REWARD_DECOR:
-        if(!mutePopups)
-            Rogue_PushPopup_UnlockedDecor(rewardInfo->perType.decor.decorId);
-        break;
-
-    case QUEST_REWARD_DECOR_VARIANT:
-        if(!mutePopups)
-            Rogue_PushPopup_UnlockedDecorVariant(rewardInfo->perType.decorVariant.decorVariantId);
-        break;
-
     case QUEST_REWARD_OUTFIT_UNLOCK:
         RoguePlayer_ActivateOutfitUnlock(rewardInfo->perType.outfitUnlock.outfitUnlockId);
         AGB_ASSERT(mutePopups); // force custom popups for now, as this is already an edge case anyway

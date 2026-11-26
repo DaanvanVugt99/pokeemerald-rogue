@@ -1733,25 +1733,6 @@ const u16 gTilesetPalettes_FacilityRocket[][16] =
     INCBIN_U16("data/tilesets/secondary/facility_rocket/palettes/12.gbapal"),
 };
 
-const u16 gTilesetPalettes_PlayerHome[][16] =
-{
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/00.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/01.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/02.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/03.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/04.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/05.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/06.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/07.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/08.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/09.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/10.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/11.gbapal"),
-    INCBIN_U16("data/tilesets/secondary/player_home/palettes/12.gbapal"),
-};
-
-const u32 gTilesetTiles_PlayerHome[] = INCBIN_U32("data/tilesets/secondary/player_home/tiles.4bpp.lz");
-
 const u16 gTilesetPalettes_Restaurant[][16] =
 {
     INCBIN_U16("data/tilesets/secondary/restaurant/palettes/00.gbapal"),
@@ -1883,14 +1864,3 @@ const u16 gTilesetPalettes_Trial[][16] =
 };
 
 const u32 gTilesetTiles_TrialEquipment[] = INCBIN_U32("data/tilesets/secondary/trial_equipment/tiles.4bpp.lz");
-
-const u32 gTilesetTiles_HomeArchitecture[] = INCBIN_U32("data/tilesets/primary/home_architecture/tiles.4bpp.lz");
-const u16 gTilesetPalettes_HomeArchitecture[][16] =
-{
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/00.gbapal"),
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/01.gbapal"),
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/02.gbapal"),
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/03.gbapal"),
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/04.gbapal"),
-    INCBIN_U16("data/tilesets/primary/home_architecture/palettes/05.gbapal"),
-};

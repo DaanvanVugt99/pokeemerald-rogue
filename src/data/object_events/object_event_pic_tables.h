@@ -5467,27 +5467,6 @@ static const struct SpriteFrameImage sPicTable_FlagAdventure[] = {
     overworld_frame(gObjectEventPic_FlagAdventure, 4, 4, 2),
 };
 
-static const struct SpriteFrameImage sPicTable_DecorBed[] = {
-    obj_frame_tiles(gObjectEventPic_DecorBed),
-};
-static const struct SpriteFrameImage sPicTable_DecorDrawers[] = {
-    obj_frame_tiles(gObjectEventPic_DecorDrawers),
-};
-static const struct SpriteFrameImage sPicTable_DecorRotomFan[] = {
-    obj_frame_tiles(gObjectEventPic_DecorRotomFan),
-};
-static const struct SpriteFrameImage sPicTable_DecorRotomFrost[] = {
-    obj_frame_tiles(gObjectEventPic_DecorRotomFrost),
-};
-static const struct SpriteFrameImage sPicTable_DecorRotomHeat[] = {
-    obj_frame_tiles(gObjectEventPic_DecorRotomHeat),
-};
-static const struct SpriteFrameImage sPicTable_DecorRotomMow[] = {
-    obj_frame_tiles(gObjectEventPic_DecorRotomMow),
-};
-static const struct SpriteFrameImage sPicTable_DecorRotomWash[] = {
-    obj_frame_tiles(gObjectEventPic_DecorRotomWash),
-};
 static const struct SpriteFrameImage sPicTable_DecorWardrobe[] = {
     obj_frame_tiles(gObjectEventPic_DecorWardrobe),
 };

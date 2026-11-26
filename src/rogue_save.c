@@ -184,9 +184,6 @@ static u16 SerializeRogueBlockInternal(struct SaveBlockStream* stream, struct Ro
     SerializeArray(stream, saveBlock->hubMap.areaBuiltFlags, sizeof(saveBlock->hubMap.areaBuiltFlags[0]), ARRAY_COUNT(saveBlock->hubMap.areaBuiltFlags));
     SerializeArray(stream, saveBlock->hubMap.areaCoords, sizeof(saveBlock->hubMap.areaCoords[0]), ARRAY_COUNT(saveBlock->hubMap.areaCoords));
     SerializeArray(stream, saveBlock->hubMap.upgradeFlags, sizeof(saveBlock->hubMap.upgradeFlags[0]), ARRAY_COUNT(saveBlock->hubMap.upgradeFlags));
-    SerializeArray(stream, saveBlock->hubMap.homeDecorations, sizeof(saveBlock->hubMap.homeDecorations[0]), ARRAY_COUNT(saveBlock->hubMap.homeDecorations));
-    SerializeArray(stream, saveBlock->hubMap.homeStyles, sizeof(saveBlock->hubMap.homeStyles[0]), ARRAY_COUNT(saveBlock->hubMap.homeStyles));
-    SerializeArray(stream, saveBlock->hubMap.homeWanderingMonSpecies, sizeof(saveBlock->hubMap.homeWanderingMonSpecies[0]), ARRAY_COUNT(saveBlock->hubMap.homeWanderingMonSpecies));
     SerializeData(stream, &saveBlock->hubMap.weatherState, sizeof(saveBlock->hubMap.weatherState));
 
     // Time/Seasons
@@ -344,14 +341,17 @@ void RogueSave_FormatForWriting()
     }
 }
 
-void RogueSave_FormatForReading()
+bool8 RogueSave_FormatForReading(void)
 {
     if(gRogueSaveBlock->currentBlockFormat != ROGUE_SAVE_FORMAT_READ)
     {
-        SerializeRogueBlock(FALSE);
+        u16 saveVersion = SerializeRogueBlock(FALSE);
 
         gRogueSaveBlock->currentBlockFormat = ROGUE_SAVE_FORMAT_READ;
+        return saveVersion != SAVE_VER_ID_UNKNOWN;
     }
+
+    return gRogueSaveBlock->saveVersion == ROGUE_SAVE_VERSION;
 }
 
 u16 RogueSave_GetVersionId()

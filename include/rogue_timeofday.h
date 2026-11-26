@@ -13,7 +13,6 @@ void RogueToD_SetSeason(u8 season);
 u8 RogueToD_GetSeasonCounter();
 void RogueToD_SetSeasonCounter(u8 value);
 
-void RogueToD_SetTimePreset(u8 time, u8 season);
 
 bool8 RogueToD_ApplyTimeVisuals();
 bool8 RogueToD_ApplySeasonVisuals();

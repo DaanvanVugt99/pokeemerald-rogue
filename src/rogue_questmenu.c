@@ -488,7 +488,6 @@ static u8 const sText_RewardMoney[] = _("Money: ");
 static u8 const sText_RewardQuest[] = _("Qst: ");
 static u8 const sText_RewardFeature[] = _("Feature unlock");
 static u8 const sText_RewardHubUpgrade[] = _("Hub: ");
-static u8 const sText_RewardDecor[] = _("Deco: ");
 static u8 const sText_RewardOutfit[] = _("Outfit unlock");
 static u8 const sText_RewardPokemon[] = _("{PKMN}: ");
 static u8 const sText_RewardShiny[] = _("Shiny ");
@@ -1960,16 +1959,6 @@ static void BufferQuestRewardText(u8* dest, struct RogueQuestReward const* rewar
         StringAppend(str, gRogueHubUpgrades[reward->perType.hubUpgrade.upgradeId].upgradeName);
         break;
 
-    case QUEST_REWARD_DECOR:
-        str = StringCopy(str, sText_RewardDecor);
-        StringAppend(str, RogueHub_GetDecorName(reward->perType.decor.decorId));
-        break;
-
-    case QUEST_REWARD_DECOR_VARIANT:
-        str = StringCopy(str, sText_RewardDecor);
-        StringAppend(str, RogueHub_GetDecorVariantName(reward->perType.decorVariant.decorVariantId));
-        break;
-
     case QUEST_REWARD_OUTFIT_UNLOCK:
         StringCopy(str, sText_RewardOutfit);
         break;
@@ -2378,15 +2367,6 @@ static void Draw_QuestPage()
                         ++spriteIdx;
                         break;
                         
-                    case QUEST_REWARD_DECOR:
-                    case QUEST_REWARD_DECOR_VARIANT:
-                        currentTag = TAG_REWARD_ICON_ITEM + ITEM_BASEMENT_KEY;
-                        
-                        sQuestMenuData->sprites[spriteIdx] = AddItemIconSprite(currentTag, currentTag, ITEM_BASEMENT_KEY);
-                        groupedSpriteIndex[spriteIdx] = currentSpriteGroup;
-                        spriteLayering[spriteIdx] = 0;
-                        ++spriteIdx;
-                        break;
                     }
                 }
             }

@@ -297,9 +297,8 @@ class Catalogue:
             header+=f'#define METATILE_HubArchitecture_Market_{name} 0x{mid:03X}\n'
         for name,mid in self.medallions.items():
             header+=f'#define METATILE_HubArchitecture_Medallion_{name} 0x{mid:03X}\n'
-        for label, first, columns in (('HomeArchitecture', 2, 3), ('TrialEquipment', 0x20B, 4)):
-            for i in range(columns * 3):
-                header+=f'#define METATILE_{label}_Medallion_{i % columns}_{i // columns} 0x{first + i:03X}\n'
+        for i in range(12):
+            header+=f'#define METATILE_TrialEquipment_Medallion_{i % 4}_{i // 4} 0x{0x20B + i:03X}\n'
         for entry in self.config.get('labels',[]):
             key,old=entry['source'];mid=self.mapping[key][old]
             prefix='HubArchitecture' if mid<512 else 'HubFurnishings'

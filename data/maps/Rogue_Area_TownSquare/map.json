@@ -232,6 +232,13 @@
       "elevation": 3,
       "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 4,
+      "elevation": 5,
+      "dest_map": "MAP_ROGUE_INTERIOR_DRESSING_ROOM",
+      "dest_warp_id": "0"
     }
   ],
   "coord_events": [
@@ -261,6 +268,14 @@
       "elevation": 5,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
       "script": "Rogue_Area_TownSquare_ConnectSign"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 4,
+      "elevation": 5,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Rogue_DressingRoom_Sign"
     }
   ]
 }

@@ -894,9 +894,18 @@ u8 LoadGameSave(u8 saveType)
     case SAVE_NORMAL:
     default:
         status = TryLoadSaveSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
-        CopyPartyAndObjectsFromSave();
-        RogueSave_FormatForReading();
-        RogueSave_OnSaveLoaded();
+        if (status == SAVE_STATUS_OK || status == SAVE_STATUS_ERROR)
+        {
+            if (RogueSave_FormatForReading())
+            {
+                CopyPartyAndObjectsFromSave();
+                RogueSave_OnSaveLoaded();
+            }
+            else
+            {
+                status = SAVE_STATUS_INCOMPATIBLE;
+            }
+        }
         gSaveFileStatus = status;
         gGameContinueCallback = 0;
         break;

@@ -926,13 +926,6 @@ const u32 gObjectEventPic_GoldGrass[] = INCBIN_U32("graphics/object_events/pics/
 const u32 gObjectEventPic_UniqueDenGrass[] = INCBIN_U32("graphics/object_events/pics/rogue/grass_unique_den.4bpp");
 const u32 gObjectEventPic_FlagAdventure[] = INCBIN_U32("graphics/object_events/pics/rogue/flag_adventure.4bpp");
 
-const u32 gObjectEventPic_DecorBed[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_bed.4bpp");
-const u32 gObjectEventPic_DecorDrawers[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_drawers.4bpp");
-const u32 gObjectEventPic_DecorRotomFan[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_fan.4bpp");
-const u32 gObjectEventPic_DecorRotomFrost[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_frost.4bpp");
-const u32 gObjectEventPic_DecorRotomHeat[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_heat.4bpp");
-const u32 gObjectEventPic_DecorRotomMow[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_mow.4bpp");
-const u32 gObjectEventPic_DecorRotomWash[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_rotom_wash.4bpp");
 const u32 gObjectEventPic_DecorWardrobe[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_wardrobe.4bpp");
 const u32 gObjectEventPic_DecorCauldron[] = INCBIN_U32("graphics/object_events/pics/rogue/decor_cauldron.4bpp");
 

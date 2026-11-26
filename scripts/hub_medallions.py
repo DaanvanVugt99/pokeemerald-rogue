@@ -25,16 +25,6 @@ def labs(image):
         d.rectangle((x,y,x+1,y+1), fill=GOLD)
 
 
-def home(image):
-    d = ImageDraw.Draw(image)
-    d.rectangle((15, 22, 32, 35), fill=SHADE)
-    d.line(((15, 22), (15, 35), (32, 35), (32, 22)), fill=BRASS, width=2)
-    d.line(((10, 23), (24, 12), (37, 23)), fill=GOLD, width=3)
-    d.rectangle((22, 27, 26, 35), fill=5)
-    d.rectangle((17, 25, 19, 27), fill=GOLD)
-    d.rectangle((28, 25, 30, 27), fill=GOLD)
-
-
 def mirrored_symbol(image, half):
     for left, x in ((half, 0), (half.transpose(Image.Transpose.FLIP_LEFT_RIGHT), 24)):
         image.paste(left, (x, 0), left.point([0] + [255] * 255, 'L'))

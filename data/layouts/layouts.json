@@ -1532,36 +1532,6 @@
       "blockdata_filepath": "data/layouts/Rogue_HallwayFacade_Vertical/map.bin"
     },
     {
-      "id": "LAYOUT_ROGUE_AREA_HOME",
-      "name": "Rogue_Area_Home_Layout",
-      "width": 36,
-      "height": 36,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_PlayerHome",
-      "border_filepath": "data/layouts/Rogue_Area_Home/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Area_Home/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_INTERIOR_HOME",
-      "name": "Rogue_Interior_Home_Layout",
-      "width": 12,
-      "height": 12,
-      "primary_tileset": "gTileset_HomeArchitecture",
-      "secondary_tileset": "gTileset_SecretBaseRedCave",
-      "border_filepath": "data/layouts/Rogue_Interior_Home/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Interior_Home/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_INTERIOR_HOME_UPPER",
-      "name": "Rogue_Interior_HomeUpper_Layout",
-      "width": 10,
-      "height": 10,
-      "primary_tileset": "gTileset_Building",
-      "secondary_tileset": "gTileset_BrendansMaysHouse",
-      "border_filepath": "data/layouts/Rogue_Interior_HomeUpper/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Interior_HomeUpper/map.bin"
-    },
-    {
       "id": "LAYOUT_ROGUE_AREA_FARMING_FIELD",
       "name": "Rogue_Area_FarmingField_Layout",
       "width": 29,
@@ -1630,6 +1600,16 @@
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_SafariZone/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_SafariZone/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_INTERIOR_DRESSING_ROOM",
+      "name": "Rogue_Interior_DressingRoom_Layout",
+      "width": 11,
+      "height": 9,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_Interior_DressingRoom/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_Interior_DressingRoom/map.bin"
     },
     {
       "id": "LAYOUT_ROGUE_INTERIOR_POKE_CONNECT",
@@ -1812,46 +1792,6 @@
       "blockdata_filepath": "data/layouts/Rogue_Boss_Final/map.bin"
     },
     {
-      "id": "LAYOUT_ROGUE_TEMPLATE_HOMES",
-      "name": "Rogue_Template_Homes_Layout",
-      "width": 55,
-      "height": 17,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_PlayerHome",
-      "border_filepath": "data/layouts/Rogue_Template_Homes/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Template_Homes/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_TEMPLATE_HOME_FLOWERS",
-      "name": "Rogue_Template_Home_Flowers_Layout",
-      "width": 30,
-      "height": 32,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_PlayerHome",
-      "border_filepath": "data/layouts/Rogue_Template_Home_Flowers/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Template_Home_Flowers/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_TEMPLATE_HOME_BASE",
-      "name": "Rogue_Template_Home_Base_Layout",
-      "width": 30,
-      "height": 32,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_PlayerHome",
-      "border_filepath": "data/layouts/Rogue_Template_Home_Base/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Template_Home_Base/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_TEMPLATE_HOME_GRASS",
-      "name": "Rogue_Template_Home_Grass_Layout",
-      "width": 30,
-      "height": 32,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_PlayerHome",
-      "border_filepath": "data/layouts/Rogue_Template_Home_Grass/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Template_Home_Grass/map.bin"
-    },
-    {
       "id": "LAYOUT_ROGUE_ENCOUNTER_SHRINE",
       "name": "Rogue_Encounter_Shrine_Layout",
       "width": 17,
@@ -2010,16 +1950,6 @@
       "secondary_tileset": "gTileset_BattleFactory",
       "border_filepath": "data/layouts/Rogue_Interior_BillsLab/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Interior_BillsLab/map.bin"
-    },
-    {
-      "id": "LAYOUT_ROGUE_TEMPLATE_HOME_INTERIOR",
-      "name": "Rogue_Template_Home_Interior_Layout",
-      "width": 22,
-      "height": 12,
-      "primary_tileset": "gTileset_SecretBase",
-      "secondary_tileset": "gTileset_SecretBaseBrownCave",
-      "border_filepath": "data/layouts/Rogue_Template_Home_Interior/border.bin",
-      "blockdata_filepath": "data/layouts/Rogue_Template_Home_Interior/map.bin"
     },
     {
       "id": "LAYOUT_ROGUE_AREA_MARKET",
