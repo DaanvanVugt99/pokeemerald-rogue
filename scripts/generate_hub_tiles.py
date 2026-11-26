@@ -111,12 +111,13 @@ class Catalogue:
         if 'id_layout_sha256' in self.config:
             assert digest==self.config['id_layout_sha256'], ('Hub IDs changed: a reviewed map/prefab/runtime remap is required; do not regenerate over authored layouts',digest)
         # Append compositions at explicit IDs, without repacking established art.
+        def resolve(ref):
+            key,name=ref
+            return self.mapping[key][self.config['rooms'][key]['names'][name]]
+
         self.compositions={}
         for entry in self.config.get('compositions',[]):
             assert entry['id']==len(self.metas), ('Composition IDs must be appended',entry)
-            def resolve(ref):
-                key,name=ref
-                return self.mapping[key][self.config['rooms'][key]['names'][name]]
             background=resolve(entry['background']);foreground=resolve(entry['foreground'])
             self.compositions[entry['name']]=len(self.metas)
             vals=self.metas[background][:4]+self.metas[foreground][4:]
@@ -142,12 +143,13 @@ class Catalogue:
         # Preserve explicit Porymap variants in unused primary slots without
         # changing established IDs or the immutable donor metatiles.
         for entry in self.config.get('variants', []):
-            mid=entry['id'];key,name=entry['source']
-            original=self.mapping[key][self.config['rooms'][key]['names'][name]]
+            mid=entry['id'];original=resolve(entry['source'])
+            background=resolve(entry['background']) if 'background' in entry else original
+            layer_type=entry.get('layer_type', self.attrs[original] >> 12)
             assert 0<=mid<512 and self.metas[mid]==[0]*8 and self.attrs[mid]==0, ('Variant slot is occupied',mid)
-            assert entry['layer_type'] in (0,1,2)
-            self.metas[mid]=self.metas[original][:]
-            self.attrs[mid]=(self.attrs[original]&0x0FFF)|(entry['layer_type']<<12)
+            assert layer_type in (0,1,2)
+            self.metas[mid]=self.metas[background][:4]+self.metas[original][4:]
+            self.attrs[mid]=(self.attrs[original]&0x0FFF)|(layer_type<<12)
         from generate_terrarium_tiles import append_terrariums
         append_terrariums(self)
         from berry_lab_tiles import append_berry_lab
@@ -334,6 +336,9 @@ class Catalogue:
                 if mid in named:continue
                 named.add(mid);prefix='HubArchitecture' if mid<512 else 'HubFurnishings'
                 header+=f'#define METATILE_{prefix}_{key}_{old:03X} 0x{mid:03X}\n'
+        for entry in self.config.get('variants', []):
+            if 'name' in entry:
+                header+=f'#define METATILE_HubArchitecture_{entry["name"]} 0x{entry["id"]:03X}\n'
         for name,mid in self.main_hall_doors.items():
             header+=f'#define METATILE_HubArchitecture_MainHall_{name} 0x{mid:03X}\n'
         for name,mid in self.compositions.items():

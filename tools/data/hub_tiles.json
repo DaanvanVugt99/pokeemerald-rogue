@@ -979,6 +979,12 @@
       "id": 133,
       "source": ["portal_room", "ControlBase"],
       "layer_type": 1
+    },
+    {
+      "id": 406,
+      "name": "MainHall_MonitorShadowBase",
+      "source": ["main_hall", "Monitor_0_1"],
+      "background": ["main_hall", "FloorShadow"]
     }
   ],
   "labels": [

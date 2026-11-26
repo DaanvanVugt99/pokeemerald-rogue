@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Continue the Main Hall wall shadow beneath the four wall-side machines.
+
 - Open the Main Hall Dressing Room after the player returns from their first Adventure.
 
 - Keep the Poké Connect wing shuttered and explain on its sign that multiplayer is currently unsupported.
