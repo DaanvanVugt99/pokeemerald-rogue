@@ -212,6 +212,8 @@ class Catalogue:
         from hub_medallions import append_hub_medallions
         append_hub_medallions(self)
         self.build_main_hall_doors()
+        from safari_fixture_tiles import append_safari_fixture_art
+        append_safari_fixture_art(self)
         assert len(self.metas)<=1024 and len(self.tiles)<=1024
 
     def build_main_hall_doors(self):
@@ -493,9 +495,10 @@ def main():
                 assert [c == 0 for c in before] == [c == 0 for c in after], ('Transparency changed', key, old)
     shadow=cat.mapping['lab_junction'][cat.config['rooms']['lab_junction']['names']['FloorShadow']]
     for mid,original in cat.capsule_originals.items():
-        assert cat.metas[mid]==original, 'Capsule tile composition changed'
+        assert cat.safari_fixture_originals[mid]==original, 'Capsule backing composition changed'
+        assert cat.metas[mid][:4]==original[:4], 'Capsule backing changed'
         before=cat.render(mid,original,cat.capsule_original_tiles)
-        after=cat.render(mid)
+        after=cat.render(mid,original)
         for y in range(16):
             for x in range(16):
                 j=y//8*2+x//8;word=original[j];k=y%8*8+x%8
@@ -514,7 +517,8 @@ def main():
     assert len({b''.join(frame) for frame in cat.terrarium_frames})==3
     for name,mid in cat.terrariums.items():
         old=cat.mapping['safari_lab'][cat.config['rooms']['safari_lab']['names'][name]]
-        assert cat.metas[mid][4:]==cat.metas[old][4:] and cat.attrs[mid]==cat.attrs[old]
+        assert cat.safari_fixture_originals.get(mid, cat.metas[mid])[4:]==cat.metas[old][4:]
+        assert cat.attrs[mid]==cat.attrs[old]
     for path,data in cat.outputs().items():
         p=ROOT/path
         if args.check:assert p.exists() and p.read_bytes()==data, f'Stale generated asset: {path}'

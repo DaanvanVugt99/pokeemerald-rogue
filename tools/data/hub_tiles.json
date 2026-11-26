@@ -985,6 +985,24 @@
       "name": "MainHall_MonitorShadowBase",
       "source": ["main_hall", "Monitor_0_1"],
       "background": ["main_hall", "FloorShadow"]
+    },
+    {
+      "id": 413,
+      "name": "SafariLab_TableShadowLeft",
+      "source": ["safari_lab", "Decor_Table_0_0"],
+      "background": ["safari_lab", "FloorShadow"]
+    },
+    {
+      "id": 414,
+      "name": "SafariLab_TableShadowRight",
+      "source": ["safari_lab", "Decor_Table_1_0"],
+      "background": ["safari_lab", "FloorShadow"]
+    },
+    {
+      "id": 415,
+      "name": "SafariLab_StoolShadow",
+      "source": ["safari_lab", "Decor_Stool_0_0"],
+      "background": ["safari_lab", "FloorShadow"]
     }
   ],
   "labels": [

@@ -5,6 +5,12 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Move the Lab Junction flask medallion four tiles north.
+
+- Continue the Safari Lab wall shadows beneath the adjoining tables and stools.
+
+- Give Safari Lab capsules beveled steel bases and add recessed vents to the glass enclosures.
+
 - Restore the player’s walk-out step at open Main Hall and Lab Junction doorways.
 
 - Move the Main Hall floor medallion one tile south and center its emblem inside the ring.
