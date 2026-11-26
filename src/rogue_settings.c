@@ -416,7 +416,7 @@ void Rogue_ResetSettingsToDefaults(void)
     memset(&gRogueSaveBlock->adventureConfig, 0, sizeof(gRogueSaveBlock->adventureConfig));
     gRogueSaveBlock->adventureConfig.overworldMons = TRUE;
     gRogueSaveBlock->adventureConfig.trainerRegions = (1 << 1) | (1 << 2) | (1 << 3);
-    gRogueSaveBlock->adventureConfig.pokedexVariant = POKEDEX_VARIANT_HOENN_RSE;
+    gRogueSaveBlock->adventureConfig.pokedexVariant = POKEDEX_VARIANT_INITIAL_DEFAULT;
     RogueAscension_ResetProgress();
 }
 

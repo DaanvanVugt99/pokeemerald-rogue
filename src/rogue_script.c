@@ -1511,7 +1511,7 @@ void Rogue_AssignDefaultRegion()
         RoguePokedex_ApplyTrainerPoolForVariant(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION));
     }
     else
-        RoguePokedex_SetDexVariant(POKEDEX_VARIANT_HOENN_RSE);
+        RoguePokedex_SetDexVariant(POKEDEX_VARIANT_INITIAL_DEFAULT);
 #else
     RoguePokedex_SetDexVariant(POKEDEX_VARIANT_DEFAULT);
 #endif

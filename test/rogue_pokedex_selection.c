@@ -39,6 +39,7 @@ TEST("Adventure controls: A confirms, horizontal input changes, and B returns")
 TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Continue")
 {
     struct RogueAdventureConfig before, draft, after;
+    struct RoguePokedexSelection selection;
     bool8 defaultBack, unchanged, duplicateRejected;
     u16 initialVariant = VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION);
     u16 initialItem = VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM);
@@ -58,9 +59,12 @@ TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Cont
     EXPECT_EQ(memcmp(&before, &after, sizeof(before)), 0);
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), initialVariant);
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), initialItem);
-    // Returning from confirmation can be followed by a different selection.
-    draft.pokedexVariant = POKEDEX_VARIANT_HOENN_ORAS;
-    EXPECT(RogueTest_ExerciseIntroConfirmation(&draft, ITEM_MEGA_RING, TRUE,
+    // Keep the default Pokédex and its native gimmick when accepting the revised draft.
+    EXPECT_EQ(before.pokedexVariant, POKEDEX_VARIANT_HOENN_ORAS);
+    EXPECT(RogueDexSelection_Init(&selection, ALL_POOLS, before.pokedexVariant, ITEM_NONE, TRUE));
+    EXPECT_EQ(RogueDexSelection_GetGimmick(&selection), ITEM_MEGA_RING);
+    draft.pokedexVariant = selection.variant;
+    EXPECT(RogueTest_ExerciseIntroConfirmation(&draft, RogueDexSelection_GetGimmick(&selection), TRUE,
         &defaultBack, &unchanged, &duplicateRejected));
     EXPECT(defaultBack);
     EXPECT(unchanged);

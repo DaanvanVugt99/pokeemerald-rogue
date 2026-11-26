@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Default new games to the Omega Ruby and Alpha Sapphire Pokédex with the Mega Ring.
+
 - Blend the Main Hall’s closed south corridor into the floor and restore the wall shadow at the closed west corridor.
 
 - Spread PC portrait refreshes across frames when moving the cursor or switching boxes to keep navigation smooth.
