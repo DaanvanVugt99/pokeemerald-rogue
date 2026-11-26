@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Beacon sets Ion Deluge on switch-in and uses Wish once per battle after its holder survives a resisted hit.
+
 - Use Route 228 (Day) throughout the Main Hall, Lab Junction, Adventure Gate, and Safari Area.
 
 - Give the Trial Area Fight Area (Day), the Market and Supply Depot Slateport City, and the Park, Berry Lab, and Pokémon Nursery Amity Square.

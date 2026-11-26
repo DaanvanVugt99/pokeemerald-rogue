@@ -5526,6 +5526,16 @@ bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility)
     return FALSE;
 }
 
+bool32 TrySetWish(u32 battler)
+{
+    if (gWishFutureKnock.wishCounter[battler] != 0)
+        return FALSE;
+
+    gWishFutureKnock.wishCounter[battler] = 2;
+    gWishFutureKnock.wishPartyId[battler] = gBattlerPartyIndexes[battler];
+    return TRUE;
+}
+
 bool32 TryChangeBattleTerrain(u32 battler, u32 statusFlag, u8 *timer)
 {
     if ((!(gFieldStatuses & statusFlag) && (!gBattleStruct->isSkyBattle)))
@@ -10894,6 +10904,16 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BEACON) && !uniqueDone)
+        {
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = TRUE;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
+            gFieldStatuses |= STATUS_FIELD_ION_DELUGE;
+            BattleScriptPushCursorAndCallback(BattleScript_BeaconIonDeluge);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BIOLUMINESCENCE) && !uniqueDone)
         {
             uniqueDone = TRUE;
@@ -15653,6 +15673,25 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_BEACON)
+         && moveEndAttacker != battler
+         && battler == moveEndTarget
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && BATTLER_TURN_DAMAGED(battler)
+         && IsBattlerAlive(battler)
+         && IsFinalMultiHitStrike()
+         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
+         && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]])
+         && TrySetWish(battler))
+        {
+            gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
+            SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_BeaconWish;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_STORM_GLIDER)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && moveEndAttacker != battler
@@ -20302,24 +20341,6 @@ if (triggeringAbility != ABILITY_NONE)
                 gBattlescriptCurrInstr = BattleScript_VampiricActivates;
                 effect++;
             }
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_BEACON)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[gBattlerTarget].hp != 0
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
-         && gBattleMoves[move].pulseMove
-         && (CompareStat(gBattlerTarget, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
-          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_BEACON);
-            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_FLOWING_LESSON)
