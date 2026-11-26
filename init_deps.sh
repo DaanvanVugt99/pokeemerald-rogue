@@ -4,6 +4,20 @@ set -eu
 poryscript_version="3.5.2"
 host_os="$(uname -s)"
 
+case "${1:-}" in
+  "") ;;
+  --with-tests)
+    if [ "$host_os" != Darwin ]; then
+      echo "Use the bundled headless runner on Linux. --with-tests builds the macOS runner." >&2
+      exit 2
+    fi
+    ;;
+  *)
+    echo "Usage: $0 [--with-tests]" >&2
+    exit 2
+    ;;
+esac
+
 download_file() {
   source_url="$1"
   destination_path="$2"
@@ -88,6 +102,35 @@ else
   extract_zip "tools/ups/linux-arm.zip" tools/ups/linux-arm
   chmod +x tools/ups/linux-arm/ups
   echo "Done."
+fi
+
+if [ "${1:-}" = --with-tests ]; then
+  mgba_revision="dbffb46c4e7d2e7a2cbed7c3488cece4c2176d4c"
+  runner_dir="build/mgba-rom-test"
+  if [ ! -x "$runner_dir/mgba-rom-test" ] ||
+     [ "$(cat "$runner_dir/revision" 2>/dev/null || true)" != "$mgba_revision" ]; then
+    for command in cmake git; do
+      if ! command -v "$command" >/dev/null 2>&1; then
+        echo "Error: $command is required to build the macOS headless runner." >&2
+        exit 1
+      fi
+    done
+
+    echo "Building native mgba-rom-test.."
+    runner_source="$(mktemp -d "${TMPDIR:-/tmp}/divergence-mgba.XXXXXX")"
+    trap 'rm -rf "$runner_source"' EXIT
+    git -C "$runner_source" init -q
+    git -C "$runner_source" fetch -q --depth 1 https://github.com/mgba-emu/mgba.git "$mgba_revision"
+    git -C "$runner_source" checkout -q --detach FETCH_HEAD
+    cmake -S "$runner_source" -B "$runner_source/out" -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_ROM_TEST=ON -DBUILD_QT=OFF -DBUILD_SDL=OFF \
+      -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DDISABLE_DEPS=ON \
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cmake --build "$runner_source/out" --target mgba-rom-test --parallel "${BUILD_JOBS:-4}"
+    mkdir -p "$runner_dir"
+    install -m 755 "$runner_source/out/test/mgba-rom-test" "$runner_dir/mgba-rom-test"
+    printf '%s\n' "$mgba_revision" > "$runner_dir/revision"
+  fi
 fi
 
 echo "Gathering dependencies finished."

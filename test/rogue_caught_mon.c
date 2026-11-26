@@ -1387,7 +1387,12 @@ TEST("Converted legality Trials enforce starter and Legendary rules")
 
 TEST("Insane Mode requires minimum A10 without forcing a fixed level")
 {
+    bool8 wasChampion = FlagGet(FLAG_IS_CHAMPION);
+    bool8 wasAscensionIntroduced = FlagGet(FLAG_ROGUE_ASCENSION_INTRODUCED);
+
     ResetCaughtMonTestState();
+    FlagSet(FLAG_IS_CHAMPION);
+    FlagSet(FLAG_ROGUE_ASCENSION_INTRODUCED);
 
     gSpecialVar_0x8004 = ROGUE_TRIAL_INSANE_MODE;
     gSpecialVar_0x8005 = 0;
@@ -1405,6 +1410,10 @@ TEST("Insane Mode requires minimum A10 without forcing a fixed level")
     EXPECT(!gSpecialVar_Result);
 
     ClearCaughtMonTestState();
+    if (!wasChampion)
+        FlagClear(FLAG_IS_CHAMPION);
+    if (!wasAscensionIntroduced)
+        FlagClear(FLAG_ROGUE_ASCENSION_INTRODUCED);
 }
 
 TEST("Last Trial selection restores its exact setup")

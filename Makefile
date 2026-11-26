@@ -2,11 +2,7 @@ TOOLCHAIN := $(DEVKITARM)
 COMPARE ?= 0
 RELEASE ?= 0
 EXPANSION := 1
-ifeq ($(OS),Windows_NT)
-PYTHON ?= python
-else
 PYTHON ?= python3
-endif
 
 ifeq (compare,$(MAKECMDGOALS))
   COMPARE := 1
@@ -101,12 +97,7 @@ endif
 
 CPP := $(PREFIX)cpp
 
-IS_WSL := $(findstring microsoft,$(shell uname -r 2>/dev/null | tr '[:upper:]' '[:lower:]'))
-ifneq ($(IS_WSL),)
-OBJ_BASE_DIR_NAME := build_wsl
-else
 OBJ_BASE_DIR_NAME := build
-endif
 
 ifneq ($(LTO),0)
 LTO_SUFFIX := _lto
@@ -222,7 +213,7 @@ MAPJSON := tools/mapjson/mapjson$(EXE)
 JSONPROC := tools/jsonproc/jsonproc$(EXE)
 PATCHELF := tools/patchelf/patchelf$(EXE)
 ifeq ($(shell uname -s),Darwin)
-ROMTEST ?= $(shell command -v mgba-rom-test 2>/dev/null)
+ROMTEST ?= $(shell { command -v mgba-rom-test || command -v build/mgba-rom-test/mgba-rom-test; } 2>/dev/null)
 else
 ROMTEST ?= $(shell { command -v mgba-rom-test || command -v tools/mgba/mgba-rom-test$(EXE); } 2>/dev/null)
 endif
@@ -695,7 +686,7 @@ endif
 check: $(TESTELF)
 	@if [ -z "$(ROMTEST)" ]; then \
 		echo "Error: mgba-rom-test not found in PATH."; \
-		echo "Install it or run an interactive test build instead (./scripts/launch_build_test.sh --ui)."; \
+		echo "Install it or, on macOS, run ./init_deps.sh --with-tests."; \
 		exit 127; \
 	fi
 	@cp $< $(HEADLESSELF)

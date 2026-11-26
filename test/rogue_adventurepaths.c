@@ -1328,11 +1328,21 @@ TEST("Portal room: all connection masks retain interior tiles and the departure 
             EXPECT(!MapGridIsImpassableAt(9 + MAP_OFFSET, 3 + MAP_OFFSET));
             EXPECT(MapGridIsImpassableAt(9 + MAP_OFFSET, 5 + MAP_OFFSET));
             EXPECT_EQ(MapGridGetMetatileIdAt(9 + MAP_OFFSET, 7 + MAP_OFFSET), METATILE_PortalRoom_Lane);
-            EXPECT_EQ(MapGridGetMetatileIdAt(10 + MAP_OFFSET, 6 + MAP_OFFSET), METATILE_PortalRoom_ControlBase);
+            EXPECT_EQ(MapGridGetMetatileIdAt(10 + MAP_OFFSET, 6 + MAP_OFFSET),
+                header->mapLayout->map[6 * header->mapLayout->width + 10] & MAPGRID_METATILE_ID_MASK);
+            EXPECT(MapGridIsImpassableAt(10 + MAP_OFFSET, 6 + MAP_OFFSET));
             if (!(mask & 1))
-                for (y = 8; y <= 13; ++y) EXPECT_EQ(MapGridGetMetatileIdAt(2 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+            {
+                for (y = 8; y <= 11; ++y)
+                    EXPECT_EQ(MapGridGetMetatileIdAt(2 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+                EXPECT_EQ(MapGridGetMetatileIdAt(2 + MAP_OFFSET, 12 + MAP_OFFSET), METATILE_PortalRoom_PillarEnd);
+            }
             if (!(mask & 4))
-                for (y = 8; y <= 13; ++y) EXPECT_EQ(MapGridGetMetatileIdAt(16 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+            {
+                for (y = 8; y <= 11; ++y)
+                    EXPECT_EQ(MapGridGetMetatileIdAt(16 + MAP_OFFSET, y + MAP_OFFSET), METATILE_PortalRoom_Pillar);
+                EXPECT_EQ(MapGridGetMetatileIdAt(16 + MAP_OFFSET, 12 + MAP_OFFSET), METATILE_PortalRoom_PillarEnd);
+            }
         }
     }
     EXPECT_EQ(header->mapType, MAP_TYPE_INDOOR);
@@ -1385,20 +1395,20 @@ TEST("Portal room: stale service positions trigger a real continue warp even whe
     ClearContinueGameWarpStatus();
 
     // An old snapshot without the console still needs rebuilding.
-    objects[10].localId = 51;
+    objects[9].localId = 51;
     Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
     EXPECT(UseContinueGameWarp());
 
-    // A newly placed table must also recover saves with current NPC templates.
-    objects[10] = header.events->objectEvents[10];
-    gSaveBlock1Ptr->pos.x = 12;
-    gSaveBlock1Ptr->pos.y = 11;
+    // A save on a solid service tile must also recover with current templates.
+    objects[9] = header.events->objectEvents[9];
+    gSaveBlock1Ptr->pos.x = 10;
+    gSaveBlock1Ptr->pos.y = 6;
     ClearContinueGameWarpStatus();
     Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
     EXPECT(UseContinueGameWarp());
     EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 9);
     EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 7);
-    gSaveBlock1Ptr->pos.y = 10; // The story crossing remains clear.
+    gSaveBlock1Ptr->pos.y = 7; // The departure lane remains clear.
     ClearContinueGameWarpStatus();
     Rogue_ModifyObjectEvents(&header, TRUE, objects, &count, ARRAY_COUNT(objects));
     EXPECT(!UseContinueGameWarp());

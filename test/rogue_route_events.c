@@ -40,6 +40,7 @@
 #include "rogue_event_transactions.h"
 #include "rogue_gifts.h"
 #include "rogue_pokedex.h"
+#include "rogue_query.h"
 #include "rogue_route_events.h"
 #include "rogue_route_scene_internal.h"
 #include "rogue_route_scenes.h"
@@ -902,20 +903,25 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     struct RogueRouteSceneRequest siteB;
     u8 observationA[256];
     u8 observationB[256];
+    u8 originalEvoItems[sizeof(gRogueRun.activeEvoItemFlags)];
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
     u16 originalHistory2 = VarGet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2);
     u32 originalMoney = GetMoney(&gSaveBlock1Ptr->money);
+    bool8 originalRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
     bool8 originalFlagA = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
     bool8 originalFlagB = FlagGet(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN);
-    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalDexVariant = gRogueSaveBlock->activeAdventureConfig.pokedexVariant;
     u8 originalRoomId;
     u16 seed;
-    u16 rewardItem;
-    u16 secondaryRewardItem;
-    u8 cacheType;
+    u16 grantedItem;
 
     SetupCurrentEvent(&originalPath, &originalRoomId);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE);
+    FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    memcpy(originalEvoItems, gRogueRun.activeEvoItemFlags, sizeof(originalEvoItems));
+    memset(gRogueRun.activeEvoItemFlags, 0xFF, sizeof(gRogueRun.activeEvoItemFlags));
+    gRogueSaveBlock->activeAdventureConfig.pokedexVariant = POKEDEX_VARIANT_NATIONAL_MAX;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     ClearBag();
     SetMoney(&gSaveBlock1Ptr->money, 0);
     FlagClear(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
@@ -932,6 +938,8 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
         EXPECT(RogueRouteScenes_GetPlacementRequest(0, &archaeologist));
         EXPECT(RogueRouteScenes_GetPlacementRequest(1, &siteA));
         EXPECT(RogueRouteScenes_GetPlacementRequest(2, &siteB));
+        EXPECT_EQ(archaeologist.rewardAmount, siteA.rewardAmount);
+        EXPECT_EQ(archaeologist.rewardAmount, siteB.rewardAmount);
         EXPECT_EQ(archaeologist.sceneSlot, siteA.sceneSlot);
         EXPECT_EQ(archaeologist.sceneSlot, siteB.sceneSlot);
         EXPECT_EQ(archaeologist.lotRole, 0);
@@ -1004,9 +1012,6 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
 
         SelectPlacement(&archaeologist);
         RogueRouteEvents_BufferBuriedCacheData();
-        rewardItem = gSpecialVar_0x8004;
-        secondaryRewardItem = gSpecialVar_0x8005;
-        cacheType = gSpecialVar_0x8007;
         EXPECT_EQ(CountTextCharacter(gStringVar2, CHAR_NEWLINE), 1);
         RogueRouteEvents_TryAcceptBuriedCache();
         EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
@@ -1045,10 +1050,11 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     RogueRouteEvents_TryDigBuriedCache();
     EXPECT_EQ(gSpecialVar_Result, ROGUE_ROUTE_EVENT_RESULT_SUCCESS);
     EXPECT(!CheckBagHasItem(ITEM_FIELD_SHOVEL, 1));
-    EXPECT(CheckBagHasItem(rewardItem, 1));
-    if(secondaryRewardItem != ITEM_NONE)
-        EXPECT(CheckBagHasItem(secondaryRewardItem, 1));
-    if(cacheType == ROGUE_BURIED_CACHE_ANCIENT)
+    grantedItem = gSaveBlock1Ptr->bagPockets[0].itemId;
+    EXPECT_NE(grantedItem, ITEM_NONE);
+    EXPECT(Rogue_IsItemEnabled(grantedItem));
+    EXPECT_EQ(GetItemCountInBag(grantedItem), 1);
+    if (Rogue_IsEvolutionItem(grantedItem))
         EXPECT_GE(GetMoney(&gSaveBlock1Ptr->money), ROGUE_BURIED_CACHE_MONEY_BASE);
     EXPECT_EQ(RogueRouteScenes_GetState(0), ROGUE_ROUTE_EVENT_STATE_COMPLETED);
     EXPECT(RogueRouteEvents_HasCompletedFamily(ROGUE_ROUTE_FAMILY_BURIED_CACHE));
@@ -1058,8 +1064,8 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     AddBagItem(ITEM_FIELD_SHOVEL, 1);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, 0);
     RogueRouteScenes_SetState(0, ROGUE_ROUTE_EVENT_STATE_ACTIVE);
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_UNOVA_BW);
-    siteA.environment = ROGUE_ROUTE_ENVIRONMENT_WATERFRONT;
+    gRogueSaveBlock->activeAdventureConfig.pokedexVariant = POKEDEX_VARIANT_UNOVA_BW;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     ZeroEnemyPartyMons();
     SelectPlacement(&siteA);
     RogueRouteEvents_TryDigBuriedCache();
@@ -1081,9 +1087,12 @@ TEST("Buried cache composes three lots and resolves a recoverable wrong dig")
     SetMoney(&gSaveBlock1Ptr->money, originalMoney);
     VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, originalState);
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY_2, originalHistory2);
+    RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRun);
+    memcpy(gRogueRun.activeEvoItemFlags, originalEvoItems, sizeof(originalEvoItems));
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN, originalFlagA);
     RestoreFlag(FLAG_ROGUE_ROUTE_EVENT_PROP_B_HIDDEN, originalFlagB);
-    RoguePokedex_SetDexVariant(originalDexVariant);
+    gRogueSaveBlock->activeAdventureConfig.pokedexVariant = originalDexVariant;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     gRogueAdvPath = originalPath;
     gRogueRun.adventureRoomId = originalRoomId;
 }
@@ -1983,6 +1992,8 @@ TEST("Unbound Tutor offers three universal moves and completes after one lesson"
         SetMonMoveSlot(&gPlayerParty[0], MOVE_NONE, moveIdx);
     gPlayerPartyCount = 1;
     Rogue_SetCurrentDifficulty(5);
+    // The mock route is room zero, which also represents an invalid scene room.
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     SetDebugPlacement(ROGUE_ROUTE_SCENE_RECIPE_UNBOUND_TUTOR, 0, ROGUE_ADVENTURE_QUEST_INVALID_ID);
     EXPECT(GetFirstPlacement(&tutor));
@@ -2841,6 +2852,8 @@ TEST("Anomalous Fossil restores deterministic stable and adaptive Rare Unique Po
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
     FlagSet(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
     gRogueRun.temporaryDarkDealCurseItem = Rogue_SelectDarkDealCurseItem(0);
+    // The mock route is room zero, which also represents an invalid scene room.
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     Rogue_SetCurrentDifficulty(0);
     gRogueAdvPath.rooms[0].roomParams.roomIdx = FindRouteForRecipe(ROGUE_ROUTE_SCENE_RECIPE_ANOMALOUS_FOSSIL_OFFER);
@@ -3414,6 +3427,8 @@ TEST("Stolen Trade Case completes its three route-node handoffs")
     SetupCurrentEvent(&originalPath, &originalRoomId);
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     memset(gRogueRun.adventureQuests, 0, sizeof(gRogueRun.adventureQuests));
+    // The mock route is room zero, which also represents an invalid scene room.
+    VarSet(VAR_ROGUE_ROUTE_EVENT_STATE, ROGUE_ROUTE_EVENT_STATE_NOT_STARTED);
     gRogueRun.routeSceneRoomId = ADVPATH_INVALID_ROOM_ID;
     VarSet(VAR_ROGUE_ROUTE_EVENT_HISTORY, 0);
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;

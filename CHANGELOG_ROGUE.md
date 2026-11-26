@@ -5,6 +5,11 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Retire the Windows and WSL development launchers and their editor tasks.
+
+- Document macOS development setup and build the native headless test runner with `./init_deps.sh --with-tests`.
+- Update Rogue test fixtures for the current hub layouts, Ascension unlocks, and route event state.
+
 - Streamline setup and contributor guidance, retire obsolete documentation, and preserve validation inputs and third-party notices.
 
 - Reflow Berry Lab into a compact 29 x 28 layout: upper and lower berry banks are fifteen tiles apart, preserving all four upgrade banks while keeping each camera window within the ten-berry sprite limit.

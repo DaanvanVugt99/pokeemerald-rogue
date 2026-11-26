@@ -6,9 +6,6 @@
     {
       "label": "stop emulation",
       "type": "shell",
-      "windows": {
-        "command": "taskkill /im mGBA.exe /F",
-      },
       "osx": {
         "command": "killall mGBA",
       },
@@ -20,9 +17,6 @@
       "label": "start emulator",
       "type": "shell",
       "isBackground": true,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_emu.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_emu.sh",
       },
@@ -34,9 +28,6 @@
       "label": "start emulator (debug)",
       "type": "shell",
       "isBackground": true,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_emu_debug.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_emu_debug.sh",
       },
@@ -48,9 +39,6 @@
       "label": "start emulator (test)",
       "type": "shell",
       "isBackground": true,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_emu_test.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_emu_test.sh",
       },
@@ -63,9 +51,6 @@
       "type": "shell",
       "dependsOn": ["start emulator (debug)"],
       "isBackground": false,
-      "windows": {
-        "command": "sleep 1; echo debuggerReady",
-      },
       "osx": {
         "command": "sleep 1; echo debuggerReady",
       },
@@ -91,9 +76,6 @@
       "type": "shell",
       "dependsOn": ["start emulator (test)"],
       "isBackground": false,
-      "windows": {
-        "command": "sleep 1; echo debuggerReady",
-      },
       "osx": {
         "command": "sleep 1; echo debuggerReady",
       },
@@ -119,9 +101,6 @@
       "label": "clean",
       "type": "shell",
       "isBackground": false,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_clean.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_clean.sh",
       },
@@ -133,9 +112,6 @@
       "label": "build-debug",
       "type": "shell",
       "isBackground": false,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_build_debug.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_build_debug.sh",
       },
@@ -147,9 +123,6 @@
       "label": "build-release",
       "type": "shell",
       "isBackground": false,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_build_release.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_build_release.sh",
       },
@@ -161,9 +134,6 @@
       "label": "build-test",
       "type": "shell",
       "isBackground": false,
-      "windows": {
-        "command": "${workspaceFolder}/scripts/launch_build_test.bat",
-      },
       "osx": {
         "command": "${workspaceFolder}/scripts/launch_build_test.sh --build",
       },
