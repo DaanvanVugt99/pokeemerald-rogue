@@ -9,6 +9,7 @@
 #include "event_object_movement.h"
 #include "event_scripts.h"
 #include "fieldmap.h"
+#include "rogue_hub.h"
 #include "field_control_avatar.h"
 #include "field_player_avatar.h"
 #include "field_poison.h"
@@ -60,7 +61,7 @@ static bool32 TrySetupDiveDownScript(void);
 static bool32 TrySetupDiveEmergeScript(void);
 static bool8 TryStartStepBasedScript(struct MapPosition *, u16, u16);
 static bool8 CheckStandardWildEncounter(u16);
-static bool8 TryArrowWarp(struct MapPosition *, u16, u8);
+static bool8 TryArrowWarp(struct MapPosition *, u16, u8, u8);
 static bool8 IsWarpMetatileBehavior(u16);
 static bool8 IsArrowWarpMetatileBehavior(u16, u8);
 static s8 GetWarpEventAtMapPosition(struct MapHeader *, struct MapPosition *);
@@ -153,6 +154,15 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     struct MapPosition position;
     u8 playerDirection;
     u16 metatileBehavior;
+    struct WarpData hallwayReturn;
+
+    if (RogueHub_GetHallwayFacadeReturn(gMapHeader.mapLayoutId, &hallwayReturn))
+    {
+        StoreInitialPlayerAvatarState();
+        SetWarpDestination(hallwayReturn.mapGroup, hallwayReturn.mapNum, hallwayReturn.warpId, hallwayReturn.x, hallwayReturn.y);
+        DoWarp();
+        return TRUE;
+    }
 
     gSpecialVar_LastTalked = 0;
     gSelectedObjectEvent = 0;
@@ -196,9 +206,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     }
     if (input->checkStandardWildEncounter && CheckStandardWildEncounter(metatileBehavior) == TRUE)
         return TRUE;
-    if (input->heldDirection && input->dpadDirection == playerDirection)
+    if (input->heldDirection)
     {
-        if (TryArrowWarp(&position, metatileBehavior, playerDirection) == TRUE)
+        if (TryArrowWarp(&position, metatileBehavior, input->dpadDirection, playerDirection))
         {
             if(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_RIDING)
                 Rogue_OnRideMonWarp();
@@ -731,21 +741,22 @@ static bool8 CheckStandardWildEncounter(u16 metatileBehavior)
     return FALSE;
 }
 
-static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8 direction)
+static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8 direction, u8 facing)
 {
-    s8 warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
+    s8 warpEventId;
 
-    if (IsArrowWarpMetatileBehavior(metatileBehavior, direction) == TRUE && warpEventId != WARP_ID_NONE)
-    {
-        //if(Rogue_IsRideMonFlying())
-        //    return FALSE;
+    if (!IsArrowWarpMetatileBehavior(metatileBehavior, direction))
+        return FALSE;
 
-        StoreInitialPlayerAvatarState();
-        SetupWarp(&gMapHeader, warpEventId, position);
-        DoWarp();
-        return TRUE;
-    }
-    return FALSE;
+    warpEventId = GetWarpEventAtMapPosition(&gMapHeader, position);
+    // A turn on the threshold must take the hallway warp before PlayerStep.
+    if (warpEventId == WARP_ID_NONE || (direction != facing && !RogueHub_IsHallwayWarp(&gMapHeader, warpEventId)))
+        return FALSE;
+
+    StoreInitialPlayerAvatarState();
+    SetupWarp(&gMapHeader, warpEventId, position);
+    DoWarp();
+    return TRUE;
 }
 
 static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileBehavior)

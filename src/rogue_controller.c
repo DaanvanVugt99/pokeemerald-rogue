@@ -8510,8 +8510,14 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
 
     if (loadingFromSave && !Rogue_IsRunActive())
     {
+        struct WarpData hallwayReturn;
         s16 x = gSaveBlock1Ptr->pos.x, y = gSaveBlock1Ptr->pos.y;
-        if (RogueHub_RecoverHallwayPosition(mapHeader, &x, &y))
+        if (RogueHub_GetHallwayFacadeReturn(mapHeader->mapLayoutId, &hallwayReturn))
+        {
+            SetContinueGameWarp(hallwayReturn.mapGroup, hallwayReturn.mapNum, hallwayReturn.warpId, hallwayReturn.x, hallwayReturn.y);
+            SetContinueGameWarpStatus();
+        }
+        else if (RogueHub_RecoverHallwayPosition(mapHeader, &x, &y))
         {
             SetContinueGameWarp(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE, x, y);
             SetContinueGameWarpStatus();

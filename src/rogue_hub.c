@@ -761,10 +761,8 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
     return HUB_AREA_CONN_COUNT;
 }
 
-bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y)
+bool8 RogueHub_IsHallwayWarp(const struct MapHeader *mapHeader, u8 warpId)
 {
-    u8 i, dir;
-    s16 minX, maxX, minY, maxY;
     switch (mapHeader->mapLayoutId)
     {
     case LAYOUT_ROGUE_AREA_ADVENTURE_ENTRANCE:
@@ -775,6 +773,7 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     case LAYOUT_ROGUE_AREA_MARKET:
     case LAYOUT_ROGUE_AREA_MARTS:
     case LAYOUT_ROGUE_AREA_DAY_CARE:
+    case LAYOUT_ROGUE_AREA_RIDE_TRAINING:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL:
         break;
@@ -783,9 +782,17 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     }
     if (mapHeader->events == NULL || warpId >= mapHeader->events->warpCount)
         return FALSE;
+    return GetConnectionWarpDirection(mapHeader, warpId) < HUB_AREA_CONN_COUNT;
+}
+
+bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y)
+{
+    u8 i, dir;
+    s16 minX, maxX, minY, maxY;
+
+    if (!RogueHub_IsHallwayWarp(mapHeader, warpId))
+        return FALSE;
     dir = GetConnectionWarpDirection(mapHeader, warpId);
-    if (dir > HUB_AREA_CONN_EAST)
-        return FALSE; // Interior doors, portal returns and teleport arrivals.
     minX = maxX = mapHeader->events->warps[warpId].x;
     minY = maxY = mapHeader->events->warps[warpId].y;
     for (i = 0; i < mapHeader->events->warpCount; ++i)
@@ -799,6 +806,76 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
         }
     *x = (minX + maxX) / 2;
     *y = (minY + maxY) / 2;
+    return TRUE;
+}
+
+bool8 RogueHub_IsHallwayExit(const struct MapHeader *mapHeader, s16 x, s16 y, u8 direction)
+{
+    u8 i;
+    if (mapHeader->events == NULL)
+        return FALSE;
+    for (i = 0; i < mapHeader->events->warpCount; ++i)
+    {
+        const struct WarpEvent *warp = &mapHeader->events->warps[i];
+        if (warp->x == x && warp->y == y && RogueHub_IsHallwayWarp(mapHeader, i)
+            && GetConnectionWarpDirection(mapHeader, i) + 1 == direction)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+bool8 RogueHub_IsHallwayFacade(u16 layoutId)
+{
+    return layoutId >= LAYOUT_ROGUE_PORTAL_CORRIDOR_HORIZONTAL
+        && layoutId <= LAYOUT_ROGUE_TRIAL_CORRIDOR_WEST;
+}
+
+static u8 GetHubAreaForFacade(u16 layoutId)
+{
+    u8 area;
+    for (area = 0; area < HUB_AREA_COUNT; ++area)
+    {
+        const struct RogueHubArea *hubArea = &gRogueHubAreas[area];
+        const struct MapHeader *map = Overworld_GetMapHeaderByGroupAndId(hubArea->primaryMapGroup, hubArea->primaryMapNum);
+        int i;
+
+        if (map->connections == NULL)
+            continue;
+        for (i = 0; i < map->connections->count; ++i)
+            if (GetMapHeaderFromConnection(&map->connections->connections[i])->mapLayoutId == layoutId)
+                return area;
+    }
+    return HUB_AREA_TOWN_SQUARE;
+}
+
+bool8 RogueHub_GetHallwayFacadeReturn(u16 layoutId, struct WarpData *warp)
+{
+    const struct RogueHubArea *area;
+    const struct MapHeader *map;
+    const struct WarpEvent *arrival;
+    u8 areaId, mapNum, arrivalId;
+
+    if (!RogueHub_IsHallwayFacade(layoutId))
+        return FALSE;
+
+    areaId = GetHubAreaForFacade(layoutId);
+    area = &gRogueHubAreas[areaId];
+    mapNum = area->primaryMapNum;
+    arrivalId = area->connectionWarps[HUB_AREA_CONN_TELEPORT][0];
+    if (areaId == HUB_AREA_SAFARI_ZONE && VarGet(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_CATCH_MON)
+    {
+        mapNum = MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL);
+        arrivalId = 9;
+    }
+    map = Overworld_GetMapHeaderByGroupAndId(area->primaryMapGroup, mapNum);
+    arrival = &map->events->warps[arrivalId];
+    *warp = (struct WarpData){
+        .mapGroup = area->primaryMapGroup,
+        .mapNum = mapNum,
+        .warpId = WARP_ID_NONE,
+        .x = arrival->x,
+        .y = arrival->y,
+    };
     return TRUE;
 }
 
@@ -822,25 +899,42 @@ bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x,
                 return TRUE;
             }
         }
-        return FALSE;
     }
-    // Old saves may be standing beyond a threshold that has moved inward.
+    // A saved position on the far side of an exit belongs inside the room.
     for (i = 0; i < mapHeader->events->warpCount; ++i)
     {
-        s16 centerX, centerY;
-        u8 dir;
+        s16 centerX, centerY, along, across;
+        const struct UCoords32 *outward;
+        u8 area, dir, arrivalId;
+        const struct WarpEvent *arrival;
+
         if (!RogueHub_GetWarpArrivalPosition(mapHeader, i, &centerX, &centerY))
             continue;
+
         dir = GetConnectionWarpDirection(mapHeader, i);
-        if ((dir == HUB_AREA_CONN_WEST && *x < centerX && *y >= centerY - 1 && *y <= centerY + 1)
-            || (dir == HUB_AREA_CONN_EAST && *x > centerX && *y >= centerY - 1 && *y <= centerY + 1)
-            || (dir == HUB_AREA_CONN_NORTH && *y < centerY && *x >= centerX - 1 && *x <= centerX + 1)
-            || (dir == HUB_AREA_CONN_SOUTH && *y > centerY && *x >= centerX - 1 && *x <= centerX + 1))
+        outward = &gDirectionToVectors[dir + 1]; // Hub connections use the same order as field directions.
+        along = (*x - centerX) * outward->x + (*y - centerY) * outward->y;
+        across = outward->x ? *y - centerY : *x - centerX;
+        if (along < 0 || across < -1 || across > 1)
+            continue;
+
+        area = GetAreaForLayout(mapHeader->mapLayoutId);
+        if (RogueHub_GetAreaAtConnection(area, dir) != HUB_AREA_NONE)
         {
-            *x = centerX;
-            *y = centerY;
+            if (along == 0)
+                continue;
+            *x = centerX - outward->x;
+            *y = centerY - outward->y;
             return TRUE;
         }
+
+        // The area in front of a closed exit can itself be part of the wall patch.
+        arrivalId = mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL
+            ? 9 : gRogueHubAreas[area].connectionWarps[HUB_AREA_CONN_TELEPORT][0];
+        arrival = &mapHeader->events->warps[arrivalId];
+        *x = arrival->x;
+        *y = arrival->y;
+        return TRUE;
     }
     return FALSE;
 }

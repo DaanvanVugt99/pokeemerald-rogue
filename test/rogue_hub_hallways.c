@@ -7,6 +7,15 @@
 #include "test/test.h"
 #include "event_data.h"
 #include "load_save.h"
+#include "fieldmap.h"
+#include "field_control_avatar.h"
+#include "field_player_avatar.h"
+#include "field_screen_effect.h"
+#include "palette.h"
+#include "script.h"
+#include "task.h"
+#include "malloc.h"
+#include "rogue_save.h"
 #include "rogue_controller.h"
 #include "constants/flags.h"
 #include "constants/berry.h"
@@ -227,8 +236,16 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
         {MAP_NUM(ROGUE_AREA_TOWN_SQUARE),15},{MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
+    struct RogueHubMap *oldHub = Alloc(sizeof(*oldHub));
     u8 i;
     s16 x, y;
+    EXPECT(oldHub != NULL);
+    *oldHub = gRogueSaveBlock->hubMap;
+    memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
+    RogueHub_BuildArea(HUB_AREA_SAFARI_ZONE, 0, 0);
+    RogueHub_BuildArea(HUB_AREA_LABS, 1, 0);
+    RogueHub_BuildArea(HUB_AREA_TOWN_SQUARE, -1, 0);
+    RogueHub_BuildArea(HUB_AREA_ADVENTURE_ENTRANCE, 0, -1);
     for (i = 0; i < ARRAY_COUNT(special); ++i)
     {
         const struct MapHeader *header = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_LABS), special[i].mapNum);
@@ -238,16 +255,138 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
     }
     x = 36; y = 16;
     EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
-    EXPECT_EQ(x, 32); EXPECT_EQ(y, 15);
+    EXPECT_EQ(x, 31); EXPECT_EQ(y, 15);
     x = 1; y = 14;
     EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
-    EXPECT_EQ(x, 4); EXPECT_EQ(y, 15);
+    EXPECT_EQ(x, 5); EXPECT_EQ(y, 15);
     x = 17; y = 30;
     EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
-    EXPECT_EQ(x, 18); EXPECT_EQ(y, 27);
+    EXPECT_EQ(x, 18); EXPECT_EQ(y, 26);
     x = 18; y = 18;
     EXPECT(!RogueHub_RecoverHallwayPosition(safari, &x, &y));
     EXPECT_EQ(x, 18); EXPECT_EQ(y, 18);
+
+    memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
+    RogueHub_BuildArea(HUB_AREA_SAFARI_ZONE, 0, 0);
+    x = 36; y = 16;
+    EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, safari->events->warps[7].x);
+    EXPECT_EQ(y, safari->events->warps[7].y);
+    x = 32; y = 15;
+    EXPECT(RogueHub_RecoverHallwayPosition(safari, &x, &y));
+    EXPECT_EQ(x, safari->events->warps[7].x);
+    EXPECT_EQ(y, safari->events->warps[7].y);
+    gRogueSaveBlock->hubMap = *oldHub;
+    Free(oldHub);
+}
+
+static void CheckNorthHallwayTurn(void)
+{
+    struct FieldInput input = {.heldDirection = TRUE, .dpadDirection = DIR_NORTH};
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    struct ObjectEvent oldPlayer = *player;
+    struct PaletteFadeControl oldFade = gPaletteFade;
+    void (*oldFieldCallback)(void) = gFieldCallback;
+    bool8 wasLocked = ArePlayerFieldControlsLocked();
+    u8 task;
+
+    player->currentCoords.x = 18 + MAP_OFFSET;
+    player->currentCoords.y = 1 + MAP_OFFSET;
+    player->previousElevation = MapGridGetElevationAt(player->currentCoords.x, player->currentCoords.y);
+    player->facingDirection = DIR_EAST;
+    EXPECT(ProcessPlayerFieldInput(&input));
+    EXPECT_EQ(GetDestinationWarpMapHeader()->mapLayoutId, LAYOUT_ROGUE_AREA_LABS);
+    task = FindTaskIdByFunc(Task_WarpAndLoadMap);
+    EXPECT_NE(task, TASK_NONE);
+    DestroyTask(task);
+
+    *player = oldPlayer;
+    gFieldCallback = oldFieldCallback;
+    gPaletteFade = oldFade;
+    if (!wasLocked)
+        UnlockPlayerFieldControls();
+}
+
+TEST("Hub hallways: visible facades cannot load and stranded saves return inside")
+{
+    struct MapHeader oldHeader = gMapHeader;
+    struct BackupMapLayout oldLayout = gBackupMapLayout;
+    struct RogueHubMap *oldHub = Alloc(sizeof(*oldHub));
+    struct WarpData returnWarp;
+    u16 layout;
+    s16 x, y;
+    bool8 oldRun = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+
+    EXPECT(oldHub != NULL);
+    *oldHub = gRogueSaveBlock->hubMap;
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
+    RogueHub_BuildArea(HUB_AREA_TOWN_SQUARE, 0, 0);
+    RogueHub_BuildArea(HUB_AREA_LABS, 0, 1);
+    RogueHub_BuildArea(HUB_AREA_ADVENTURE_ENTRANCE, 1, 0);
+
+    gMapHeader = *Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_TOWN_SQUARE), MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+    gMapHeader.mapScripts = NULL;
+    InitMap();
+    // The north and east facades are present in the map grid for rendering.
+    EXPECT_NE(MapGridGetMetatileIdAt(18 + MAP_OFFSET, MAP_OFFSET - 1), MAPGRID_UNDEFINED);
+    EXPECT_NE(MapGridGetMetatileIdAt(36 + MAP_OFFSET, 17 + MAP_OFFSET), MAPGRID_UNDEFINED);
+    // They cannot be traversed as seamless camera connections.
+    EXPECT_EQ(GetMapBorderIdAt(18 + MAP_OFFSET, MAP_OFFSET - 1), CONNECTION_INVALID);
+    EXPECT_EQ(GetMapBorderIdAt(36 + MAP_OFFSET, 17 + MAP_OFFSET), CONNECTION_INVALID);
+    for (x = 17; x <= 19; ++x)
+    {
+        EXPECT(RogueHub_IsHallwayExit(&gMapHeader, x, 1, DIR_NORTH));
+        EXPECT(!RogueHub_IsHallwayExit(&gMapHeader, x, 1, DIR_SOUTH));
+    }
+    for (y = 16; y <= 18; ++y)
+    {
+        EXPECT(RogueHub_IsHallwayExit(&gMapHeader, 35, y, DIR_EAST));
+        EXPECT(!RogueHub_IsHallwayExit(&gMapHeader, 35, y, DIR_WEST));
+    }
+    EXPECT(!RogueHub_IsHallwayExit(&gMapHeader, 23, 4, DIR_NORTH)); // Dressing room door
+    CheckNorthHallwayTurn();
+    for (layout = LAYOUT_ROGUE_PORTAL_CORRIDOR_HORIZONTAL; layout <= LAYOUT_ROGUE_TRIAL_CORRIDOR_WEST; ++layout)
+    {
+        const struct MapHeader *destination;
+        EXPECT(RogueHub_GetHallwayFacadeReturn(layout, &returnWarp));
+        destination = Overworld_GetMapHeaderByGroupAndId(returnWarp.mapGroup, returnWarp.mapNum);
+        EXPECT(!RogueHub_IsHallwayFacade(destination->mapLayoutId));
+        EXPECT(!(destination->mapLayout->map[returnWarp.y * destination->mapLayout->width + returnWarp.x] & MAPGRID_COLLISION_MASK));
+    }
+    EXPECT(RogueHub_GetHallwayFacadeReturn(LAYOUT_ROGUE_MAIN_HALL_CORRIDOR_NORTH, &returnWarp));
+    EXPECT_EQ(returnWarp.mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+    EXPECT_EQ(returnWarp.x, 18);
+    EXPECT_EQ(returnWarp.y, 19);
+    EXPECT(RogueHub_GetHallwayFacadeReturn(LAYOUT_ROGUE_MAIN_HALL_CORRIDOR_HORIZONTAL, &returnWarp));
+    EXPECT_EQ(returnWarp.mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+    EXPECT(!RogueHub_GetHallwayFacadeReturn(LAYOUT_ROGUE_AREA_TOWN_SQUARE, &returnWarp));
+
+    {
+        struct MapHeader facade = *Overworld_GetMapHeaderByGroupAndId(
+            MAP_GROUP(ROGUE_MAIN_HALL_CORRIDOR_NORTH), MAP_NUM(ROGUE_MAIN_HALL_CORRIDOR_NORTH));
+        struct WarpData oldContinue = gSaveBlock1Ptr->continueGameWarp;
+        bool8 oldContinueStatus = UseContinueGameWarp();
+        struct ObjectEventTemplate objects[OBJECT_EVENT_TEMPLATES_COUNT];
+        u8 count = 0;
+
+        ClearContinueGameWarpStatus();
+        Rogue_ModifyObjectEvents(&facade, TRUE, objects, &count, ARRAY_COUNT(objects));
+        EXPECT(UseContinueGameWarp());
+        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
+        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.x, 18);
+        EXPECT_EQ(gSaveBlock1Ptr->continueGameWarp.y, 19);
+        gSaveBlock1Ptr->continueGameWarp = oldContinue;
+        if (!oldContinueStatus)
+            ClearContinueGameWarpStatus();
+    }
+
+    gMapHeader = oldHeader;
+    gBackupMapLayout = oldLayout;
+    gRogueSaveBlock->hubMap = *oldHub;
+    if (oldRun)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+    Free(oldHub);
 }
 
 TEST("Hub hallways: dressing room uses the Main Hall door in both directions")

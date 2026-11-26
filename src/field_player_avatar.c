@@ -33,6 +33,7 @@
 
 #include "rogue_controller.h"
 #include "rogue_followmon.h"
+#include "rogue_hub.h"
 #include "rogue_player_customisation.h"
 #include "rogue_ridemon.h"
 
@@ -667,10 +668,22 @@ static void PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
     }
 }
 
+static bool8 IsMovingPastHallwayWarp(const struct ObjectEvent *player, u8 direction)
+{
+    s16 x = player->currentCoords.x;
+    s16 y = player->currentCoords.y;
+    return direction >= DIR_SOUTH && direction <= DIR_EAST
+        && sArrowWarpMetatileBehaviorChecks[direction - 1](MapGridGetMetatileBehaviorAt(x, y))
+        && RogueHub_IsHallwayExit(&gMapHeader, x - MAP_OFFSET, y - MAP_OFFSET, direction);
+}
+
 static u8 CheckForPlayerAvatarCollision(u8 direction)
 {
     s16 x, y;
     struct ObjectEvent *playerObjEvent = &gObjectEvents[gPlayerAvatar.objectEventId];
+
+    if (IsMovingPastHallwayWarp(playerObjEvent, direction))
+        return COLLISION_IMPASSABLE;
 
     x = playerObjEvent->currentCoords.x;
     y = playerObjEvent->currentCoords.y;
@@ -682,6 +695,9 @@ static u8 CheckForPlayerAvatarStaticCollision(u8 direction)
 {
     s16 x, y;
     struct ObjectEvent *playerObjEvent = &gObjectEvents[gPlayerAvatar.objectEventId];
+
+    if (IsMovingPastHallwayWarp(playerObjEvent, direction))
+        return COLLISION_IMPASSABLE;
 
     x = playerObjEvent->currentCoords.x;
     y = playerObjEvent->currentCoords.y;

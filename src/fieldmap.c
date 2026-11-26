@@ -18,6 +18,7 @@
 #include "constants/metatile_behaviors.h"
 
 #include "rogue_controller.h"
+#include "rogue_hub.h"
 
 struct ConnectionFlags
 {
@@ -139,15 +140,17 @@ static void InitBackupMapLayoutConnections(struct MapHeader *mapHeader)
     const struct MapConnection *connection;
     int i;
 
+    sMapConnectionFlags = sDummyConnectionFlags;
     if (mapHeader->connections)
     {
         count = mapHeader->connections->count;
         connection = mapHeader->connections->connections;
-        sMapConnectionFlags = sDummyConnectionFlags;
         for (i = 0; i < count; i++, connection++)
         {
             struct MapHeader const *cMap = GetMapHeaderFromConnection(connection);
             u32 offset = connection->offset;
+            // Hallway facades contribute scenery only. Arrow warps connect the rooms.
+            bool8 traversable = !RogueHub_IsHallwayFacade(cMap->mapLayoutId);
 
             if(!Rogue_AcceptMapConnection(mapHeader, connection))
                 continue;
@@ -156,19 +159,19 @@ static void InitBackupMapLayoutConnections(struct MapHeader *mapHeader)
             {
             case CONNECTION_SOUTH:
                 FillSouthConnection(mapHeader, cMap, offset);
-                sMapConnectionFlags.south = TRUE;
+                sMapConnectionFlags.south |= traversable;
                 break;
             case CONNECTION_NORTH:
                 FillNorthConnection(mapHeader, cMap, offset);
-                sMapConnectionFlags.north = TRUE;
+                sMapConnectionFlags.north |= traversable;
                 break;
             case CONNECTION_WEST:
                 FillWestConnection(mapHeader, cMap, offset);
-                sMapConnectionFlags.west = TRUE;
+                sMapConnectionFlags.west |= traversable;
                 break;
             case CONNECTION_EAST:
                 FillEastConnection(mapHeader, cMap, offset);
-                sMapConnectionFlags.east = TRUE;
+                sMapConnectionFlags.east |= traversable;
                 break;
             }
         }
@@ -711,7 +714,9 @@ static const struct MapConnection *GetIncomingConnection(u8 direction, int x, in
         if(!Rogue_AcceptMapConnection(&gMapHeader, connection))
             continue;
 
-        if (connection->direction == direction && IsPosInIncomingConnectingMap(direction, x, y, connection) == TRUE)
+        if (connection->direction == direction
+            && !RogueHub_IsHallwayFacade(GetMapHeaderFromConnection(connection)->mapLayoutId)
+            && IsPosInIncomingConnectingMap(direction, x, y, connection) == TRUE)
             return connection;
     }
     return NULL;

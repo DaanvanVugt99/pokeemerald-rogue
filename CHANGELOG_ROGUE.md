@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Keep hub hallway travel on its arrow warps and return stranded players from decorative corridors.
+
 - Let players start the builder’s tutorial from either side and walk them to the workbench.
 
 - Default new games to the Omega Ruby and Alpha Sapphire Pokédex with the Mega Ring.

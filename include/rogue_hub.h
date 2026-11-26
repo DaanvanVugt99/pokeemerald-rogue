@@ -3,6 +3,8 @@
 
 #include "global.h"
 
+struct WarpData;
+
 void RogueHub_Enter();
 void RogueHub_Exit();
 void RogueHub_ClearProgress();
@@ -37,6 +39,10 @@ void RogueHub_UpdateWeatherState();
 void RogueHub_UpdateWarpStates();
 u16 RogueHub_GetWeatherState();
 
+bool8 RogueHub_IsHallwayWarp(const struct MapHeader *mapHeader, u8 warpId);
+bool8 RogueHub_IsHallwayExit(const struct MapHeader *mapHeader, s16 x, s16 y, u8 direction);
+bool8 RogueHub_IsHallwayFacade(u16 layoutId);
+bool8 RogueHub_GetHallwayFacadeReturn(u16 layoutId, struct WarpData *warp);
 bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y);
 bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x, s16 *y);
 void RogueHub_ModifyMapWarpEvent(struct MapHeader *mapHeader, u8 warpId, struct WarpEvent *warp);
