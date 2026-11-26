@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Curtain Call replaces Sweet Nothings on Jynx and Smoochum. It uses Haze on entry and sets Snow on switch-out, including pivot moves.
+
 - Chatterbox uses Copycat on switch-in when the last move was an eligible status move.
 
 - Insectivore uses Stockpile after a foe resists Fire Lash or Bug Bite. Dynamic gifts pair it with Fire Lash.

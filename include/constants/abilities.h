@@ -411,7 +411,7 @@
 #define ABILITY_VARIETY_ACT            779
 #define ABILITY_SWARM_ASSAULT          374
 #define ABILITY_SHARDSTORM             810
-#define ABILITY_SWEET_NOTHINGS         375
+#define ABILITY_CURTAIN_CALL         375
 #define ABILITY_DYNAMO_FISTS           376
 #define ABILITY_FLAMEHEART             377
 #define ABILITY_BURROWING_HORNS        378

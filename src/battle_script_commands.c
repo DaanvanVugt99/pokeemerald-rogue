@@ -19564,6 +19564,18 @@ static void Cmd_switchoutabilities(void)
         }
 
         if (!gSpecialStatuses[battler].switchOutAbilityDone
+         && IsBattlerAlive(battler)
+         && HasBattlerAbility(battler, ABILITY_CURTAIN_CALL)
+         && TryChangeBattleWeather(battler, ENUM_WEATHER_SNOW, TRUE))
+        {
+            gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_CURTAIN_CALL);
+            BattleScriptPush(gBattlescriptCurrInstr);
+            gBattlescriptCurrInstr = BattleScript_CurtainCallSnow;
+            return;
+        }
+
+        if (!gSpecialStatuses[battler].switchOutAbilityDone
          && HasBattlerAbility(battler, ABILITY_MIGRATION)
          && TrySetMigrationRain(battler))
         {

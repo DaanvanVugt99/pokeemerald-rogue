@@ -10930,6 +10930,15 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CURTAIN_CALL) && !uniqueDone)
+        {
+            gSpecialStatuses[battler].switchInUniqueAbilityDone = TRUE;
+            gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+            SetBattlerTriggeredAbility(battler, ABILITY_CURTAIN_CALL);
+            BattleScriptPushCursorAndCallback(BattleScript_CurtainCallHaze);
+            return 1;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_BEACON) && !uniqueDone)
         {
             gSpecialStatuses[battler].switchInUniqueAbilityDone = TRUE;
@@ -19486,21 +19495,6 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SWEET_NOTHINGS)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && gBattleMons[gBattlerTarget].hp != 0
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike()
-         && gBattleMoves[move].kissingMove)
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_SWEET_NOTHINGS);
-            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_HEARTTHROB)
          && move == MOVE_HEART_SWAP
          && !(gMoveResultFlags & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_FAILED))
@@ -25531,12 +25525,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
      && HasBattlerAbility(battlerAtk, ABILITY_STRIKER))
     {
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
-    }
-
-    if (gBattleMoves[move].kissingMove
-     && HasBattlerAbility(battlerAtk, ABILITY_SWEET_NOTHINGS))
-    {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
     }
 
     if (gBattleMoves[move].punchingMove

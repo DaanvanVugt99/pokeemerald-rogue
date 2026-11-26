@@ -13047,6 +13047,25 @@ BattleScript_TumbleweedTailwindEnd:
 	various BS_ATTACKER, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
 
+BattleScript_CurtainCallHaze::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	playmoveanimation BS_SCRIPTING, MOVE_HAZE
+	waitanimation
+	normalisebuffs
+	printstring STRINGID_STATCHANGESGONE
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_CurtainCallSnow::
+	pause B_WAIT_TIME_SHORT
+	call BattleScript_AbilityPopUp
+	printstring STRINGID_SNOWWARNINGSNOW
+	waitstate
+	playanimation BS_BATTLER_0, B_ANIM_SNOW_CONTINUES
+	call BattleScript_ActivateWeatherAbilities
+	return
+
 BattleScript_BeaconIonDeluge::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp

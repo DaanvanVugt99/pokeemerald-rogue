@@ -110,6 +110,8 @@ extern const u8 BattleScript_FreshlyBakedHealMistActivates[];
 extern const u8 BattleScript_RallyHealActivates[];
 extern const u8 BattleScript_RallyCureOnlyActivates[];
 extern const u8 BattleScript_MoltInstinctActivates[];
+extern const u8 BattleScript_CurtainCallHaze[];
+extern const u8 BattleScript_CurtainCallSnow[];
 extern const u8 BattleScript_BeaconIonDeluge[];
 extern const u8 BattleScript_BeaconWish[];
 extern const u8 BattleScript_StormGliderTailwind[];
