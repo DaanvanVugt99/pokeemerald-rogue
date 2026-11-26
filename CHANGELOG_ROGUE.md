@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Insectivore uses Stockpile after a foe resists Fire Lash or Bug Bite. Dynamic gifts pair it with Fire Lash.
+
 - Heartthrob follows Heart Swap with Baton Pass.
 
 - Breaching Shot forces a foe out with the first damaging Water Pulse each switch-in.

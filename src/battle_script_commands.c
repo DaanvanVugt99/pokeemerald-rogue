@@ -13285,20 +13285,6 @@ static void Cmd_various(void)
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_INSECTIVORE)
-         && battler == gBattlerAttacker
-         && HasAttackerFaintedTarget()
-         && !NoAliveMonsForEitherParty()
-         && IS_BATTLER_OF_TYPE(gBattlerTarget, TYPE_BUG))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_INSECTIVORE);
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
-            return;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_MAIN_EVENT)
          && battler == gBattlerAttacker
          && HasAttackerFaintedTarget()
@@ -13309,7 +13295,7 @@ static void Cmd_various(void)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
+            gBattlescriptCurrInstr = BattleScript_AbilityHealsHalfOnKO;
             return;
         }
 
@@ -13323,7 +13309,7 @@ static void Cmd_various(void)
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_InsectivoreActivates;
+            gBattlescriptCurrInstr = BattleScript_AbilityHealsHalfOnKO;
             return;
         }
 

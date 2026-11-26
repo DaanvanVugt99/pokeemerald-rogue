@@ -13967,18 +13967,6 @@ else if (moveType == TYPE_ROCK)
     if (HasBattlerAbility(battler, ABILITY_MORTAR_SHELL))
         triggeringAbility = ABILITY_MORTAR_SHELL, effect = 2, statId = STAT_DEF;
 }
-else if (moveType == TYPE_BUG)
-{
-    if (HasBattlerAbility(battler, ABILITY_INSECTIVORE))
-    {
-        triggeringAbility = ABILITY_INSECTIVORE;
-        effect = 3;
-        if (gProtectStructs[gBattlerAttacker].notFirstStrike)
-            gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless;
-        else
-            gBattlescriptCurrInstr = BattleScript_MonMadeMoveUseless_PPLoss;
-    }
-}
 else if (moveType == TYPE_FLYING)
 {
     if (HasBattlerAbility(battler, ABILITY_AERODYNAMIC))
@@ -17195,6 +17183,26 @@ if (triggeringAbility != ABILITY_NONE)
                 BattleScriptPushCursorAndCallback(worldPrismScript);
                 effect++;
             }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_INSECTIVORE)
+         && (move == MOVE_FIRE_LASH || move == MOVE_BUG_BITE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && (gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && TARGET_TURN_DAMAGED
+         && IsFinalMultiHitStrike()
+         && gDisableStructs[battler].stockpileCounter < 3
+         && CanUseSelfExtraMove(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_INSECTIVORE);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+            gCalledMove = MOVE_STOCKPILE;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            effect++;
         }
 
         if (HasBattlerAbility(battler, ABILITY_SWALLOWED)
@@ -29633,8 +29641,6 @@ static bool32 HasDragonDartsAbsorbingAbility(u32 battler, u32 moveType)
         return HasBattlerAbility(battler, ABILITY_FAIRY_ABSORB);
     case TYPE_ROCK:
         return HasBattlerAbility(battler, ABILITY_MORTAR_SHELL);
-    case TYPE_BUG:
-        return HasBattlerAbility(battler, ABILITY_INSECTIVORE);
     case TYPE_FLYING:
         return HasBattlerAbility(battler, ABILITY_AERODYNAMIC);
     case TYPE_FIRE:

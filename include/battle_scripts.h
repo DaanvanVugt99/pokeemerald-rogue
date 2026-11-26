@@ -60,7 +60,7 @@ extern const u8 BattleScript_VictoryActivates[];
 extern const u8 BattleScript_VictoryActivatesSpeed[];
 extern const u8 BattleScript_RoyalGardenActivates[];
 extern const u8 BattleScript_WitchingHourActivates[];
-extern const u8 BattleScript_InsectivoreActivates[];
+extern const u8 BattleScript_AbilityHealsHalfOnKO[];
 extern const u8 BattleScript_RadiantActivates[];
 extern const u8 BattleScript_StormCommandActivates[];
 extern const u8 BattleScript_SpringCommandActivates[];

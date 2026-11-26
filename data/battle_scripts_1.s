@@ -13147,18 +13147,18 @@ BattleScript_VictoryCelebrate:
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
-BattleScript_InsectivoreActivates::
+BattleScript_AbilityHealsHalfOnKO::
 	call BattleScript_AbilityPopUp
 	waitmessage B_WAIT_TIME_SHORT
-	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_InsectivoreEnd
-	tryhealhalfhealth BattleScript_InsectivoreEnd, BS_ATTACKER
+	jumpifstatus3 BS_ATTACKER, STATUS3_HEAL_BLOCK, BattleScript_AbilityHealsHalfOnKOEnd
+	tryhealhalfhealth BattleScript_AbilityHealsHalfOnKOEnd, BS_ATTACKER
 	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER
 	datahpupdate BS_ATTACKER
 	printstring STRINGID_PKMNREGAINEDHEALTH
 	waitmessage B_WAIT_TIME_LONG
-BattleScript_InsectivoreEnd:
+BattleScript_AbilityHealsHalfOnKOEnd:
 	return
 
 BattleScript_RadiantActivates::
