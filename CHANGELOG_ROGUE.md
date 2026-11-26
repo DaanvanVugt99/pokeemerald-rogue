@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Let players start the builder’s tutorial from either side and walk them to the workbench.
+
 - Default new games to the Omega Ruby and Alpha Sapphire Pokédex with the Mega Ring.
 
 - Blend the Main Hall’s closed south corridor into the floor and restore the wall shadow at the closed west corridor.

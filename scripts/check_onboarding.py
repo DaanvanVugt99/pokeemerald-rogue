@@ -65,12 +65,24 @@ def main():
     assert walk(lab, 'IntroAssistant0', (7, 10), {(3, 4), (3, 5)})[0] == (3, 6)
     assert walk(lab, 'IntroAssistant1', (3, 6), {(3, 4), (3, 5)})[0] == (4, 6)
     hall = 'Rogue_Area_TownSquare'
-    events, _, _ = load(hall)
+    events, layout, cells = load(hall)
     bench = next(x for x in events['object_events'] if x['graphics_id'] == 'OBJ_EVENT_GFX_WORK_TABLE')
     bx, by = bench['x'], bench['y']
     # PrepareMainHallBuilder places him one tile above the authored workbench.
-    assert walk(hall, hall + '_WorkbenchBuilder_North', (bx, by - 1), {(bx, by), (bx, by - 2)})[0] == (bx + 1, by - 1)
-    assert walk(hall, hall + '_WorkbenchPlayer_North', (bx, by - 2), {(bx, by), (bx + 1, by - 1)})[0] == (bx, by - 1)
+    builder = (bx, by - 1)
+    stopped = {(obj['x'], obj['y']) for obj in events['object_events'] if not obj['script'].endswith('TalkBuilder')}
+    starts = {'North': (bx, by - 2), 'West': (bx - 1, by - 1), 'East': (bx + 1, by - 1)}
+    approaches = {(builder[0] + dx, builder[1] + dy) for dx, dy in DELTAS.values()}
+    assert {p for p in approaches if p not in stopped and not cells[p[1] * layout['width'] + p[0]] & 0xC00} == set(starts.values())
+    for side, player in starts.items():
+        if side == 'East':
+            player, _ = walk(hall, hall + '_WorkbenchClearEast', player, stopped | {builder})
+            assert player == starts['North']
+        builder_end, _ = walk(hall, hall + '_WorkbenchBuilder_North', builder, stopped | {player})
+        assert builder_end == (bx + 1, by - 1)
+        final_route = 'West' if side == 'West' else 'North'
+        player_end, body = walk(hall, hall + '_WorkbenchPlayer_' + final_route, player, stopped | {builder_end})
+        assert player_end == builder and body.strip().endswith('face_down')
     print('Onboarding routes PASS: both nurse approaches, portal, Birch junction paths, lab approaches, assistant and builder; collision, elevation and static blockers.')
 
 
