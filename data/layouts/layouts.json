@@ -1546,7 +1546,7 @@
       "name": "Rogue_Interior_Home_Layout",
       "width": 12,
       "height": 12,
-      "primary_tileset": "gTileset_SecretBase",
+      "primary_tileset": "gTileset_HomeArchitecture",
       "secondary_tileset": "gTileset_SecretBaseRedCave",
       "border_filepath": "data/layouts/Rogue_Interior_Home/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Interior_Home/map.bin"
@@ -1894,10 +1894,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_TRIAL_FRONTIER",
       "name": "Rogue_Area_TrialFrontier_Layout",
-      "width": 40,
-      "height": 26,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Lilycove",
+      "width": 46,
+      "height": 38,
+      "primary_tileset": "gTileset_TrialArchitecture",
+      "secondary_tileset": "gTileset_TrialEquipment",
       "border_filepath": "data/layouts/Rogue_Area_TrialFrontier/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_TrialFrontier/map.bin"
     },
@@ -2024,10 +2024,10 @@
     {
       "id": "LAYOUT_ROGUE_AREA_MARKET",
       "name": "Rogue_Area_Market_Layout",
-      "width": 34,
-      "height": 24,
-      "primary_tileset": "gTileset_GeneralHub",
-      "secondary_tileset": "gTileset_Slateport",
+      "width": 37,
+      "height": 31,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_Area_Market/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_Area_Market/map.bin"
     },
@@ -2420,6 +2420,76 @@
       "secondary_tileset": "gTileset_HubFurnishings",
       "border_filepath": "data/layouts/Rogue_NurseryCorridor_South/border.bin",
       "blockdata_filepath": "data/layouts/Rogue_NurseryCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MARKET_CORRIDOR_HORIZONTAL",
+      "name": "Rogue_MarketCorridor_Horizontal_Layout",
+      "width": 16,
+      "height": 8,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_MarketCorridor_Horizontal/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MarketCorridor_Horizontal/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MARKET_CORRIDOR_NORTH",
+      "name": "Rogue_MarketCorridor_North_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_MarketCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MarketCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_MARKET_CORRIDOR_SOUTH",
+      "name": "Rogue_MarketCorridor_South_Layout",
+      "width": 8,
+      "height": 12,
+      "primary_tileset": "gTileset_HubArchitecture",
+      "secondary_tileset": "gTileset_HubFurnishings",
+      "border_filepath": "data/layouts/Rogue_MarketCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_MarketCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_TRIAL_CORRIDOR_NORTH",
+      "name": "Rogue_TrialCorridor_North_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_TrialArchitecture",
+      "secondary_tileset": "gTileset_TrialEquipment",
+      "border_filepath": "data/layouts/Rogue_TrialCorridor_North/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_TrialCorridor_North/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_TRIAL_CORRIDOR_EAST",
+      "name": "Rogue_TrialCorridor_East_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_TrialArchitecture",
+      "secondary_tileset": "gTileset_TrialEquipment",
+      "border_filepath": "data/layouts/Rogue_TrialCorridor_East/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_TrialCorridor_East/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_TRIAL_CORRIDOR_SOUTH",
+      "name": "Rogue_TrialCorridor_South_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_TrialArchitecture",
+      "secondary_tileset": "gTileset_TrialEquipment",
+      "border_filepath": "data/layouts/Rogue_TrialCorridor_South/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_TrialCorridor_South/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROGUE_TRIAL_CORRIDOR_WEST",
+      "name": "Rogue_TrialCorridor_West_Layout",
+      "width": 8,
+      "height": 8,
+      "primary_tileset": "gTileset_TrialArchitecture",
+      "secondary_tileset": "gTileset_TrialEquipment",
+      "border_filepath": "data/layouts/Rogue_TrialCorridor_West/border.bin",
+      "blockdata_filepath": "data/layouts/Rogue_TrialCorridor_West/map.bin"
     }
   ]
 }

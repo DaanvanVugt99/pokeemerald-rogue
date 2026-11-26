@@ -61,6 +61,22 @@ Format follows Keep a Changelog loosely:
 
 ### Changed
 
+- Add brass floor medallions to the indoor hub districts, with a centered
+  paw in both Safari layouts and a trophy aligned to the Trial staircase.
+  Keep the Adventure Gate floor open.
+
+- Inlay a brass berry medallion in the center aisle of the Berry Lab.
+
+- Refine the Market kitchen with the complete Restaurant range, continuous
+  brickwork, and brass floor transitions. Cap the counter mats and continue
+  the slate grout around the bowl inlay.
+
+- Rebuild the Trial Area as an underground facility with an Aqua Hideout
+  cooling basin, four three-lane corridors, and a shared landing at the original
+  Trial building. Relocate the workbench and recover saves from the old site.
+
+- Rebuild the Market as an underground food hall with Pokéblock crafting, a Treat Shop, the Bank, and both chefs on one floor. Shape the hall around a slate crossing, a warm brick kitchen with restored Restaurant fixtures, and a stepped oak dining bay. Add three-lane passages and continue recovery for saves from the outdoor Market or old Restaurant.
+
 - Make trainer AI depend on role instead of run stage: ordinary trainers retain
   basic move evaluation and switching, while bosses use smarter choices and
   advanced switching throughout the run. Ascension levels do not change AI.

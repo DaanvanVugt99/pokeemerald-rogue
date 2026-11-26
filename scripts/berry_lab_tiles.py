@@ -85,3 +85,14 @@ def append_berry_lab(cat):
     append('PlantBaseShadow',shadow,cat.metas[112][4:])
     append('PlantTopShadow',shadow,cat.metas[111][4:])
     assert len(cat.tiles) <= 1024, ('Berry Lab graphics budget exceeded',len(cat.tiles))
+
+
+def draw_berry_symbol(medallion):
+    """Draw the round berry within the shared 48-pixel floor medallion."""
+    from PIL import ImageDraw
+
+    pen = ImageDraw.Draw(medallion)
+    pen.arc((13, 19, 34, 36), 0, 360, fill=13, width=2)
+    pen.line(((24, 20), (20, 16), (16, 15), (18, 19)), fill=12, width=2)
+    pen.line(((24, 20), (28, 16), (31, 15), (30, 19)), fill=12, width=2)
+    pen.arc((17, 23, 30, 32), 154, 224, fill=11, width=1)

@@ -202,6 +202,10 @@ class Catalogue:
         append_nursery(self)
         from lab_decorations import append_lab_decor
         append_lab_decor(self)
+        from market_tiles import append_market
+        append_market(self)
+        from hub_medallions import append_hub_medallions
+        append_hub_medallions(self)
         assert len(self.metas)<=1024 and len(self.tiles)<=1024
 
     def meta(self,key,mid):
@@ -281,13 +285,21 @@ class Catalogue:
         for name,mid in self.terrariums.items():
             header+=f'#define METATILE_HubFurnishings_Planted{name} 0x{mid:03X}\n'
         for name,mid in self.berry_lab.items():
-            header+=f'#define METATILE_HubFurnishings_BerryLab_{name} 0x{mid:03X}\n'
+            prefix = 'HubArchitecture' if mid < 512 else 'HubFurnishings'
+            header+=f'#define METATILE_{prefix}_BerryLab_{name} 0x{mid:03X}\n'
         for name,mid in self.supply_depot.items():
             header+=f'#define METATILE_HubFurnishings_SupplyDepot_{name} 0x{mid:03X}\n'
         for name,mid in self.nursery.items():
             header+=f'#define METATILE_HubFurnishings_Nursery_{name} 0x{mid:03X}\n'
         for name,mid in self.lab_decor.items():
             header+=f'#define METATILE_HubFurnishings_LabDecor_{name} 0x{mid:03X}\n'
+        for name,mid in self.market.items():
+            header+=f'#define METATILE_HubArchitecture_Market_{name} 0x{mid:03X}\n'
+        for name,mid in self.medallions.items():
+            header+=f'#define METATILE_HubArchitecture_Medallion_{name} 0x{mid:03X}\n'
+        for label, first, columns in (('HomeArchitecture', 2, 3), ('TrialEquipment', 0x20B, 4)):
+            for i in range(columns * 3):
+                header+=f'#define METATILE_{label}_Medallion_{i % columns}_{i // columns} 0x{first + i:03X}\n'
         for entry in self.config.get('labels',[]):
             key,old=entry['source'];mid=self.mapping[key][old]
             prefix='HubArchitecture' if mid<512 else 'HubFurnishings'
@@ -405,6 +417,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--check',action='store_true');parser.add_argument('--convert-layouts',action='store_true')
     args=parser.parse_args();assert not(args.check and args.convert_layouts)
     cat=Catalogue()
+    from hub_medallions import flipped_tiles
     # Exact pixel verification for every original room metatile, including ones
     # unused by the current map but still referenced by runtime upgrade code.
     for key in cat.config['rooms']:
@@ -413,8 +426,10 @@ def main():
             assert render(cat.sources[key],old).tobytes()==cat.render(new,original,cat.capsule_original_tiles).tobytes(),(key,old,new)
             assert cat.attrs[new]==cat.sources[key].attrs[old//512][old%512]
             for a,b in zip(cat.meta(key,old),original):
-                before=cat.sources[key].tile(a);after=cat.capsule_original_tiles.get(b&1023,cat.tiles[b&1023])
-                assert [c==0 for c in before]==[c==0 for c in after],('Transparency changed',key,old)
+                before = dict(flipped_tiles(cat.sources[key].tile(a)))[a & 0xC00]
+                raw = cat.capsule_original_tiles.get(b & 1023, cat.tiles[b & 1023])
+                after = dict(flipped_tiles(raw))[b & 0xC00]
+                assert [c == 0 for c in before] == [c == 0 for c in after], ('Transparency changed', key, old)
     shadow=cat.mapping['lab_junction'][cat.config['rooms']['lab_junction']['names']['FloorShadow']]
     for mid,original in cat.capsule_originals.items():
         assert cat.metas[mid]==original, 'Capsule tile composition changed'

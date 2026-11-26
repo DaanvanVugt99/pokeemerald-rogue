@@ -6,40 +6,40 @@
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
-  "map_type": "MAP_TYPE_TOWN",
-  "allow_cycling": true,
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
   "allow_escaping": false,
   "allow_running": true,
   "show_map_name": false,
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 2,
-      "direction": "down"
+      "map": "MAP_ROGUE_TRIAL_CORRIDOR_NORTH",
+      "offset": 30,
+      "direction": "up"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 12,
-      "direction": "left"
-    },
-    {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_HORIZONTAL",
-      "offset": 12,
+      "map": "MAP_ROGUE_TRIAL_CORRIDOR_EAST",
+      "offset": 15,
       "direction": "right"
     },
     {
-      "map": "MAP_ROGUE_HALLWAY_FACADE_VERTICAL",
-      "offset": 30,
-      "direction": "up"
+      "map": "MAP_ROGUE_TRIAL_CORRIDOR_SOUTH",
+      "offset": 19,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_ROGUE_TRIAL_CORRIDOR_WEST",
+      "offset": 14,
+      "direction": "left"
     }
   ],
   "object_events": [
     {
       "graphics_id": "OBJ_EVENT_GFX_WORK_TABLE",
-      "x": 15,
-      "y": 12,
-      "elevation": 0,
+      "x": 14,
+      "y": 9,
+      "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
@@ -52,86 +52,110 @@
   "warp_events": [
     {
       "x": 33,
-      "y": 12,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
       "x": 34,
-      "y": 12,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 39,
-      "y": 15,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 43,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 39,
-      "y": 16,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 43,
+      "y": 19,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 5,
-      "y": 20,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 22,
+      "y": 35,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 6,
-      "y": 20,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 23,
+      "y": 35,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
-      "y": 15,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 2,
+      "y": 17,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 0,
-      "y": 16,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "x": 2,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     },
     {
-      "x": 19,
-      "y": 8,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 20,
-      "y": 8,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 19,
+      "x": 22,
       "y": 9,
-      "elevation": 0,
-      "dest_map": "MAP_ROGUE_AREA_TOWN_SQUARE",
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_INTERIOR_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 15,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 35,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 43,
+      "y": 20,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 35,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 19,
+      "elevation": 3,
+      "dest_map": "MAP_ROGUE_AREA_TRIAL_FRONTIER",
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
-  "bg_events": [
-
-  ]
+  "coord_events": [],
+  "bg_events": []
 }

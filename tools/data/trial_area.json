@@ -1,0 +1,115 @@
+{
+  "metatiles": {
+    "Void": 512,
+    "WallCap": 0,
+    "WallBase": 1,
+    "LeftWall": 2,
+    "RightWall": 3,
+    "FrontWall": 4
+  },
+  "entrances": [
+    {
+      "direction": "North",
+      "warps": [
+        0,
+        1,
+        11
+      ],
+      "closure": [
+        [
+          33,
+          0,
+          35,
+          0,
+          "Void"
+        ],
+        [
+          33,
+          1,
+          35,
+          1,
+          "WallCap"
+        ],
+        [
+          33,
+          2,
+          35,
+          2,
+          "WallBase"
+        ]
+      ]
+    },
+    {
+      "direction": "East",
+      "warps": [
+        2,
+        3,
+        12
+      ],
+      "closure": [
+        [
+          42,
+          18,
+          45,
+          20,
+          "Void"
+        ],
+        [
+          41,
+          18,
+          41,
+          20,
+          "RightWall"
+        ]
+      ]
+    },
+    {
+      "direction": "South",
+      "warps": [
+        4,
+        5,
+        13
+      ],
+      "closure": [
+        [
+          22,
+          36,
+          24,
+          37,
+          "Void"
+        ],
+        [
+          22,
+          35,
+          24,
+          35,
+          "FrontWall"
+        ]
+      ]
+    },
+    {
+      "direction": "West",
+      "warps": [
+        6,
+        7,
+        14
+      ],
+      "closure": [
+        [
+          0,
+          17,
+          5,
+          19,
+          "Void"
+        ],
+        [
+          6,
+          17,
+          6,
+          19,
+          "LeftWall"
+        ]
+      ]
+    }
+  ]
+}

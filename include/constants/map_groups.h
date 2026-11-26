@@ -66,6 +66,13 @@
 #define MAP_ROGUE_NURSERY_CORRIDOR_HORIZONTAL      (33 | (2 << 8))
 #define MAP_ROGUE_NURSERY_CORRIDOR_NORTH           (34 | (2 << 8))
 #define MAP_ROGUE_NURSERY_CORRIDOR_SOUTH           (35 | (2 << 8))
+#define MAP_ROGUE_MARKET_CORRIDOR_HORIZONTAL       (36 | (2 << 8))
+#define MAP_ROGUE_MARKET_CORRIDOR_NORTH            (37 | (2 << 8))
+#define MAP_ROGUE_MARKET_CORRIDOR_SOUTH            (38 | (2 << 8))
+#define MAP_ROGUE_TRIAL_CORRIDOR_NORTH             (39 | (2 << 8))
+#define MAP_ROGUE_TRIAL_CORRIDOR_EAST              (40 | (2 << 8))
+#define MAP_ROGUE_TRIAL_CORRIDOR_SOUTH             (41 | (2 << 8))
+#define MAP_ROGUE_TRIAL_CORRIDOR_WEST              (42 | (2 << 8))
 
 // gMapGroup_RogueHubInteriors
 #define MAP_ROGUE_INTERIOR_HOME           (0 | (3 << 8))

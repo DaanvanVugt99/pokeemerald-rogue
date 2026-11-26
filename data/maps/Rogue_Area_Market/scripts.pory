@@ -1,8 +1,19 @@
 
 const FLAG_HIDE_BANK = FLAG_TEMP_1
 const FLAG_HIDE_TREATS = FLAG_TEMP_2
+const FLAG_HIDE_CHEFS = FLAG_TEMP_3
+const FLAG_HIDE_PIE = FLAG_TEMP_4
 
-mapscripts Rogue_Area_Market_MapScripts 
+const VAR_CRUST_ITEM = VAR_0x8008
+const VAR_FILLING_ITEM = VAR_0x8009
+const VAR_PIE_SIZE = VAR_0x800A
+const VAR_FILLING_AMOUNT = VAR_0x800B
+
+const NPC_OBJ_NORMAL_CHEF = 7
+const NPC_OBJ_SHINY_CHEF = 8
+const NPC_OBJ_PLACED_PIE = 9
+
+mapscripts Rogue_Area_Market_MapScripts
 {
     MAP_SCRIPT_ON_LOAD: Rogue_Area_Market_OnMapLoad
 }
@@ -30,6 +41,17 @@ script Rogue_Area_Market_OnMapLoad
         setflag(FLAG_HIDE_TREATS)
     }
 
+    hubupgradeunlocked(HUB_UPGRADE_MARKET_BAKERY)
+    if(var(VAR_RESULT) == YES)
+    {
+        clearflag(FLAG_HIDE_CHEFS)
+    }
+    else
+    {
+        setflag(FLAG_HIDE_CHEFS)
+    }
+
+    setflag(FLAG_HIDE_PIE)
 }
 
 
@@ -48,7 +70,42 @@ script Rogue_Area_Market_BankSign
     hubupgradeunlocked(HUB_UPGRADE_MARKET_BANK)
     if(var(VAR_RESULT) == YES)
     {
-        msgbox(format("The Bank"), MSGBOX_SIGN)
+        msgbox(format("Bank\pUpgrade the starting funds for your Adventures."), MSGBOX_SIGN)
+    }
+    else
+    {
+        msgbox(format("Bank\nClosed until the Bank upgrade."), MSGBOX_SIGN)
+    }
+}
+
+script Rogue_Market_CraftSign
+{
+    msgbox(format("{POKEBLOCK} Crafting\pTrade Berries for {POKEBLOCK}."), MSGBOX_SIGN)
+}
+
+script Rogue_Market_ShopSign
+{
+    hubupgradeunlocked(HUB_UPGRADE_MARKET_TREAT_SHOP)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("Treat Shop\nBuy treats with money."), MSGBOX_SIGN)
+    }
+    else
+    {
+        msgbox(format("Treat Shop\nClosed until the Treat Shop upgrade."), MSGBOX_SIGN)
+    }
+}
+
+script Rogue_Market_KitchenSign
+{
+    hubupgradeunlocked(HUB_UPGRADE_MARKET_BAKERY)
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("Market Kitchen\pBring {POKEBLOCK} for a Pie to share with your first Pokémon."), MSGBOX_SIGN)
+    }
+    else
+    {
+        msgbox(format("Market Kitchen\nClosed until the Bakery upgrade."), MSGBOX_SIGN)
     }
 }
 
@@ -240,7 +297,7 @@ script Rogue_Area_Market_TalkPokeblockHelper
             message(format("These are the Berries which produce {STR_VAR_1}."))
             waitmessage
             enddynamicmultichoice(19, 2, 5, TRUE)
-            
+
             setvar(VAR_RESULT, YES)
         }
         else
@@ -249,5 +306,340 @@ script Rogue_Area_Market_TalkPokeblockHelper
         }
     }
 
+    release
+}
+
+script Rogue_Market_TalkMainChef
+{
+    lock
+    faceplayer
+
+    setvar(VAR_0x8004, 0)
+    special(BufferMonNickname)
+    msgbox(format("Good day to you!\pWould you like me to bake a Pie for you to share with {STR_VAR_1}?"), MSGBOX_YESNO)
+
+    if(var(VAR_RESULT) == YES)
+    {
+        msgbox(format("I need one kind of {POKEBLOCK} for the crust and another for the filling."), MSGBOX_DEFAULT)
+
+        // Select ingredients
+        call(Rogue_Market_SelectCrustPokeblock)
+        if(var(VAR_RESULT) == YES)
+        {
+            call(Rogue_Market_SelectFillingPokeblock)
+        }
+
+        // Notify if we're making a "negative" Pie
+        if(var(VAR_RESULT) == YES)
+        {
+            special(Rogue_WillMonLikePie)
+
+            if(var(VAR_RESULT) == NO)
+            {
+                setvar(VAR_0x8004, 0)
+                special(BufferMonNickname)
+
+                msgbox(format("I don't think {STR_VAR_1} will like this Pie very much.\pAre you sure you'd like to continue?"), MSGBOX_YESNO)
+            }
+        }
+
+        // Now make the Pie
+        if(var(VAR_RESULT) == YES)
+        {
+            call(Rogue_Market_ServeNormalPie)
+        }
+    }
+
+    if(var(VAR_RESULT) == NO)
+    {
+        msgbox(format("Please let me know, if you change your mind."))
+    }
+
+    release
+}
+
+script Rogue_Market_TalkShinyChef
+{
+    lock
+
+    if(flag(FLAG_ROGUE_MET_SHINY_CHEF) == FALSE)
+    {
+        msgbox(format("Sigh…"))
+        faceplayer
+
+        msgbox(format("I'm trying to bake a Pie using Shiny {POKEBLOCK} as the filling, but it's very difficult…\pEach Pokémon seems to enjoy it prepared in a different way.\pOh, I know!\pI bet I could do it, if I had some Pokédex data on the Pokémon!\pIf you catch a Pokémon in its Shiny form, I'm certain I could bake a Shiny Pie for it!"))
+        setflag(FLAG_ROGUE_MET_SHINY_CHEF)
+    }
+    else
+    {
+        faceplayer
+
+        setvar(VAR_0x8004, 0)
+        special(BufferMonNickname)
+        msgbox(format("Would you like me to bake a Shiny Pie for you to share with {STR_VAR_1}?"), MSGBOX_YESNO)
+
+        if(var(VAR_RESULT) == YES)
+        {
+            special(Rogue_CanMakeShinyPieFor)
+            if(var(VAR_RESULT) == NO)
+            {
+                msgbox(format("I'm afraid you haven't got any Shiny Pokédex data for that Pokémon."))
+                setvar(VAR_RESULT, 2)
+            }
+        }
+
+        // Select ingredients
+        if(var(VAR_RESULT) == YES)
+        {
+            call(Rogue_Market_SelectCrustPokeblock)
+        }
+
+        if(var(VAR_RESULT) == YES)
+        {
+            setvar(VAR_PIE_SIZE, PIE_SIZE_SMALL)
+            setvar(VAR_FILLING_AMOUNT, PIE_SMALL_FILLING_AMOUNT)
+            setvar(VAR_FILLING_ITEM, ITEM_POKEBLOCK_SHINY)
+
+            msgbox(format("Finally, I will need x1 Shiny {POKEBLOCK} for the filling.")) // based on PIE_SMALL_FILLING_AMOUNT
+
+            checkitem(VAR_FILLING_ITEM, VAR_FILLING_AMOUNT)
+            if(var(VAR_RESULT) == YES)
+            {
+                setvar(VAR_RESULT, YES)
+            }
+            else
+            {
+                msgbox(format("I'm afraid you don't have enough Shiny {POKEBLOCK} for the filling.")) // based on PIE_SMALL_FILLING_AMOUNT
+                setvar(VAR_RESULT, 2)
+            }
+        }
+
+        // Notify if we're making a "negative" Pie
+        if(var(VAR_RESULT) == YES)
+        {
+            special(Rogue_WillMonLikePie)
+
+            if(var(VAR_RESULT) == NO)
+            {
+                setvar(VAR_0x8004, 0)
+                special(BufferMonNickname)
+
+                msgbox(format("I don't think {STR_VAR_1} will like this Pie very much.\pAre you sure you'd like to continue?"), MSGBOX_YESNO)
+            }
+        }
+
+        // Now make the Pie
+        if(var(VAR_RESULT) == YES)
+        {
+            call(Rogue_Market_ServeShinyPie)
+        }
+
+        if(var(VAR_RESULT) == NO)
+        {
+            msgbox(format("Please let me know, if you change your mind."))
+        }
+    }
+
+    release
+}
+
+script Rogue_Market_SelectCrustPokeblock
+{
+    // based on PIE_CRUST_AMOUNT
+    msgbox(format("Which {POKEBLOCK} should I use for the crust? It takes two."), MSGBOX_DEFAULT)
+    fadescreen(FADE_TO_BLACK)
+
+    special(Bag_ChoosePokeblock)
+    waitstate
+
+    if(var(VAR_ITEM_ID) == ITEM_NONE)
+    {
+        setvar(VAR_RESULT, NO)
+    }
+    else
+    {
+        special(Rogue_IsValidPieCrust)
+        if(var(VAR_RESULT) == YES)
+        {
+            checkitem(VAR_ITEM_ID, PIE_CRUST_AMOUNT)
+            if(var(VAR_RESULT) == YES)
+            {
+                copyvar(VAR_CRUST_ITEM, VAR_ITEM_ID)
+                setvar(VAR_RESULT, YES)
+            }
+            else
+            {
+                msgbox(format("I'm afraid you don't have enough {POKEBLOCK} for crust."))
+                setvar(VAR_RESULT, 2)
+            }
+        }
+        else
+        {
+            msgbox(format("I'm afraid that {POKEBLOCK} cannot be used for crust"))
+            setvar(VAR_RESULT, 2)
+        }
+    }
+}
+
+script Rogue_Market_SelectFillingPokeblock
+{
+    message(format("Secondly, what size Pie would you like?"))
+    waitmessage
+
+    multichoice(20, 6, MULTI_SELECT_PIE_FILLING, NO)
+
+    switch(var(VAR_RESULT))
+    {
+        case 0:
+            setvar(VAR_PIE_SIZE, PIE_SIZE_SMALL)
+            setvar(VAR_FILLING_AMOUNT, PIE_SMALL_FILLING_AMOUNT)
+
+        case 1:
+            setvar(VAR_PIE_SIZE, PIE_SIZE_MEDIUM)
+            setvar(VAR_FILLING_AMOUNT, PIE_MEDIUM_FILLING_AMOUNT)
+
+        case 2:
+            setvar(VAR_PIE_SIZE, PIE_SIZE_LARGE)
+            setvar(VAR_FILLING_AMOUNT, PIE_LARGE_FILLING_AMOUNT)
+
+        case MULTI_B_PRESSED:
+            setvar(VAR_RESULT, NO)
+            return
+    }
+
+    msgbox(format("Finally, what {POKEBLOCK} would you like the filling to be made from?"), MSGBOX_DEFAULT)
+    fadescreen(FADE_TO_BLACK)
+
+    special(Bag_ChoosePokeblock)
+    waitstate
+
+    if(var(VAR_ITEM_ID) == ITEM_NONE)
+    {
+        setvar(VAR_RESULT, NO)
+    }
+    else
+    {
+        special(Rogue_IsValidPieFilling)
+        if(var(VAR_RESULT) == YES)
+        {
+            checkitem(VAR_ITEM_ID, VAR_FILLING_AMOUNT)
+            if(var(VAR_RESULT) == YES)
+            {
+                copyvar(VAR_FILLING_ITEM, VAR_ITEM_ID)
+                setvar(VAR_RESULT, YES)
+            }
+            else
+            {
+                msgbox(format("I'm afraid you don't have enough {POKEBLOCK} for that filling."))
+                setvar(VAR_RESULT, 2)
+            }
+        }
+        else
+        {
+            msgbox(format("I'm afraid that {POKEBLOCK} cannot be used for filling"))
+            setvar(VAR_RESULT, 2)
+        }
+    }
+}
+
+script Rogue_Market_ServeNormalPie
+{
+    call(Rogue_Market_PreparePie)
+    applymovement(OBJ_EVENT_ID_PLAYER, Movement_MarketNormalToTable)
+    waitmovement(0)
+    setobjectxy(NPC_OBJ_NORMAL_CHEF, 31, 24)
+    call(Rogue_Market_EatPie)
+    setobjectxy(NPC_OBJ_NORMAL_CHEF, 25, 19)
+    applymovement(OBJ_EVENT_ID_PLAYER, Movement_MarketNormalToCounter)
+    waitmovement(0)
+    fadescreen(FADE_FROM_BLACK)
+}
+
+script Rogue_Market_ServeShinyPie
+{
+    call(Rogue_Market_PreparePie)
+    applymovement(OBJ_EVENT_ID_PLAYER, Movement_MarketShinyToTable)
+    waitmovement(0)
+    setobjectxy(NPC_OBJ_SHINY_CHEF, 31, 24)
+    call(Rogue_Market_EatPie)
+    setobjectxy(NPC_OBJ_SHINY_CHEF, 31, 19)
+    applymovement(OBJ_EVENT_ID_PLAYER, Movement_MarketShinyToCounter)
+    waitmovement(0)
+    if (!flag(FLAG_SCRIPT_HIDE_FOLLOWER))
+    {
+        call(Rogue_ScriptHideFollower)
+        call(Rogue_ScriptShowFollower)
+    }
+    else
+    {
+        special(Rogue_SetupFollowParterMonObjectEvent)
+    }
+    fadescreen(FADE_FROM_BLACK)
+}
+
+script Rogue_Market_PreparePie
+{
+    removeitem(VAR_CRUST_ITEM, PIE_CRUST_AMOUNT)
+    removeitem(VAR_FILLING_ITEM, VAR_FILLING_AMOUNT)
+    msgbox(format("I'll get started on it right away!\pPlease take a seat."), MSGBOX_DEFAULT)
+    fadescreen(FADE_TO_BLACK)
+}
+
+script Rogue_Market_EatPie
+{
+    clearflag(FLAG_HIDE_PIE)
+    addobject(NPC_OBJ_PLACED_PIE)
+    fadescreen(FADE_FROM_BLACK)
+    msgbox(format("Bon Appétit!"), MSGBOX_DEFAULT)
+
+    fadescreen(FADE_TO_BLACK)
+    playse(SE_RG_BALL_CLICK)
+    delay(15)
+    playse(SE_RG_BALL_CLICK)
+    delay(15)
+    playse(SE_RG_BALL_CLICK)
+    delay(15)
+    playfanfare(MUS_LEVEL_UP)
+    waitfanfare
+
+    special(Rogue_FeedMonPie)
+    setflag(FLAG_HIDE_PIE)
+    removeobject(NPC_OBJ_PLACED_PIE)
+    setvar(VAR_RESULT, YES)
+}
+
+movement Movement_MarketNormalToTable
+{
+    walk_faster_down * 3
+    walk_faster_right * 3
+    walk_faster_down
+    face_right
+}
+
+movement Movement_MarketShinyToTable
+{
+    walk_faster_down * 2
+    walk_faster_left * 3
+    walk_faster_down * 2
+    face_right
+}
+
+movement Movement_MarketNormalToCounter
+{
+    walk_faster_up
+    walk_faster_left * 3
+    walk_faster_up * 3
+}
+
+movement Movement_MarketShinyToCounter
+{
+    walk_faster_up * 2
+    walk_faster_right * 3
+    walk_faster_up * 2
+}
+script Rogue_Market_TalkPie
+{
+    lock
+    msgbox(format("It's a delicious smelling Pie!"))
     release
 }

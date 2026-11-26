@@ -80,6 +80,10 @@ or validation workflows change.
   `python3 scripts/generate_supply_depot.py --check` for all 2048 connection/upgrade
   states and previews; normal generation writes only aliases/private facades.
   Never rerun the guarded `--init-layout` converter. See `docs/design/supply_depot.md`.
+- Market layout and border are authored map assets. Run
+  `python3 scripts/generate_market.py --check` for all 192 connection and
+  service states. Normal generation updates private facades and previews.
+  See `docs/design/market.md`.
 - Pokemon Nursery layout/border are Porymap-authored. Use
   `python3 scripts/generate_pokemon_nursery.py --check` for 4,096 connection,
   upgrade and occupancy states; normal generation writes only private facades,
@@ -90,6 +94,14 @@ or validation workflows change.
   Normal generation preserves the authored Park map/border; allocation and
   original-footprint guards live in `tools/data/park_tunnels.json`. See
   `docs/design/park_tunnels.md`.
+- Trial Area uses Porymap-authored layout, border and private tilesets.
+  Run `python3 scripts/generate_trial_area.py --check` to verify routes and
+  facade seams in all 16 connection states. Normal generation updates the
+  facades and runtime closure table. See `docs/design/trial_area.md`.
+- Hub medallions use authored 3×3 floor stamps. Shared art is generated with
+  the hub catalogue. Run `python3 scripts/generate_hub_medallions.py --check`
+  for the placements and private Home and Trial art. Normal generation
+  preserves map layouts and borders.
 - Berry Lab uses `python3 scripts/generate_berry_lab.py --check` to verify
   all 256 connection/bed/brewing states and preview the authored room. Normal
   generation only updates private facades and tile aliases; never rerun the

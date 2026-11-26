@@ -242,3 +242,12 @@ const u16 gMetatileAttributes_HubFurnishings[] = INCBIN_U16("data/tilesets/secon
 
 const u16 gMetatiles_ParkTunnels[] = INCBIN_U16("data/tilesets/secondary/park_tunnels/metatiles.bin");
 const u16 gMetatileAttributes_ParkTunnels[] = INCBIN_U16("data/tilesets/secondary/park_tunnels/metatile_attributes.bin");
+
+const u16 gMetatiles_TrialArchitecture[] = INCBIN_U16("data/tilesets/primary/trial_architecture/metatiles.bin");
+const u16 gMetatileAttributes_TrialArchitecture[] = INCBIN_U16("data/tilesets/primary/trial_architecture/metatile_attributes.bin");
+
+const u16 gMetatiles_TrialEquipment[] = INCBIN_U16("data/tilesets/secondary/trial_equipment/metatiles.bin");
+const u16 gMetatileAttributes_TrialEquipment[] = INCBIN_U16("data/tilesets/secondary/trial_equipment/metatile_attributes.bin");
+
+const u16 gMetatiles_HomeArchitecture[] = INCBIN_U16("data/tilesets/primary/home_architecture/metatiles.bin");
+const u16 gMetatileAttributes_HomeArchitecture[] = INCBIN_U16("data/tilesets/primary/home_architecture/metatile_attributes.bin");

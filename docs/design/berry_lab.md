@@ -24,10 +24,11 @@ The lower beds sit fifteen tiles south of the upper beds. This matches the
 camera's vertical spawn range, so every camera window contains one five-berry
 bank per side at most (ten berries total), leaving object-event slots for the
 player and service objects.
-The retained table remains the room's single central furnishing. The open floor
+A 3×3 brass berry medallion is centered on tile (14,14). It uses the Market
+bowl’s circular frame over the Berry Lab’s original floor tiles. The retained table sits to the west. The open floor
 remains clear around the growing banks, leaving the three-wide crossing and all
 service or berry interaction positions unchanged.
-The merchant (local ID 22) at (14,11), pot (23) at (15,11), and workbench (1)
+The merchant (local ID 22) at (9,13), pot (23) at (10,13), and workbench (1)
 at (20,24) remain in the authored service positions. Menus, recipes, berry
 growth, prices, yields, and upgrades are unchanged.
 

@@ -8610,6 +8610,34 @@ void Rogue_ModifyObjectEvents(struct MapHeader *mapHeader, bool8 loadingFromSave
         SetContinueGameWarpStatus();
     }
 
+    if (loadingFromSave && !Rogue_IsRunActive())
+    {
+        if (mapHeader->mapLayoutId == LAYOUT_ROGUE_INTERIOR_RESTAURANT)
+        {
+            SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_MARKET), MAP_NUM(ROGUE_AREA_MARKET),
+                WARP_ID_NONE, 23, 21);
+            SetContinueGameWarpStatus();
+        }
+        else if (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_MARKET
+            && HasStaleStaticHubSnapshot(mapHeader, objectEvents, *objectEventCount))
+        {
+            const struct WarpEvent *arrival = &mapHeader->events->warps[9];
+            SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_MARKET), MAP_NUM(ROGUE_AREA_MARKET),
+                WARP_ID_NONE, arrival->x, arrival->y);
+            SetContinueGameWarpStatus();
+        }
+    }
+
+    if (loadingFromSave && !Rogue_IsRunActive()
+        && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_TRIAL_FRONTIER
+        && HasStaleStaticHubSnapshot(mapHeader, objectEvents, *objectEventCount))
+    {
+        const struct WarpEvent *arrival = &mapHeader->events->warps[10];
+        SetContinueGameWarp(MAP_GROUP(ROGUE_AREA_TRIAL_FRONTIER), MAP_NUM(ROGUE_AREA_TRIAL_FRONTIER),
+            WARP_ID_NONE, arrival->x, arrival->y);
+        SetContinueGameWarpStatus();
+    }
+
     if (loadingFromSave && !Rogue_IsRunActive()
         && mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_DAY_CARE
         && HasStaleStaticHubSnapshot(mapHeader, objectEvents, *objectEventCount))

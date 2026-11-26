@@ -968,3 +968,33 @@ const struct Tileset gTileset_ParkTunnels =
     .metatileAttributes = gMetatileAttributes_ParkTunnels,
     .callback = InitTilesetAnim_Mauville,
 };
+
+const struct Tileset gTileset_TrialArchitecture =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_TrialArchitecture,
+    .palettes = gTilesetPalettes_Trial,
+    .metatiles = gMetatiles_TrialArchitecture,
+    .metatileAttributes = gMetatileAttributes_TrialArchitecture,
+};
+
+const struct Tileset gTileset_TrialEquipment =
+{
+    .isCompressed = TRUE,
+    .isSecondary = TRUE,
+    .tiles = gTilesetTiles_TrialEquipment,
+    .palettes = gTilesetPalettes_Trial,
+    .metatiles = gMetatiles_TrialEquipment,
+    .metatileAttributes = gMetatileAttributes_TrialEquipment,
+};
+
+const struct Tileset gTileset_HomeArchitecture =
+{
+    .isCompressed = TRUE,
+    .isSecondary = FALSE,
+    .tiles = gTilesetTiles_HomeArchitecture,
+    .palettes = gTilesetPalettes_HomeArchitecture,
+    .metatiles = gMetatiles_HomeArchitecture,
+    .metatileAttributes = gMetatileAttributes_HomeArchitecture,
+};

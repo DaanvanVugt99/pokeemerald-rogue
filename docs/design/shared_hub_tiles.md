@@ -176,3 +176,25 @@ fences and complete tea flower boxes, with floor/shadow backgrounds.
 `nursery_decorations.py` reads immutable GeneralHub + Mauville source art and
 uses static padding 679-691, after mart merchandise and before Safari animation
 slots. Existing compositions, graphics, palettes and animation slots stay fixed.
+
+
+## Floor medallions
+
+The indoor hub uses the same 48 x 48 brass frame over each room's normal
+floor. The new shared stamps use primary metatiles starting at 0x160. The
+Depot's northwest piece preserves the authored shadow. The main and tutorial
+Safari maps align the paw with the south corridor. The Adventure Gate
+keeps its open floor. The Trial trophy is centered on the seam between the
+two stair lanes, using four backing columns for the same 48-pixel circle. Home Base uses its main interior, where
+decorations can cover the inlay like any other floor tile. Park stays outdoors.
+
+The shared packer reuses pixel-identical static 8 x 8 graphics, accounting for
+horizontal and vertical flips. Existing metatile IDs, palette indices, and
+animation graphics are retained. Home Architecture uses a spare palette bank
+and works with all six original interior styles. The Trial inlay occupies a
+reserved section of Trial Equipment.
+
+After editing the medallions, run `python3 scripts/generate_hub_tiles.py` and
+`python3 scripts/generate_hub_medallions.py`. Add `--check` to verify assets.
+The second command previews the authored positions at GBA camera size in
+`build/hub_medallions/installed.png`. Both commands preserve the authored maps.

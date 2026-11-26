@@ -1010,6 +1010,15 @@ u8 RogueHub_GetHubVariantNumber()
     return gSaveBlock2Ptr->playerTrainerId[0];
 }
 
+struct TrialAreaClosure
+{
+    u8 direction;
+    u8 xStart, yStart, xEnd, yEnd;
+    u16 metatile;
+};
+
+#include "data/trial_area_closures.h"
+
 static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpId)
 {
     u8 area = GetAreaForLayout(mapHeader->mapLayoutId);
@@ -1025,6 +1034,12 @@ static u8 GetConnectionWarpDirection(const struct MapHeader *mapHeader, u8 warpI
 
     if ((area == HUB_AREA_BERRY_FIELD || area == HUB_AREA_MARTS || area == HUB_AREA_DAY_CARE) && warpId >= 9 && warpId <= 12)
         warpId = (warpId - 9) * 2; // Appended third lanes, N/E/S/W.
+
+    if (area == HUB_AREA_MARKET && warpId >= 10 && warpId <= 13)
+        warpId = (warpId - 10) * 2;
+
+    if (area == HUB_AREA_TRIAL_FRONTIER && warpId >= 11 && warpId <= 14)
+        warpId = (warpId - 11) * 2; // Third N/E/S/W lanes.
 
     if (area == HUB_AREA_LABS)
     {
@@ -1075,6 +1090,8 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
     case LAYOUT_ROGUE_AREA_TOWN_SQUARE:
     case LAYOUT_ROGUE_AREA_LABS:
     case LAYOUT_ROGUE_AREA_FARMING_FIELD:
+    case LAYOUT_ROGUE_AREA_TRIAL_FRONTIER:
+    case LAYOUT_ROGUE_AREA_MARKET:
     case LAYOUT_ROGUE_AREA_MARTS:
     case LAYOUT_ROGUE_AREA_DAY_CARE:
     case LAYOUT_ROGUE_AREA_SAFARI_ZONE:
@@ -1109,6 +1126,23 @@ bool8 RogueHub_RecoverHallwayPosition(const struct MapHeader *mapHeader, s16 *x,
     u8 i;
     if (mapHeader->events == NULL)
         return FALSE;
+    if (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_TRIAL_FRONTIER)
+    {
+        for (i = 0; i < ARRAY_COUNT(sTrialAreaClosures); ++i)
+        {
+            const struct TrialAreaClosure *closure = &sTrialAreaClosures[i];
+            if (*x >= closure->xStart && *x <= closure->xEnd
+                && *y >= closure->yStart && *y <= closure->yEnd
+                && RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, closure->direction) == HUB_AREA_NONE)
+            {
+                const struct WarpEvent *arrival = &mapHeader->events->warps[10];
+                *x = arrival->x;
+                *y = arrival->y;
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
     // Old saves may be standing beyond a threshold that has moved inward.
     for (i = 0; i < mapHeader->events->warpCount; ++i)
     {
@@ -1241,10 +1275,12 @@ void RogueHub_ApplyMapMetatiles()
         break;
 
     case LAYOUT_ROGUE_AREA_MARKET:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateMarketAreaMetatiles();
         break;
 
     case LAYOUT_ROGUE_AREA_TRIAL_FRONTIER:
+        applyCommonFixup = FALSE;
         RogueHub_UpdateTrialFrontierAreaMetatiles();
         break;
 
@@ -1855,138 +1891,51 @@ static void RogueHub_UpdateTownSquareAreaMetatiles()
 
 static void RogueHub_UpdateMarketAreaMetatiles()
 {
-    // Remove connections
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
     {
-        MetatileFill_TreesOverlapping(16, 0, 20, 0, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(16, 1, 19, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(16, 2, 19, 11);
+        MetatileFill_Tile(17, 0, 19, 2, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 3, 19, 3, METATILE_LabJunction_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 4, 19, 4, METATILE_LabJunction_WallBase | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 5, 19, 5, METATILE_LabJunction_FloorShadow);
+    }
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+    {
+        MetatileFill_Tile(34, 13, 36, 16, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(33, 14, 33, 16, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
+    }
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
+    {
+        MetatileFill_Tile(17, 27, 19, 27, METATILE_LabJunction_Wall | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(17, 28, 19, 30, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+    }
+    if (RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
+    {
+        MetatileFill_Tile(0, 13, 2, 16, METATILE_LabJunction_Void | MAPGRID_COLLISION_MASK);
+        MetatileFill_Tile(3, 14, 3, 16, METATILE_LabJunction_Pillar | MAPGRID_COLLISION_MASK);
     }
 
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
+    if (!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_BANK))
+        MetatileSet_Tile(26, 8, METATILE_HubArchitecture_Market_Counter_0_0 | MAPGRID_COLLISION_MASK);
+    if (!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_TREAT_SHOP))
+        MetatileSet_Tile(10, 21, METATILE_HubArchitecture_Market_Counter_0_0 | MAPGRID_COLLISION_MASK);
+    if (!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_BAKERY))
     {
-        MetatileFill_TreesOverlapping(32, 9, 33, 15, TREE_TYPE_DENSE);
-
-        MetatileFill_CommonPathRemoval(28, 12, 31, 14);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
-    {
-        MetatileFill_TreesOverlapping(15, 22, 20, 23, TREE_TYPE_DENSE);
-        MetatileFill_TreeCaps(16, 21, 19);
-
-        MetatileFill_CommonPathRemoval(16, 15, 19, 20);
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
-    {
-        MetatileFill_CommonWarpExitHorizontal(0, 11);
-
-        MetatileFill_CommonPathRemoval(2, 12, 9, 14);
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_BAKERY))
-    {
-        MetatileFill_TreesOverlapping(0, 1, 7, 8, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(0, 9, 7, TREE_TYPE_DENSE);
-
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(0, 9, 7, 15, TREE_TYPE_DENSE);
-        }
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_TREAT_SHOP))
-    {
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(10, 16, 22, 21, TREE_TYPE_DENSE);
-            MetatileFill_TreeCaps(10, 15, 21);
-        }
-        else
-        {
-            MetatileFill_TreesOverlapping(10, 16, 13, 21, TREE_TYPE_DENSE);
-            MetatileFill_TreeCaps(10, 15, 13);
-
-            MetatileFill_Tile(14, 16, 14, 19, METATILE_GeneralHub_Grass);
-        }
-    }
-
-    if(!RogueHub_HasUpgrade(HUB_UPGRADE_MARKET_BANK))
-    {
-        MetatileFill_TreesOverlapping(22, 1, 38, 8, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(23, 9, 31, TREE_TYPE_DENSE);
-        MetatileFill_TreeStumps(22, 9, 22, TREE_TYPE_SPARSE);
-
-        MetatileFill_Tile(21, 2, 21, 10, METATILE_GeneralHub_Grass);
-        MetatileFill_Tile(22, 10, 31, 10, METATILE_GeneralHub_Grass);
-        MetatileFill_Tile(23, 11, 28, 11, METATILE_GeneralHub_Grass);
-
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_MARKET, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(22, 9, 31, 16, TREE_TYPE_DENSE);
-
-            MetatileFill_CommonPathRemoval(20, 12, 21, 14);
-        }
+        MetatileSet_Tile(25, 19, METATILE_HubArchitecture_Market_KitchenCounter_0_0 | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(26, 19, METATILE_HubArchitecture_Market_PrepCounterMiddle | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(30, 19, METATILE_HubArchitecture_Market_PrepCounterMiddle | MAPGRID_COLLISION_MASK);
+        MetatileSet_Tile(31, 19, METATILE_HubArchitecture_Market_KitchenCounter_1_0 | MAPGRID_COLLISION_MASK);
     }
 }
 
 static void RogueHub_UpdateTrialFrontierAreaMetatiles()
 {
-    // Remove connectionss
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sTrialAreaClosures); ++i)
     {
-        MetatileFill_TreesOverlapping(30, 7, 37, 19, TREE_TYPE_DENSE);
-
-        MetatileFill_Tile(28, 12, 28, 17, 0x075 | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(29, 12, 29, 17, 0x072 | MAPGRID_COLLISION_MASK);
-
-        MetatileFill_CommonPathRemoval(21, 13, 27, 15);
-    }
-    else
-    {
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_NORTH) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(32, 0, 35, 12, TREE_TYPE_DENSE);
-            MetatileFill_TreeStumps(32, 13, 35, TREE_TYPE_DENSE);
-
-            MetatileFill_CommonPathRemoval(32, 14, 35, 14);
-        }
-
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_EAST) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(38, 13, 39, 18, TREE_TYPE_DENSE);
-
-            MetatileFill_CommonPathRemoval(36, 15, 37, 17);
-        }
-    }
-
-    if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE && RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
-    {
-        MetatileFill_TreesOverlapping(2, 13, 9, 25, TREE_TYPE_DENSE);
-
-        MetatileFill_Tile(10, 13, 10, 17, 0x070 | MAPGRID_COLLISION_MASK);
-        MetatileFill_Tile(11, 13, 11, 17, 0x073 | MAPGRID_COLLISION_MASK);
-
-        MetatileFill_CommonPathRemoval(12, 13, 18, 15);
-    }
-    else
-    {
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_SOUTH) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreeCaps(4, 19, 7);
-            MetatileFill_TreesOverlapping(4, 20, 7, 25, TREE_TYPE_DENSE);
-
-            MetatileFill_CommonPathRemoval(4, 18, 7, 18);
-        }
-
-        if(RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, HUB_AREA_CONN_WEST) == HUB_AREA_NONE)
-        {
-            MetatileFill_TreesOverlapping(0, 13, 1, 18, TREE_TYPE_DENSE);
-
-            MetatileFill_CommonPathRemoval(2, 15, 3, 17);
-        }
+        const struct TrialAreaClosure *closure = &sTrialAreaClosures[i];
+        if (RogueHub_GetAreaAtConnection(HUB_AREA_TRIAL_FRONTIER, closure->direction) == HUB_AREA_NONE)
+            MetatileFill_Tile(closure->xStart, closure->yStart, closure->xEnd, closure->yEnd,
+                closure->metatile | MAPGRID_COLLISION_MASK);
     }
 }
 

@@ -878,6 +878,10 @@ EventScript_VsSeekerChargingDone::
 	.include "data/maps/Rogue_Special_Gen9_Mon/scripts.inc"
 
 	.include "data/maps/Rogue_Area_TrialFrontier/scripts.inc"
+	.include "data/maps/Rogue_TrialCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_TrialCorridor_East/scripts.inc"
+	.include "data/maps/Rogue_TrialCorridor_South/scripts.inc"
+	.include "data/maps/Rogue_TrialCorridor_West/scripts.inc"
 
 	.include "data/maps/Rogue_Area_DayCare/scripts.inc"
 	.include "data/maps/Rogue_NurseryCorridor_Horizontal/scripts.inc"
@@ -938,6 +942,9 @@ EventScript_VsSeekerChargingDone::
 
 	.include "data/maps/Rogue_Route_Sinnoh_IronIsland/scripts.inc"
 
+	.include "data/maps/Rogue_MarketCorridor_Horizontal/scripts.inc"
+	.include "data/maps/Rogue_MarketCorridor_North/scripts.inc"
+	.include "data/maps/Rogue_MarketCorridor_South/scripts.inc"
 	.include "data/maps/Rogue_BerryLabCorridor_Horizontal/scripts.inc"
 	.include "data/maps/Rogue_BerryLabCorridor_North/scripts.inc"
 	.include "data/maps/Rogue_BerryLabCorridor_South/scripts.inc"
