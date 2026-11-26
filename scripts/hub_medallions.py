@@ -6,13 +6,19 @@ GOLD, BRASS, SHADE = 13, 12, 11
 
 
 def hall(image):
+    # Mirror the roof across the ring's center seam between pixels 23 and 24.
+    half = Image.new('P', (24, 48))
+    roof = ImageDraw.Draw(half)
+    roof.polygon(((11, 19), (23, 11), (23, 19)), fill=BRASS)
+    roof.line(((11, 19), (23, 11)), fill=GOLD, width=2)
+    roof.line((11, 19, 23, 19), fill=GOLD)
+    mirrored_symbol(image, half)
+
     d = ImageDraw.Draw(image)
-    d.polygon(((11, 20), (24, 12), (37, 20)), fill=BRASS)
-    d.line(((11, 20), (24, 12), (37, 20), (11, 20)), fill=GOLD, width=2)
-    d.rectangle((13, 22, 34, 34), fill=SHADE)
+    d.rectangle((13, 21, 34, 33), fill=SHADE)
     for x in (15, 22, 29):
-        d.rounded_rectangle((x, 24, x + 4, 33), radius=2, fill=5)
-    d.line((12, 35, 35, 35), fill=GOLD, width=2)
+        d.rounded_rectangle((x, 23, x + 3, 32), radius=2, fill=5)
+    d.line((12, 34, 35, 34), fill=GOLD, width=2)
 
 
 def labs(image):

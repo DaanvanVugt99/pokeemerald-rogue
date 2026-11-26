@@ -2,6 +2,7 @@
 #include "constants/layouts.h"
 #include "constants/metatile_behaviors.h"
 #include "constants/rogue_hub.h"
+#include "constants/rogue_quests.h"
 #include "overworld.h"
 #include "rogue_hub.h"
 #include "test/test.h"
@@ -17,6 +18,7 @@
 #include "malloc.h"
 #include "rogue_save.h"
 #include "rogue_controller.h"
+#include "rogue_quest.h"
 #include "constants/flags.h"
 #include "constants/berry.h"
 #include "constants/vars.h"
@@ -395,6 +397,7 @@ TEST("Hub hallways: dressing room uses the Main Hall door in both directions")
     const struct WarpEvent *entrance = &hall->events->warps[15];
     const struct WarpEvent *exit = &dressing->events->warps[0];
     s16 x, y;
+    bool8 oldComplete = RogueQuest_GetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE);
 
     EXPECT_EQ(entrance->mapGroup, MAP_GROUP(ROGUE_INTERIOR_DRESSING_ROOM));
     EXPECT_EQ(entrance->mapNum, MAP_NUM(ROGUE_INTERIOR_DRESSING_ROOM));
@@ -402,9 +405,13 @@ TEST("Hub hallways: dressing room uses the Main Hall door in both directions")
     EXPECT_EQ(exit->mapGroup, MAP_GROUP(ROGUE_AREA_TOWN_SQUARE));
     EXPECT_EQ(exit->mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
     EXPECT_EQ(exit->warpId, 15);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, FALSE);
     EXPECT(RogueHub_GetWarpArrivalPosition(hall, 15, &x, &y));
     EXPECT_EQ(x, entrance->x);
     EXPECT_EQ(y, entrance->y + 1);
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, TRUE);
+    EXPECT(!RogueHub_GetWarpArrivalPosition(hall, 15, &x, &y));
+    RogueQuest_SetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE, oldComplete);
     EXPECT(!RogueHub_GetWarpArrivalPosition(dressing, 0, &x, &y));
     EXPECT_EQ(dressing->events->objectEventCount, 2);
 }

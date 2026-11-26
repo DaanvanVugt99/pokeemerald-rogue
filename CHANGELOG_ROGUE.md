@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Restore the player’s walk-out step at open Main Hall and Lab Junction doorways.
+
+- Move the Main Hall floor medallion one tile south and center its emblem inside the ring.
+
 - Continue the Main Hall wall shadow beneath the four wall-side machines.
 
 - Open the Main Hall Dressing Room after the player returns from their first Adventure.

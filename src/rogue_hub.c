@@ -26,6 +26,11 @@
 #include "rogue_multiplayer.h"
 #include "rogue_quest.h"
 
+#define MAIN_HALL_DOOR_Y 4
+#define SCHOOL_DOOR_X 9
+#define DRESSING_ROOM_DOOR_X 23
+#define POKE_CONNECT_DOOR_X 27
+
 #define LAB_WING_DOOR_Y 13
 #define UNIQUE_LAB_DOOR_X 8
 #define DEBUG_LAB_DOOR_X 20
@@ -790,6 +795,39 @@ bool8 RogueHub_IsHallwayWarp(const struct MapHeader *mapHeader, u8 warpId)
     return GetConnectionWarpDirection(mapHeader, warpId) < HUB_AREA_CONN_COUNT;
 }
 
+static bool8 IsMainHallDoorOpen(s16 x)
+{
+    switch (x)
+    {
+    case SCHOOL_DOOR_X:
+        return RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL);
+    case DRESSING_ROOM_DOOR_X:
+        return RogueHub_IsDressingRoomOpen();
+    case POKE_CONNECT_DOOR_X:
+        return FALSE; // Multiplayer is unsupported.
+    default:
+        return TRUE;
+    }
+}
+
+static bool8 IsClosedHubRoomDoor(u16 layoutId, const struct WarpEvent *warp)
+{
+    if (layoutId == LAYOUT_ROGUE_AREA_TOWN_SQUARE && warp->y == MAIN_HALL_DOOR_Y)
+        return !IsMainHallDoorOpen(warp->x);
+
+    if (layoutId == LAYOUT_ROGUE_AREA_LABS && warp->y == LAB_WING_DOOR_Y)
+    {
+        if (warp->x == UNIQUE_LAB_DOOR_X)
+            return !RogueHub_HasUpgrade(HUB_UPGRADE_LAB_UNIQUE_MON_LAB);
+#ifndef ROGUE_DEBUG
+        if (warp->x == DEBUG_LAB_DOOR_X)
+            return TRUE;
+#endif
+    }
+
+    return FALSE;
+}
+
 bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warpId, s16 *x, s16 *y)
 {
     u8 i, dir;
@@ -800,21 +838,13 @@ bool8 RogueHub_GetWarpArrivalPosition(const struct MapHeader *mapHeader, u8 warp
         return FALSE;
 
     warp = &mapHeader->events->warps[warpId];
-    if (mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_TOWN_SQUARE
-        || mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_LABS)
+    // Open doors use their warp tile so the regular walk-out can play.
+    // A return from a closed wing must land clear of the shutter or wall.
+    if (IsClosedHubRoomDoor(mapHeader->mapLayoutId, warp))
     {
-        const struct MapLayout *layout = mapHeader->mapLayout;
-        u16 tile = layout->map[warp->y * layout->width + warp->x] & MAPGRID_METATILE_ID_MASK;
-        // The Unique and debug wings install their doors at runtime.
-        bool8 labWing = mapHeader->mapLayoutId == LAYOUT_ROGUE_AREA_LABS && warp->y == LAB_WING_DOOR_Y
-            && (warp->x == UNIQUE_LAB_DOOR_X || warp->x == DEBUG_LAB_DOOR_X);
-        if (tile == METATILE_MainHall_Door || labWing)
-        {
-            // Land on the floor to bypass the player and follower door sequence.
-            *x = warp->x;
-            *y = warp->y + 1;
-            return TRUE;
-        }
+        *x = warp->x;
+        *y = warp->y + 1;
+        return TRUE;
     }
 
     if (!RogueHub_IsHallwayWarp(mapHeader, warpId))
@@ -1380,7 +1410,7 @@ bool8 RogueHub_IsDressingRoomOpen(void)
     return RogueQuest_GetStateFlag(QUEST_ID_TO_ADVENTUREEMARK, QUEST_STATE_HAS_COMPLETE);
 }
 
-static void RogueHub_SetMainHallDoor(u16 x, bool8 open)
+static void RogueHub_SetMainHallDoor(u16 x)
 {
     static const u16 tiles[2][6] =
     {
@@ -1393,12 +1423,13 @@ static void RogueHub_SetMainHallDoor(u16 x, bool8 open)
             METATILE_MainHall_FrameLeft, METATILE_MainHall_Door, METATILE_MainHall_FrameRight,
         },
     };
+    bool8 open = IsMainHallDoorOpen(x);
     u8 i;
 
     for (i = 0; i < ARRAY_COUNT(tiles[0]); ++i)
     {
         u16 collision = open && i == 4 ? 0 : MAPGRID_COLLISION_MASK;
-        MetatileSet_Tile(x - 1 + i % 3, 3 + i / 3, tiles[open][i] | collision);
+        MetatileSet_Tile(x - 1 + i % 3, MAIN_HALL_DOOR_Y - 1 + i / 3, tiles[open][i] | collision);
     }
 }
 
@@ -1428,9 +1459,9 @@ static void RogueHub_UpdateTownSquareAreaMetatiles()
         MetatileFill_Tile(3, 14, 3, 19, METATILE_MainHall_Pillar | MAPGRID_COLLISION_MASK);
         MetatileFill_Tile(4, 17, 4, 18, METATILE_MainHall_FloorShadow);
     }
-    RogueHub_SetMainHallDoor(9, RogueHub_HasUpgrade(HUB_UPGRADE_TOWN_SQUARE_SCHOOL));
-    RogueHub_SetMainHallDoor(23, RogueHub_IsDressingRoomOpen());
-    RogueHub_SetMainHallDoor(27, FALSE); // Poké Connect is closed while multiplayer is unsupported.
+    RogueHub_SetMainHallDoor(SCHOOL_DOOR_X);
+    RogueHub_SetMainHallDoor(DRESSING_ROOM_DOOR_X);
+    RogueHub_SetMainHallDoor(POKE_CONNECT_DOOR_X);
 }
 
 static void RogueHub_UpdateMarketAreaMetatiles()

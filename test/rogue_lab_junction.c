@@ -90,11 +90,15 @@ TEST("Lab junction: all connections preserve doors, seal unused lanes and redire
                 {
                     const struct WarpEvent *warp = &header->events->warps[doors[i]];
                     s16 arrivalX = -1, arrivalY = -1;
-                    EXPECT(RogueHub_GetWarpArrivalPosition(header, doors[i], &arrivalX, &arrivalY));
-                    EXPECT_EQ(arrivalX, warp->x);
-                    EXPECT_EQ(arrivalY, warp->y + 1);
-                    EXPECT(!MapGridIsImpassableAt(arrivalX + MAP_OFFSET, arrivalY + MAP_OFFSET));
-                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(arrivalX + MAP_OFFSET, arrivalY + MAP_OFFSET), MB_NORMAL);
+                    bool8 closed = doors[i] == 14 && !upgrade;
+#ifndef ROGUE_DEBUG
+                    closed |= doors[i] == 12;
+#endif
+                    EXPECT_EQ(RogueHub_GetWarpArrivalPosition(header, doors[i], &arrivalX, &arrivalY), closed);
+                    EXPECT_EQ(arrivalX, closed ? warp->x : -1);
+                    EXPECT_EQ(arrivalY, closed ? warp->y + 1 : -1);
+                    EXPECT(!MapGridIsImpassableAt(warp->x + MAP_OFFSET, warp->y + 1 + MAP_OFFSET));
+                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(warp->x + MAP_OFFSET, warp->y + 1 + MAP_OFFSET), MB_NORMAL);
                 }
             }
             for (x = 0; x < ARRAY_COUNT(addedLaneMasks); ++x)

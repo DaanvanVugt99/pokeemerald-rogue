@@ -7763,7 +7763,7 @@ void Rogue_StartRunPortalTransition(void)
 
 void Rogue_OnWarpIntoMap(void)
 {
-    // Set the arrival tile for hub hallways and walk-through room exits.
+    // Center hub hallway arrivals and place returns clear of closed doors.
     if (gSaveBlock1Ptr->location.warpId >= 0)
         RogueHub_GetWarpArrivalPosition(&gMapHeader, gSaveBlock1Ptr->location.warpId,
             &gSaveBlock1Ptr->pos.x, &gSaveBlock1Ptr->pos.y);

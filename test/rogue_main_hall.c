@@ -83,11 +83,12 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                      || warp->mapNum == MAP_NUM(ROGUE_INTERIOR_POKE_CONNECT)
                      || warp->mapNum == MAP_NUM(ROGUE_INTERIOR_DRESSING_ROOM)))
                 {
-                    EXPECT(RogueHub_GetWarpArrivalPosition(header, i, &cx, &cy));
-                    EXPECT_EQ(cx, warp->x);
-                    EXPECT_EQ(cy, warp->y + 1);
-                    EXPECT(!MapGridIsImpassableAt(cx + MAP_OFFSET, cy + MAP_OFFSET));
-                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET), MB_NORMAL);
+                    bool8 closed = warp->mapNum != MAP_NUM(ROGUE_INTERIOR_SCHOOL) || !school;
+                    EXPECT_EQ(RogueHub_GetWarpArrivalPosition(header, i, &cx, &cy), closed);
+                    EXPECT_EQ(cx, closed ? warp->x : -1);
+                    EXPECT_EQ(cy, closed ? warp->y + 1 : -1);
+                    EXPECT(!MapGridIsImpassableAt(warp->x + MAP_OFFSET, warp->y + 1 + MAP_OFFSET));
+                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(warp->x + MAP_OFFSET, warp->y + 1 + MAP_OFFSET), MB_NORMAL);
                     continue;
                 }
                 if (i == 10
