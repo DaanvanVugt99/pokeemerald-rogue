@@ -57,7 +57,9 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                 const struct WarpEvent *warp = &header->events->warps[i];
                 s16 cx = -1, cy = -1;
                 u8 dir, behavior;
-                if (i >= 8 && i <= 10)
+                if (i == 10
+                    || warp->mapGroup != MAP_GROUP(ROGUE_AREA_TOWN_SQUARE)
+                    || warp->mapNum != MAP_NUM(ROGUE_AREA_TOWN_SQUARE))
                 {
                     EXPECT(!RogueHub_GetWarpArrivalPosition(header, i, &cx, &cy));
                     EXPECT_EQ(cx, -1); EXPECT_EQ(cy, -1);
@@ -81,6 +83,8 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
             EXPECT_EQ(!!MapGridIsImpassableAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), !school);
             EXPECT_EQ(MapGridGetMetatileBehaviorAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), school ? MB_ANIMATED_DOOR : MB_NORMAL);
             EXPECT_EQ(MapGridGetElevationAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), 5);
+            EXPECT(!MapGridIsImpassableAt(23 + MAP_OFFSET, 4 + MAP_OFFSET));
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_ANIMATED_DOOR);
             EXPECT_EQ(MapGridGetMetatileBehaviorAt(27 + MAP_OFFSET, 4 + MAP_OFFSET), MB_ANIMATED_DOOR);
             EXPECT_EQ(GetDoorSoundEffect(27 + MAP_OFFSET, 4 + MAP_OFFSET), SE_SLIDING_DOOR);
             for (x = 4; x <= 32; ++x)

@@ -220,7 +220,7 @@ static u8 GetRouteTestMetatileBehavior(const struct MapLayout *mapLayout, u16 bl
         return attributes[metatileId] & METATILE_ATTR_BEHAVIOR_MASK;
     }
 
-    attributes = Rogue_ModifyOverworldTileset(mapLayout->secondaryTileset)->metatileAttributes;
+    attributes = mapLayout->secondaryTileset->metatileAttributes;
     return attributes[metatileId - NUM_METATILES_IN_PRIMARY] & METATILE_ATTR_BEHAVIOR_MASK;
 }
 
@@ -550,7 +550,7 @@ TEST("Selected standalone route scene payloads remain immutable")
     u16 originalTeamNum = gRogueRun.teamEncounterNum;
     u16 originalTempCurse = gRogueRun.temporaryDarkDealCurseItem;
     u16 originalState = VarGet(VAR_ROGUE_ROUTE_EVENT_STATE);
-    u8 originalDexVariant = RoguePokedex_GetDexVariant();
+    u8 originalDexVariant = gRogueSaveBlock->activeAdventureConfig.pokedexVariant;
     u8 originalTrialId = gRogueRun.trialState.trialId;
     u8 originalRoomId;
     u8 originalSceneRoomId = gRogueRun.routeSceneRoomId;
@@ -568,7 +568,8 @@ TEST("Selected standalone route scene payloads remain immutable")
     gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
     gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
     gRogueRun.trialState.trialId = ROGUE_TRIAL_NONE;
-    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_NATIONAL_MAX);
+    gRogueSaveBlock->activeAdventureConfig.pokedexVariant = POKEDEX_VARIANT_NATIONAL_MAX;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
     Rogue_SetCurrentDifficulty(2);
     FlagClear(FLAG_ROGUE_STOLEN_TRADE_CASE_COMPLETED);
@@ -588,9 +589,8 @@ TEST("Selected standalone route scene payloads remain immutable")
                 break;
             }
         }
-        EXPECT(found);
         if(!found)
-            continue;
+            Test_ExitWithResult(TEST_RESULT_FAIL, "Could not select a payload for route scene recipe %d", sRecipes[i]);
         selectedPlan = gRogueAdvPath.rooms[0].routeScenePlan;
 
         gRogueRun.teamEncounterNum = TEAM_NUM_AQUA;
@@ -601,7 +601,19 @@ TEST("Selected standalone route scene payloads remain immutable")
 
         ExpectRouteScenePlansEqual(&gRogueAdvPath.rooms[0].routeScenePlan, &selectedPlan);
         EXPECT(RogueRouteScenes_GetPlacementRequest(0, &restored));
-        EXPECT_EQ(memcmp(&restored, &selected, sizeof(selected)), 0);
+        EXPECT_EQ(restored.rewardItem, selected.rewardItem);
+        EXPECT_EQ(restored.requestedItem, selected.requestedItem);
+        EXPECT_EQ(restored.trainerNum, selected.trainerNum);
+        EXPECT_EQ(restored.primaryGraphicsId, selected.primaryGraphicsId);
+        EXPECT_EQ(restored.secondaryGraphicsId, selected.secondaryGraphicsId);
+        EXPECT_EQ(restored.rewardAmount, selected.rewardAmount);
+        EXPECT_EQ(restored.recipeId, selected.recipeId);
+        EXPECT_EQ(restored.environment, selected.environment);
+        EXPECT_EQ(restored.lotId, selected.lotId);
+        EXPECT_EQ(restored.lotRole, selected.lotRole);
+        EXPECT_EQ(restored.sceneSlot, selected.sceneSlot);
+        EXPECT_EQ(restored.source, selected.source);
+        EXPECT_EQ(restored.ownerQuestId, selected.ownerQuestId);
 
         gRogueRun.teamEncounterNum = TEAM_NUM_KANTO_ROCKET;
         gRogueRun.temporaryDarkDealCurseItem = ITEM_NONE;
@@ -610,7 +622,8 @@ TEST("Selected standalone route scene payloads remain immutable")
     }
 
     Rogue_SetCurrentDifficulty(originalDifficulty);
-    RoguePokedex_SetDexVariant(originalDexVariant);
+    gRogueSaveBlock->activeAdventureConfig.pokedexVariant = originalDexVariant;
+    RogueMonQuery_InvalidateSpeciesActiveCache();
     gRogueRun.trialState.trialId = originalTrialId;
     gRogueRun.teamEncounterNum = originalTeamNum;
     gRogueRun.temporaryDarkDealCurseItem = originalTempCurse;

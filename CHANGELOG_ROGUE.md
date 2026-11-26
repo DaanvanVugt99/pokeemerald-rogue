@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Fix Rogue CI tests for the dressing-room warp, compact hub upgrade flags, and deterministic route scene payloads.
+
 - Remove Home Base, its decorating system, eight decoration quest rewards, and manual time and season controls. All affected quests retain other rewards, and time and seasons still advance automatically.
 - Add a staffed dressing room in the Main Hall for outfit changes and player renaming. Open it from the first visit.
 - Give Rotom Mastery the Rotom Catalog so players can still change Rotom’s forms.

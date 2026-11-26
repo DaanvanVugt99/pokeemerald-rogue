@@ -640,7 +640,6 @@ TEST("Unique Typings is the final Lab upgrade")
     memcpy(originalAreaBuiltFlags, gRogueSaveBlock->hubMap.areaBuiltFlags, sizeof(originalAreaBuiltFlags));
     gRogueSaveBlock->hubMap.areaBuiltFlags[HUB_AREA_LABS / 8] |= 1 << (HUB_AREA_LABS % 8);
 
-    EXPECT_EQ(ARRAY_COUNT(gRogueSaveBlock->hubMap.upgradeFlags), 7);
     EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].targetArea, HUB_AREA_LABS);
     EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].buildCost, 12);
     EXPECT_EQ(gRogueHubUpgrades[HUB_UPGRADE_LAB_UNIQUE_TYPINGS].requiredUpgrades[0], HUB_UPGRADE_LAB_UNIQUE_MON_RARITY_LEGENDARY);
