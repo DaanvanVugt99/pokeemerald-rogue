@@ -166,7 +166,7 @@ $checks | Format-Table Component, Required, Found, Path -AutoSize
 
 $missingRequired = @($checks | Where-Object { $_.Required -and -not $_.Found })
 if ($missingRequired.Count -gt 0) {
-    Write-Host 'Windows setup is incomplete. See docs/windows_setup.md for the missing prerequisites.' -ForegroundColor Red
+    Write-Host 'Windows setup is incomplete. See README.md for setup and the audit above for missing prerequisites.' -ForegroundColor Red
     exit 1
 }
 

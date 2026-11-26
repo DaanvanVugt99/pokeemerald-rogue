@@ -1,96 +1,45 @@
- # Pokemon Emerald Rogue: Divergence
+# Pokemon Emerald Rogue: Divergence
 
-Pokemon Emerald Rogue: Divergence is a standalone fork of Pokemon Emerald
-Rogue focused on expressive run variety and expanded battle identity through
-custom abilities, weather, terrain, items, maps, and quality-of-life systems.
+Divergence is a standalone fork of Pokemon Emerald Rogue with custom abilities,
+battle mechanics, and an underground hub.
 
-This repository is now treated as its own project. Upstream Emerald Rogue and
-pokeemerald-expansion changes may still be ported when useful, but they are
-inputs to this project rather than the project identity itself.
+## Build and play
 
-## Project Direction
-
-- Preserve a standalone Divergence identity while keeping upstream credits
-  explicit.
-- Unique abilities and battle feedback should make Pokemon feel meaningfully
-  distinct during a run.
-- Balance and content rollout should favor readable, replayable runs over
-  simply enabling every available upstream feature.
-- Upstream changes may be ported deliberately when they strengthen the project.
-
-## Current Development Line
-
-- Active branch: `main`
-- Baseline release: `DIV-v0.1.0`
-- Project changelog: [CHANGELOG_ROGUE.md](CHANGELOG_ROGUE.md)
-- Versioning policy: [VERSIONING.md](VERSIONING.md)
-- Documentation index: [docs/README.md](docs/README.md)
-- Agent/contributor guidance: [AGENTS.md](AGENTS.md)
-
-Existing `EX-v*` and `vanilla-v*` tags and inherited branches are retained for
-historical provenance. New project releases use the `DIV-vX.Y.Z` tag line.
-
-## Build and Test
-
-Expected tools:
-
-- `devkitARM` with `arm-none-eabi-*` in `PATH`
-- `mgba` for interactive ROM runs
-- `mgba-rom-test` for headless checks
-
-Day-to-day focused validation:
+On macOS, Linux, or WSL, install GNU Make, Python 3, a host C/C++ toolchain,
+libpng, and an ARM toolchain with `arm-none-eabi-gcc` and newlib. Make sure GNU Make is
+available as `make` when using the launchers. Install `mgba` to play locally.
 
 ```sh
-./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
-./scripts/launch_build_test.sh --ui
+./init_deps.sh
+./scripts/launch_build_debug.sh
+mgba pokeemerald.gba
 ```
 
-The full split suite is reserved for CI and release validation because it can
-take more than 30 minutes on a local machine:
+For a release build, use `./scripts/launch_build_release.sh`. Build launchers
+default to at most four jobs. Set `BUILD_JOBS` to override that limit.
 
-```sh
-./scripts/launch_build_test.sh --check-all-suites
-```
-
-On Windows, use the devkitPro/MSYS2 wrappers instead:
+On Windows, install devkitPro with **GBA Development** selected, then run:
 
 ```powershell
 .\scripts\check_windows_setup.ps1 -InstallPoryscript
-.\scripts\launch_build_test.bat --check --suite ability --filter "Intimidate"
+.\scripts\launch_build_debug.bat
+.\scripts\launch_emu_debug.bat
 ```
 
-For the faster WSL1 path with this checkout on `C:`, invoke the Linux launcher
-directly from PowerShell:
+With WSL, use the Linux commands inside WSL. Keep the checkout in the Linux
+filesystem for best WSL2 build performance.
 
-```powershell
-wsl ./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
+## Test
+
+Headless tests use `mgba-rom-test` on `PATH` or the repository's bundled
+Windows runner. Use the matching `.bat` launcher on native Windows.
+
+```sh
+./scripts/launch_build_test.sh --check --suite ability --filter "Intimidate"
+./scripts/launch_build_test.sh --check-all-suites
 ```
 
-See [docs/windows_setup.md](docs/windows_setup.md) for the one-time setup and
-the WSL1, MSYS2, mGBA, and Python configuration.
+Run a focused check during development. Use the full split suites for CI and
+release validation.
 
-Use the split-suite validation path for CI and release checks. The legacy
-monolithic test ROM build can run into the 32 MiB linker layout limit and should
-not be treated as the normal full-validation target.
-
-## Release Notes
-
-Record project-specific changes in `CHANGELOG_ROGUE.md`. Keep inherited
-pokeemerald-expansion changelog history in `CHANGELOG.md` and `docs/changelogs/`.
-
-Release tags should use:
-
-- `DIV-vX.Y.Z` for Divergence releases
-
-Existing `EX-v*` and `vanilla-v*` tags are inherited history and should be kept
-for provenance.
-
-## Upstream Credits
-
-This project builds on:
-
-- pret's `pokeemerald` decompilation project
-- RHH's `pokeemerald-expansion`
-- Pokabbie's `pokeemerald-rogue`
-
-Keep upstream credits intact when distributing builds or public release notes.
+[Release notes](CHANGELOG_ROGUE.md) · [Third-party notices](NOTICE.md)

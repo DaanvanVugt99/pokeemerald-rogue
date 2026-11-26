@@ -27,8 +27,8 @@ from typing import Iterable
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
 BASELINE_PATH = REPO_ROOT / "tools" / "data" / "canonical_species_data.csv"
-MARKDOWN_PATH = REPO_ROOT / "docs" / "generated" / "species_changes.md"
-CSV_PATH = REPO_ROOT / "docs" / "generated" / "species_changes.csv"
+MARKDOWN_PATH = REPO_ROOT / "tools" / "data" / "generated" / "species_changes.md"
+CSV_PATH = REPO_ROOT / "tools" / "data" / "generated" / "species_changes.csv"
 SPECIES_BASELINES_PATH = REPO_ROOT / "src" / "data" / "rogue_species_baselines.h"
 DEFAULT_BASELINE_REF = "91a4feca60251da39ac320bac91d7c59a8a7dd9a"
 

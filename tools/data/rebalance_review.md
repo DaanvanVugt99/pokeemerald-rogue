@@ -9,10 +9,7 @@ Upstream comparison commit: `c0ea02119f`
 
 ## Implementation progress — 2026-09-11
 
-The resumable implementation log is `docs/rebalance_implementation.md`; exact
-normalized targets and verification coverage are in
-`tools/data/rebalance_manifest.json`. Later implementation status in these
-records supersedes historical "pending" wording in the approval notes below.
+Exact targets and verification coverage are in `rebalance_manifest.json`.
 **Implementation complete.** All **650/650 decisions** are reconciled against
 **1,052 species/forms**, with all **54 shared invariants** passing. There are
 no exact-target mismatches, uncovered runtime changes, or new evolution

@@ -1,10 +1,11 @@
 # Pokemon Emerald Rogue: Divergence Changelog
 
 This file tracks project-specific work on this fork. Keep upstream
-`pokeemerald-expansion` changelog entries in `CHANGELOG.md` and
-`docs/changelogs/`.
+`pokeemerald-expansion` history in `CHANGELOG.md`.
 
 Format follows Keep a Changelog loosely:
+
+- Streamline setup and contributor guidance, retire obsolete documentation, and preserve validation inputs and third-party notices.
 
 - Reflow Berry Lab into a compact 29 x 28 layout: upper and lower berry banks are fifteen tiles apart, preserving all four upgrade banks while keeping each camera window within the ten-berry sprite limit.
 

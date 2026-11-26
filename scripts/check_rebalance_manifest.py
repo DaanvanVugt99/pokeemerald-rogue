@@ -24,7 +24,7 @@ from generate_species_change_report import (
 )
 
 MANIFEST = REPO_ROOT / "tools/data/rebalance_manifest.json"
-LEDGER = REPO_ROOT / "docs/rebalance_review.md"
+LEDGER = REPO_ROOT / "tools/data/rebalance_review.md"
 PROFILE = "src/data/rogue_pokemon_profiles.h"
 
 

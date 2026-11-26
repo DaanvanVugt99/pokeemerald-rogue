@@ -2,7 +2,6 @@
 """Generate private Main Hall tiles; read, never overwrite, Porymap layouts.
 
 --init-layout is only for the first conversion of the outdoor Town Square.
-See docs/design/main_hall.md for donor assemblies and runtime contracts.
 """
 import argparse
 import io
