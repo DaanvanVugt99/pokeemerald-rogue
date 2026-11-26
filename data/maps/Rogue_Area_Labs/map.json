@@ -2,7 +2,7 @@
   "id": "MAP_ROGUE_AREA_LABS",
   "name": "Rogue_Area_Labs",
   "layout": "LAYOUT_ROGUE_AREA_LABS",
-  "music": "MUS_LITTLEROOT",
+  "music": "MUS_DP_ROUTE228_DAY",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Use Route 228 (Day) throughout the Main Hall, Lab Junction, Adventure Gate, and Safari Area.
+
+- Give the Trial Area Fight Area (Day), the Market and Supply Depot Slateport City, and the Park, Berry Lab, and Pokémon Nursery Amity Square.
+
 - Move New Game and Options closer to the title on the menu shown before the first save.
 
 - Move directly to Continue when pressing Up from either bottom button and fade in the full main menu after it loads.

@@ -2,7 +2,7 @@
   "id": "MAP_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
   "name": "Rogue_Area_SafariZone_Tutorial",
   "layout": "LAYOUT_ROGUE_AREA_SAFARI_ZONE_TUTORIAL",
-  "music": "MUS_LITTLEROOT",
+  "music": "MUS_DP_ROUTE228_DAY",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

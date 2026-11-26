@@ -2,7 +2,7 @@
   "id": "MAP_ROGUE_AREA_DAY_CARE",
   "name": "Rogue_Area_DayCare",
   "layout": "LAYOUT_ROGUE_AREA_DAY_CARE",
-  "music": "MUS_LITTLEROOT",
+  "music": "MUS_DP_AMITY_SQUARE",
   "region_map_section": "MAPSEC_POKEMON_HUB",
   "requires_flash": false,
   "weather": "WEATHER_NONE",

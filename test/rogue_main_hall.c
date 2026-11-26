@@ -8,6 +8,7 @@
 #include "constants/map_types.h"
 #include "constants/main_hall_tiles.h"
 #include "constants/metatile_behaviors.h"
+#include "constants/songs.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_door.h"
@@ -20,6 +21,49 @@
 #include "rogue_quest.h"
 #include "rogue_save.h"
 #include "test/test.h"
+
+TEST("Hub music: primary maps play their assigned themes and preserve the Safari intro cue")
+{
+    struct
+    {
+        struct WarpData warp;
+        u16 song;
+    } hubMaps[] =
+    {
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_TOWN_SQUARE), .mapNum = MAP_NUM(ROGUE_AREA_TOWN_SQUARE) }, MUS_DP_ROUTE228_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_LABS), .mapNum = MAP_NUM(ROGUE_AREA_LABS) }, MUS_DP_ROUTE228_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_ADVENTURE_ENTRANCE), .mapNum = MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE) }, MUS_DP_ROUTE228_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), .mapNum = MAP_NUM(ROGUE_AREA_SAFARI_ZONE) }, MUS_DP_ROUTE228_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_SAFARI_ZONE_TUTORIAL), .mapNum = MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL) }, MUS_DP_ROUTE228_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_TRIAL_FRONTIER), .mapNum = MAP_NUM(ROGUE_AREA_TRIAL_FRONTIER) }, MUS_DP_FIGHT_AREA_DAY },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_MARKET), .mapNum = MAP_NUM(ROGUE_AREA_MARKET) }, MUS_SLATEPORT },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_MARTS), .mapNum = MAP_NUM(ROGUE_AREA_MARTS) }, MUS_SLATEPORT },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_RIDE_TRAINING), .mapNum = MAP_NUM(ROGUE_AREA_RIDE_TRAINING) }, MUS_DP_AMITY_SQUARE },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_FARMING_FIELD), .mapNum = MAP_NUM(ROGUE_AREA_FARMING_FIELD) }, MUS_DP_AMITY_SQUARE },
+        { { .mapGroup = MAP_GROUP(ROGUE_AREA_DAY_CARE), .mapNum = MAP_NUM(ROGUE_AREA_DAY_CARE) }, MUS_DP_AMITY_SQUARE },
+    };
+    u16 previousIntroState = VarGet(VAR_ROGUE_INTRO_STATE);
+    bool8 previousRunState = FlagGet(FLAG_ROGUE_RUN_ACTIVE);
+    u8 i;
+
+    FlagClear(FLAG_ROGUE_RUN_ACTIVE);
+    for (i = 0; i < ARRAY_COUNT(hubMaps); i++)
+    {
+        VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_COMPLETE);
+        EXPECT_EQ(GetLocationMusic(&hubMaps[i].warp), hubMaps[i].song);
+        if (hubMaps[i].song == MUS_DP_ROUTE228_DAY)
+        {
+            VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_LEAVE_LAB);
+            EXPECT_EQ(GetLocationMusic(&hubMaps[i].warp), MUS_HELP);
+            VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_CATCH_MON);
+            EXPECT_EQ(GetLocationMusic(&hubMaps[i].warp), MUS_HELP);
+        }
+    }
+
+    VarSet(VAR_ROGUE_INTRO_STATE, previousIntroState);
+    if (previousRunState)
+        FlagSet(FLAG_ROGUE_RUN_ACTIVE);
+}
 
 TEST("Main Hall: all connections, closed School, gallery stairs and hallway arrivals")
 {

@@ -1097,6 +1097,7 @@ u16 Rogue_ModifyPlayBGM(u16 songNum)
             switch (songNum)
             {
             case MUS_LITTLEROOT:
+            case MUS_DP_ROUTE228_DAY:
             case MUS_HG_ELM_LAB:
                 songNum = MUS_HELP;
                 break;
