@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Chatterbox uses Copycat on switch-in when the last move was an eligible status move.
+
 - Insectivore uses Stockpile after a foe resists Fire Lash or Bug Bite. Dynamic gifts pair it with Fire Lash.
 
 - Heartthrob follows Heart Swap with Baton Pass.

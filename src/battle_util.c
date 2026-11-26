@@ -9965,6 +9965,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX) && !uniqueDone)
+        {
+            u32 lastMove = gLastUsedMove;
+
+            uniqueDone = TRUE;
+            // A copied pivot could chain switch-in activations before the turn starts.
+            if (lastMove != MOVE_NONE
+             && lastMove < MOVES_COUNT
+             && IS_MOVE_STATUS(lastMove)
+             && !gBattleMoves[lastMove].copycatBanned
+             && !IsSwitchingMove(lastMove)
+             && CanUseSelfExtraMove(battler))
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_CHATTERBOX);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = gBattlerTarget = battler;
+                gCalledMove = MOVE_COPYCAT;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
         if (HasBattlerAbility(battler, ABILITY_TAKE_AIM) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
@@ -18030,28 +18056,6 @@ if (triggeringAbility != ABILITY_NONE)
             {
                 gDisableStructs[battler].uniquePersistentStateActive = FALSE;
             }
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
-         && gBattleMoves[move].soundMove
-         && gDisableStructs[battler].uniquePersistentStateActive
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike())
-        {
-            gDisableStructs[battler].uniquePersistentStateActive = FALSE;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_CHATTERBOX)
-         && IsBattlerAlive(battler)
-         && moveType == TYPE_FLYING
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && IsFinalMultiHitStrike())
-        {
-            gDisableStructs[battler].uniquePersistentStateActive = TRUE;
         }
 
         if (HasBattlerAbility(battler, ABILITY_FLOWING_LESSON)
