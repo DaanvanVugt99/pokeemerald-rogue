@@ -62,6 +62,5 @@
 #define METATILE_LabJunction_Decor_Cargo_0_2 0x037
 #define METATILE_LabJunction_Decor_Cargo_1_2 0x038
 #define METATILE_LabJunction_Decor_WallPlate_0_0 0x039
-#define LAB_JUNCTION_DOOR_PALETTE 11
 
 #endif

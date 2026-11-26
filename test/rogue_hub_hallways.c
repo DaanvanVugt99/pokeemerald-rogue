@@ -228,12 +228,11 @@ TEST("Hub hallways: keep special arrivals and outdoor districts unchanged, recov
 {
     static const struct {u8 mapNum, warp;} special[] = {
         {MAP_NUM(ROGUE_AREA_ADVENTURE_ENTRANCE),6},
-        {MAP_NUM(ROGUE_AREA_LABS),8},{MAP_NUM(ROGUE_AREA_LABS),9},{MAP_NUM(ROGUE_AREA_LABS),10},
-        {MAP_NUM(ROGUE_AREA_LABS),11},{MAP_NUM(ROGUE_AREA_LABS),12},{MAP_NUM(ROGUE_AREA_LABS),13},{MAP_NUM(ROGUE_AREA_LABS),14},
+        {MAP_NUM(ROGUE_AREA_LABS),8},{MAP_NUM(ROGUE_AREA_LABS),11},{MAP_NUM(ROGUE_AREA_LABS),13},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE),6},{MAP_NUM(ROGUE_AREA_SAFARI_ZONE),7},
         {MAP_NUM(ROGUE_AREA_SAFARI_ZONE_TUTORIAL),9},
         {MAP_NUM(ROGUE_AREA_FARMING_FIELD),8},
-        {MAP_NUM(ROGUE_AREA_TOWN_SQUARE),15},{MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
+        {MAP_NUM(ROGUE_AREA_MARTS),8},{MAP_NUM(ROGUE_AREA_DAY_CARE),8},
     };
     const struct MapHeader *safari = Overworld_GetMapHeaderByGroupAndId(MAP_GROUP(ROGUE_AREA_SAFARI_ZONE), MAP_NUM(ROGUE_AREA_SAFARI_ZONE));
     struct RogueHubMap *oldHub = Alloc(sizeof(*oldHub));
@@ -403,7 +402,9 @@ TEST("Hub hallways: dressing room uses the Main Hall door in both directions")
     EXPECT_EQ(exit->mapGroup, MAP_GROUP(ROGUE_AREA_TOWN_SQUARE));
     EXPECT_EQ(exit->mapNum, MAP_NUM(ROGUE_AREA_TOWN_SQUARE));
     EXPECT_EQ(exit->warpId, 15);
-    EXPECT(!RogueHub_GetWarpArrivalPosition(hall, 15, &x, &y));
+    EXPECT(RogueHub_GetWarpArrivalPosition(hall, 15, &x, &y));
+    EXPECT_EQ(x, entrance->x);
+    EXPECT_EQ(y, entrance->y + 1);
     EXPECT(!RogueHub_GetWarpArrivalPosition(dressing, 0, &x, &y));
     EXPECT_EQ(dressing->events->objectEventCount, 2);
 }

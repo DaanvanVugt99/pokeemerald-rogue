@@ -58,16 +58,10 @@ script Rogue_Area_Labs_StartGame
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame1)
     waitmovement(0)
 
-    opendoor(9, 4)
-    waitdooranim
-
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame2)
     waitmovement(0)
     hideobjectat(OBJ_EVENT_BIRCH, MAP_ROGUE_AREA_LABS)
     setflag(FLAG_HIDE_BIRCH)
-
-    closedoor(9, 4)
-    waitdooranim
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
     release

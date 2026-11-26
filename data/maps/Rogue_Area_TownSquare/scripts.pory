@@ -313,6 +313,6 @@ script Rogue_Area_TownSquare_SchoolSign
 script Rogue_Area_TownSquare_ConnectSign
 {
     lockall
-    msgbox(format("Poké Connect\nConnection wing"))
+    msgbox(format("Poké Connect\nConnection wing\pMultiplayer is currently unsupported.\pThis wing may open in a future update."), MSGBOX_SIGN)
     releaseall
 }

@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Keep the Poké Connect wing shuttered and explain on its sign that multiplayer is currently unsupported.
+
+- Show grey shutters behind sprites on locked Main Hall doors and use static doorways in the Main Hall and Lab Junction.
+
 - Keep hub hallway travel on its arrow warps and return stranded players from decorative corridors.
 
 - Let players start the builder’s tutorial from either side and walk them to the workbench.

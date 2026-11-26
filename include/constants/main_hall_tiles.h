@@ -83,6 +83,11 @@
 #define METATILE_MainHall_Decor_Cargo_0_2 0x037
 #define METATILE_MainHall_Decor_Cargo_1_2 0x038
 #define METATILE_MainHall_Decor_WallPlate_0_0 0x039
-#define MAIN_HALL_DOOR_PALETTE 11
+#define METATILE_MainHall_ShutterTopLeft 0x197
+#define METATILE_MainHall_ShutterTop 0x198
+#define METATILE_MainHall_ShutterTopRight 0x199
+#define METATILE_MainHall_ShutterLeft 0x19A
+#define METATILE_MainHall_Shutter 0x19B
+#define METATILE_MainHall_ShutterRight 0x19C
 
 #endif

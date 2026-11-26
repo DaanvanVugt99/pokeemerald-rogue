@@ -7,7 +7,6 @@
 #include "constants/map_types.h"
 #include "constants/main_hall_tiles.h"
 #include "constants/metatile_behaviors.h"
-#include "constants/songs.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "field_door.h"
@@ -27,7 +26,8 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
     struct BackupMapLayout oldBackup = gBackupMapLayout;
     struct RogueHubMap *oldHub = Alloc(sizeof(*oldHub));
     u16 *grid = Alloc((36 + MAP_OFFSET_W) * (30 + MAP_OFFSET_H) * sizeof(u16));
-    u8 mask, school, tutors, x, y, i;
+    u8 mask, school, tutors, x, y, i, intro;
+    u16 oldIntro = VarGet(VAR_ROGUE_INTRO_STATE);
     static const u8 bits[] = {1, 2, 4, 8};
     EXPECT(oldHub != NULL && grid != NULL);
     if (oldHub == NULL || grid == NULL) { Free(oldHub); Free(grid); return; }
@@ -36,6 +36,7 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
     gBackupMapLayout.width = 36 + MAP_OFFSET_W;
     gBackupMapLayout.height = 30 + MAP_OFFSET_H;
     gBackupMapLayout.map = grid;
+    VarSet(VAR_ROGUE_INTRO_STATE, ROGUE_INTRO_STATE_REPORT_TO_PROF);
     for (mask = 0; mask < 16; ++mask)
     {
         memset(gRogueSaveBlock->hubMap.areaBuiltFlags, 0, sizeof(gRogueSaveBlock->hubMap.areaBuiltFlags));
@@ -72,6 +73,18 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                 const struct WarpEvent *warp = &header->events->warps[i];
                 s16 cx = -1, cy = -1;
                 u8 dir, behavior;
+                if (warp->mapGroup == MAP_GROUP(ROGUE_INTERIOR_SCHOOL)
+                    && (warp->mapNum == MAP_NUM(ROGUE_INTERIOR_SCHOOL)
+                     || warp->mapNum == MAP_NUM(ROGUE_INTERIOR_POKE_CONNECT)
+                     || warp->mapNum == MAP_NUM(ROGUE_INTERIOR_DRESSING_ROOM)))
+                {
+                    EXPECT(RogueHub_GetWarpArrivalPosition(header, i, &cx, &cy));
+                    EXPECT_EQ(cx, warp->x);
+                    EXPECT_EQ(cy, warp->y + 1);
+                    EXPECT(!MapGridIsImpassableAt(cx + MAP_OFFSET, cy + MAP_OFFSET));
+                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET), MB_NORMAL);
+                    continue;
+                }
                 if (i == 10
                     || warp->mapGroup != MAP_GROUP(ROGUE_AREA_TOWN_SQUARE)
                     || warp->mapNum != MAP_NUM(ROGUE_AREA_TOWN_SQUARE))
@@ -96,12 +109,21 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                 }
             }
             EXPECT_EQ(!!MapGridIsImpassableAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), !school);
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), school ? MB_ANIMATED_DOOR : MB_NORMAL);
+            EXPECT_EQ(MapGridGetMetatileIdAt(9 + MAP_OFFSET, 4 + MAP_OFFSET),
+                school ? METATILE_MainHall_Door : METATILE_MainHall_Shutter);
+            EXPECT_EQ(MapGridGetMetatileIdAt(8 + MAP_OFFSET, 3 + MAP_OFFSET),
+                school ? METATILE_MainHall_FrameTopLeft : METATILE_MainHall_ShutterTopLeft);
+            if (!school)
+                for (y = 3; y <= 4; ++y)
+                    for (x = 8; x <= 10; ++x)
+                        EXPECT_EQ(MapGridGetMetatileLayerTypeAt(x + MAP_OFFSET, y + MAP_OFFSET),
+                            METATILE_LAYER_TYPE_COVERED);
+            EXPECT_EQ(FieldAnimateDoorOpen(9 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), school ? MB_NON_ANIMATED_DOOR : MB_NORMAL);
             EXPECT_EQ(MapGridGetElevationAt(9 + MAP_OFFSET, 4 + MAP_OFFSET), 5);
             EXPECT(!MapGridIsImpassableAt(23 + MAP_OFFSET, 4 + MAP_OFFSET));
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_ANIMATED_DOOR);
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(27 + MAP_OFFSET, 4 + MAP_OFFSET), MB_ANIMATED_DOOR);
-            EXPECT_EQ(GetDoorSoundEffect(27 + MAP_OFFSET, 4 + MAP_OFFSET), SE_SLIDING_DOOR);
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(23 + MAP_OFFSET, 4 + MAP_OFFSET), MB_NON_ANIMATED_DOOR);
+            EXPECT_EQ(FieldAnimateDoorOpen(23 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
             for (x = 4; x <= 32; ++x)
                 for (y = 8; y <= 9; ++y)
                 {
@@ -119,6 +141,17 @@ TEST("Main Hall: all connections, closed School, gallery stairs and hallway arri
                 EXPECT(!MapGridIsImpassableAt(x + MAP_OFFSET, 17 + MAP_OFFSET));
         }
     }
+    for (intro = ROGUE_INTRO_STATE_SPAWN; intro <= ROGUE_INTRO_STATE_COMPLETE; ++intro)
+    {
+        VarSet(VAR_ROGUE_INTRO_STATE, intro);
+        RogueHub_ApplyMapMetatiles();
+        EXPECT_EQ(MapGridGetMetatileIdAt(27 + MAP_OFFSET, 4 + MAP_OFFSET), METATILE_MainHall_Shutter);
+        EXPECT(MapGridIsImpassableAt(27 + MAP_OFFSET, 4 + MAP_OFFSET));
+        EXPECT_EQ(MapGridGetMetatileBehaviorAt(27 + MAP_OFFSET, 4 + MAP_OFFSET), MB_NORMAL);
+        EXPECT_EQ(MapGridGetMetatileIdAt(28 + MAP_OFFSET, 4 + MAP_OFFSET), METATILE_MainHall_ShutterRight);
+        EXPECT_EQ(FieldAnimateDoorOpen(27 + MAP_OFFSET, 4 + MAP_OFFSET), -1);
+    }
+    VarSet(VAR_ROGUE_INTRO_STATE, oldIntro);
     EXPECT_EQ(header->mapType, MAP_TYPE_INDOOR);
     gRogueSaveBlock->hubMap = *oldHub; gMapHeader = oldHeader; gBackupMapLayout = oldBackup;
     Free(grid); Free(oldHub);

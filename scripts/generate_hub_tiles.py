@@ -71,8 +71,11 @@ class Catalogue:
             banks.append(set(chosen))
             candidates={s:n for s,n in candidates.items() if not s<=chosen}
         self.pals=[[BLACK]+sorted(b)+[BLACK]*(15-len(b)) for b in banks]
-        door=Image.open(ROOT/'graphics/door_anims/lab_junction.png').getpalette()
-        self.pals.append([tuple(door[i:i+3]) for i in range(0,48,3)])
+        self.pals.append([
+            BLACK, (65, 74, 106), (98, 98, 123), (139, 148, 164),
+            (222, 222, 222), (255, 255, 255),
+            (164, 172, 172), (131, 139, 148), (82, 90, 98),
+        ] + [BLACK] * 7)
         portal=self.sources['portal_room'];self.pals.append(portal.pal(portal.meta[1][0]>>12))
         self.tiles=[bytes(64)]
         self.metas=[];self.attrs=[];self.mapping={};self.aliases={}
@@ -206,7 +209,56 @@ class Catalogue:
         append_market(self)
         from hub_medallions import append_hub_medallions
         append_hub_medallions(self)
+        self.build_main_hall_doors()
         assert len(self.metas)<=1024 and len(self.tiles)<=1024
+
+    def build_main_hall_doors(self):
+        from hub_medallions import InlayTiles, flipped_tiles
+
+        names = self.config['rooms']['main_hall']['names']
+        hall = self.mapping['main_hall']
+        self.walk_through_door = hall[names['Door']]
+        assert self.walk_through_door == self.mapping['lab_junction'][self.config['rooms']['lab_junction']['names']['Door']]
+        self.attrs[self.walk_through_door] = 0x60  # MB_NON_ANIMATED_DOOR
+        self.main_hall_doors = {}
+
+        bank = 11
+        colors = self.pals[bank]
+        used = {word & 1023 for meta in self.metas for word in meta}
+        free = (i for i in range(548, 1004) if i not in used)
+        tiles = InlayTiles(self.tiles, free, bank)
+        slat = (6, 7, 7, 8)
+        frames = ('FrameTopLeft', 'FrameTop', 'FrameTopRight', 'FrameLeft', 'Door', 'FrameRight')
+        shutters = ('ShutterTopLeft', 'ShutterTop', 'ShutterTopRight', 'ShutterLeft', 'Shutter', 'ShutterRight')
+        for i, (frame, shutter) in enumerate(zip(frames, shutters)):
+            mid = 0x197 + i
+            assert self.metas[mid] == [0] * 8 and self.attrs[mid] == 0
+            source = hall[names[frame]]
+            vals = self.metas[source][:]
+            expected = self.render(source)
+            for j, word in enumerate(vals[4:]):
+                start_x = i % 3 * 16 + j % 2 * 8
+                start_y = i // 3 * 16 + j // 2 * 8
+                if not (8 <= start_x < 40 and start_y + 8 > 12):
+                    continue
+                original = dict(flipped_tiles(self.tiles[word & 1023]))[word & 0xC00]
+                pixels = bytearray()
+                for y in range(8):
+                    for x in range(8):
+                        row = start_y + y
+                        if row >= 12:
+                            index = slat[(row - 12) % len(slat)]
+                            expected.putpixel((j % 2 * 8 + x, j // 2 * 8 + y), colors[index])
+                            pixels.append(index)
+                        else:
+                            old_index = original[y * 8 + x]
+                            pixels.append(colors.index(self.pals[word >> 12][old_index], 1) if old_index else 0)
+                vals[4 + j] = tiles.word(bytes(pixels))
+            self.metas[mid] = vals
+            # Put the shutter and its frame behind the player and follower.
+            self.attrs[mid] = 0x1000  # METATILE_LAYER_TYPE_COVERED
+            self.main_hall_doors[shutter] = mid
+            assert self.render(mid).tobytes() == expected.tobytes(), shutter
 
     def meta(self,key,mid):
         return self.sources[key].meta[mid//512][mid%512*8:mid%512*8+8]
@@ -264,7 +316,9 @@ class Catalogue:
             text=f'#ifndef GUARD_{key.upper()}_TILES_H\n#define GUARD_{key.upper()}_TILES_H\n\n// Generated shared hub aliases; do not edit.\n'
             for name,old in d['names'].items():
                 text+=f'#define METATILE_{d["label"]}_{name} 0x{self.mapping[key][old]:03X}\n'
-            if key in ('lab_junction','main_hall'):text+=f'#define {key.upper()}_DOOR_PALETTE 11\n'
+            if key=='main_hall':
+                for name,mid in self.main_hall_doors.items():
+                    text+=f'#define METATILE_MainHall_{name} 0x{mid:03X}\n'
             outputs[f'include/constants/{key}_tiles.h']=(text+'\n#endif\n').encode()
         header='#ifndef GUARD_HUB_TILES_H\n#define GUARD_HUB_TILES_H\n\n// Generated Porymap catalogue names.\n'
         named=set()
@@ -280,6 +334,8 @@ class Catalogue:
                 if mid in named:continue
                 named.add(mid);prefix='HubArchitecture' if mid<512 else 'HubFurnishings'
                 header+=f'#define METATILE_{prefix}_{key}_{old:03X} 0x{mid:03X}\n'
+        for name,mid in self.main_hall_doors.items():
+            header+=f'#define METATILE_HubArchitecture_MainHall_{name} 0x{mid:03X}\n'
         for name,mid in self.compositions.items():
             header+=f'#define METATILE_HubFurnishings_{name} 0x{mid:03X}\n'
         for name,mid in self.terrariums.items():
@@ -423,7 +479,8 @@ def main():
         for old,new in cat.mapping[key].items():
             original=cat.capsule_originals.get(new,cat.metas[new])
             assert render(cat.sources[key],old).tobytes()==cat.render(new,original,cat.capsule_original_tiles).tobytes(),(key,old,new)
-            assert cat.attrs[new]==cat.sources[key].attrs[old//512][old%512]
+            expected_attr = 0x60 if new == cat.walk_through_door else cat.sources[key].attrs[old//512][old%512]
+            assert cat.attrs[new] == expected_attr
             for a,b in zip(cat.meta(key,old),original):
                 before = dict(flipped_tiles(cat.sources[key].tile(a)))[a & 0xC00]
                 raw = cat.capsule_original_tiles.get(b & 1023, cat.tiles[b & 1023])
@@ -453,9 +510,6 @@ def main():
     for name,mid in cat.terrariums.items():
         old=cat.mapping['safari_lab'][cat.config['rooms']['safari_lab']['names'][name]]
         assert cat.metas[mid][4:]==cat.metas[old][4:] and cat.attrs[mid]==cat.attrs[old]
-    for name in ('lab_junction','main_hall'):
-        raw=Image.open(ROOT/f'graphics/door_anims/{name}.png').getpalette()
-        assert cat.pals[11]==[tuple(raw[i:i+3]) for i in range(0,48,3)],name
     for path,data in cat.outputs().items():
         p=ROOT/path
         if args.check:assert p.exists() and p.read_bytes()==data, f'Stale generated asset: {path}'

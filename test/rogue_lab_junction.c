@@ -5,7 +5,6 @@
 #include "constants/rogue_hub.h"
 #include "constants/map_types.h"
 #include "constants/metatile_behaviors.h"
-#include "constants/songs.h"
 #include "event_data.h"
 #include "field_door.h"
 #include "fieldmap.h"
@@ -70,18 +69,34 @@ TEST("Lab junction: all connections preserve doors, seal unused lanes and redire
             for (x = 9; x <= 19; x += 10)
             {
                 EXPECT(!MapGridIsImpassableAt(x + MAP_OFFSET, 4 + MAP_OFFSET));
-                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 4 + MAP_OFFSET), MB_ANIMATED_DOOR);
-                EXPECT_EQ(GetDoorSoundEffect(x + MAP_OFFSET, 4 + MAP_OFFSET), SE_SLIDING_DOOR);
+                EXPECT_EQ(MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, 4 + MAP_OFFSET), MB_NON_ANIMATED_DOOR);
+                EXPECT_EQ(FieldAnimateDoorOpen(x + MAP_OFFSET, 4 + MAP_OFFSET), -1);
                 EXPECT(MapGridIsImpassableAt(x - 1 + MAP_OFFSET, 4 + MAP_OFFSET));
             }
             EXPECT_EQ(!!MapGridIsImpassableAt(8 + MAP_OFFSET, 13 + MAP_OFFSET), !upgrade);
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(8 + MAP_OFFSET, 13 + MAP_OFFSET), upgrade ? MB_ANIMATED_DOOR : MB_NORMAL);
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(8 + MAP_OFFSET, 13 + MAP_OFFSET), upgrade ? MB_NON_ANIMATED_DOOR : MB_NORMAL);
 #ifdef ROGUE_DEBUG
-            EXPECT_EQ(MapGridGetMetatileBehaviorAt(20 + MAP_OFFSET, 13 + MAP_OFFSET), MB_ANIMATED_DOOR);
+            EXPECT_EQ(MapGridGetMetatileBehaviorAt(20 + MAP_OFFSET, 13 + MAP_OFFSET), MB_NON_ANIMATED_DOOR);
 #else
             EXPECT(MapGridIsImpassableAt(20 + MAP_OFFSET, 13 + MAP_OFFSET));
             EXPECT_EQ(MapGridGetMetatileBehaviorAt(20 + MAP_OFFSET, 13 + MAP_OFFSET), MB_NORMAL);
 #endif
+            EXPECT_EQ(FieldAnimateDoorOpen(8 + MAP_OFFSET, 13 + MAP_OFFSET), -1);
+            EXPECT_EQ(FieldAnimateDoorOpen(20 + MAP_OFFSET, 13 + MAP_OFFSET), -1);
+            {
+                static const u8 doors[] = {9, 10, 12, 14};
+                u8 i;
+                for (i = 0; i < ARRAY_COUNT(doors); ++i)
+                {
+                    const struct WarpEvent *warp = &header->events->warps[doors[i]];
+                    s16 arrivalX = -1, arrivalY = -1;
+                    EXPECT(RogueHub_GetWarpArrivalPosition(header, doors[i], &arrivalX, &arrivalY));
+                    EXPECT_EQ(arrivalX, warp->x);
+                    EXPECT_EQ(arrivalY, warp->y + 1);
+                    EXPECT(!MapGridIsImpassableAt(arrivalX + MAP_OFFSET, arrivalY + MAP_OFFSET));
+                    EXPECT_EQ(MapGridGetMetatileBehaviorAt(arrivalX + MAP_OFFSET, arrivalY + MAP_OFFSET), MB_NORMAL);
+                }
+            }
             for (x = 0; x < ARRAY_COUNT(addedLaneMasks); ++x)
                 if (mask & addedLaneMasks[x])
                 {

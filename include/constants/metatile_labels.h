@@ -1449,6 +1449,12 @@
 // BEGIN GENERATED SHARED HUB LABELS
 #define METATILE_HubArchitecture_PortalRoom_Decor_WallPlate_0_0 0x039
 #define METATILE_HubFurnishings_Galactic_21C 0x29C
+#define METATILE_HubArchitecture_MainHall_ShutterTopLeft 0x197
+#define METATILE_HubArchitecture_MainHall_ShutterTop 0x198
+#define METATILE_HubArchitecture_MainHall_ShutterTopRight 0x199
+#define METATILE_HubArchitecture_MainHall_ShutterLeft 0x19A
+#define METATILE_HubArchitecture_MainHall_Shutter 0x19B
+#define METATILE_HubArchitecture_MainHall_ShutterRight 0x19C
 #define METATILE_HubFurnishings_PlantedHabitat_0_0 0x33E
 #define METATILE_HubFurnishings_PlantedHabitat_1_0 0x33F
 #define METATILE_HubFurnishings_PlantedHabitat_2_0 0x340
