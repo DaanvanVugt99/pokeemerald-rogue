@@ -210,6 +210,7 @@ enum RandomTag
     RNG_ROGUE_LIVING_LIBRARY,
     RNG_ROGUE_CHAOS_CHARM,
     RNG_ROGUE_FURY_MANTLE,
+    RNG_ROGUE_AFTERSHOCK,
 };
 
 #define RandomWeighted(tag, ...) \

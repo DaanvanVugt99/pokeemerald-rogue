@@ -16495,10 +16495,10 @@ if (triggeringAbility != ABILITY_NONE)
             SetBattlerTriggeredAbility(battler, ABILITY_AFTERSHOCK);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
-            gCalledMove = MOVE_BULLDOZE;
+            gCalledMove = MOVE_MAGNITUDE;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
-            VarSet(VAR_EXTRA_MOVE_DAMAGE, 30);
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 10 + 20 * RandomWeighted(RNG_ROGUE_AFTERSHOCK, 20, 50, 20, 10));
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;

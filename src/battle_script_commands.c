@@ -18357,9 +18357,16 @@ static void Cmd_magnitudedamagecalculation(void)
 {
     CMD_ARGS();
 
-    u32 magnitude = Random() % 100;
+    u32 magnitude;
+    u32 extraMovePower = gProtectStructs[gBattlerAttacker].extraMoveUsed ? VarGet(VAR_EXTRA_MOVE_DAMAGE) : 0;
 
-    if (magnitude < 5)
+    // Aftershock supplies the power for its rolled Magnitude.
+    if (extraMovePower == 10 || extraMovePower == 30 || extraMovePower == 50 || extraMovePower == 70)
+    {
+        gBattleStruct->magnitudeBasePower = extraMovePower;
+        magnitude = 4 + (extraMovePower - 10) / 20;
+    }
+    else if ((magnitude = Random() % 100) < 5)
     {
         gBattleStruct->magnitudeBasePower = 10;
         magnitude = 4;
