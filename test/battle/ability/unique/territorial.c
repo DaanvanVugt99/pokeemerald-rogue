@@ -143,3 +143,32 @@ DOUBLE_BATTLE_TEST("Territorial and Pursuit can intercept the same switch")
         EXPECT_EQ(opponentLeft->species, SPECIES_BULBASAUR);
     }
 }
+
+DOUBLE_BATTLE_TEST("Territorial and Pursuit can intercept the pivot after Eject Button resolves")
+{
+    u16 intercept;
+    PARAMETRIZE { intercept = MOVE_AERIAL_ACE; }
+    PARAMETRIZE { intercept = MOVE_PURSUIT; }
+    GIVEN {
+        PLAYER(SPECIES_FEAROW) { Speed(50); UniqueAbility(ABILITY_TERRITORIAL); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(40); Item(ITEM_EJECT_BUTTON); }
+        PLAYER(SPECIES_WYNAUT) { Speed(30); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); HP(500); MaxHP(500); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(20); }
+        OPPONENT(SPECIES_BULBASAUR) { Speed(10); }
+    } WHEN {
+        TURN {
+            MOVE(opponentLeft, MOVE_U_TURN, target: playerRight);
+            MOVE(playerLeft, intercept, target: opponentLeft);
+            SEND_OUT(playerRight, 2);
+            SEND_OUT(opponentLeft, 2);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, opponentLeft);
+        MESSAGE("Go! Wynaut!");
+        ANIMATION(ANIM_TYPE_MOVE, intercept, playerLeft);
+        HP_BAR(opponentLeft);
+        MESSAGE("2 sent out Bulbasaur!");
+        NOT ANIMATION(ANIM_TYPE_MOVE, intercept, playerLeft);
+    }
+}

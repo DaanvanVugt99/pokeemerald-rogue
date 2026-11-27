@@ -15,26 +15,24 @@ SINGLE_BATTLE_TEST("Burn Up user loses its Fire-type")
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
         TURN { MOVE(player, MOVE_BURN_UP); }
-        TURN { MOVE(player, MOVE_BURN_UP); }
+        TURN { MOVE(player, MOVE_BURN_UP, allowed: FALSE); MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_BURN_UP, player);
         MESSAGE("Cyndaquil burned itself out!");
-        MESSAGE("Cyndaquil used Burn Up!");
-        MESSAGE("But it failed!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
     }
 }
 
-SINGLE_BATTLE_TEST("Burn Up fails if the user isn't a Fire-type")
+SINGLE_BATTLE_TEST("Burn Up cannot be selected if the user isn't a Fire-type")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, MOVE_BURN_UP); }
+        TURN { MOVE(player, MOVE_BURN_UP, allowed: FALSE); MOVE(player, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF { ANIMATION(ANIM_TYPE_MOVE, MOVE_BURN_UP, player); }
-        MESSAGE("Wobbuffet used Burn Up!");
-        MESSAGE("But it failed!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
     }
 }
 

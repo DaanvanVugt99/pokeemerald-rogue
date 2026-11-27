@@ -12,9 +12,8 @@
 #define MOVE_LIMITATION_ASSAULT_VEST            (1 << 8)
 #define MOVE_LIMITATION_GRAVITY                 (1 << 9)
 #define MOVE_LIMITATION_HEAL_BLOCK              (1 << 10)
-#define MOVE_LIMITATION_BELCH                   (1 << 11)
+#define MOVE_LIMITATION_UNUSABLE                (1 << 11)
 #define MOVE_LIMITATION_THROAT_CHOP             (1 << 12)
-#define MOVE_LIMITATION_STUFF_CHEEKS            (1 << 13)
 #define MOVE_LIMITATION_CANT_USE_TWICE          (1 << 14)
 
 #define MOVE_LIMITATION_PLACEHOLDER             (1 << 15)

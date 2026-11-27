@@ -62,7 +62,7 @@ SINGLE_BATTLE_TEST("U-turn does not switch the user out if replacements fainted"
     }
 }
 
-SINGLE_BATTLE_TEST("U-turn does not switch the user out if Wimp Out activates")
+SINGLE_BATTLE_TEST("U-turn switches the user out after Wimp Out activates")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
@@ -70,7 +70,7 @@ SINGLE_BATTLE_TEST("U-turn does not switch the user out if Wimp Out activates")
         OPPONENT(SPECIES_WIMPOD) { MaxHP(100); HP(51); Ability(ABILITY_WIMP_OUT); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(opponent, 1); }
+        TURN { MOVE(player, MOVE_U_TURN); SEND_OUT(opponent, 1); SEND_OUT(player, 1); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_U_TURN, player);
         HP_BAR(opponent);

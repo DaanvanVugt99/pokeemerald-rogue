@@ -3699,7 +3699,8 @@ BattleScript_EffectHitEscape:
 	moveendfrom MOVEEND_TARGET_VISIBLE
 	jumpifbattleend BattleScript_HitEscapeEnd
 	jumpifbyte CMP_NOT_EQUAL gBattleOutcome 0, BattleScript_HitEscapeEnd
-	jumpifemergencyexited BS_TARGET, BattleScript_HitEscapeEnd
+	jumpifhasnohp BS_ATTACKER, BattleScript_HitEscapeEnd
+	jumpifemergencyexited BS_ATTACKER, BattleScript_HitEscapeEnd
 	goto BattleScript_MoveSwitchIntercept
 BattleScript_HitEscapeEnd:
 	end
@@ -8893,21 +8894,13 @@ BattleScript_SelectingNotAllowedMoveGravity::
 	printselectionstring STRINGID_GRAVITYPREVENTSUSAGE
 	endselectionscript
 
-BattleScript_SelectingNotAllowedStuffCheeks::
-	printselectionstring STRINGID_STUFFCHEEKSCANTSELECT
-	endselectionscript
-
-BattleScript_SelectingNotAllowedStuffCheeksInPalace::
-	printstring STRINGID_STUFFCHEEKSCANTSELECT
-	goto BattleScript_SelectingUnusableMoveInPalace
-
-BattleScript_SelectingNotAllowedBelch::
-	printselectionstring STRINGID_BELCHCANTSELECT
-	endselectionscript
-
-BattleScript_SelectingNotAllowedBelchInPalace::
+BattleScript_BelchFails::
+	attackstring
+	ppreduce
+	orhalfword gMoveResultFlags, MOVE_RESULT_FAILED
 	printstring STRINGID_BELCHCANTSELECT
-	goto BattleScript_SelectingUnusableMoveInPalace
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
 
 BattleScript_MoveUsedGravityPrevents::
 	printstring STRINGID_GRAVITYPREVENTSUSAGE

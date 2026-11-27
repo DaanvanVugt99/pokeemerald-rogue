@@ -6,14 +6,14 @@ SINGLE_BATTLE_TEST("Adventure balance: unavailable move selection comparison")
 {
     u16 move;
     bool32 blocked;
-    PARAMETRIZE { move = MOVE_FAKE_OUT; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_FIRST_IMPRESSION; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_SPIT_UP; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_BURN_UP; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_DOUBLE_SHOCK; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_LAST_RESORT; blocked = FALSE; }
-    PARAMETRIZE { move = MOVE_BELCH; blocked = TRUE; }
-    PARAMETRIZE { move = MOVE_STUFF_CHEEKS; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_FAKE_OUT; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_FIRST_IMPRESSION; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_SPIT_UP; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_BURN_UP; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_DOUBLE_SHOCK; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_LAST_RESORT; blocked = TRUE; }
+    PARAMETRIZE { move = MOVE_BELCH; blocked = FALSE; }
+    PARAMETRIZE { move = MOVE_STUFF_CHEEKS; blocked = FALSE; }
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(move, MOVE_CELEBRATE, MOVE_SCRATCH); }
@@ -22,6 +22,42 @@ SINGLE_BATTLE_TEST("Adventure balance: unavailable move selection comparison")
         TURN { MOVE(player, MOVE_CELEBRATE); }
     } THEN {
         EXPECT_EQ(CheckMoveLimitations(B_POSITION_PLAYER_LEFT, 0, MOVE_LIMITATIONS_ALL) & 1, blocked);
+    }
+}
+
+SINGLE_BATTLE_TEST("Adventure balance: Berry moves can be selected before meeting their requirements")
+{
+    GIVEN {
+        PLAYER(SPECIES_SKWOVET);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_BELCH); }
+        TURN { MOVE(player, MOVE_STUFF_CHEEKS); }
+    } SCENE {
+        MESSAGE("Skwovet used Belch!");
+        MESSAGE("It hasn't eaten a Berry, so Belch can't be used!");
+        MESSAGE("Skwovet used Stuff Cheeks!");
+        MESSAGE("But it failed!");
+    } THEN {
+        EXPECT_EQ(opponent->hp, opponent->maxHP);
+    }
+}
+
+SINGLE_BATTLE_TEST("Adventure balance: Stuff Cheeks enables repeat uses of Belch")
+{
+    GIVEN {
+        PLAYER(SPECIES_SKWOVET) { Item(ITEM_ORAN_BERRY); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_STUFF_CHEEKS); }
+        TURN { MOVE(player, MOVE_BELCH); }
+        TURN { MOVE(player, MOVE_BELCH); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_STUFF_CHEEKS, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BELCH, player);
+        HP_BAR(opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_BELCH, player);
+        HP_BAR(opponent);
     }
 }
 

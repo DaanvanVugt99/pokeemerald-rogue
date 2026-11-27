@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Eject Button and Emergency Exit allow U-turn, Volt Switch and other damaging pivots to complete after the defender switches. Fake Out, First Impression, Spit Up, Burn Up, Double Shock and Last Resort require their conditions at move selection. Belch and Stuff Cheeks check their Berry requirements on use.
+
 - Unseen Fist deals quarter damage through protection and activates contact shields. Rage Fist keeps its stacks through switching and loses them on fainting. Make It Rain sharply lowers Sp. Atk.
 - Milk Drink can heal a protected ally. Revival Blessing preserves Mega Evolution and Palafin’s Hero Form. Speed Swap survives Mega Evolution, and Encore changes the priority of the move it forces that turn.
 - Increased the power of Gear Grind, Anchor Shot, Revelation Dance, Dragon Hammer, Triple Dive and Hyper Drill. Gear Grind also has 90% accuracy. Reduced the power of Bolt Beak, Fishious Rend, Astral Barrage and Blood Moon.

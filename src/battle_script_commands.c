@@ -1503,6 +1503,14 @@ static void Cmd_attackcanceler(void)
     if (AtkCanceller_UnableToUseMove(moveType))
         return;
 
+    if (gBattleMoves[gCurrentMove].effect == EFFECT_BELCH
+     && !gBattleStruct->isAtkCancelerForCalledMove
+     && !(gBattleStruct->ateBerry[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]]))
+    {
+        gBattlescriptCurrInstr = BattleScript_BelchFails;
+        return;
+    }
+
     // Preserve the pre-move last-used state for Storyboard. Nested called moves
     // should keep the original top-level source move instead of overwriting it.
     if (!gBattleStruct->isAtkCancelerForCalledMove)
@@ -7930,7 +7938,7 @@ static void Cmd_moveend(void)
                         }
                         gBattleScripting.battler = battler;
                         gLastUsedItem = gBattleMons[battler].item;
-                        if (gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
+                        if (holdEffect == HOLD_EFFECT_JESTER_SWITCH && gBattleMoves[gCurrentMove].effect == EFFECT_HIT_ESCAPE)
                             gBattlescriptCurrInstr = BattleScript_MoveEnd;  // Prevent user switch-in selection
                         BattleScriptPushCursor();
                         gBattlescriptCurrInstr = BattleScript_EjectButtonActivates;
@@ -11961,7 +11969,8 @@ bool32 CanUseLastResort(u8 battler)
     {
         if (gBattleMons[battler].moves[i] != MOVE_NONE)
             knownMovesCount++;
-        if (i != gCurrMovePos && gDisableStructs[battler].usedMoves & gBitTable[i]) // Increment used move count for all moves except current Last Resort.
+        if (gBattleMons[battler].moves[i] != MOVE_NONE && gBattleMons[battler].moves[i] != MOVE_LAST_RESORT
+         && (gDisableStructs[battler].usedMoves & gBitTable[i])) // Increment used move count for all moves except current Last Resort.
             usedMovesCount++;
     }
 
@@ -14955,6 +14964,9 @@ static void Cmd_various(void)
             gLastUsedItem = gBattleMons[battler].item;
 
         gBattleScripting.battler = gEffectBattler = gBattlerTarget = battler;    // Cover all berry effect battler cases. e.g. ChangeStatBuffs uses target ID
+        // Forced consumption counts for Belch even when the Berry has no effect.
+        if (ItemId_GetPocket(gLastUsedItem) == POCKET_BERRIES)
+            gBattleStruct->ateBerry[GetBattlerSide(battler)] |= gBitTable[gBattlerPartyIndexes[battler]];
         if (ItemBattleEffects(ITEMEFFECT_USE_LAST_ITEM, battler, FALSE))
             return;
         gBattlescriptCurrInstr = cmd->nextInstr;
@@ -17948,7 +17960,7 @@ static void Cmd_trychoosesleeptalkmove(void)
         }
     }
 
-    unusableMovesBits = CheckMoveLimitations(gBattlerAttacker, unusableMovesBits, ~MOVE_LIMITATION_PP);
+    unusableMovesBits = CheckMoveLimitations(gBattlerAttacker, unusableMovesBits, ~(MOVE_LIMITATION_PP | MOVE_LIMITATION_UNUSABLE));
     if (unusableMovesBits == ALL_MOVES_MASK) // all 4 moves cannot be chosen
     {
         gBattlescriptCurrInstr = cmd->nextInstr;

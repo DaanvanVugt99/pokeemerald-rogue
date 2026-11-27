@@ -152,8 +152,11 @@ SINGLE_BATTLE_TEST("Eject Button has no chance to activate after Dragon Tail")
     }
 }
 
-SINGLE_BATTLE_TEST("Eject Button prevents Volt Switch / U-Turn from activating")
+SINGLE_BATTLE_TEST("Eject Button lets Volt Switch and U-turn pivot after the holder switches")
 {
+    u16 move;
+    PARAMETRIZE { move = MOVE_VOLT_SWITCH; }
+    PARAMETRIZE { move = MOVE_U_TURN; }
     GIVEN {
         PLAYER(SPECIES_MANECTRIC);
         PLAYER(SPECIES_WOBBUFFET);
@@ -161,12 +164,16 @@ SINGLE_BATTLE_TEST("Eject Button prevents Volt Switch / U-Turn from activating")
         OPPONENT(SPECIES_WYNAUT);
     } WHEN {
         TURN {
-            MOVE(player, MOVE_VOLT_SWITCH);
+            MOVE(player, move);
             SEND_OUT(opponent, 1);
+            SEND_OUT(player, 1);
         }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_VOLT_SWITCH, player);
+        ANIMATION(ANIM_TYPE_MOVE, move, player);
         MESSAGE("Foe Wobbuffet is switched out with the Eject Button!");
+    } THEN {
+        EXPECT_EQ(player->species, SPECIES_WOBBUFFET);
+        EXPECT_EQ(opponent->species, SPECIES_WYNAUT);
     }
 }
 

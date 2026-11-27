@@ -1957,12 +1957,23 @@ bool32 IsHealBlockPreventingMove(u32 battler, u32 move)
     return IsBattlerHealBlocked(battler) && gBattleMoves[move].healBlockBanned;
 }
 
-static bool32 IsBelchPreventingMove(u32 battler, u32 move)
+static bool32 IsMoveUnavailableForSelection(u32 battler, u32 move)
 {
-    if (gBattleMoves[move].effect != EFFECT_BELCH)
+    switch (gBattleMoves[move].effect)
+    {
+    case EFFECT_FAKE_OUT:
+        return !gDisableStructs[battler].isFirstTurn;
+    case EFFECT_SPIT_UP:
+        return gDisableStructs[battler].stockpileCounter == 0;
+    case EFFECT_BURN_UP:
+        return !IS_BATTLER_OF_TYPE(battler, TYPE_FIRE);
+    case EFFECT_DOUBLE_SHOCK:
+        return !IS_BATTLER_OF_TYPE(battler, TYPE_ELECTRIC);
+    case EFFECT_LAST_RESORT:
+        return !CanUseLastResort(battler);
+    default:
         return FALSE;
-
-    return !(gBattleStruct->ateBerry[battler & BIT_SIDE] & gBitTable[gBattlerPartyIndexes[battler]]);
+    }
 }
 
 // Dynamax bypasses all selection prevention except Taunt and Assault Vest.
@@ -2091,37 +2102,8 @@ u32 TrySetCantSelectMoveBattleScript(u32 battler)
         }
     }
 
-    if (DYNAMAX_BYPASS_CHECK && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE && IsBelchPreventingMove(battler, move))
-    {
-        gCurrentMove = move;
-        if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
-        {
-            gPalaceSelectionBattleScripts[battler] = BattleScript_SelectingNotAllowedBelchInPalace;
-            gProtectStructs[battler].palaceUnableToUseMove = TRUE;
-        }
-        else
-        {
-            gSelectionBattleScripts[battler] = BattleScript_SelectingNotAllowedBelch;
-            limitations++;
-        }
-    }
-
-    if (DYNAMAX_BYPASS_CHECK && move == MOVE_STUFF_CHEEKS && ItemId_GetPocket(gBattleMons[battler].item) != POCKET_BERRIES)
-    {
-        gCurrentMove = move;
-        if (gBattleTypeFlags & BATTLE_TYPE_PALACE)
-        {
-            gPalaceSelectionBattleScripts[battler] = BattleScript_SelectingNotAllowedStuffCheeksInPalace;
-            gProtectStructs[battler].palaceUnableToUseMove = TRUE;
-        }
-        else
-        {
-            gSelectionBattleScripts[battler] = BattleScript_SelectingNotAllowedStuffCheeks;
-            limitations++;
-        }
-    }
-
-    if (gBattleMoves[move].cantUseTwice && move == gLastResultingMoves[battler])
+    if ((gBattleMoves[move].cantUseTwice && move == gLastResultingMoves[battler])
+     || (!gBattleStruct->dynamax.playerSelect && !IsDynamaxed(battler) && IsMoveUnavailableForSelection(battler, move)))
     {
         gCurrentMove = move;
         PREPARE_MOVE_BUFFER(gBattleTextBuff1, gCurrentMove);
@@ -2273,14 +2255,10 @@ u8 CheckMoveLimitations(u32 battler, u8 unusableMoves, u16 check)
         // Heal Block
         else if (check & MOVE_LIMITATION_HEAL_BLOCK && IsHealBlockPreventingMove(battler, gBattleMons[battler].moves[i]))
             unusableMoves |= gBitTable[i];
-        // Belch
-        else if (check & MOVE_LIMITATION_BELCH && IsBelchPreventingMove(battler, gBattleMons[battler].moves[i]))
+        else if ((check & MOVE_LIMITATION_UNUSABLE) && IsMoveUnavailableForSelection(battler, gBattleMons[battler].moves[i]))
             unusableMoves |= gBitTable[i];
         // Throat Chop
         else if (check & MOVE_LIMITATION_THROAT_CHOP && gDisableStructs[battler].throatChopTimer && gBattleMoves[gBattleMons[battler].moves[i]].soundMove)
-            unusableMoves |= gBitTable[i];
-        // Stuff Cheeks
-        else if (check & MOVE_LIMITATION_STUFF_CHEEKS && gBattleMons[battler].moves[i] == MOVE_STUFF_CHEEKS && ItemId_GetPocket(gBattleMons[battler].item) != POCKET_BERRIES)
             unusableMoves |= gBitTable[i];
         // Gorilla Tactics
         else if (check & MOVE_LIMITATION_CHOICE_ITEM && HasBattlerAbility(battler, ABILITY_GORILLA_TACTICS) && *choicedMove != MOVE_NONE && *choicedMove != MOVE_UNAVAILABLE && *choicedMove != gBattleMons[battler].moves[i])

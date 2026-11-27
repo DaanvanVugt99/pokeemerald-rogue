@@ -6,88 +6,43 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_LAST_RESORT].effect == EFFECT_LAST_RESORT);
 }
 
-SINGLE_BATTLE_TEST("Last Resort always fails if it's the only known move")
+SINGLE_BATTLE_TEST("Last Resort forces Struggle if it is the only known move")
 {
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_LAST_RESORT); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
+        TURN { MOVE(player, MOVE_LAST_RESORT, allowed: FALSE); }
     } SCENE {
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        NOT HP_BAR(opponent);
-    }
-}
-
-SINGLE_BATTLE_TEST("Last Resort works only when all of the known moves have been used - 2 moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_LAST_RESORT, MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-    } SCENE {
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Tackle!");
-        MESSAGE("Wobbuffet used Last Resort!");
+        MESSAGE("Wobbuffet used Struggle!");
         HP_BAR(opponent);
     }
 }
 
-SINGLE_BATTLE_TEST("Last Resort works only when all of the known moves have been used - 3 moves")
+SINGLE_BATTLE_TEST("Last Resort becomes selectable after using every other move")
 {
+    u32 count;
+    PARAMETRIZE { count = 2; }
+    PARAMETRIZE { count = 3; }
+    PARAMETRIZE { count = 4; }
     GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_LAST_RESORT, MOVE_TACKLE, MOVE_SCRATCH); }
+        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_TACKLE, MOVE_LAST_RESORT,
+            count >= 3 ? MOVE_SCRATCH : MOVE_NONE, count == 4 ? MOVE_GUST : MOVE_NONE); }
         OPPONENT(SPECIES_WOBBUFFET);
     } WHEN {
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_SCRATCH); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-    } SCENE {
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Tackle!");
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Scratch!");
-        MESSAGE("Wobbuffet used Last Resort!");
-        HP_BAR(opponent);
-    }
-}
-
-SINGLE_BATTLE_TEST("Last Resort works only when all of the known moves have been used - 4 moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_LAST_RESORT, MOVE_TACKLE, MOVE_SCRATCH, MOVE_GUST); }
-        OPPONENT(SPECIES_WOBBUFFET);
-    } WHEN {
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_SCRATCH); }
-        TURN { MOVE(player, MOVE_LAST_RESORT); }
-        TURN { MOVE(player, MOVE_GUST); }
+        TURN { MOVE(player, MOVE_LAST_RESORT, allowed: FALSE); MOVE(player, MOVE_TACKLE); }
+        if (count >= 3)
+            TURN { MOVE(player, MOVE_LAST_RESORT, allowed: FALSE); MOVE(player, MOVE_SCRATCH); }
+        if (count == 4)
+            TURN { MOVE(player, MOVE_LAST_RESORT, allowed: FALSE); MOVE(player, MOVE_GUST); }
         TURN { MOVE(player, MOVE_LAST_RESORT); }
     } SCENE {
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Tackle!");
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Scratch!");
-        MESSAGE("Wobbuffet used Last Resort!");
-        MESSAGE("But it failed!");
-        MESSAGE("Wobbuffet used Gust!");
-        MESSAGE("Wobbuffet used Last Resort!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
+        if (count >= 3)
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+        if (count == 4)
+            ANIMATION(ANIM_TYPE_MOVE, MOVE_GUST, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_LAST_RESORT, player);
         HP_BAR(opponent);
     }
 }
