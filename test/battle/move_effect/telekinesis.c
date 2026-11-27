@@ -9,19 +9,19 @@ ASSUMPTIONS
 SINGLE_BATTLE_TEST("Telekinesis makes the target unable to avoid any attacks made against it")
 {
     GIVEN {
-        ASSUME(gBattleMoves[MOVE_MINIMIZE].effect == EFFECT_MINIMIZE); // Raises evs by 2
-        ASSUME(gBattleMoves[MOVE_SCREECH].accuracy < 100);
+        ASSUME(gBattleMoves[MOVE_MINIMIZE].effect == EFFECT_MINIMIZE);
+        ASSUME(gBattleMoves[MOVE_HYPNOSIS].accuracy > 0 && gBattleMoves[MOVE_HYPNOSIS].accuracy < 100);
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_WYNAUT);
     } WHEN {
         TURN { MOVE(player, MOVE_TELEKINESIS); MOVE(opponent, MOVE_MINIMIZE); }
-        TURN { MOVE(player, MOVE_SCREECH, hit:FALSE); }
+        TURN { MOVE(player, MOVE_HYPNOSIS, hit:FALSE); }
     } SCENE {
         MESSAGE("Wobbuffet used Telekinesis!");
         MESSAGE("Foe Wynaut was hurled into the air!");
         MESSAGE("Foe Wynaut used Minimize!");
-        MESSAGE("Wobbuffet used Screech!");
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCREECH, player);
+        MESSAGE("Wobbuffet used Hypnosis!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPNOSIS, player);
         NOT MESSAGE("Wobbuffet's attack missed!");
     }
 }
