@@ -17563,21 +17563,24 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_HANDYWORK)
+         && !IS_MOVE_STATUS(move)
          && IsMoveMakingContact(move, battler)
-         && DidMoveSucceedForMoveEndEffects(battler)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
          && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseExtraMove(battler, gBattlerTarget))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_HANDYWORK);
-            gTempMove = gCurrentMove;
-            gCurrentMove = MOVE_SCRATCH;
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerAbility = battler;
+            gCalledMove = MOVE_COVET;
+            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
-            VarSet(VAR_EXTRA_MOVE_DAMAGE, 40);
-            VarSet(VAR_TEMP_MOVEEFECT_CHANCE, 0);
-            VarSet(VAR_TEMP_MOVEEFFECT, 0);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AttackerUsedAnExtraMove;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+            VarSet(VAR_EXTRA_MOVE_DAMAGE, 20);
+            StartAbilityCalledMoveScript();
             effect++;
         }
 
