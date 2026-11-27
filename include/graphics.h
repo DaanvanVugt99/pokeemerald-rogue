@@ -2882,6 +2882,10 @@ extern const u16 gSummaryScreen_MoveEffect_Battle_Tilemap[];
 extern const u16 gSummaryScreen_MoveEffect_Cancel_Tilemap[];
 
 extern const u32 gMoveTypes_Gfx[];
+// One 32x16, 4bpp OBJ frame per move type, in TYPE_* order.
+#define COMPACT_MOVE_BADGE_BYTES (32 * 16 / 2)
+extern const u32 gCompactMoveBadges[];
+extern const u16 gCompactMoveBadgePalette[];
 extern const u32 gSummaryMoveSelect_Gfx[];
 extern const u32 gSummaryMoveSelect_Pal[];
 extern const u32 gStatusGfx_Icons[];

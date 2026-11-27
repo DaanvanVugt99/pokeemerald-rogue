@@ -6,6 +6,7 @@
 #include "battle_terastal.h"
 #include "battle_util.h"
 #include "event_data.h"
+#include "graphics.h"
 #include "item.h"
 #include "palette.h"
 #include "pokemon.h"
@@ -406,7 +407,7 @@ void DestroyTeraTriggerSprite(void)
 #undef tHide
 
 // TERA INDICATOR:f
-static const u16 sTeraIndicatorPal[] = INCBIN_U16("graphics/battle_interface/tera/tera_indicator.gbapal");
+
 static const u8 ALIGNED(4) sNormalIndicatorGfx[] = INCBIN_U8("graphics/battle_interface/tera/normal_indicator.4bpp");
 static const u8 ALIGNED(4) sFightingIndicatorGfx[] = INCBIN_U8("graphics/battle_interface/tera/fighting_indicator.4bpp");
 static const u8 ALIGNED(4) sFlyingIndicatorGfx[] = INCBIN_U8("graphics/battle_interface/tera/flying_indicator.4bpp");
@@ -438,7 +439,7 @@ static const s8 sIndicatorPositions[][2] =
 
 static const struct SpritePalette sSpritePalette_TeraIndicator =
 {
-    sTeraIndicatorPal, TAG_TERA_INDICATOR_PAL
+    gCompactMoveBadgePalette, TAG_TERA_INDICATOR_PAL
 };
 
 static const struct OamData sOamData_TeraIndicator =
@@ -751,7 +752,7 @@ void TeraIndicator_LoadSpriteGfx(void)
             inactivePaletteData, TAG_TERA_INDICATOR_INACTIVE_PAL
         };
 
-        CpuCopy16(sTeraIndicatorPal, inactivePaletteData, sizeof(inactivePaletteData));
+        CpuCopy16(gCompactMoveBadgePalette, inactivePaletteData, sizeof(inactivePaletteData));
         TintTeraIndicatorInactivePalette(inactivePaletteData, ARRAY_COUNT(inactivePaletteData));
         LoadSpritePalette(&inactivePalette);
     }

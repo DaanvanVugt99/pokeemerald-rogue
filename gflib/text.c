@@ -599,26 +599,33 @@ static u8 UNUSED GetLastTextColor(u8 colorType)
     }
 }
 
-inline static void GLYPH_COPY(u8 *windowTiles, u32 widthOffset, u32 j, u32 i, u32 *glyphPixels, s32 width, s32 height)
+// Composite one (at most 8x8) glyph tile into the tile-aligned window buffer.
+static void CopyGlyphTile(u8 *windowTiles, u32 stride, u32 x, u32 y, const u32 *glyph, s32 width, s32 height)
 {
-    u32 xAdd, yAdd, pixelData, bits, toOrr, dummyX;
-    u8 *dst;
+    u32 shift = (x % 8) * 4;
+    u32 clip;
+    s32 row;
 
-    xAdd = j + width;
-    yAdd = i + height;
-    dummyX = j;
-    for (; i < yAdd; i++)
+    if (width <= 0 || height <= 0)
+        return;
+    clip = ~0u >> ((8 - width) * 4);
+    for (row = 0; row < height; row++, y++)
     {
-        pixelData = *glyphPixels++;
-        for (j = dummyX; j < xAdd; j++)
+        u32 pixels = glyph[row] & clip;
+        u32 occupied, mask;
+        u32 *dst;
+        if (!pixels)
+            continue;
+        // Expand each nontransparent nibble to 0xF, preserving the background elsewhere.
+        occupied = pixels | (pixels >> 1);
+        occupied |= occupied >> 2;
+        mask = (occupied & 0x11111111u) * 15;
+        dst = (u32 *)(windowTiles + (y / 8) * stride + (x / 8) * 32 + (y % 8) * 4);
+        *dst = (*dst & ~(mask << shift)) | (pixels << shift);
+        if (shift && (mask >> (32 - shift)))
         {
-            if ((toOrr = pixelData & 0xF))
-            {
-                dst = windowTiles + ((j / 8) * 32) + ((j % 8) / 2) + ((i / 8) * widthOffset) + ((i % 8) * 4);
-                bits = ((j & 1) * 4);
-                *dst = (toOrr << bits) | (*dst & (0xF0 >> bits));
-            }
-            pixelData >>= 4;
+            dst += 8;
+            *dst = (*dst & ~(mask >> (32 - shift))) | (pixels >> (32 - shift));
         }
     }
 }
@@ -651,27 +658,27 @@ void CopyGlyphToWindow(struct TextPrinter *textPrinter)
     {
         if (glyphHeight < 9)
         {
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY, glyphPixels, glyphWidth, glyphHeight);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY, glyphPixels, glyphWidth, glyphHeight);
         }
         else
         {
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY, glyphPixels, glyphWidth, 8);
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY + 8, glyphPixels + 16, glyphWidth, glyphHeight - 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY, glyphPixels, glyphWidth, 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY + 8, glyphPixels + 16, glyphWidth, glyphHeight - 8);
         }
     }
     else
     {
         if (glyphHeight < 9)
         {
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY, glyphPixels, 8, glyphHeight);
-            GLYPH_COPY(windowTiles, widthOffset, currX + 8, currY, glyphPixels + 8, glyphWidth - 8, glyphHeight);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY, glyphPixels, 8, glyphHeight);
+            CopyGlyphTile(windowTiles, widthOffset, currX + 8, currY, glyphPixels + 8, glyphWidth - 8, glyphHeight);
         }
         else
         {
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY, glyphPixels, 8, 8);
-            GLYPH_COPY(windowTiles, widthOffset, currX + 8, currY, glyphPixels + 8, glyphWidth - 8, 8);
-            GLYPH_COPY(windowTiles, widthOffset, currX, currY + 8, glyphPixels + 16, 8, glyphHeight - 8);
-            GLYPH_COPY(windowTiles, widthOffset, currX + 8, currY + 8, glyphPixels + 24, glyphWidth - 8, glyphHeight - 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY, glyphPixels, 8, 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX + 8, currY, glyphPixels + 8, glyphWidth - 8, 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX, currY + 8, glyphPixels + 16, 8, glyphHeight - 8);
+            CopyGlyphTile(windowTiles, widthOffset, currX + 8, currY + 8, glyphPixels + 24, glyphWidth - 8, glyphHeight - 8);
         }
     }
 }

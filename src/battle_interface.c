@@ -2159,8 +2159,7 @@ static void TypeIndicator_UpdateTypesIfNeeded(u32 battlerId)
     }
 }
 
-// The first type indicator owns the item sprite. Share the type palette so
-// four different items in doubles leave OBJ palettes available for animations.
+// Held items and type indicators share one palette across both sides.
 #define TAG_HELDBOX_ITEM_BASE 0xD7B0
 #define tItemSpritePlusOne data[7]
 
@@ -4151,90 +4150,9 @@ static void Task_FreeAbilityPopUpGfx(u8 taskId)
 #define BATTLE_OPTION_WINDOW_PAL_TAG 0xD722
 #define MOVE_INFO_WINDOW_TAG 0xD723
 #define MOVE_TYPE_BADGE_TILE_TAG 0xD725
-#define MOVE_TYPE_BADGE_PAL_TAG 0xD726
 
 #define MOVE_TYPE_BADGE_X 168
 #define MOVE_TYPE_BADGE_Y 120
-
-static const u32 sMoveTypeBadgeNormalGfx[] = INCBIN_U32("graphics/types/normal.4bpp.lz");
-static const u32 sMoveTypeBadgeFightingGfx[] = INCBIN_U32("graphics/types/fight.4bpp.lz");
-static const u32 sMoveTypeBadgeFlyingGfx[] = INCBIN_U32("graphics/types/flying.4bpp.lz");
-static const u32 sMoveTypeBadgePoisonGfx[] = INCBIN_U32("graphics/types/poison.4bpp.lz");
-static const u32 sMoveTypeBadgeGroundGfx[] = INCBIN_U32("graphics/types/ground.4bpp.lz");
-static const u32 sMoveTypeBadgeRockGfx[] = INCBIN_U32("graphics/types/rock.4bpp.lz");
-static const u32 sMoveTypeBadgeBugGfx[] = INCBIN_U32("graphics/types/bug.4bpp.lz");
-static const u32 sMoveTypeBadgeGhostGfx[] = INCBIN_U32("graphics/types/ghost.4bpp.lz");
-static const u32 sMoveTypeBadgeSteelGfx[] = INCBIN_U32("graphics/types/steel.4bpp.lz");
-static const u32 sMoveTypeBadgeMysteryGfx[] = INCBIN_U32("graphics/types/mystery.4bpp.lz");
-static const u32 sMoveTypeBadgeFireGfx[] = INCBIN_U32("graphics/types/fire.4bpp.lz");
-static const u32 sMoveTypeBadgeWaterGfx[] = INCBIN_U32("graphics/types/water.4bpp.lz");
-static const u32 sMoveTypeBadgeGrassGfx[] = INCBIN_U32("graphics/types/grass.4bpp.lz");
-static const u32 sMoveTypeBadgeElectricGfx[] = INCBIN_U32("graphics/types/electric.4bpp.lz");
-static const u32 sMoveTypeBadgePsychicGfx[] = INCBIN_U32("graphics/types/psychic.4bpp.lz");
-static const u32 sMoveTypeBadgeIceGfx[] = INCBIN_U32("graphics/types/ice.4bpp.lz");
-static const u32 sMoveTypeBadgeDragonGfx[] = INCBIN_U32("graphics/types/dragon.4bpp.lz");
-static const u32 sMoveTypeBadgeDarkGfx[] = INCBIN_U32("graphics/types/dark.4bpp.lz");
-static const u32 sMoveTypeBadgeFairyGfx[] = INCBIN_U32("graphics/types/fairy.4bpp.lz");
-static const u32 sMoveTypeBadgeStellarGfx[] = INCBIN_U32("graphics/types/stellar.4bpp.lz");
-
-static const u32 *const sMoveTypeBadgeGfx[NUMBER_OF_MON_TYPES] =
-{
-    [TYPE_NORMAL] = sMoveTypeBadgeNormalGfx,
-    [TYPE_FIGHTING] = sMoveTypeBadgeFightingGfx,
-    [TYPE_FLYING] = sMoveTypeBadgeFlyingGfx,
-    [TYPE_POISON] = sMoveTypeBadgePoisonGfx,
-    [TYPE_GROUND] = sMoveTypeBadgeGroundGfx,
-    [TYPE_ROCK] = sMoveTypeBadgeRockGfx,
-    [TYPE_BUG] = sMoveTypeBadgeBugGfx,
-    [TYPE_GHOST] = sMoveTypeBadgeGhostGfx,
-    [TYPE_STEEL] = sMoveTypeBadgeSteelGfx,
-    [TYPE_MYSTERY] = sMoveTypeBadgeMysteryGfx,
-    [TYPE_FIRE] = sMoveTypeBadgeFireGfx,
-    [TYPE_WATER] = sMoveTypeBadgeWaterGfx,
-    [TYPE_GRASS] = sMoveTypeBadgeGrassGfx,
-    [TYPE_ELECTRIC] = sMoveTypeBadgeElectricGfx,
-    [TYPE_PSYCHIC] = sMoveTypeBadgePsychicGfx,
-    [TYPE_ICE] = sMoveTypeBadgeIceGfx,
-    [TYPE_DRAGON] = sMoveTypeBadgeDragonGfx,
-    [TYPE_DARK] = sMoveTypeBadgeDarkGfx,
-    [TYPE_FAIRY] = sMoveTypeBadgeFairyGfx,
-    [TYPE_STELLAR] = sMoveTypeBadgeStellarGfx,
-};
-
-static const u8 sMoveTypeBadgePaletteGroup[NUMBER_OF_MON_TYPES] =
-{
-    [TYPE_NORMAL] = 0,
-    [TYPE_FIGHTING] = 0,
-    [TYPE_FLYING] = 1,
-    [TYPE_POISON] = 1,
-    [TYPE_GROUND] = 0,
-    [TYPE_ROCK] = 0,
-    [TYPE_BUG] = 2,
-    [TYPE_GHOST] = 1,
-    [TYPE_STEEL] = 0,
-    [TYPE_MYSTERY] = 2,
-    [TYPE_FIRE] = 0,
-    [TYPE_WATER] = 1,
-    [TYPE_GRASS] = 2,
-    [TYPE_ELECTRIC] = 0,
-    [TYPE_PSYCHIC] = 1,
-    [TYPE_ICE] = 1,
-    [TYPE_DRAGON] = 2,
-    [TYPE_DARK] = 0,
-    [TYPE_FAIRY] = 1,
-    [TYPE_STELLAR] = 2,
-};
-
-static const u16 sMoveTypeBadgePalette1[] = INCBIN_U16("graphics/types/move_types_1.gbapal");
-static const u16 sMoveTypeBadgePalette2[] = INCBIN_U16("graphics/types/move_types_2.gbapal");
-static const u16 sMoveTypeBadgePalette3[] = INCBIN_U16("graphics/types/move_types_3.gbapal");
-
-static const u16 *const sMoveTypeBadgePalettes[] =
-{
-    sMoveTypeBadgePalette1,
-    sMoveTypeBadgePalette2,
-    sMoveTypeBadgePalette3,
-};
 
 static const struct OamData sOamData_MoveTypeBadge =
 {
@@ -4246,7 +4164,7 @@ static const struct OamData sOamData_MoveTypeBadge =
 static const struct SpriteTemplate sSpriteTemplate_MoveTypeBadge =
 {
     .tileTag = MOVE_TYPE_BADGE_TILE_TAG,
-    .paletteTag = MOVE_TYPE_BADGE_PAL_TAG,
+    .paletteTag = TAG_TERA_INDICATOR_PAL,
     .oam = &sOamData_MoveTypeBadge,
     .anims = gDummySpriteAnimTable,
     .images = NULL,
@@ -4254,11 +4172,7 @@ static const struct SpriteTemplate sSpriteTemplate_MoveTypeBadge =
     .callback = SpriteCallbackDummy,
 };
 
-static const struct SpritePalette sSpritePalette_MoveTypeBadge =
-{
-    .data = sMoveTypeBadgePalette1,
-    .tag = MOVE_TYPE_BADGE_PAL_TAG,
-};
+
 
 static const struct OamData sOamData_LastUsedBall =
 {
@@ -4647,24 +4561,6 @@ static bool32 IsMoveTypeBadgeSpriteValid(void)
         && gSprites[spriteId].template == &sSpriteTemplate_MoveTypeBadge;
 }
 
-static bool32 IsMoveTypeBadgePaletteExclusive(u8 paletteNum)
-{
-    u32 i;
-    u8 badgeSpriteId = IsMoveTypeBadgeSpriteValid()
-                     ? gBattleStruct->moveTypeBadgeSpriteId
-                     : MAX_SPRITES;
-
-    for (i = 0; i < MAX_SPRITES; i++)
-    {
-        if (i != badgeSpriteId
-         && gSprites[i].inUse
-         && gSprites[i].oam.paletteNum == paletteNum)
-            return FALSE;
-    }
-
-    return TRUE;
-}
-
 bool32 UpdateBattleMoveTypeBadge(u8 type)
 {
     struct SpriteSheet spriteSheet;
@@ -4675,12 +4571,11 @@ bool32 UpdateBattleMoveTypeBadge(u8 type)
     if (type >= NUMBER_OF_MON_TYPES)
         return FALSE;
 
-    LZDecompressWram(sMoveTypeBadgeGfx[type], gDecompressionBuffer);
     tileStart = GetSpriteTileStartByTag(MOVE_TYPE_BADGE_TILE_TAG);
     if (tileStart == 0xFFFF)
     {
-        spriteSheet.data = gDecompressionBuffer;
-        spriteSheet.size = 32 * 16 / 2;
+        spriteSheet.data = &gCompactMoveBadges[type * COMPACT_MOVE_BADGE_BYTES / sizeof(u32)];
+        spriteSheet.size = COMPACT_MOVE_BADGE_BYTES;
         spriteSheet.tag = MOVE_TYPE_BADGE_TILE_TAG;
         LoadSpriteSheet(&spriteSheet);
         tileStart = GetSpriteTileStartByTag(MOVE_TYPE_BADGE_TILE_TAG);
@@ -4689,39 +4584,27 @@ bool32 UpdateBattleMoveTypeBadge(u8 type)
     }
     else
     {
-        CpuCopy16(gDecompressionBuffer,
+        CpuCopy16(&gCompactMoveBadges[type * COMPACT_MOVE_BADGE_BYTES / sizeof(u32)],
                   (u8 *)OBJ_VRAM0 + TILE_SIZE_4BPP * tileStart,
                   32 * 16 / 2);
     }
 
-    paletteNum = IndexOfSpritePaletteTag(MOVE_TYPE_BADGE_PAL_TAG);
-    if (paletteNum == 0xFF)
-        paletteNum = LoadSpritePalette(&sSpritePalette_MoveTypeBadge);
+    paletteNum = IndexOfSpritePaletteTag(TAG_TERA_INDICATOR_PAL);
     if (paletteNum == 0xFF)
     {
         FreeSpriteTilesByTag(MOVE_TYPE_BADGE_TILE_TAG);
         return FALSE;
     }
-    if (!IsMoveTypeBadgePaletteExclusive(paletteNum))
-    {
-        DestroyBattleMoveTypeBadge();
-        return FALSE;
-    }
-    LoadPalette(sMoveTypeBadgePalettes[sMoveTypeBadgePaletteGroup[type]],
-                OBJ_PLTT_ID(paletteNum),
-                PLTT_SIZE_4BPP);
-
     if (!IsMoveTypeBadgeSpriteValid())
     {
         gBattleStruct->moveTypeBadgeSpriteId = MAX_SPRITES;
         spriteId = CreateSprite(&sSpriteTemplate_MoveTypeBadge,
-                                MOVE_TYPE_BADGE_X + 16,
-                                MOVE_TYPE_BADGE_Y + 8,
+                                MOVE_TYPE_BADGE_X + 20,
+                                MOVE_TYPE_BADGE_Y + 10,
                                 0);
         if (spriteId == MAX_SPRITES)
         {
             FreeSpriteTilesByTag(MOVE_TYPE_BADGE_TILE_TAG);
-            FreeSpritePaletteByTag(MOVE_TYPE_BADGE_PAL_TAG);
             return FALSE;
         }
         gBattleStruct->moveTypeBadgeSpriteId = spriteId;
@@ -4738,7 +4621,6 @@ void DestroyBattleMoveTypeBadge(void)
 
     gBattleStruct->moveTypeBadgeSpriteId = MAX_SPRITES;
     FreeSpriteTilesByTag(MOVE_TYPE_BADGE_TILE_TAG);
-    FreeSpritePaletteByTag(MOVE_TYPE_BADGE_PAL_TAG);
 }
 
 void TryAddMoveInfoWindow(void)
