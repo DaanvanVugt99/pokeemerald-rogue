@@ -901,7 +901,7 @@ Divergence design; they do not consume a review-batch slot.
 | Lumineon | Replace Water Veil with Dazzling; add Tail Glow by level; retain Tailwind, Submerge, and Divergence's stats; skip the rest of upstream's learnset and stats. |
 | Luvdisc | Change to Water/Fairy; add Hydration in slot 2 and replace hidden Hydration with Soul-Heart; add Lovely Kiss and Moonblast by level; retain Wish, Baby-Doll Eyes, Heartthrob, and Divergence's stats; skip Heart Stamp, Captivate, Scald, and upstream's stats. |
 | Magcargo | Replace Magma Armor with Weak Armor and hidden Weak Armor with Solid Rock; add Shelter and Power Gem by level; retain Basalt Shell, Steam Eruption, Acid Rain, and Divergence's stats; skip Flame Burst, Toxic, and upstream's stats. |
-| Maractus | Use Water Absorb / Rough Skin / Seed Sower; use 75/106/72/86/81/60; add Horn Leech by level and make Needle Arm level-up rather than compatibility-only; retain Prickly and Divergence's Spiky Shield placement; skip the wholesale upstream learnset and Scald. |
+| Maractus | Use Water Absorb / Rough Skin / Seed Sower; use 75/106/72/86/81/60; learn Needle Arm at 26 and Horn Leech at 50; Rattle Off uses Roar when Spiky Shield blocks a foe's contact move; skip the wholesale upstream learnset and Scald. |
 | Marowak | Add Head Smash as a tutor to regular and Alolan Marowak, preserving Cubone's approved access; assess the move on both forms during balance testing; skip Rock Climb and Alolan Marowak's legacy additions; otherwise retain both forms as-is. |
 | Meowstic | Skip Mystical Fire for both genders and their Megas; retain Divergence's existing moves, gender-differentiated stats, and Screen Test. |
 | Mightyena | Keep Divergence as-is; skip upstream's stat redistribution. |

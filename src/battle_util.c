@@ -7099,6 +7099,25 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
         if (TryActivateCounterstep(battler, source, target))
             return TRUE;
     }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_RATTLE_OFF)
+    {
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (!IsBattlerAlive(battler) || !IsBattlerAlive(target) || !HasBattlerAbility(battler, ABILITY_RATTLE_OFF))
+            return FALSE;
+
+        SetBattlerTriggeredAbility(battler, ABILITY_RATTLE_OFF);
+        SetAtkCancellerForCalledMove();
+        gBattlerAttacker = gBattlerAbility = battler;
+        gBattlerTarget = target;
+        gCalledMove = MOVE_ROAR;
+        gMoveResultFlags = 0;
+        gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+        gProtectStructs[battler].extraMoveUsed = TRUE;
+        StartAbilityCalledMoveScript();
+        return TRUE;
+    }
     else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_STARMOBILE)
     {
         u32 target = GetPendingUniqueAbilityTarget(battler);
@@ -14969,26 +14988,6 @@ if (triggeringAbility != ABILITY_NONE)
          && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(battler)] & gBitTable[gBattlerPartyIndexes[battler]]))
         {
             gBattleResources->flags->flags[battler] |= RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES;
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_PRICKLY)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg
-         && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IsMoveMakingContact(move, moveEndAttacker)
-         && IsFinalMultiHitStrike()
-         && CanUseExtraMove(battler, moveEndAttacker))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_PRICKLY);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = moveEndAttacker;
-            gCalledMove = MOVE_TWINEEDLE;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
             effect++;
         }
 

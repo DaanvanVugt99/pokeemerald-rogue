@@ -4266,13 +4266,13 @@
       "id": "rebalance-maractus-horn_leech",
       "species": "SPECIES_MARACTUS",
       "move": "MOVE_HORN_LEECH",
-      "level": 26
+      "level": 50
     },
     {
       "id": "rebalance-maractus-needle_arm",
       "species": "SPECIES_MARACTUS",
       "move": "MOVE_NEEDLE_ARM",
-      "level": 50
+      "level": 26
     },
     {
       "id": "rebalance-tarountula-stealth_rock",

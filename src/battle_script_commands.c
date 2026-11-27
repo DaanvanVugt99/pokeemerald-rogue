@@ -7120,6 +7120,13 @@ static void Cmd_moveend(void)
         case MOVEEND_PROTECT_LIKE_EFFECT:
             if (gProtectStructs[gBattlerAttacker].touchedProtectLike)
             {
+                if (gProtectStructs[gBattlerTarget].spikyShielded
+                 && (gMoveResultFlags & MOVE_RESULT_MISSED)
+                 && gBattleCommunication[MISS_TYPE] == B_MSG_PROTECTED
+                 && GetBattlerSide(gBattlerTarget) != GetBattlerSide(gBattlerAttacker)
+                 && HasBattlerAbility(gBattlerTarget, ABILITY_RATTLE_OFF))
+                    QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_RATTLE_OFF, gBattlerTarget, gBattlerTarget, gBattlerAttacker);
+
                 if (gProtectStructs[gBattlerTarget].spikyShielded && !HasBattlerAbility(gBattlerAttacker, ABILITY_MAGIC_GUARD))
                 {
                     gProtectStructs[gBattlerAttacker].touchedProtectLike = FALSE;

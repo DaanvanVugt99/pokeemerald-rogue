@@ -787,7 +787,9 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 5);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 257);
+    EXPECT_EQ(pairedAbilityCount, 258);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_RATTLE_OFF, 0), MOVE_SPIKY_SHIELD);
+    EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RATTLE_OFF, MOVE_SPIKES));
 }
 
 TEST("Newest dynamic unique abilities use their required synergy profiles")

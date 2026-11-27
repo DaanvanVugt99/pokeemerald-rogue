@@ -5622,7 +5622,7 @@
         "Remaining Upstream Revised Pokemon | Ledyba": "cf7ca912abe3a915b50c17cef469dc628180e0c0471fcaefe35946e3c03f4ae6",
         "Initial Divergence-design review | Ledian": "2b96c535f70f21cdee8c14b581c4706a77c1ec0a2a5cb067d267f9e743759eac",
         "Initial Divergence-design review | Luvdisc": "2b7a09c70ca2f8468222ebdf4ab175bbfb9dbafabc704864e51add4d2bfa98f4",
-        "Initial Divergence-design review | Maractus": "ac62924ca16f9102a861b2279e6fe50309fce48d6bc8cfecee248ea90c032917",
+        "Initial Divergence-design review | Maractus": "00bcce8109f62542e42c49a10533b5ba2afdde4d00a2820460ff062da802cbd1",
         "Remaining Upstream Revised Pokemon | Tarountula": "1981347e061536f39d5ff6dc3f28cb0d00c418805e2341d6a5ca379b270adc1f",
         "Initial Divergence-design review | Spidops": "e06878b218fdd9484d5987233c08d0a355d754d67f96820dfd93ba5a421b1a73",
         "Remaining Upstream Revised Pokemon | Sunkern": "b18c193d7dc0286ddb8d19fd355b6599d5486748897f2d4dd7e7f54ab31b9470",
@@ -5866,8 +5866,8 @@
             "ABILITY_SEED_SOWER"
           ],
           "level_moves": {
-            "MOVE_HORN_LEECH": 26,
-            "MOVE_NEEDLE_ARM": 50
+            "MOVE_HORN_LEECH": 50,
+            "MOVE_NEEDLE_ARM": 26
           }
         },
         "SPECIES_TAROUNTULA": {

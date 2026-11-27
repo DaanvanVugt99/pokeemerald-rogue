@@ -565,7 +565,7 @@
 #define ABILITY_STORM_COMMAND          647
 #define ABILITY_BOUNTY                 604
 #define ABILITY_PRETTY_PETALS          602
-#define ABILITY_PRICKLY                606
+#define ABILITY_RATTLE_OFF             606
 #define ABILITY_TIDECALL               610
 #define ABILITY_TRASH_HEAP             613
 #define ABILITY_SPRING_CLEAN           615

@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Maractus’s Unique is now Rattle Off. When Spiky Shield blocks a foe’s contact move, it uses Roar on that foe. Dynamic gifts pair it with Spiky Shield. Maractus learns Needle Arm at level 26 and Horn Leech at level 50.
+
 - Ceaseless Edge and Stone Axe set hazards only if the user survives contact damage from Rough Skin, Iron Barbs or Rocky Helmet.
 
 - Sheer Force-boosted hits now trigger Pickpocket, Wimp Out, Emergency Exit, Eject Button and Red Card. Multiple Emergency Exit or Wimp Out users switch in descending Speed order after a spread hit. Sheer Force suppresses Shell Bell healing and Life Orb recoil on boosted hits.
