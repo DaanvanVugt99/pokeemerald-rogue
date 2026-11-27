@@ -58,6 +58,11 @@ static const u16 sTextWindowPalettes[][16] =
     INCBIN_U16("graphics/text_window/text_pal4.gbapal")
 };
 
+// Nine tiles per frame. The inner three pixels of each border form the menu gutter.
+#define DARK_FRAME_SIZE (9 * TILE_SIZE_4BPP)
+static const u8 sDarkWindowFrames[] = INCBIN_U8("graphics/text_window/dark_frames.4bpp");
+STATIC_ASSERT(sizeof(sDarkWindowFrames) == WINDOW_FRAMES_COUNT * DARK_FRAME_SIZE, DarkFrameCount);
+
 static const u16 sDarkWindowFramePal[] =
 {
     RGB(0, 0, 0),
@@ -70,7 +75,7 @@ static const u16 sDarkWindowFramePal[] =
     RGB(21, 21, 22),
     RGB(3, 3, 4),
     RGB(6, 6, 7),
-    RGB(9, 9, 10),
+    RGB(6, 6, 7), // Menu gutter
     RGB(12, 12, 13),
     RGB(15, 15, 16),
     RGB(18, 18, 19),
@@ -124,8 +129,7 @@ void LoadUserWindowBorderGfx_(u8 windowId, u16 destOffset, u8 palOffset)
 
 void LoadWindowGfx(u8 windowId, u8 frameId, u16 destOffset, u8 palOffset)
 {
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sWindowFrames[frameId].tiles, 0x120, destOffset);
-    LoadPalette(sDarkWindowFramePal, palOffset, PLTT_SIZE_4BPP);
+    LoadDarkWindowBorderGfxOnBg(GetWindowAttribute(windowId, WINDOW_BG), frameId, destOffset, palOffset);
 }
 
 void LoadOriginalWindowGfx(u8 windowId, u8 frameId, u16 destOffset, u8 palOffset)
@@ -234,13 +238,12 @@ const u16 *GetOverworldTextboxPalettePtr(void)
 // Effectively LoadUserWindowBorderGfx but specifying the bg directly instead of a window from that bg
 void LoadUserWindowBorderGfxOnBg(u8 bg, u16 destOffset, u8 palOffset)
 {
-    LoadBgTiles(bg, sWindowFrames[gSaveBlock2Ptr->optionsWindowFrameType].tiles, 0x120, destOffset);
-    LoadPalette(sDarkWindowFramePal, palOffset, PLTT_SIZE_4BPP);
+    LoadDarkWindowBorderGfxOnBg(bg, gSaveBlock2Ptr->optionsWindowFrameType, destOffset, palOffset);
 }
 
 void LoadDarkWindowBorderGfxOnBg(u8 bg, u8 frameId, u16 destOffset, u8 palOffset)
 {
-    LoadBgTiles(bg, sWindowFrames[frameId].tiles, 0x120, destOffset);
+    LoadBgTiles(bg, &sDarkWindowFrames[frameId * DARK_FRAME_SIZE], DARK_FRAME_SIZE, destOffset);
     LoadPalette(sDarkWindowFramePal, palOffset, PLTT_SIZE_4BPP);
 }
 

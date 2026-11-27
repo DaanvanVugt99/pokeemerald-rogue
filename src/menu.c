@@ -77,25 +77,7 @@ static EWRAM_DATA bool8 sScheduledBgCopiesToVram[4] = {FALSE};
 static EWRAM_DATA u16 sTempTileDataBufferIdx = 0;
 static EWRAM_DATA void *sTempTileDataBuffer[0x20] = {NULL};
 
-const u16 gStandardMenuPalette[] =
-{
-    RGB_WHITE,
-    RGB_WHITE,
-    RGB(12, 12, 13),
-    RGB(24, 24, 25),
-    RGB(24, 5, 5),
-    RGB(29, 18, 12),
-    RGB(7, 18, 8),
-    RGB(18, 26, 18),
-    RGB(9, 12, 16),
-    RGB(18, 20, 24),
-    RGB_BLACK,
-    RGB_BLACK,
-    RGB_BLACK,
-    RGB_BLACK,
-    RGB_BLACK,
-    RGB_BLACK,
-};
+const u16 gStandardMenuPalette[] = INCBIN_U16("graphics/interface/std_menu.gbapal");
 
 static const u8 sTextSpeedFrameDelays[] =
 {
