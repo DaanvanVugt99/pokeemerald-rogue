@@ -329,6 +329,17 @@ static void SpriteCB_ZMoveTrigger(struct Sprite *sprite)
     }
 }
 
+bool32 IsZMoveTriggerVisibleForBattler(u32 battler)
+{
+    u8 id = gBattleStruct->zmove.triggerSpriteId;
+    if (id >= MAX_SPRITES || !gSprites[id].inUse || gSprites[id].tBattler != battler)
+        return FALSE;
+
+    // The move menu also creates a fully retracted trigger for unusable Z-Moves.
+    return !gSprites[id].tHide
+        || gSprites[id].x != gSprites[gHealthboxSpriteIds[battler]].x - SINGLES_Z_TRIGGER_POS_X_SLIDE;
+}
+
 bool32 IsZMoveTriggerSpriteActive(void)
 {
     if (GetSpriteTileStartByTag(TAG_ZMOVE_TRIGGER_TILE) == 0xFFFF)

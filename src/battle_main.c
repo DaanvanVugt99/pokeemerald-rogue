@@ -3134,6 +3134,9 @@ static void BattleStartClearSetData(void)
 
     gBattleStruct->mega.triggerSpriteId = 0xFF;
     gBattleStruct->burst.triggerSpriteId = 0xFF;
+    gBattleStruct->dynamax.triggerSpriteId = 0xFF;
+    gBattleStruct->tera.triggerSpriteId = 0xFF;
+    gBattleStruct->zmove.triggerSpriteId = 0xFF;
 
     for (i = 0; i < ARRAY_COUNT(gSideTimers); i++)
     {

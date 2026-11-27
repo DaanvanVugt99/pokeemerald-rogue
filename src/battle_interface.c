@@ -1051,16 +1051,16 @@ void GetBattlerHealthboxCoords(u8 battler, s16 *x, s16 *y)
         switch (GetBattlerPosition(battler))
         {
         case B_POSITION_PLAYER_LEFT:
-            *x = 159, *y = 76;
+            *x = 171, *y = 75;
             break;
         case B_POSITION_PLAYER_RIGHT:
             *x = 171, *y = 101;
             break;
         case B_POSITION_OPPONENT_LEFT:
-            *x = 44, *y = 19;
+            *x = 31, *y = 19;
             break;
         case B_POSITION_OPPONENT_RIGHT:
-            *x = 32, *y = 44;
+            *x = 31, *y = 44;
             break;
         }
     }
@@ -1487,6 +1487,8 @@ static void SpriteCb_MegaTrigger(struct Sprite *sprite)
         xPriority = DOUBLES_MEGA_TRIGGER_POS_X_PRIORITY;
         xOptimal = DOUBLES_MEGA_TRIGGER_POS_X_OPTIMAL;
         yDiff = DOUBLES_MEGA_TRIGGER_POS_Y_DIFF;
+        if (GetBattlerPosition(sprite->tBattler) == B_POSITION_PLAYER_LEFT)
+            yDiff--; // Applied to both y and y2, lowering the upper button by two pixels.
     }
     else
     {
@@ -1936,7 +1938,7 @@ static const struct TypeIndicatorCoords sTypeIndicatorSinglesCoords[NUM_BATTLE_S
 
 static const struct TypeIndicatorCoords sTypeIndicatorDoublesCoords[MAX_BATTLERS_COUNT] =
 {
-    [B_POSITION_PLAYER_LEFT] = {-26, -11},
+    [B_POSITION_PLAYER_LEFT] = {-26, -10},
     [B_POSITION_OPPONENT_LEFT] = {68, -11},
     [B_POSITION_PLAYER_RIGHT] = {-26, -11},
     [B_POSITION_OPPONENT_RIGHT] = {68, -11},
@@ -2157,6 +2159,127 @@ static void TypeIndicator_UpdateTypesIfNeeded(u32 battlerId)
     }
 }
 
+// The first type indicator owns the item sprite. Share the type palette so
+// four different items in doubles leave OBJ palettes available for animations.
+#define TAG_HELDBOX_ITEM_BASE 0xD7B0
+#define tItemSpritePlusOne data[7]
+
+static u8 CreateHealthboxItemIcon(u32 battler, u16 item)
+{
+    u8 palette = IndexOfSpritePaletteTag(TAG_TERA_INDICATOR_PAL);
+    u32 source[8];
+    u8 map[16] = {0};
+    u32 i, j;
+    if (palette == 0xFF)
+        return MAX_SPRITES;
+    LZDecompressWram(GetItemIconPicOrPalette(item, 1), source);
+    for (i = 1; i < 16; ++i)
+    {
+        u16 color = source[i / 2] >> (16 * (i % 2));
+        s32 best = 3 * 31 * 31 + 1;
+        for (j = 1; j < 16; ++j)
+        {
+            u16 other = gPlttBufferUnfaded[OBJ_PLTT_ID(palette) + j];
+            s32 r = (color & 31) - (other & 31);
+            s32 g = ((color >> 5) & 31) - ((other >> 5) & 31);
+            s32 b = (color >> 10 & 31) - (other >> 10 & 31);
+            s32 distance = r*r + g*g + b*b;
+            if (distance < best)
+            {
+                best = distance;
+                map[i] = j;
+            }
+        }
+    }
+    return AddRemappedItemIconSprite(TAG_HELDBOX_ITEM_BASE + battler, TAG_TERA_INDICATOR_PAL, item, map);
+}
+
+// Measure once per item change. Its native 24x24 image occupies the top
+// left nine tiles of the 32x32 OBJ, and palette index zero is transparent.
+static void AlignHealthboxItemIcon(struct Sprite *icon, u32 battler)
+{
+    const u8 *tiles = (const u8 *)OBJ_VRAM0 + icon->oam.tileNum * TILE_SIZE_4BPP;
+    s32 left = 24, right = 0, top = 24, bottom = 0;
+    s32 x, y;
+    for (y = 0; y < 24; ++y)
+    {
+        for (x = 0; x < 24; ++x)
+        {
+            u32 tile = (y / 8) * 4 + x / 8;
+            u8 pair = tiles[tile * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+            if ((pair >> (4 * (x % 2))) & 15)
+            {
+                left = min(left, x);
+                right = max(right, x);
+                top = min(top, y);
+                bottom = max(bottom, y);
+            }
+        }
+    }
+
+    // Type pixels span x = -4..3. Leave two clear columns on either side.
+    icon->data[1] = 16 + (GetBattlerSide(battler) == B_SIDE_PLAYER ? -7 - right : 6 - left);
+    // The two visible type glyphs together span y = -1..20.
+    icon->data[2] = 16 + (19 - top - bottom) / 2;
+}
+
+static bool32 TriggerBelongsToBattler(u8 spriteId, u32 battler)
+{
+    return spriteId < MAX_SPRITES && gSprites[spriteId].inUse
+        && gSprites[spriteId].tBattler == battler;
+}
+
+static bool32 IsHealthboxTriggerVisible(u32 battler)
+{
+    return TriggerBelongsToBattler(gBattleStruct->mega.triggerSpriteId, battler)
+        || TriggerBelongsToBattler(gBattleStruct->burst.triggerSpriteId, battler)
+        || TriggerBelongsToBattler(gBattleStruct->dynamax.triggerSpriteId, battler)
+        || TriggerBelongsToBattler(gBattleStruct->tera.triggerSpriteId, battler)
+        || IsZMoveTriggerVisibleForBattler(battler);
+}
+
+static void UpdateHealthboxItemIcon(struct Sprite *type)
+{
+    u32 battler = type->tBattler;
+    u16 item = gBattleMons[battler].item;
+    struct Sprite *icon = NULL;
+    if (type->tItemSpritePlusOne)
+    {
+        icon = &gSprites[type->tItemSpritePlusOne - 1];
+        if (icon->data[0] != item)
+        {
+            DestroySprite(icon);
+            FreeSpriteTilesByTag(TAG_HELDBOX_ITEM_BASE + battler);
+            type->tItemSpritePlusOne = 0;
+            icon = NULL;
+        }
+    }
+    if (!icon && item && !type->invisible)
+    {
+        u8 id = CreateHealthboxItemIcon(battler, item);
+        if (id == MAX_SPRITES || GetSpriteTileStartByTag(TAG_HELDBOX_ITEM_BASE + battler) == 0xFFFF)
+        {
+            if (id != MAX_SPRITES)
+                DestroySprite(&gSprites[id]);
+            FreeSpriteTilesByTag(TAG_HELDBOX_ITEM_BASE + battler);
+            return;
+        }
+        icon = &gSprites[id];
+        type->tItemSpritePlusOne = id + 1;
+        icon->data[0] = item;
+        AlignHealthboxItemIcon(icon, battler);
+        icon->oam.priority = 0;
+    }
+    if (icon)
+    {
+        icon->invisible = type->invisible || IsHealthboxTriggerVisible(battler);
+        icon->x = type->x + icon->data[1];
+        icon->y = type->y + icon->data[2];
+        icon->x2 = type->x2;
+        icon->y2 = type->y2;
+    }
+}
+
 static void SpriteCb_TypeIndicator(struct Sprite *sprite)
 {
     u32 battlerId = sprite->tBattler;
@@ -2165,6 +2288,8 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     if (healthboxSpriteId >= MAX_SPRITES || !gSprites[healthboxSpriteId].inUse)
     {
         sprite->invisible = TRUE;
+        if (sprite->tTypeSlot == 0)
+            UpdateHealthboxItemIcon(sprite);
         return;
     }
 
@@ -2176,8 +2301,11 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
     sprite->x2 = gSprites[healthboxSpriteId].x2;
     sprite->y2 = gSprites[healthboxSpriteId].y2;
+    if (sprite->tTypeSlot == 0)
+        UpdateHealthboxItemIcon(sprite);
 }
 
+#undef tItemSpritePlusOne
 #undef TYPE_INDICATOR_ICON_Y_SPACING
 
 #undef tBattler

@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Battle health boxes show each Pokémon’s current held item beside its type icons in singles and doubles. The item hides while that Pokémon’s transformation button is out and returns when it retracts.
+
 - Jirachi’s Wishmaker grants a random follow-up move when its Wish resolves, even at full HP or after Jirachi switches out. The recipient uses the move. Helping Hand leaves the pool because Wish resolves at the end of the turn.
 
 - Rebuilt Ascension as twelve milestones. Gym aces start with Sitrus Berries, the rival raises a persistent Unique Pokémon, and later runs introduce gym fields, Elite Four legendaries, fixed starting supplies and Unique Pokémon on League teams. Trainer Uniques roll gift rarity and typing, and League bosses upgrade a random non-Legendary party member. A12 bosses field six Pokémon where capacity allows. This development build requires a new game.
