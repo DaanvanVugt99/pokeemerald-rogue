@@ -3,6 +3,10 @@
 
 #include "battle_controllers.h"
 
+// Center of a 32x16 button cue docked above the battle menu.
+#define BATTLE_MENU_HINT_X 16
+#define BATTLE_MENU_HINT_Y 104
+
 enum
 {
     HP_CURRENT,
@@ -148,6 +152,7 @@ void TryRestoreLastUsedBall(void);
 void TryAddLastUsedBallItemSprites(void);
 void TryAddMoveInfoWindow(void);
 void TryHideMoveInfoWindow(void);
+bool32 IsMoveInfoSpriteValid(void);
 bool32 UpdateBattleMoveTypeBadge(u8 type);
 void DestroyBattleMoveTypeBadge(void);
 void SwapBallToDisplay(bool32 sameBall);

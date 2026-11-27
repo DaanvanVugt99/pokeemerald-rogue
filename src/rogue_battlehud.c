@@ -6,6 +6,7 @@
 
 #include "battle_anim.h"
 #include "battle_main.h"
+#include "battle_interface.h"
 #include "battle_message.h"
 #include "malloc.h"
 #include "main.h"
@@ -103,15 +104,33 @@ static const struct SpritePalette sSpritePalette_Overlay[] =
     {},
 };
 
+static const union AnimCmd sInspectHint[] = { ANIMCMD_FRAME(0, 1), ANIMCMD_END };
+static const union AnimCmd sInfoHint[] = { ANIMCMD_FRAME(8, 1), ANIMCMD_END };
+static const union AnimCmd sStartInspectHint[] = { ANIMCMD_FRAME(16, 1), ANIMCMD_END };
+enum { HINT_L_INSPECT, HINT_A_INFO, HINT_START_INSPECT };
+static const union AnimCmd *const sDexPromptAnims[] =
+{
+    [HINT_L_INSPECT] = sInspectHint,
+    [HINT_A_INFO] = sInfoHint,
+    [HINT_START_INSPECT] = sStartInspectHint,
+};
+
+static void SlideInspectHint(struct Sprite *sprite)
+{
+    // The move-info sprite keeps this corner until its exit animation finishes.
+    if (sprite->x2 < 0 && !IsMoveInfoSpriteValid())
+        sprite->x2++;
+}
+
 static const struct SpriteTemplate sDexPromptSpriteTemplate =
 {
     .tileTag = HUD_TAG_SPRITE_DEX_PROMPT,
-    .paletteTag = HUD_TAG_PALETTE_0,
-    .oam = &gOamData_AffineOff_ObjNormal_32x32,
-    .anims = gDummySpriteAnimTable,
+    .paletteTag = TAG_HEALTHBOX_PAL,
+    .oam = &gOamData_AffineOff_ObjNormal_32x16,
+    .anims = sDexPromptAnims,
     .images = NULL,
     .affineAnims = gDummySpriteAffineAnimTable,
-    .callback = SpriteCallbackDummy,
+    .callback = SlideInspectHint,
 };
 
 // Hazards
@@ -794,24 +813,51 @@ static s32 CyclePosition(s32 pos, s32 inc)
 #define SpriteCB_ShowAsMoveTarget SpriteCb_ShowAsMoveTarget
 #endif
 
+u16 RogueBH_GetInspectButtons(void)
+{
+    if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A)
+        return START_BUTTON;
+    return START_BUTTON | L_BUTTON;
+}
+
+void RogueBH_ShowInspectHint(void)
+{
+    u8 id, hint;
+    if (gRogueBattleOverlay == NULL)
+        return;
+    hint = gRogueBattleOverlay->statViewActive ? HINT_A_INFO : HINT_L_INSPECT;
+    if (!gRogueBattleOverlay->statViewActive && !(RogueBH_GetInspectButtons() & L_BUTTON))
+        hint = HINT_START_INSPECT;
+    id = gRogueBattleOverlay->dexPromptSprite;
+    if (id == SPRITE_NONE)
+    {
+        if (RogueBH_CountFreeSpriteSlots() <= MIN_FREE_SPRITES_AFTER_OVERLAY)
+            return;
+        id = CreateSprite(&sDexPromptSpriteTemplate, BATTLE_MENU_HINT_X, BATTLE_MENU_HINT_Y, SUBPRIORITY_PLAYER_ABOVE);
+        if (id >= MAX_SPRITES)
+            return;
+        gRogueBattleOverlay->dexPromptSprite = id;
+        gSprites[id].oam.priority = 0;
+    }
+    else if (gSprites[id].animNum == hint)
+        return;
+
+    gSprites[id].x2 = -2 * BATTLE_MENU_HINT_X;
+    StartSpriteAnim(&gSprites[id], hint);
+}
+
+void RogueBH_HideInspectHint(void)
+{
+    if (gRogueBattleOverlay != NULL && RogueBH_IsValidSpriteId(gRogueBattleOverlay->dexPromptSprite))
+    {
+        DestroySprite(&gSprites[gRogueBattleOverlay->dexPromptSprite]);
+        gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
+    }
+}
+
 void RogueBH_HandleStatViewUpdate(u32 battler)
 {
     u8 prevCursorPos = gMultiUsePlayerCursor;
-
-    if(gRogueBattleOverlay->dexPromptSprite == SPRITE_NONE)
-    {
-        gRogueBattleOverlay->dexPromptSprite = CreateSprite(&sDexPromptSpriteTemplate, 84, 108, SUBPRIORITY_PLAYER_ABOVE);
-        if (gRogueBattleOverlay->dexPromptSprite >= MAX_SPRITES)
-        {
-            gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
-        }
-        else if (RogueBH_CountFreeSpriteSlots() < MIN_FREE_SPRITES_AFTER_OVERLAY)
-        {
-            RogueBH_DestroyOverlaySprite(gRogueBattleOverlay->dexPromptSprite);
-            gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
-        }
-    }
-
 
     if(gMultiUsePlayerCursor == MAX_BATTLERS_COUNT)
     {
@@ -821,16 +867,10 @@ void RogueBH_HandleStatViewUpdate(u32 battler)
         RogueBH_PrintStatView();
     }
 
-    if (JOY_NEW(SELECT_BUTTON | B_BUTTON))
+    if (JOY_NEW(RogueBH_GetInspectButtons() | B_BUTTON))
     {
         PlaySE(SE_WIN_OPEN);
         RogueBH_ToggleStatView();
-
-        if(RogueBH_IsValidSpriteId(gRogueBattleOverlay->dexPromptSprite))
-        {
-            DestroySprite(&gSprites[gRogueBattleOverlay->dexPromptSprite]);
-            gRogueBattleOverlay->dexPromptSprite = SPRITE_NONE;
-        }
 
         if (RogueBH_IsValidBattlerSprite(gMultiUsePlayerCursor))
             gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;

@@ -4512,7 +4512,7 @@ void TryAddLastUsedBallItemSprites(void)
         ArrowsChangeColorLastBallCycle(0); //Default the arrows to be invisible
 }
 
-static bool32 IsMoveInfoSpriteValid(void)
+bool32 IsMoveInfoSpriteValid(void)
 {
     u8 spriteId = gBattleStruct->moveInfoSpriteId;
 
@@ -4645,7 +4645,7 @@ void TryAddMoveInfoWindow(void)
 
     spriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow,
                             -16,
-                            104, // Bottom edge aligns with the top of the battle menu.
+                            BATTLE_MENU_HINT_Y,
                             0);
     if (spriteId < MAX_SPRITES)
     {
@@ -4721,7 +4721,7 @@ static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
         if (sprite->x == -16)
             DestroyMoveInfoWinGfx(sprite);
     }
-    else if (sprite->x != 16)
+    else if (sprite->x != BATTLE_MENU_HINT_X)
     {
         sprite->x++;
     }

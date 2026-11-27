@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- The battle action menu shows L for PKMN INFO (ST when L=A is enabled). Start also opens inspection in either mode. The stat view shows A Info. Both cues slide in after Move Info clears the lower left, with the button and label side by side in the charcoal Move Info style. Select toggles the HP display.
+
 - The battle move type badge clears while choosing which move to swap and returns after confirming or cancelling.
 
 - The naming keyboard switches to lowercase after an initial capital and shows a white arrow beside the name.

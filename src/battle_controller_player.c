@@ -57,6 +57,7 @@
 #include "rogue_pokedex.h"
 
 static void PlayerBufferExecCompleted(u32 battler);
+static void HandleInputChooseAction(u32 battler);
 static void PlayerHandleLoadMonSprite(u32 battler);
 static void PlayerHandleSwitchInAnim(u32 battler);
 static void PlayerHandleDrawTrainerPic(u32 battler);
@@ -193,6 +194,8 @@ void SetControllerToPlayer(u32 battler)
 
 static void PlayerBufferExecCompleted(u32 battler)
 {
+    if (gBattlerControllerFuncs[battler] == HandleInputChooseAction)
+        RogueBH_HideInspectHint();
     gBattlerControllerFuncs[battler] = PlayerBufferRunCommand;
     if (gBattleTypeFlags & BATTLE_TYPE_LINK)
     {
@@ -459,10 +462,6 @@ static void HandleInputChooseAction(u32 battler)
             }
         }
     }
-    else if (JOY_NEW(START_BUTTON))
-    {
-        SwapHpBarsWithHpText();
-    }
 #if DEBUG_BATTLE_MENU == TRUE
     else if (JOY_NEW(SELECT_BUTTON) && JOY_HELD(R_BUTTON))
     {
@@ -471,6 +470,10 @@ static void HandleInputChooseAction(u32 battler)
     }
 #endif
     else if (JOY_NEW(SELECT_BUTTON))
+    {
+        SwapHpBarsWithHpText();
+    }
+    else if (JOY_NEW(RogueBH_GetInspectButtons()))
     {
         PlaySE(SE_WIN_OPEN);
         RogueBH_ToggleStatView();
@@ -2464,6 +2467,7 @@ static void PrintPlayerBattleMenu(u32 battler)
 {
     s32 i;
 
+    RogueBH_ShowInspectHint();
     if (RogueBH_IsStatViewActive())
     {
         gBattle_BG0_Y = 0;
