@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- New Standard Adventures shuffle short and long approaches by run seed. Gym 1 opens long, at most two short approaches occur in succession, and both championship approaches stay medium. At Ascension 0, one long gym approach becomes medium with a guaranteed opening route.
+
 - With exactly two biting moves, Huntail’s Abyssal Maw follows a landed bite with the other at 40% of its base power. Gift recipients can learn Ice Fang from the tutor to complement their bite pairing.
 
 - Living Fossil now calls the holder’s lowest-power attack when it first drops below half HP each switch-in. It compares listed power and breaks ties by moveslot order.

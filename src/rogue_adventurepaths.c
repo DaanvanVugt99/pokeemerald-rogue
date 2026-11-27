@@ -131,6 +131,7 @@ struct AdvPathSettings
     struct AdvPathRoomSettings roomScratch[ROGUE_ADVPATH_ROOM_CAPACITY];
     u8 numOfRooms[ADVPATH_ROOM_COUNT];
     struct Coords8 currentCoords;
+    u8 reservedOpeningRoute; // Room id plus one, or zero for no reservation.
     u8 totalLength;
     u8 nodeCount;
 };
@@ -219,7 +220,7 @@ struct ItemRoomScheduleEntry
     u8 difficulty;
 };
 
-static u32 AdvanceItemRoomScheduleRng(u32 *state)
+static u32 AdvancePathScheduleRng(u32 *state)
 {
     *state = *state * 1664525u + 1013904223u;
     return *state;
@@ -320,21 +321,21 @@ static void GetItemRoomSchedule(struct ItemRoomScheduleEntry *schedule)
         return;
     }
 
-    schedule[0].difficulty = 1 + AdvanceItemRoomScheduleRng(&state) % 7;
-    hasBonusRoom = (AdvanceItemRoomScheduleRng(&state) & 1) != 0;
+    schedule[0].difficulty = 1 + AdvancePathScheduleRng(&state) % 7;
+    hasBonusRoom = (AdvancePathScheduleRng(&state) & 1) != 0;
 
     if(hasBonusRoom)
     {
-        schedule[1].difficulty = 1 + AdvanceItemRoomScheduleRng(&state) % 6;
+        schedule[1].difficulty = 1 + AdvancePathScheduleRng(&state) % 6;
         if(schedule[1].difficulty >= schedule[0].difficulty)
             ++schedule[1].difficulty;
     }
 
-    schedule[2].difficulty = 9 + AdvanceItemRoomScheduleRng(&state) % 4;
+    schedule[2].difficulty = 9 + AdvancePathScheduleRng(&state) % 4;
 
     for(i = ITEM_ROOM_REWARD_COUNT - 1; i != 0; --i)
     {
-        u8 other = AdvanceItemRoomScheduleRng(&state) % (i + 1);
+        u8 other = AdvancePathScheduleRng(&state) % (i + 1);
         u16 temp = items[i];
         items[i] = items[other];
         items[other] = temp;
@@ -940,7 +941,7 @@ static bool8 ReplaceRoomEncounter(struct AdvPathSettings* pathSettings, u8 fromR
 
     for(i = 0; i < pathSettings->nodeCount; ++i)
     {
-        if(pathSettings->roomScratch[i].roomType == fromRoomType)
+        if(i + 1 != pathSettings->reservedOpeningRoute && pathSettings->roomScratch[i].roomType == fromRoomType)
         {
             candidateIds[candidateCount] = i;
             weights[candidateCount] = ReplaceRoomEncounters_CalculateWeight(candidateCount, i, &settings);
@@ -984,15 +985,63 @@ static bool8 ReplaceRoomEncounter(struct AdvPathSettings* pathSettings, u8 fromR
     return FALSE;
 }
 
+static void ShufflePathLengths(u8 *lengths, u8 first, u8 end, u32 *seed)
+{
+    for(u8 i = first + 1; i < end; ++i)
+    {
+        u8 other = first + (AdvancePathScheduleRng(seed) >> 16) % (i - first + 1);
+        u8 temp = lengths[i];
+        lengths[i] = lengths[other];
+        lengths[other] = temp;
+    }
+}
+
+// Draw each block without replacement from a private seed. Reject schedules
+// containing three consecutive short paths, including across the Elite Four boundary.
+u8 RogueAdv_GetStandardPathLength(u8 difficulty)
+{
+    static EWRAM_DATA u8 lengths[ROGUE_CHAMP_START_DIFFICULTY] = {0};
+    static EWRAM_DATA u16 cachedSeed = 0;
+    static EWRAM_DATA bool8 cachedBaseAscension = FALSE;
+    bool8 baseAscension = Rogue_GetAscension() == 0;
+    u32 seed = gRogueRun.baseSeed ^ 0x50414345u;
+    u8 shorts;
+    u8 i;
+
+    if(difficulty >= ROGUE_CHAMP_START_DIFFICULTY)
+        return STANDARD_PATH_MEDIUM;
+    if(!gRogueRun.seededStandardPacing)
+        return difficulty % 2 ? STANDARD_PATH_SHORT : STANDARD_PATH_LONG;
+
+    if(lengths[0] && cachedSeed == gRogueRun.baseSeed && cachedBaseAscension == baseAscension)
+        return lengths[difficulty];
+
+    do
+    {
+        shorts = 0;
+        for(i = 0; i < ARRAY_COUNT(lengths); ++i)
+            lengths[i] = i % 2 ? STANDARD_PATH_SHORT : STANDARD_PATH_LONG;
+        if(baseAscension)
+            lengths[2] = STANDARD_PATH_MEDIUM;
+        ShufflePathLengths(lengths, 1, ROGUE_ELITE_START_DIFFICULTY, &seed);
+        ShufflePathLengths(lengths, ROGUE_ELITE_START_DIFFICULTY, ROGUE_CHAMP_START_DIFFICULTY, &seed);
+
+        for(i = 0; i < ARRAY_COUNT(lengths); ++i)
+        {
+            shorts = lengths[i] == STANDARD_PATH_SHORT ? shorts + 1 : 0;
+            if(shorts == 3)
+                break;
+        }
+    } while(shorts == 3);
+    cachedSeed = gRogueRun.baseSeed;
+    cachedBaseAscension = baseAscension;
+    return lengths[difficulty];
+}
+
 static bool8 StandardPathAreRoutesHidden()
 {
-    if(Rogue_GetModeRules()->adventureGenerator != ADV_GENERATOR_STANDARD)
-        return FALSE;
-
-    if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-        return FALSE;
-
-    return (GetPathGenerationDifficulty() % 2) == 1;
+    return Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD
+        && RogueAdv_GetStandardPathLength(GetPathGenerationDifficulty()) == STANDARD_PATH_SHORT;
 }
 
 static bool8 IsStartingPathRoom(struct AdvPathSettings* pathSettings, struct AdvPathRoomSettings* room)
@@ -1077,7 +1126,14 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         if(pathSettings->roomScratch[i].currentCoords.x > 1)
         {
             AssignRoomInstance(pathSettings, i, ADVPATH_ROOM_ROUTE);
-            ++freeRoomCount;
+            if(pathSettings->reservedOpeningRoute == 0
+             && pathSettings->totalLength == STANDARD_PATH_MEDIUM + 2
+             && GetPathGenerationDifficulty() < ROGUE_ELITE_START_DIFFICULTY
+             && Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD
+             && IsStartingPathRoom(pathSettings, &pathSettings->roomScratch[i]))
+                pathSettings->reservedOpeningRoute = i + 1;
+            else
+                ++freeRoomCount;
         }
     }
 
@@ -1127,7 +1183,8 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             // immediately available from a newly generated path.
             for(i = 0; i < pathSettings->nodeCount; ++i)
             {
-                if(IsStartingPathRoom(pathSettings, &pathSettings->roomScratch[i])
+                if(i + 1 != pathSettings->reservedOpeningRoute
+                    && IsStartingPathRoom(pathSettings, &pathSettings->roomScratch[i])
                     && pathSettings->roomScratch[i].roomType != ADVPATH_ROOM_BOSS)
                 {
                     itemRoomId = i;
@@ -1141,7 +1198,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
             {
                 for(i = 0; i < pathSettings->nodeCount; ++i)
                 {
-                    if(pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE)
+                    if(i + 1 != pathSettings->reservedOpeningRoute && pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE)
                     {
                         itemRoomId = i;
                         break;
@@ -1218,7 +1275,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         {
             for(i = 0; i < pathSettings->nodeCount; ++i)
             {
-                if(pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE && RogueRandomChance(chance, 0))
+                if(i + 1 != pathSettings->reservedOpeningRoute && pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE && RogueRandomChance(chance, 0))
                 {
                     AssignRoomInstance(pathSettings, i, ADVPATH_ROOM_NONE);
                     --freeRoomCount;
@@ -1443,7 +1500,7 @@ static void GenerateRoomPlacements(struct AdvPathSettings* pathSettings)
         // Always make sure there is at least 1 regular route which can be chosen
         for(i = 0; i < pathSettings->nodeCount && freeRoomCount > minRouteCount; ++i)
         {
-            if(pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE && RogueRandomChance(chance, 0))
+            if(i + 1 != pathSettings->reservedOpeningRoute && pathSettings->roomScratch[i].roomType == ADVPATH_ROOM_ROUTE && RogueRandomChance(chance, 0))
             {
                 AssignRoomInstance(pathSettings, i, ADVPATH_ROOM_WILD_DEN);
                 --freeRoomCount;
@@ -1884,10 +1941,7 @@ bool8 RogueAdv_GenerateAdventurePathsIfRequired()
             break;
 
         case ADV_GENERATOR_STANDARD:
-            if(GetPathGenerationDifficulty() >= ROGUE_CHAMP_START_DIFFICULTY)
-                pathSettings.totalLength = 3 + 2;
-            else
-                pathSettings.totalLength = (StandardPathAreRoutesHidden() ? 2 : 4) + 2;
+            pathSettings.totalLength = RogueAdv_GetStandardPathLength(GetPathGenerationDifficulty()) + 2;
             break;
 
         case ADV_GENERATOR_SLOW_PATH:

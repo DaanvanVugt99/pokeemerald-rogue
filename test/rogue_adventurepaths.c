@@ -1418,3 +1418,111 @@ TEST("Portal room: stale service positions trigger a real continue warp even whe
     if (oldStatus) SetContinueGameWarpStatus(); else ClearContinueGameWarpStatus();
     if (oldRun) FlagSet(FLAG_ROGUE_RUN_ACTIVE); else FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }
+
+TEST("Standard pacing keeps stage budgets and streak limits across seeds and reloads")
+{
+    struct RogueAdventureConfig config;
+    u16 originalSeed = gRogueRun.baseSeed;
+    bool8 originalPacing = gRogueRun.seededStandardPacing;
+    RAND_TYPE originalRng = gRngRogueValue;
+    u16 firstShorts = 0;
+    bool8 varied = FALSE;
+
+    Rogue_CopyAdventureConfig(&config);
+    config.mode = ROGUE_GAME_MODE_STANDARD;
+    gRogueRun.seededStandardPacing = TRUE;
+    for(config.ascension = 0; config.ascension <= 1; ++config.ascension)
+    {
+        Rogue_SetRunStartConfigOverride(&config);
+        for(u16 seed = 0; seed < 128; ++seed)
+        {
+            u16 shortMask = 0;
+            u8 gymShort = 0, gymMedium = 0, eliteShort = 0, streak = 0;
+            gRogueRun.baseSeed = seed;
+            EXPECT_EQ(RogueAdv_GetStandardPathLength(0), STANDARD_PATH_LONG);
+            for(u8 stage = 0; stage < ROGUE_MAX_BOSS_COUNT; ++stage)
+            {
+                u8 length = RogueAdv_GetStandardPathLength(stage);
+                streak = length == STANDARD_PATH_SHORT ? streak + 1 : 0;
+                EXPECT_LE(streak, 2);
+                if(length == STANDARD_PATH_SHORT)
+                    shortMask |= 1u << stage;
+                if(stage < ROGUE_ELITE_START_DIFFICULTY)
+                {
+                    gymShort += length == STANDARD_PATH_SHORT;
+                    gymMedium += length == STANDARD_PATH_MEDIUM;
+                }
+                else if(stage < ROGUE_CHAMP_START_DIFFICULTY)
+                {
+                    EXPECT_NE(length, STANDARD_PATH_MEDIUM);
+                    eliteShort += length == STANDARD_PATH_SHORT;
+                }
+                else
+                    EXPECT_EQ(length, STANDARD_PATH_MEDIUM);
+            }
+            EXPECT_EQ(gymShort, 4);
+            EXPECT_EQ(gymMedium, config.ascension == 0);
+            EXPECT_EQ(eliteShort, 2);
+            if(seed == 0)
+                firstShorts = shortMask;
+            else if(shortMask != firstShorts)
+                varied = TRUE;
+
+            gRogueRun.baseSeed = seed + 1;
+            RogueAdv_GetStandardPathLength(0);
+            gRogueRun.baseSeed = seed;
+            for(u8 stage = 0; stage < ROGUE_CHAMP_START_DIFFICULTY; ++stage)
+                EXPECT_EQ(RogueAdv_GetStandardPathLength(stage) == STANDARD_PATH_SHORT, (shortMask >> stage) & 1);
+        }
+    }
+    EXPECT(varied);
+    EXPECT_EQ(gRngRogueValue, originalRng);
+    Rogue_ClearRunStartConfigOverride();
+    gRogueRun.seededStandardPacing = originalPacing;
+    gRogueRun.baseSeed = originalSeed;
+}
+
+TEST("Standard pacing gives the A0 medium gym an ordinary opening route")
+{
+    struct RogueAdvPath *saved = Alloc(sizeof(*saved));
+    struct RogueAdventureConfig config;
+    u16 originalSeed = gRogueRun.baseSeed;
+    u8 originalStage = Rogue_GetCurrentDifficulty();
+    u8 originalRoom = gRogueRun.adventureRoomId;
+    bool8 originalPacing = gRogueRun.seededStandardPacing;
+    RAND_TYPE originalRng = gRngRogueValue;
+
+    EXPECT_NE(saved, NULL);
+    *saved = gRogueAdvPath;
+    Rogue_CopyAdventureConfig(&config);
+    config.mode = ROGUE_GAME_MODE_STANDARD;
+    config.ascension = 0;
+    Rogue_SetRunStartConfigOverride(&config);
+    gRogueRun.seededStandardPacing = TRUE;
+    for(u8 seed = 0; seed < 8; ++seed)
+    {
+        bool8 found = FALSE;
+        u8 stage = 0;
+        gRogueRun.baseSeed = seed;
+        while(stage < ROGUE_ELITE_START_DIFFICULTY && RogueAdv_GetStandardPathLength(stage) != STANDARD_PATH_MEDIUM)
+            ++stage;
+        EXPECT_LT(stage, ROGUE_ELITE_START_DIFFICULTY);
+        Rogue_SetCurrentDifficulty(stage);
+        gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
+        memset(&gRogueAdvPath, 0, sizeof(gRogueAdvPath));
+        EXPECT(RogueAdv_GenerateAdventurePathsIfRequired());
+        EXPECT_EQ(gRogueAdvPath.pathLength, 5);
+        for(u8 i = 0; i < gRogueAdvPath.roomCount; ++i)
+            if(gRogueAdvPath.rooms[i].coords.x + 1 == gRogueAdvPath.pathLength && gRogueAdvPath.rooms[i].roomType == ADVPATH_ROOM_ROUTE)
+                found = TRUE;
+        EXPECT(found);
+    }
+    gRogueAdvPath = *saved;
+    Free(saved);
+    gRogueRun.seededStandardPacing = originalPacing;
+    gRogueRun.baseSeed = originalSeed;
+    gRogueRun.adventureRoomId = originalRoom;
+    Rogue_SetCurrentDifficulty(originalStage);
+    Rogue_ClearRunStartConfigOverride();
+    gRngRogueValue = originalRng;
+}

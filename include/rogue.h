@@ -338,7 +338,8 @@ struct RogueRunData
     u16 currentDifficulty;
     u16 victoryLapTotalWins;
     u16 pendingPokeblockBundleRewardCount;
-    u8 shrineSpawnDifficulty : 7;
+    u8 shrineSpawnDifficulty : 6;
+    bool8 seededStandardPacing : 1; // Previously zero in saved runs (shrine stages are below 14).
     bool8 hasChallengedShrine : 1;
     u8 adventureRoomId;
     u8 currentRouteIndex;

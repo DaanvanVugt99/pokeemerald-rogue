@@ -9,6 +9,13 @@
 
 extern EWRAM_DATA struct RogueAdvPath gRogueAdvPath;
 
+enum StandardPathLength
+{
+    STANDARD_PATH_SHORT = 2,
+    STANDARD_PATH_MEDIUM,
+    STANDARD_PATH_LONG,
+};
+u8 RogueAdv_GetStandardPathLength(u8 difficulty);
 bool8 RogueAdv_GenerateAdventurePathsIfRequired();
 void RogueAdv_CacheMiniBossPreviews();
 void RogueAdv_ApplyAdventureMetatiles();

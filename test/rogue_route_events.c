@@ -540,7 +540,7 @@ TEST("Selected standalone route scene payloads remain immutable")
         ROGUE_ROUTE_SCENE_RECIPE_BURIED_CACHE,
         ROGUE_ROUTE_SCENE_RECIPE_TIDE_SALVAGE,
     };
-    struct RogueAdvPath originalPath;
+    struct RogueAdvPath *originalPath = Alloc(sizeof(*originalPath));
     struct RogueAdventureQuest originalQuests[ROGUE_ADVENTURE_QUEST_CAPACITY];
     struct RogueRouteSceneRequest selected;
     struct RogueRouteSceneRequest restored;
@@ -560,7 +560,8 @@ TEST("Selected standalone route scene payloads remain immutable")
     u16 seed;
     bool8 found;
 
-    SetupCurrentEvent(&originalPath, &originalRoomId);
+    EXPECT_NE(originalPath, NULL);
+    SetupCurrentEvent(originalPath, &originalRoomId);
     memcpy(originalQuests, gRogueRun.adventureQuests, sizeof(originalQuests));
     ClearAdventureQuestSlotsForRouteTest();
     memset(&gRogueRun.wildEncounters, 0, sizeof(gRogueRun.wildEncounters));
@@ -633,7 +634,8 @@ TEST("Selected standalone route scene payloads remain immutable")
     RestoreFlag(FLAG_ROGUE_RUN_ACTIVE, originalRunActive);
     gRogueRun.wildEncounters = originalWildEncounters;
     memcpy(gRogueRun.adventureQuests, originalQuests, sizeof(originalQuests));
-    gRogueAdvPath = originalPath;
+    gRogueAdvPath = *originalPath;
+    Free(originalPath);
     gRogueRun.adventureRoomId = originalRoomId;
 }
 

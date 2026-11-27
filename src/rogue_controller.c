@@ -5285,6 +5285,7 @@ static void BeginRogueRunPhase_Reset(void)
     else
         FlagClear(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
 
+    gRogueRun.seededStandardPacing = TRUE;
     Rogue_SetCurrentDifficulty(GetStartDifficulty());
     gRogueRun.currentLevelOffset = Rogue_GetModeRules()->initialLevelOffset;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;
@@ -5767,34 +5768,18 @@ static void ChooseLegendarysForNewAdventure()
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : ROGUE_ELITE_START_DIFFICULTY - 1 + RogueRandomRange(3, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_BOX] = SelectLegendarySpecies(ADVPATH_LEGEND_BOX);
-
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
-        {
-            // Standard hides routes every other path, so place special encounters on reset paths.
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] / 2) * 2;
-        }
     }
 
     if(spawnRoamer)
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 1 + RogueRandomRange(5, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_ROAMER] = SelectLegendarySpecies(ADVPATH_LEGEND_ROAMER);
-
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
-        {
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] / 2) * 2;
-        }
     }
 
     if(spawnMinor)
     {
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_GAUNTLET) ? 0 : 4 + RogueRandomRange(4, 0);
         gRogueRun.legendarySpecies[ADVPATH_LEGEND_MINOR] = SelectLegendarySpecies(ADVPATH_LEGEND_MINOR);
-
-        if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
-        {
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] = (gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] / 2) * 2;
-        }
     }
 
     // DEBUG - Force all legends to spawn at specific difficulties
@@ -5805,17 +5790,43 @@ static void ChooseLegendarysForNewAdventure()
         gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] = 2;
     }
 
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
     {
-        u8 collisionStep = (Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD) ? 2 : 1;
+        u16 occupied = 0;
+        for(u8 slot = 0; slot < ADVPATH_LEGEND_COUNT; ++slot)
+        {
+            u8 preferred = gRogueRun.legendaryDifficulties[slot];
+            if(preferred >= ROGUE_MAX_BOSS_COUNT)
+                continue;
+            // Stay near the original timing, preferring the earlier stage on a tie.
+            u8 best = ROGUE_MAX_BOSS_COUNT;
+            u8 bestDistance = ROGUE_MAX_BOSS_COUNT;
+            for(u8 stage = 0; stage < ROGUE_MAX_BOSS_COUNT; ++stage)
+            {
+                u8 distance = stage > preferred ? stage - preferred : preferred - stage;
+                if(distance < bestDistance && !(occupied & (1u << stage))
+                 && RogueAdv_GetStandardPathLength(stage) != STANDARD_PATH_SHORT)
+                {
+                    best = stage;
+                    bestDistance = distance;
+                }
+            }
+            AGB_ASSERT(best < ROGUE_MAX_BOSS_COUNT);
+            gRogueRun.legendaryDifficulties[slot] = best;
+            occupied |= 1u << best;
+        }
+        return;
+    }
 
+    {
         if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] += collisionStep;
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR]++;
 
         if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] += collisionStep;
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX]++;
 
         if(gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
-            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX] += collisionStep;
+            gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX]++;
     }
 }
 
@@ -5823,7 +5834,7 @@ static bool8 IsUniqueDenDifficultyAvailable(u8 difficulty, u8 selectedDenCount)
 {
     u8 i;
 
-    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD && (difficulty % 2) != 0)
+    if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD && RogueAdv_GetStandardPathLength(difficulty) == STANDARD_PATH_SHORT)
         return FALSE;
 
     for(i = 0; i < ADVPATH_LEGEND_COUNT; ++i)
@@ -6007,32 +6018,35 @@ static void ChooseTeamEncountersForNewAdventure()
     // Early can be anytime from badge 2 to badge 5 (provided there is no legend at that time)
     if(Rogue_GetModeRules()->adventureGenerator == ADV_GENERATOR_STANDARD)
     {
-        u8 candidates[] = {2, 4, 6};
-        u8 validCandidates[ARRAY_COUNT(candidates)];
+        u8 validCandidates[ROGUE_ELITE_START_DIFFICULTY];
         u8 validCount = 0;
 
-        for(i = 0; i < ARRAY_COUNT(candidates); ++i)
+        for(i = 1; i < ROGUE_ELITE_START_DIFFICULTY; ++i)
         {
-            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
+            if(RogueAdv_GetStandardPathLength(i) == STANDARD_PATH_SHORT)
                 continue;
-            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER])
+            if(i == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_MINOR])
                 continue;
-            if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+            if(i == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_ROAMER])
+                continue;
+            if(i == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
                 continue;
 
-            validCandidates[validCount++] = candidates[i];
+            validCandidates[validCount++] = i;
         }
 
         if(validCount == 0)
         {
             // Prefer not to stack with the box legend, because pre-legend team
             // already uses that path. Minor/roamer overlap is better than no early team encounter.
-            for(i = 0; i < ARRAY_COUNT(candidates); ++i)
+            for(i = 1; i < ROGUE_ELITE_START_DIFFICULTY; ++i)
             {
-                if(candidates[i] == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
+                if(RogueAdv_GetStandardPathLength(i) == STANDARD_PATH_SHORT)
+                    continue;
+                if(i == gRogueRun.legendaryDifficulties[ADVPATH_LEGEND_BOX])
                     continue;
 
-                validCandidates[validCount++] = candidates[i];
+                validCandidates[validCount++] = i;
             }
         }
 
