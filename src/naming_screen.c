@@ -1487,6 +1487,7 @@ static bool8 KeyboardKeyHandler_Character(u8 input)
     TryStartButtonFlash(BUTTON_COUNT, FALSE, FALSE);
     if (input == INPUT_A_BUTTON)
     {
+        bool8 firstCharacter = sNamingScreen->textBuffer[0] == EOS;
         bool8 textFull = AddTextCharacter();
 
         SquishCursor();
@@ -1494,6 +1495,10 @@ static bool8 KeyboardKeyHandler_Character(u8 input)
         {
             SetInputState(INPUT_STATE_OVERRIDE);
             sNamingScreen->state = STATE_MOVE_TO_OK_BUTTON;
+        }
+        else if (firstCharacter && sNamingScreen->textBuffer[0] >= CHAR_A && sNamingScreen->textBuffer[0] <= CHAR_Z)
+        {
+            return SwapKeyboardPage();
         }
     }
     return FALSE;

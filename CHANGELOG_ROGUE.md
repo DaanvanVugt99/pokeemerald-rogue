@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- The naming keyboard switches to lowercase after an initial capital and shows a white arrow beside the name.
+
 - L now wraps from Stats to Base on the Pokémon Summary Skills tab, completing the reverse cycle.
 
 - The Bag and its battle, selling, berry-selection, and PC deposit views use charcoal panels. Pokémon Storage, the naming keyboard, berry tags, Battle Checker, and Trainer Card follow the same palette, and the Outfit menu highlights the selected option in amber. Box wallpapers, berry sprites, and Trainer Card rank accents keep their own colors.
