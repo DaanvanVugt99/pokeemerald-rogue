@@ -1892,7 +1892,7 @@ static void LoadPalettes(void)
 {
     LoadPalette(gNamingScreenMenu_Pal, BG_PLTT_ID(0), sizeof(gNamingScreenMenu_Pal));
     LoadPalette(sKeyboard_Pal, BG_PLTT_ID(10), sizeof(sKeyboard_Pal));
-    LoadPalette(GetTextWindowPalette(2), BG_PLTT_ID(11), PLTT_SIZE_4BPP);
+    LoadPalette(gStandardMenuPalette, BG_PLTT_ID(11), PLTT_SIZE_4BPP);
 }
 
 static void DrawBgTilemap(u8 bg, const void *src)
@@ -1937,9 +1937,9 @@ struct TextColor   // Needed because of alignment
 static const struct TextColor sTextColorStruct =
 {
     {
-        {TEXT_DYNAMIC_COLOR_4, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY},
-        {TEXT_DYNAMIC_COLOR_5, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY},
-        {TEXT_DYNAMIC_COLOR_6, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY}
+        {TEXT_DYNAMIC_COLOR_4, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY},
+        {TEXT_DYNAMIC_COLOR_5, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY},
+        {TEXT_DYNAMIC_COLOR_6, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY}
     }
 };
 
@@ -2007,9 +2007,9 @@ static void DrawKeyboardPageOnDeck(void)
 
 static void PrintControls(void)
 {
-    const u8 color[3] = { TEXT_DYNAMIC_COLOR_6, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY };
+    const u8 color[3] = { TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
 
-    FillWindowPixelBuffer(sNamingScreen->windows[WIN_BANNER], PIXEL_FILL(15));
+    FillWindowPixelBuffer(sNamingScreen->windows[WIN_BANNER], PIXEL_FILL(TEXT_COLOR_WHITE));
     AddTextPrinterParameterized3(sNamingScreen->windows[WIN_BANNER], FONT_SMALL, 2, 1, color, 0, gText_MoveOkBack);
     PutWindowTilemap(sNamingScreen->windows[WIN_BANNER]);
     CopyWindowToVram(sNamingScreen->windows[WIN_BANNER], COPYWIN_FULL);

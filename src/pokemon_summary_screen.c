@@ -2604,8 +2604,6 @@ static void Task_SummaryInput(u8 taskId)
     }
     else if (s->currPageIndex == PSS_PAGE_SKILLS && (lr || JOY_NEW(A_BUTTON)))
     {
-        if (lr == MENU_L_PRESSED && !s->currTabIndex)
-            return;
         s->currTabIndex = (s->currTabIndex + (lr == MENU_L_PRESSED ? 3 : 1)) % 4;
     }
     else if (JOY_NEW(START_BUTTON) && !detail && s->currPageIndex == PSS_PAGE_BATTLE_MOVES && ShouldShowMoveRemember())

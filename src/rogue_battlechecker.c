@@ -370,7 +370,7 @@ static u8 const sText_Slash[] = _(" / ");
 
 static void InitBattleCheckerHeader(void)
 {
-    u8 const color[3] = {0, 1, 2};
+    u8 const color[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
     u8* str = gStringVar4;
 
     AGB_ASSERT(sBattleCheckerState != NULL);

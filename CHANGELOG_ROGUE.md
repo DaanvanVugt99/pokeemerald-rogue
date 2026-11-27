@@ -5,13 +5,17 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- L now wraps from Stats to Base on the Pokémon Summary Skills tab, completing the reverse cycle.
+
+- The Bag and its battle, selling, berry-selection, and PC deposit views use charcoal panels. Pokémon Storage, the naming keyboard, berry tags, Battle Checker, and Trainer Card follow the same palette, and the Outfit menu highlights the selected option in amber. Box wallpapers, berry sprites, and Trainer Card rank accents keep their own colors.
+
 - Builder, berry, item, and TM purchase lists use charcoal panels, off-white text, and a matching item description background.
 
 - Options uses charcoal panels with an amber bar and lettering on the selected setting.
 
 - The crystal main menu pairs charcoal save and option panels with off-white text and an amber selection jewel against the purple cave.
 
-- Quest journal pages use black ink on paper. Overworld item pickup names and quantities use dark ink with a light outline.
+- Restored the original quest book text palette and button hints. Overworld item pickups use their original white names, grey shadows, and green stack counts.
 
 - Party cards use charcoal panels and off-white text, with a warm amber outline for the selected Pokémon and a blue accent for switching.
 

@@ -287,6 +287,9 @@ static const u8 sText_Popup_PokemonChain[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN
 static const u8 sText_Popup_PokemonChainBroke[] = _("{COLOR LIGHT_RED}{SHADOW RED}Broken Chain");
 
 static const u8 sText_Popup_BagFull[] = _("{COLOR LIGHT_RED}{SHADOW RED}Bag too full.");
+// The overworld message palette reserves dynamic colors 1, 2, 3 and 6 for pickup ink.
+static const u8 sText_PickupItem[] = _("{COLOR DYNAMIC_COLOR1}{SHADOW DYNAMIC_COLOR2}{STR_VAR_1}");
+static const u8 sText_PickupStack[] = _("{COLOR DYNAMIC_COLOR1}{SHADOW DYNAMIC_COLOR2}{STR_VAR_1} {COLOR DYNAMIC_COLOR3}{SHADOW DYNAMIC_COLOR6}x{STR_VAR_2}");
 static const u8 sText_Popup_SingleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1}");
 static const u8 sText_Popup_MultipleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1} x{STR_VAR_2}");
 static const u8 sText_Popup_Money[] = _("¥{STR_VAR_1}");
@@ -1681,12 +1684,12 @@ void Rogue_PushPopup_AddItem(u16 itemId, u16 amount)
 
     if(amount == 1)
     {
-        popup->titleText = sText_Popup_SingleItem;
+        popup->titleText = sText_PickupItem;
         popup->subtitleText = NULL;
     }
     else
     {
-        popup->titleText = sText_Popup_MultipleItem;
+        popup->titleText = sText_PickupStack;
         popup->subtitleText = NULL;
     }
 

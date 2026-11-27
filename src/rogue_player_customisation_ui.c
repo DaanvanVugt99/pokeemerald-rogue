@@ -459,8 +459,7 @@ enum FontColor
     FONT_WHITE,
     FONT_RED,
     FONT_BLUE,
-    FONT_GREEN,
-    FONT_BRIGHT_GREEN,
+    FONT_SELECTED,
 };
 static const u8 sRoguePlayerUIWindowFontColors[][3] = 
 {
@@ -468,8 +467,7 @@ static const u8 sRoguePlayerUIWindowFontColors[][3] =
     [FONT_WHITE]        = {TEXT_COLOR_WHITE, TEXT_COLOR_WHITE,      TEXT_COLOR_DARK_GRAY},
     [FONT_RED]          = {TEXT_COLOR_WHITE, TEXT_COLOR_RED,        TEXT_COLOR_LIGHT_GRAY},
     [FONT_BLUE]         = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY,  TEXT_COLOR_LIGHT_GRAY},
-    [FONT_GREEN]        = {TEXT_COLOR_WHITE, TEXT_COLOR_GREEN,      TEXT_COLOR_LIGHT_GRAY},
-    [FONT_BRIGHT_GREEN] = {TEXT_COLOR_WHITE, TEXT_COLOR_GREEN,      TEXT_COLOR_LIGHT_GREEN},
+    [FONT_SELECTED] = {TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_1, TEXT_COLOR_LIGHT_GRAY},
 };
 
 static void RoguePlayerUI_PreSetupCB(void);
@@ -941,6 +939,7 @@ static bool8 RoguePlayerUI_LoadGraphics(void)
     case 2:
         LoadPalette(sRoguePlayerUIPalette, BG_PLTT_ID(BG_PAL_ID_BACKGROUND), PLTT_SIZE_4BPP);
         LoadPalette(gMessageBox_Pal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+        FillPalette(RGB(31, 24, 12), BG_PLTT_ID(15) + TEXT_DYNAMIC_COLOR_1, sizeof(u16));
         sPlayerOutfitUIState->loadState++;
     default:
         sPlayerOutfitUIState->loadState = 0;
@@ -1001,7 +1000,7 @@ static void AddMenuNameText(u8 menuOffset, const u8* text)
 
     if(menuOffset == sPlayerOutfitUIState->currentOptionIdx)
     {
-        font = FONT_GREEN;
+        font = FONT_SELECTED;
         AddTextPrinterParameterized4(WIN_INFO_PANEL, FONT_NARROW, 0, YPOS_SPACING * menuOffset, 0, 0, sRoguePlayerUIWindowFontColors[font], TEXT_SKIP_DRAW, gText_SelectorArrow);
     }
 
@@ -1014,7 +1013,7 @@ static void AddMenuValueText(u8 menuOffset, s8 offset, const u8* text)
 
     if(menuOffset == sPlayerOutfitUIState->currentOptionIdx)
     {
-        font = FONT_BRIGHT_GREEN;
+        font = FONT_SELECTED;
     }
 
     AddTextPrinterParameterized4(WIN_INFO_PANEL, 
