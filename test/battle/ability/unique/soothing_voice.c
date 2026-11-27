@@ -18,7 +18,7 @@ SINGLE_BATTLE_TEST("Soothing Voice blocks Fighting-type moves only")
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Moves(move); }
-        OPPONENT(SPECIES_JIGGLYPUFF) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SOFT_BODY); }
+        OPPONENT(SPECIES_JIGGLYPUFF) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SOOTHING_VOICE); }
     } WHEN {
         TURN { MOVE(player, move); }
     } THEN {
@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Soothing Voice makes Sing 90 percent accurate")
     PASSES_RANDOMLY(90, 100, RNG_ACCURACY);
 
     GIVEN {
-        PLAYER(SPECIES_JIGGLYPUFF) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SOFT_BODY); Moves(MOVE_SING); }
+        PLAYER(SPECIES_JIGGLYPUFF) { Ability(ABILITY_CUTE_CHARM); UniqueAbility(ABILITY_SOOTHING_VOICE); Moves(MOVE_SING); }
         OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
     } WHEN {
         TURN { MOVE(player, MOVE_SING); MOVE(opponent, MOVE_CELEBRATE); }

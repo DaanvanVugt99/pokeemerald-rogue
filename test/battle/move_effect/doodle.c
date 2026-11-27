@@ -26,7 +26,7 @@ DOUBLE_BATTLE_TEST("Doodle copies the original target's ability to the user and 
         MESSAGE("Grafaiai used Doodle!");
         NONE_OF {
             ABILITY_POPUP(playerLeft, ABILITY_WHITEOUT);
-            ABILITY_POPUP(playerRight, ABILITY_GRAFITTI_TAG);
+            ABILITY_POPUP(playerRight, ABILITY_GRAFFITI_TAG);
         }
         MESSAGE("Froslass used Celebrate!");
     } THEN {

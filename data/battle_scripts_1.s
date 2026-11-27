@@ -7329,7 +7329,7 @@ BattleScript_FaintAttacker::
 	pause B_WAIT_TIME_LONG
 	dofaintanimation BS_ATTACKER
 	printstring STRINGID_ATTACKERFAINTED
-	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG
+	various BS_ATTACKER, VARIOUS_TRY_ACTIVATE_GRAFFITI_TAG
 	cleareffectsonfaint BS_ATTACKER
 	tryactivatesoulheart
 	tryactivatereceiver BS_ATTACKER
@@ -7347,7 +7347,7 @@ BattleScript_FaintTarget::
 	pause B_WAIT_TIME_LONG
 	dofaintanimation BS_TARGET
 	printstring STRINGID_TARGETFAINTED
-	various BS_TARGET, VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG
+	various BS_TARGET, VARIOUS_TRY_ACTIVATE_GRAFFITI_TAG
 	cleareffectsonfaint BS_TARGET
 	tryactivatefellstinger BS_ATTACKER
 	tryactivatesoulheart
@@ -10446,16 +10446,16 @@ BattleScript_DeathrattleRestoreAfterCurse::
 	various BS_SCRIPTING, VARIOUS_RESTORE_ATTACKER_AND_TARGET
 	return
 
-BattleScript_GrafittiTagActivates::
+BattleScript_GraffitiTagActivates::
 	call BattleScript_AbilityPopUp
-	playanimation BS_TARGET, B_ANIM_GRAFITTI_TAG, NULL
+	playanimation BS_TARGET, B_ANIM_GRAFFITI_TAG, NULL
 	waitanimation
-	various BS_TARGET, VARIOUS_APPLY_GRAFITTI_TAG_PALETTES
-	printstring STRINGID_GRAFITTAGGED
+	various BS_TARGET, VARIOUS_APPLY_GRAFFITI_TAG_PALETTES
+	printstring STRINGID_GRAFFITI_TAGGED
 	waitmessage B_WAIT_TIME_LONG
 	end3
 
-BattleScript_GrafittiTagToxicSpikes::
+BattleScript_GraffitiTagToxicSpikes::
 	playmoveanimation BS_ATTACKER, MOVE_TOXIC_SPIKES
 	waitanimation
 	printstring STRINGID_POISONSPIKESSCATTERED
@@ -10817,7 +10817,7 @@ BattleScript_SandSpitActivates::
 	call BattleScript_ActivateWeatherAbilities
 	return
 
-BattleScript_FlashFirestormActivates::
+BattleScript_KickstartActivates::
 	pause B_WAIT_TIME_SHORT
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_PKMNSXINTENSIFIEDSUN

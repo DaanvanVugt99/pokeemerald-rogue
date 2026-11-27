@@ -424,7 +424,7 @@ static const u16 sRolePlayBannedAbilities[] =
     ABILITY_PROTOSYNTHESIS,
     ABILITY_QUARK_DRIVE,
 
-    ABILITY_FORECAST_PRIORITY,
+    ABILITY_INSTANT_FORECAST,
 };
 
 static const u16 sRolePlayBannedAttackerAbilities[] =
@@ -508,7 +508,7 @@ static const u16 sEntrainmentBannedAttackerAbilities[] =
     ABILITY_ZERO_TO_HERO,
     ABILITY_TERA_SHIFT,
 
-    ABILITY_FORECAST_PRIORITY,
+    ABILITY_INSTANT_FORECAST,
 };
 
 static const u16 sEntrainmentTargetSimpleBeamBannedAbilities[] =
@@ -1390,7 +1390,7 @@ static const u8 sAbilitiesNotTraced[ABILITIES_COUNT] =
     [ABILITY_ZERO_TO_HERO] = 1,
     [ABILITY_TERA_SHIFT] = 1,
 
-    [ABILITY_FORECAST_PRIORITY] = 1,
+    [ABILITY_INSTANT_FORECAST] = 1,
 };
 
 static const u8 sHoldEffectToType[][2] =
@@ -1779,7 +1779,7 @@ void PrepareStringBattle(u16 stringId, u32 battler)
     else if ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH)
               && ((targetAbility == ABILITY_DEFIANT && CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
                  || (targetAbility == ABILITY_COMPETITIVE && CompareStat(gBattlerTarget, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
-                 || (targetAbility == ABILITY_CHEAP_TRICK
+                 || (targetAbility == ABILITY_STREET_FIGHTER
                      && (CompareStat(gBattlerTarget, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)
                       || CompareStat(gBattlerTarget, STAT_DEF, MAX_STAT_STAGE, CMP_LESS_THAN))))
               && GetBattlerSide(gSpecialStatuses[gBattlerTarget].changedStatsBattlerId) != targetSide
@@ -9908,7 +9908,7 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
             }
         }
 
-        if (HasBattlerAbility(battler, ABILITY_GRAFITTI_TAG) && !uniqueDone)
+        if (HasBattlerAbility(battler, ABILITY_GRAFFITI_TAG) && !uniqueDone)
         {
             u32 opposingBattler = BATTLE_OPPOSITE(battler);
 
@@ -9916,13 +9916,13 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
 
             if (IsBattlerAlive(opposingBattler) && GetBattlerSide(battler) != GetBattlerSide(opposingBattler))
             {
-                SetBattlerTriggeredAbility(battler, ABILITY_GRAFITTI_TAG);
+                SetBattlerTriggeredAbility(battler, ABILITY_GRAFFITI_TAG);
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
-                SetGrafittiTag(opposingBattler);
+                SetGraffitiTag(opposingBattler);
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
                 gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
-                BattleScriptPushCursorAndCallback(BattleScript_GrafittiTagActivates);
+                BattleScriptPushCursorAndCallback(BattleScript_GraffitiTagActivates);
                 return 1;
             }
         }
@@ -19219,7 +19219,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_FLOWER_RITUAL)
+        if (HasBattlerAbility(battler, ABILITY_FLOWER_RITE)
          && IS_MOVE_STATUS(move)
          && DidMoveSucceedForMoveEndEffects(battler)
          && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -19230,7 +19230,7 @@ if (triggeringAbility != ABILITY_NONE)
          && (CountPartyMonsOfType(battler, TYPE_FAIRY, TRUE) >= 2
           || IsBattlerTerrainAffected(battler, STATUS_FIELD_MISTY_TERRAIN)))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_FLOWER_RITUAL);
+            SetBattlerTriggeredAbility(battler, ABILITY_FLOWER_RITE);
             gBattleStruct->atkCancellerTracker = 0;
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
@@ -19308,7 +19308,7 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SUNSTALKER)
+        if (HasBattlerAbility(battler, ABILITY_CANOPY_STALKER)
          && gBattleMoves[move].slicingMove
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
@@ -19322,14 +19322,14 @@ if (triggeringAbility != ABILITY_NONE)
                                        TRUE) >= 3
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SUNSTALKER);
+            SetBattlerTriggeredAbility(battler, ABILITY_CANOPY_STALKER);
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_CanopyStalkerActivates;
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_FLASH_FIRESTORM)
+        if (HasBattlerAbility(battler, ABILITY_KICKSTART)
          && gBattleMoves[move].kickingMove
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && gBattleMons[gBattlerTarget].hp != 0
@@ -19342,7 +19342,7 @@ if (triggeringAbility != ABILITY_NONE)
                                        TRUE) >= 3
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed)
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_FLASH_FIRESTORM);
+            SetBattlerTriggeredAbility(battler, ABILITY_KICKSTART);
             gBattleScripting.moveEffect = MOVE_EFFECT_BURN;
             gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             BattleScriptPushCursor();
@@ -20968,7 +20968,7 @@ if (triggeringAbility != ABILITY_NONE)
         switch (gLastUsedAbility)
         {
         case ABILITY_FORECAST:
-        case ABILITY_FORECAST_PRIORITY:
+        case ABILITY_INSTANT_FORECAST:
         case ABILITY_FLOWER_GIFT:
             if ((IsBattlerWeatherAffected(battler, gBattleWeather)
                  || gBattleWeather == B_WEATHER_NONE
@@ -25585,7 +25585,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.2));
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_SUNSTALKER)
+    if (HasBattlerAbility(battlerAtk, ABILITY_CANOPY_STALKER)
      && gBattleMoves[move].slicingMove)
     {
         u32 allyCount = CountPartyMonsWithAnyTypes(battlerAtk,
@@ -25607,7 +25607,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         }
     }
 
-    if (HasBattlerAbility(battlerAtk, ABILITY_FLASH_FIRESTORM)
+    if (HasBattlerAbility(battlerAtk, ABILITY_KICKSTART)
      && gBattleMoves[move].kickingMove)
     {
         u32 allyCount = CountPartyMonsWithAnyTypes(battlerAtk,
@@ -27171,7 +27171,7 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         break;
     }
 
-    if (HasBattlerAbility(battlerDef, ABILITY_COTTON_GUARDING))
+    if (HasBattlerAbility(battlerDef, ABILITY_SUPER_SOFT))
     {
         if (!IsMoveMakingContact(move, battlerAtk) && moveType == TYPE_FIRE)
             return UQ_4_12(4.0);
@@ -27958,16 +27958,16 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierInternal(u32 move, u32 mov
             RecordAbilityBattle(battlerDef, ABILITY_SHORT_CIRCUIT);
         }
     }
-    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
+    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOOTHING_VOICE))
     {
         modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
-            SetBattlerTriggeredAbility(battlerDef, ABILITY_SOFT_BODY);
+            SetBattlerTriggeredAbility(battlerDef, ABILITY_SOOTHING_VOICE);
             gMoveResultFlags |= MOVE_RESULT_MISSED;
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
-            RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
+            RecordAbilityBattle(battlerDef, ABILITY_SOOTHING_VOICE);
         }
     }
     else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
@@ -28184,16 +28184,16 @@ static inline uq4_12_t CalcTypeEffectivenessMultiplierForUIInternal(u32 move, u3
             RecordAbilityBattle(battlerDef, ABILITY_SHORT_CIRCUIT);
         }
     }
-    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOFT_BODY))
+    else if (moveType == TYPE_FIGHTING && HasBattlerAbility(battlerDef, ABILITY_SOOTHING_VOICE))
     {
         modifier = UQ_4_12(0.0);
         if (recordAbilities)
         {
-            gLastUsedAbility = ABILITY_SOFT_BODY;
+            gLastUsedAbility = ABILITY_SOOTHING_VOICE;
             gMoveResultFlags |= MOVE_RESULT_MISSED;
             gLastLandedMoves[battlerDef] = 0;
             gBattleCommunication[MISS_TYPE] = B_MSG_AVOIDED_DMG;
-            RecordAbilityBattle(battlerDef, ABILITY_SOFT_BODY);
+            RecordAbilityBattle(battlerDef, ABILITY_SOOTHING_VOICE);
         }
     }
     else if (HasBattlerAbility(battlerDef, ABILITY_DESERT_SHROUD)
@@ -28304,7 +28304,7 @@ uq4_12_t CalcPartyMonTypeEffectivenessMultiplier(u16 move, u16 speciesDef, u32 o
          && !(gFieldStatuses & STATUS_FIELD_GRAVITY))
             modifier = UQ_4_12(0.0);
         if (moveType == TYPE_FIGHTING
-         && (abilityDef == ABILITY_SOFT_BODY || uniqueAbilityDef == ABILITY_SOFT_BODY))
+         && (abilityDef == ABILITY_SOOTHING_VOICE || uniqueAbilityDef == ABILITY_SOOTHING_VOICE))
             modifier = UQ_4_12(0.0);
         if ((abilityDef == ABILITY_WONDER_GUARD || uniqueAbilityDef == ABILITY_WONDER_GUARD)
          && modifier <= UQ_4_12(1.0)
@@ -29033,7 +29033,7 @@ static bool32 TryRemoveTargetSideScreens(u32 target)
     return FALSE;
 }
 
-static const u16 sGrafittiTagColors[] =
+static const u16 sGraffitiTagColors[] =
 {
     RGB(31, 0, 31),
     RGB(31, 4, 0),
@@ -29041,11 +29041,11 @@ static const u16 sGrafittiTagColors[] =
     RGB(4, 31, 0),
 };
 
-static bool8 sGrafittiTagPaletteCached[MAX_BATTLERS_COUNT];
-static u8 sGrafittiTagCachedPaletteNum[MAX_BATTLERS_COUNT];
-static u16 sGrafittiTagBasePalettes[MAX_BATTLERS_COUNT][16];
+static bool8 sGraffitiTagPaletteCached[MAX_BATTLERS_COUNT];
+static u8 sGraffitiTagCachedPaletteNum[MAX_BATTLERS_COUNT];
+static u16 sGraffitiTagBasePalettes[MAX_BATTLERS_COUNT][16];
 
-static void ApplyGrafittiTagPalette(u32 battler)
+static void ApplyGraffitiTagPalette(u32 battler)
 {
     u32 spriteId;
     u8 paletteNum;
@@ -29059,40 +29059,40 @@ static void ApplyGrafittiTagPalette(u32 battler)
 
     paletteNum = gSprites[spriteId].oam.paletteNum;
 
-    if (!sGrafittiTagPaletteCached[battler] || sGrafittiTagCachedPaletteNum[battler] != paletteNum)
+    if (!sGraffitiTagPaletteCached[battler] || sGraffitiTagCachedPaletteNum[battler] != paletteNum)
     {
-        CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum)], sGrafittiTagBasePalettes[battler], sizeof(sGrafittiTagBasePalettes[battler]));
-        sGrafittiTagPaletteCached[battler] = TRUE;
-        sGrafittiTagCachedPaletteNum[battler] = paletteNum;
+        CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum)], sGraffitiTagBasePalettes[battler], sizeof(sGraffitiTagBasePalettes[battler]));
+        sGraffitiTagPaletteCached[battler] = TRUE;
+        sGraffitiTagCachedPaletteNum[battler] = paletteNum;
     }
 
-    LoadPalette(sGrafittiTagBasePalettes[battler], OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
-    BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, sGrafittiTagColors[gDisableStructs[battler].grafittiTagColor]);
+    LoadPalette(sGraffitiTagBasePalettes[battler], OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
+    BlendPalette(OBJ_PLTT_ID(paletteNum), 16, 6, sGraffitiTagColors[gDisableStructs[battler].graffitiTagColor]);
 }
 
-void SetGrafittiTag(u32 battler)
+void SetGraffitiTag(u32 battler)
 {
-    gDisableStructs[battler].grafittiTagged = TRUE;
-    gDisableStructs[battler].grafittiTagColor = Random2() & 3;
-    sGrafittiTagPaletteCached[battler] = FALSE;
+    gDisableStructs[battler].graffitiTagged = TRUE;
+    gDisableStructs[battler].graffitiTagColor = Random2() & 3;
+    sGraffitiTagPaletteCached[battler] = FALSE;
 }
 
-void ResetGrafittiTagPaletteCache(u32 battler)
+void ResetGraffitiTagPaletteCache(u32 battler)
 {
-    if (battler < ARRAY_COUNT(sGrafittiTagPaletteCached))
-        sGrafittiTagPaletteCached[battler] = FALSE;
+    if (battler < ARRAY_COUNT(sGraffitiTagPaletteCached))
+        sGraffitiTagPaletteCached[battler] = FALSE;
 }
 
-void ReapplyGrafittiTagPalettes(void)
+void ReapplyGraffitiTagPalettes(void)
 {
     u32 i;
 
     for (i = 0; i < gBattlersCount; i++)
     {
-        if (gDisableStructs[i].grafittiTagged && IsBattlerAlive(i))
-            ApplyGrafittiTagPalette(i);
+        if (gDisableStructs[i].graffitiTagged && IsBattlerAlive(i))
+            ApplyGraffitiTagPalette(i);
         else
-            sGrafittiTagPaletteCached[i] = FALSE;
+            sGraffitiTagPaletteCached[i] = FALSE;
     }
 }
 

@@ -580,7 +580,7 @@
 #define B_ANIM_ECLIPSE_CONTINUES        51
 #define B_ANIM_ACID_RAIN_CONTINUES      52
 #define B_ANIM_LEECH_SEED_SET           53
-#define B_ANIM_GRAFITTI_TAG             54
+#define B_ANIM_GRAFFITI_TAG             54
 #define B_ANIM_SACRED_ASH               55
 #define B_ANIM_GALARICA_ROUNDS_LOAD     56
 #define B_ANIM_HELD_ITEM_BERRY          57

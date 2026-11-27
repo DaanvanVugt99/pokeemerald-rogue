@@ -735,7 +735,7 @@
 #define STRINGID_BOOSTERENERGYACTIVATEDABILITY        740
 #define STRINGID_FOSSILMEMORYAWAKENED                 741
 #define STRINGID_TUMBLEWEEDCLEAREDHAZARDS             742
-#define STRINGID_GRAFITTAGGED                         743
+#define STRINGID_GRAFFITI_TAGGED                         743
 #define STRINGID_TRIPWIREACTIVATES                    744
 #define STRINGID_INTENTFOCUSED                        745
 #define STRINGID_FAMILYFEUDREADIED                    746

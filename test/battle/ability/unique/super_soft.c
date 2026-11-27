@@ -18,7 +18,7 @@ SINGLE_BATTLE_TEST("Super Soft reduces contact damage to one quarter", s16 damag
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { Attack(200); }
-        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_COTTON_GUARDING : ABILITY_NONE); HP(300); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_SUPER_SOFT : ABILITY_NONE); HP(300); }
     } WHEN {
         TURN { MOVE(player, MOVE_TACKLE); }
     } SCENE {
@@ -38,7 +38,7 @@ SINGLE_BATTLE_TEST("Super Soft quadruples damage from non-contact Fire-type move
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET) { SpAttack(200); }
-        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_COTTON_GUARDING : ABILITY_NONE); HP(300); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_SUPER_SOFT : ABILITY_NONE); HP(300); }
     } WHEN {
         TURN { MOVE(player, MOVE_EMBER); }
     } SCENE {
@@ -58,7 +58,7 @@ SINGLE_BATTLE_TEST("Super Soft does not alter damage of Fire-type contact moves"
 
     GIVEN {
         PLAYER(SPECIES_WOBBUFFET);
-        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_COTTON_GUARDING : ABILITY_NONE); }
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); UniqueAbility(uniqueAbility ? ABILITY_SUPER_SOFT : ABILITY_NONE); }
     } WHEN {
         TURN { MOVE(player, MOVE_FIRE_PUNCH); }
     } SCENE {

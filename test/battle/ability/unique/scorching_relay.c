@@ -127,7 +127,7 @@ SINGLE_BATTLE_TEST("Scorching Relay announces from the switching Pokemon when th
         TURN { SWITCH(player, 1); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ABILITY_POPUP(player, ABILITY_SCORCHING_RELAY);
-        MESSAGE("Wobbuffet was guarded by Scorch Relay!");
+        MESSAGE("Wobbuffet was guarded by Scorching Relay!");
     }
 }
 

@@ -404,7 +404,7 @@ TEST("Dynamic standard ability pool includes every audited regular ability once 
         ABILITY_TERA_SHIFT,
         ABILITY_TERA_SHELL,
         ABILITY_TERAFORM_ZERO,
-        ABILITY_FORECAST_PRIORITY,
+        ABILITY_INSTANT_FORECAST,
         ABILITY_EMBODY_ASPECT_TEAL,
         ABILITY_EMBODY_ASPECT_HEARTHFLAME,
         ABILITY_EMBODY_ASPECT_WELLSPRING,
@@ -420,7 +420,7 @@ TEST("Dynamic standard ability pool includes every audited regular ability once 
     u16 ability;
     u16 i;
 
-    for(ability = 1; ability <= ABILITY_FORECAST_PRIORITY; ++ability)
+    for(ability = 1; ability <= ABILITY_INSTANT_FORECAST; ++ability)
     {
         bool8 expected = TRUE;
 
@@ -494,7 +494,7 @@ TEST("Nine bit standard ability IDs round trip in both non Legendary formats")
     u32 originalId = DynamicOriginalCustomMonId(1, 2, ABILITY_POISON_PUPPETEER);
     u32 typedId = DynamicTypeCustomMonId(TYPE_FIRE, 0, 0, 1, 0, ABILITY_POISON_PUPPETEER);
     u32 flavorId = DynamicOriginalCustomMonId(1, 2, ABILITY_WIMP_OUT);
-    u32 excludedId = DynamicOriginalCustomMonId(1, 2, ABILITY_FORECAST_PRIORITY);
+    u32 excludedId = DynamicOriginalCustomMonId(1, 2, ABILITY_INSTANT_FORECAST);
 
     EXPECT_EQ(RogueGift_GetCustomMonAbility(originalId, 0), ABILITY_POISON_PUPPETEER);
     EXPECT_EQ(RogueGift_GetCustomMonAbility(typedId, 0), ABILITY_POISON_PUPPETEER);

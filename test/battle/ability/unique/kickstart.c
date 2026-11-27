@@ -17,7 +17,7 @@ SINGLE_BATTLE_TEST("Kickstart scales kicking damage by qualifying ally count", s
     PARAMETRIZE { ally1 = SPECIES_ELECTRIKE; ally2 = SPECIES_MACHOP;    ally3 = SPECIES_NUMEL; }     // 3 allies
 
     GIVEN {
-        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_FLASH_FIRESTORM); Moves(MOVE_MEGA_KICK); }
+        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_KICKSTART); Moves(MOVE_MEGA_KICK); }
         PLAYER(ally1);
         PLAYER(ally2);
         PLAYER(ally3);
@@ -36,7 +36,7 @@ SINGLE_BATTLE_TEST("Kickstart scales kicking damage by qualifying ally count", s
 SINGLE_BATTLE_TEST("Kickstart burns the target on the first kicking move after switch-in at 3 allies")
 {
     GIVEN {
-        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_FLASH_FIRESTORM); Moves(MOVE_MEGA_KICK); }
+        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_KICKSTART); Moves(MOVE_MEGA_KICK); }
         PLAYER(SPECIES_ELECTRIKE);
         PLAYER(SPECIES_MACHOP);
         PLAYER(SPECIES_NUMEL);
@@ -45,10 +45,10 @@ SINGLE_BATTLE_TEST("Kickstart burns the target on the first kicking move after s
         TURN { MOVE(player, MOVE_MEGA_KICK); MOVE(opponent, MOVE_CELEBRATE); }
         TURN { MOVE(player, MOVE_MEGA_KICK); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ABILITY_POPUP(player, ABILITY_FLASH_FIRESTORM);
+        ABILITY_POPUP(player, ABILITY_KICKSTART);
         STATUS_ICON(opponent, burn: TRUE);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_FLASH_FIRESTORM);
+            ABILITY_POPUP(player, ABILITY_KICKSTART);
         }
     } THEN {
         EXPECT(opponent->status1 & STATUS1_BURN);
@@ -58,7 +58,7 @@ SINGLE_BATTLE_TEST("Kickstart burns the target on the first kicking move after s
 SINGLE_BATTLE_TEST("Kickstart does not burn at fewer than 3 qualifying allies")
 {
     GIVEN {
-        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_FLASH_FIRESTORM); Moves(MOVE_MEGA_KICK); }
+        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_KICKSTART); Moves(MOVE_MEGA_KICK); }
         PLAYER(SPECIES_ELECTRIKE);
         PLAYER(SPECIES_MACHOP);
         PLAYER(SPECIES_WOBBUFFET);
@@ -67,7 +67,7 @@ SINGLE_BATTLE_TEST("Kickstart does not burn at fewer than 3 qualifying allies")
         TURN { MOVE(player, MOVE_MEGA_KICK); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_FLASH_FIRESTORM);
+            ABILITY_POPUP(player, ABILITY_KICKSTART);
             STATUS_ICON(opponent, burn: TRUE);
         }
     } THEN {
@@ -78,7 +78,7 @@ SINGLE_BATTLE_TEST("Kickstart does not burn at fewer than 3 qualifying allies")
 SINGLE_BATTLE_TEST("Kickstart does not burn on non-kicking moves")
 {
     GIVEN {
-        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_FLASH_FIRESTORM); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_BLAZIKEN) { Ability(ABILITY_BLAZE); UniqueAbility(ABILITY_KICKSTART); Moves(MOVE_TACKLE); }
         PLAYER(SPECIES_ELECTRIKE);
         PLAYER(SPECIES_MACHOP);
         PLAYER(SPECIES_NUMEL);
@@ -87,7 +87,7 @@ SINGLE_BATTLE_TEST("Kickstart does not burn on non-kicking moves")
         TURN { MOVE(player, MOVE_TACKLE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_FLASH_FIRESTORM);
+            ABILITY_POPUP(player, ABILITY_KICKSTART);
             STATUS_ICON(opponent, burn: TRUE);
         }
     } THEN {

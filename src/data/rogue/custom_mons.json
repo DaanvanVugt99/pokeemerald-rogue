@@ -226,7 +226,7 @@
                 ],
                 "abilities":
                 [
-                    "ABILITY_FORECAST_PRIORITY"
+                    "ABILITY_INSTANT_FORECAST"
                     
                 ]
             },

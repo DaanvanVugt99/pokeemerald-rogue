@@ -1054,7 +1054,7 @@ gBattleAnims_General::
 	.4byte General_Eclipse                  @ B_ANIM_ECLIPSE_CONTINUES
 	.4byte General_AcidRain                 @ B_ANIM_ACID_RAIN_CONTINUES
 	.4byte General_LeechSeedSet             @ B_ANIM_LEECH_SEED_SET
-	.4byte General_GrafittiTag              @ B_ANIM_GRAFITTI_TAG
+	.4byte General_GraffitiTag              @ B_ANIM_GRAFFITI_TAG
 	.4byte General_SacredAsh                @ B_ANIM_SACRED_ASH
 	.4byte General_GalaricaRoundsLoad       @ B_ANIM_GALARICA_ROUNDS_LOAD
 	.4byte General_HeldItemBerry            @ B_ANIM_HELD_ITEM_BERRY
@@ -18795,7 +18795,7 @@ General_LeechSeedSet:
 	waitforvisualfinish
 	end
 
-General_GrafittiTag:
+General_GraffitiTag:
 	loadspritegfx ANIM_TAG_POISON_BUBBLE
 	monbg ANIM_TARGET
 	createvisualtask AnimTask_ShakeMon2, 5, ANIM_TARGET, 1, 0, 6, 1

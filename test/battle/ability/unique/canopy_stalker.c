@@ -7,7 +7,7 @@ ASSUMPTIONS
     ASSUME(!gBattleMoves[MOVE_TACKLE].slicingMove);
 }
 
-SINGLE_BATTLE_TEST("Stalker scales slicing damage by qualifying ally count", s16 damage)
+SINGLE_BATTLE_TEST("Canopy Stalker scales slicing damage by qualifying ally count", s16 damage)
 {
     u16 ally1, ally2, ally3;
     PARAMETRIZE { ally1 = SPECIES_WOBBUFFET; ally2 = SPECIES_WOBBUFFET; ally3 = SPECIES_WOBBUFFET; } // 0 allies
@@ -16,7 +16,7 @@ SINGLE_BATTLE_TEST("Stalker scales slicing damage by qualifying ally count", s16
     PARAMETRIZE { ally1 = SPECIES_SHIFTRY;   ally2 = SPECIES_DRATINI;   ally3 = SPECIES_ODDISH; }    // 3 allies
 
     GIVEN {
-        PLAYER(SPECIES_SCEPTILE) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_SUNSTALKER); Moves(MOVE_LEAF_BLADE); }
+        PLAYER(SPECIES_SCEPTILE) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CANOPY_STALKER); Moves(MOVE_LEAF_BLADE); }
         PLAYER(ally1);
         PLAYER(ally2);
         PLAYER(ally3);
@@ -35,7 +35,7 @@ SINGLE_BATTLE_TEST("Stalker scales slicing damage by qualifying ally count", s16
 SINGLE_BATTLE_TEST("Canopy Stalker forces out the target only at 3 qualifying allies, and only after the first slicing move after switch-in")
 {
     GIVEN {
-        PLAYER(SPECIES_SCEPTILE) { Speed(70); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_SUNSTALKER); Moves(MOVE_LEAF_BLADE); }
+        PLAYER(SPECIES_SCEPTILE) { Speed(70); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CANOPY_STALKER); Moves(MOVE_LEAF_BLADE); }
         PLAYER(SPECIES_ODDISH) { Speed(40); }
         PLAYER(SPECIES_DRATINI) { Speed(40); }
         PLAYER(SPECIES_POOCHYENA) { Speed(40); }
@@ -46,12 +46,12 @@ SINGLE_BATTLE_TEST("Canopy Stalker forces out the target only at 3 qualifying al
         TURN { MOVE(player, MOVE_LEAF_BLADE); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
-        ABILITY_POPUP(player, ABILITY_SUNSTALKER);
+        ABILITY_POPUP(player, ABILITY_CANOPY_STALKER);
         MESSAGE("Foe Wynaut was dragged out!");
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SUNSTALKER);
+            ABILITY_POPUP(player, ABILITY_CANOPY_STALKER);
             MESSAGE("Foe Wobbuffet was dragged out!");
         }
     } THEN {
@@ -62,7 +62,7 @@ SINGLE_BATTLE_TEST("Canopy Stalker forces out the target only at 3 qualifying al
 SINGLE_BATTLE_TEST("Canopy Stalker does not force out the target at fewer than 3 qualifying allies")
 {
     GIVEN {
-        PLAYER(SPECIES_SCEPTILE) { Speed(50); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_SUNSTALKER); Moves(MOVE_LEAF_BLADE); }
+        PLAYER(SPECIES_SCEPTILE) { Speed(50); Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CANOPY_STALKER); Moves(MOVE_LEAF_BLADE); }
         PLAYER(SPECIES_SHIFTRY) { Speed(40); }
         PLAYER(SPECIES_DRATINI) { Speed(40); }
         PLAYER(SPECIES_WOBBUFFET) { Speed(40); }
@@ -74,7 +74,7 @@ SINGLE_BATTLE_TEST("Canopy Stalker does not force out the target at fewer than 3
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_LEAF_BLADE, player);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SUNSTALKER);
+            ABILITY_POPUP(player, ABILITY_CANOPY_STALKER);
             MESSAGE("Foe Wynaut was dragged out!");
         }
     } THEN {
@@ -85,7 +85,7 @@ SINGLE_BATTLE_TEST("Canopy Stalker does not force out the target at fewer than 3
 SINGLE_BATTLE_TEST("Canopy Stalker does not force out after a non-slicing move")
 {
     GIVEN {
-        PLAYER(SPECIES_SCEPTILE) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_SUNSTALKER); Moves(MOVE_TACKLE); }
+        PLAYER(SPECIES_SCEPTILE) { Ability(ABILITY_OVERGROW); UniqueAbility(ABILITY_CANOPY_STALKER); Moves(MOVE_TACKLE); }
         PLAYER(SPECIES_ODDISH);
         PLAYER(SPECIES_DRATINI);
         PLAYER(SPECIES_POOCHYENA);
@@ -96,7 +96,7 @@ SINGLE_BATTLE_TEST("Canopy Stalker does not force out after a non-slicing move")
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SUNSTALKER);
+            ABILITY_POPUP(player, ABILITY_CANOPY_STALKER);
             MESSAGE("Foe Wynaut was dragged out!");
         }
     } THEN {

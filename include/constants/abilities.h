@@ -340,7 +340,7 @@
 #define ABILITIES_COUNT_GEN9 311
 
 // Rogue
-#define ABILITY_FORECAST_PRIORITY   311
+#define ABILITY_INSTANT_FORECAST   311
 
 // Uniques
 #define ABILITY_VINE_LASH              314
@@ -360,7 +360,7 @@
 #define ABILITY_MOONLIGHT              335
 #define ABILITY_SUN_REVELRY            324
 #define ABILITY_FROST_REVELRY          323
-#define ABILITY_SOFT_BODY              327
+#define ABILITY_SOOTHING_VOICE              327
 #define ABILITY_VAMPIRIC               328
 #define ABILITY_TOXIC_BLOOM            329
 #define ABILITY_FESTIVAL               408
@@ -492,8 +492,8 @@
 #define ABILITY_SEA_GUARDIAN           449
 #define ABILITY_SACRED_ASH             450
 #define ABILITY_TIMELOOP               451
-#define ABILITY_SUNSTALKER             452
-#define ABILITY_FLASH_FIRESTORM        454
+#define ABILITY_CANOPY_STALKER             452
+#define ABILITY_KICKSTART        454
 #define ABILITY_FLOODPLAIN             453
 #define ABILITY_FULL_MOON              455
 #define ABILITY_SWITCHSTEP             456
@@ -553,7 +553,7 @@
 #define ABILITY_MAELSTROM              624
 #define ABILITY_RAZOR_CARAPACE         627
 #define ABILITY_FROGSONG               596
-#define ABILITY_CHEAP_TRICK            611
+#define ABILITY_STREET_FIGHTER            611
 #define ABILITY_QUIET_MIND             605
 #define ABILITY_SHELL_WORK             607
 #define ABILITY_PETRIFY                609
@@ -609,7 +609,7 @@
 #define ABILITY_SPELLBOOK              662
 #define ABILITY_WORK_CREW              664
 #define ABILITY_WINDSURGE              668
-#define ABILITY_FLOWER_RITUAL          667
+#define ABILITY_FLOWER_RITE          667
 #define ABILITY_HAUTE_COUTURE          669
 #define ABILITY_SECOND_WIND            670
 #define ABILITY_AUTHORITY              675
@@ -751,7 +751,7 @@
 #define ABILITY_AVALANCHE_HIDE         845
 #define ABILITY_FLUX_INSTINCT          838
 #define ABILITY_WAR_CRY                848
-#define ABILITY_SYNTHETIC_SCREECH      849
+#define ABILITY_SYNTH_SCREECH      849
 #define ABILITY_TIDAL_DAWN             850
 #define ABILITY_GUARD_INSTINCT         865
 #define ABILITY_STORM_INSTINCT         866
@@ -803,7 +803,7 @@
 #define ABILITY_SCRAP_JOB              854
 #define ABILITY_DIRTY_TRICKS           823
 #define ABILITY_STORM_GLIDER           837
-#define ABILITY_GRAFITTI_TAG           828
+#define ABILITY_GRAFFITI_TAG           828
 #define ABILITY_TRIPWIRE               635
 #define ABILITY_CLIFFSIDE              853
 #define ABILITY_TUMBLEWEED             824
@@ -816,7 +816,7 @@
 #define ABILITY_HIVE_COMMAND           540
 #define ABILITY_DESERT_SHROUD          488
 #define ABILITY_NEEDLEBURST            489
-#define ABILITY_COTTON_GUARDING        490
+#define ABILITY_SUPER_SOFT        490
 #define ABILITY_VENDETTA               491
 #define ABILITY_SIDEWINDER             492
 #define ABILITY_MOON_TOTEM             493
@@ -973,7 +973,7 @@
 #define ABILITY_LIVING_LIBRARY            939
 #define ABILITY_GLACIAL_FORTRESS           940
 #define ABILITY_AURA_GUARD                 941
-#define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_FORECAST_PRIORITY)
+#define IS_FORECAST_ABILITY(a) (a == ABILITY_FORECAST || a == ABILITY_INSTANT_FORECAST)
 
 #define BLAST_SHIELD_MIN_POWER      120
 #define FLAK_SHIELD_MAX_POWER       40

@@ -5139,7 +5139,7 @@ s8 GetMovePriority(u32 battler, u16 move)
     }
 	else if (IsDynamaxed(battler))
 		return priority;
-    else if (ability == ABILITY_FORECAST_PRIORITY && IsWeatherAffectedMove(move))
+    else if (ability == ABILITY_INSTANT_FORECAST && IsWeatherAffectedMove(move))
     {
         priority++;
     }

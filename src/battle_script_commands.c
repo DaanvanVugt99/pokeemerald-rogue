@@ -687,7 +687,7 @@ static void Cmd_settypetoterrain(void);
 
 static bool32 TryActivateTerraform(const u8 *resumeInstr);
 static bool32 TryActivateCrashProtocol(const u8 *resumeInstr);
-static bool32 TrySetGrafittiTagToxicSpikes(u32 battler);
+static bool32 TrySetGraffitiTagToxicSpikes(u32 battler);
 static void Cmd_jumpifnopassiveswitchintercept(void);
 static void Cmd_snatchsetbattlers(void);
 static void Cmd_removelightscreenreflect(void);
@@ -2060,7 +2060,7 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
      && HasBattlerAbility(battlerAtk, ABILITY_INNER_FOCUS))
         moveAcc = 90;
     if (move == MOVE_SING
-     && HasBattlerAbility(battlerAtk, ABILITY_SOFT_BODY))
+     && HasBattlerAbility(battlerAtk, ABILITY_SOOTHING_VOICE))
         moveAcc = 90;
     if (move == MOVE_HYPNOSIS
      && HasBattlerAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
@@ -3034,7 +3034,7 @@ static void Cmd_waitanimation(void)
 
     if (gBattleControllerExecFlags == 0)
     {
-        ReapplyGrafittiTagPalettes();
+        ReapplyGraffitiTagPalettes();
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
 }
@@ -6545,7 +6545,7 @@ static void Cmd_waitstate(void)
 
     if (gBattleControllerExecFlags == 0)
     {
-        ReapplyGrafittiTagPalettes();
+        ReapplyGraffitiTagPalettes();
         gBattlescriptCurrInstr = cmd->nextInstr;
     }
 }
@@ -10360,7 +10360,7 @@ static void Cmd_switchineffects(void)
     s32 i;
     u32 battler = GetBattlerForBattleScript(cmd->battler);
 
-    ReapplyGrafittiTagPalettes();
+    ReapplyGraffitiTagPalettes();
 
     UpdateSentPokesToOpponentValue(battler);
 
@@ -13486,7 +13486,7 @@ static void Cmd_various(void)
             return;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SYNTHETIC_SCREECH)
+        if (HasBattlerAbility(battler, ABILITY_SYNTH_SCREECH)
          && HasAttackerFaintedTarget()
          && !NoAliveMonsForEitherParty()
          && DoesPartyShareTypeWithBattler(battler)
@@ -13496,7 +13496,7 @@ static void Cmd_various(void)
          && !(gBattleMons[battler].status1 & STATUS1_SLEEP)
          && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_SYNTHETIC_SCREECH);
+            SetBattlerTriggeredAbility(battler, ABILITY_SYNTH_SCREECH);
             SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gBattlerTarget = battler;
@@ -13813,15 +13813,15 @@ static void Cmd_various(void)
         gBattlescriptCurrInstr = BattleScript_TumbleweedTailwind;
         return;
     }
-    case VARIOUS_TRY_ACTIVATE_GRAFITTI_TAG:
+    case VARIOUS_TRY_ACTIVATE_GRAFFITI_TAG:
     {
         VARIOUS_ARGS();
 
         if (!NoAliveMonsForEitherParty()
-         && TrySetGrafittiTagToxicSpikes(battler))
+         && TrySetGraffitiTagToxicSpikes(battler))
         {
             BattleScriptPush(cmd->nextInstr);
-            gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+            gBattlescriptCurrInstr = BattleScript_GraffitiTagToxicSpikes;
             return;
         }
 
@@ -13878,10 +13878,10 @@ static void Cmd_various(void)
 
         break;
     }
-    case VARIOUS_APPLY_GRAFITTI_TAG_PALETTES:
+    case VARIOUS_APPLY_GRAFFITI_TAG_PALETTES:
         VARIOUS_ARGS();
 
-        ReapplyGrafittiTagPalettes();
+        ReapplyGraffitiTagPalettes();
         break;
     case VARIOUS_TRY_ACTIVATE_RECEIVER: // Partner gets fainted's ally ability
     {
@@ -13905,7 +13905,7 @@ static void Cmd_various(void)
             case ABILITY_SHIELDS_DOWN:      case ABILITY_DISGUISE:
             case ABILITY_RKS_SYSTEM:        case ABILITY_TRACE:
             case ABILITY_ZERO_TO_HERO:      case ABILITY_COMMANDER:
-            case ABILITY_FORECAST_PRIORITY:
+            case ABILITY_INSTANT_FORECAST:
                 break;
             default:
                 gBattleStruct->tracedAbility[gBattlerAbility] = gBattleMons[battler].ability; // re-using the variable for trace
@@ -19567,14 +19567,14 @@ static bool32 HasJungleLashTarget(u32 battler)
     return FALSE;
 }
 
-static bool32 TrySetGrafittiTagToxicSpikes(u32 battler)
+static bool32 TrySetGraffitiTagToxicSpikes(u32 battler)
 {
     u32 side = GetBattlerSide(battler);
 
-    if (!gDisableStructs[battler].grafittiTagged)
+    if (!gDisableStructs[battler].graffitiTagged)
         return FALSE;
 
-    gDisableStructs[battler].grafittiTagged = FALSE;
+    gDisableStructs[battler].graffitiTagged = FALSE;
     gBattlerTarget = battler;
 
     if (gSideTimers[side].toxicSpikesAmount >= 2)
@@ -19660,11 +19660,11 @@ static void Cmd_switchoutabilities(void)
         }
 
         if (!gSpecialStatuses[battler].switchOutAbilityDone
-         && TrySetGrafittiTagToxicSpikes(battler))
+         && TrySetGraffitiTagToxicSpikes(battler))
         {
             gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
             BattleScriptPush(gBattlescriptCurrInstr);
-            gBattlescriptCurrInstr = BattleScript_GrafittiTagToxicSpikes;
+            gBattlescriptCurrInstr = BattleScript_GraffitiTagToxicSpikes;
             return;
         }
 

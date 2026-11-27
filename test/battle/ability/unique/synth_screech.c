@@ -6,7 +6,7 @@ ASSUMPTIONS
     ASSUME(gBattleMoves[MOVE_CALM_MIND].effect == EFFECT_CALM_MIND);
 }
 
-SINGLE_BATTLE_TEST("Synthetic Screech uses Calm Mind after Miraidon knocks out a target if the party shares a type")
+SINGLE_BATTLE_TEST("Synth Screech uses Calm Mind after Miraidon knocks out a target if the party shares a type")
 {
     bool32 partySharesType;
 
@@ -29,13 +29,13 @@ SINGLE_BATTLE_TEST("Synthetic Screech uses Calm Mind after Miraidon knocks out a
         HP_BAR(opponent);
         if (partySharesType)
         {
-            ABILITY_POPUP(player, ABILITY_SYNTHETIC_SCREECH);
+            ABILITY_POPUP(player, ABILITY_SYNTH_SCREECH);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_CALM_MIND, player);
         }
         else
         {
             NONE_OF {
-                ABILITY_POPUP(player, ABILITY_SYNTHETIC_SCREECH);
+                ABILITY_POPUP(player, ABILITY_SYNTH_SCREECH);
                 ANIMATION(ANIM_TYPE_MOVE, MOVE_CALM_MIND, player);
             }
         }
@@ -53,7 +53,7 @@ SINGLE_BATTLE_TEST("Synthetic Screech uses Calm Mind after Miraidon knocks out a
     }
 }
 
-SINGLE_BATTLE_TEST("Synthetic Screech does not trigger if Miraidon does not knock out the target")
+SINGLE_BATTLE_TEST("Synth Screech does not trigger if Miraidon does not knock out the target")
 {
     GIVEN {
         PLAYER(SPECIES_MIRAIDON) { Speed(100); Ability(ABILITY_BATTLE_ARMOR); Moves(MOVE_TACKLE); }
@@ -66,7 +66,7 @@ SINGLE_BATTLE_TEST("Synthetic Screech does not trigger if Miraidon does not knoc
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, player);
         HP_BAR(opponent);
         NONE_OF {
-            ABILITY_POPUP(player, ABILITY_SYNTHETIC_SCREECH);
+            ABILITY_POPUP(player, ABILITY_SYNTH_SCREECH);
             ANIMATION(ANIM_TYPE_MOVE, MOVE_CALM_MIND, player);
         }
     } THEN {
