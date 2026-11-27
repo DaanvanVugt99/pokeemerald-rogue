@@ -752,6 +752,21 @@ TEST("Dream Sequence gifts can learn Dream Eater from the tutor and see it in th
     EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_HYPNO, 0), MOVE_NONE);
 }
 
+TEST("Cross Training gifts pair Blaze Kick with tutor and Pokedex access to Ice Punch")
+{
+    struct Pokemon mon;
+    u16 moves[MOVES_COUNT];
+    u32 id = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_CROSS_TRAINING);
+    RogueGift_CreateMon(id, &mon, SPECIES_BULBASAUR, 50, USE_RANDOM_IVS);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_CROSS_TRAINING, 0), MOVE_BLAZE_KICK);
+    EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_BULBASAUR, GetMonData(&mon, MON_DATA_OT_ID)), MOVE_ICE_PUNCH);
+    u16 count = GetTutorMoves(&mon, moves, ARRAY_COUNT(moves));
+    u32 matches = 0;
+    for (u32 i = 0; i < count; i++)
+        matches += moves[i] == MOVE_ICE_PUNCH;
+    EXPECT_EQ(matches, 1);
+}
+
 TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
 {
     u16 ability;

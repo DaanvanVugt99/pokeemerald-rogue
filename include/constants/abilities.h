@@ -687,7 +687,7 @@
 #define ABILITY_EQUILIBRIUM            548
 #define ABILITY_AURA                   552
 #define ABILITY_SANDMAN                553
-#define ABILITY_BUNNY_EARS             545
+#define ABILITY_CROSS_TRAINING             545
 #define ABILITY_ROSE_GARDEN            522
 #define ABILITY_ACID_REFLUX            482
 #define ABILITY_FEEDING_FRENZY         483

@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Buneary, Lopunny, and Mega Lopunny gain Cross Training. With exactly one punch and one kick, the moves swap types and both gain STAB. Dynamic gifts pair Blaze Kick with Ice Punch tutor access.
+
 - Druddigon’s Lone Fang grants STAB to its sole attacking move and switches it out after that move hits. Druddigon can also learn Toxic from the move tutor.
 
 - Sand Veil grants 20% evasion in sandstorm and Snow Cloak grants 20% evasion in hail or snow. These replace their weather-based damage reductions.

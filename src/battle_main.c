@@ -6324,6 +6324,49 @@ static bool32 MoveCanReceiveNormalTypeAbilityOverride(u32 move)
         && effect != EFFECT_NATURAL_GIFT;
 }
 
+static u32 GetCrossTrainingType(const u16 *moves, u32 move)
+{
+    u32 punch = MOVE_NONE;
+    u32 kick = MOVE_NONE;
+
+    if (move >= MOVES_COUNT || (!gBattleMoves[move].punchingMove && !gBattleMoves[move].kickingMove))
+        return NUMBER_OF_MON_TYPES;
+
+    for (u32 slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        u32 known = moves[slot];
+        if (known == MOVE_NONE || known >= MOVES_COUNT)
+            continue;
+        if (gBattleMoves[known].punchingMove)
+        {
+            if (punch != MOVE_NONE)
+                return NUMBER_OF_MON_TYPES;
+            punch = known;
+        }
+        if (gBattleMoves[known].kickingMove)
+        {
+            if (kick != MOVE_NONE)
+                return NUMBER_OF_MON_TYPES;
+            kick = known;
+        }
+    }
+    if (punch != MOVE_NONE && kick != MOVE_NONE && punch != kick)
+    {
+        if (move == punch)
+            return gBattleMoves[kick].type;
+        if (move == kick)
+            return gBattleMoves[punch].type;
+    }
+    return NUMBER_OF_MON_TYPES;
+}
+
+u32 GetBattlerCrossTrainingType(u32 battler, u32 move)
+{
+    if (HasBattlerAbility(battler, ABILITY_CROSS_TRAINING))
+        return GetCrossTrainingType(gBattleMons[battler].moves, move);
+    return NUMBER_OF_MON_TYPES;
+}
+
 u8 GetMonMoveType(u32 move, struct Pokemon *mon)
 {
     u32 species = GetMonData(mon, MON_DATA_SPECIES);
@@ -6412,7 +6455,18 @@ u8 GetMonMoveType(u32 move, struct Pokemon *mon)
         break;
     }
 
-    if (gBattleMoves[move].type == TYPE_NORMAL
+    u32 pairedType = NUMBER_OF_MON_TYPES;
+    if (MonHasMoveTypeAbility(mon, ABILITY_CROSS_TRAINING))
+    {
+        u16 moves[MAX_MON_MOVES];
+        for (u32 slot = 0; slot < MAX_MON_MOVES; slot++)
+            moves[slot] = GetMonData(mon, MON_DATA_MOVE1 + slot);
+        pairedType = GetCrossTrainingType(moves, move);
+    }
+
+    if (pairedType != NUMBER_OF_MON_TYPES)
+        moveType = pairedType;
+    else if (gBattleMoves[move].type == TYPE_NORMAL
      && MoveCanReceiveNormalTypeAbilityOverride(move)
      && ((MonHasMoveTypeAbility(mon, ABILITY_HAUTE_COUTURE) && (ateType = GetTypeBySpecies(species, 1, otId), TRUE))
       || (ability == ABILITY_PIXILATE && (ateType = TYPE_FAIRY))
@@ -6584,7 +6638,10 @@ void SetTypeBeforeUsingMove(u32 move, u32 battlerAtk)
         gBattleStruct->dynamicMoveType = gBattleMoves[gLastMoves[battlerAtk]].type | F_DYNAMIC_TYPE_SET;
 
     attackerAbility = GetBattlerAbility(battlerAtk);
-    if (gBattleMoves[move].type == TYPE_NORMAL
+    u32 pairedType = GetBattlerCrossTrainingType(battlerAtk, move);
+    if (pairedType != NUMBER_OF_MON_TYPES)
+        gBattleStruct->dynamicMoveType = pairedType | F_DYNAMIC_TYPE_SET;
+    else if (gBattleMoves[move].type == TYPE_NORMAL
              && MoveCanReceiveNormalTypeAbilityOverride(move)
              && !(gBattleMoves[move].effect == EFFECT_TERA_BLAST && IsTerastallized(battlerAtk))
              && !(gBattleMoves[move].effect == EFFECT_TERA_STARSTORM && gBattleMons[battlerAtk].species == SPECIES_TERAPAGOS_STELLAR)

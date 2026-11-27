@@ -16356,28 +16356,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_BUNNY_EARS)
-         && IsBattlerAlive(battler)
-         && IsBattlerAlive(gBattlerTarget)
-         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
-         && IsMoveMakingContact(move, battler)
-         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
-         && (CompareStat(gBattlerTarget, STAT_DEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
-          || GetBattlerAbility(gBattlerTarget) == ABILITY_MIRROR_ARMOR))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_BUNNY_EARS);
-            gBattleScripting.moveEffect = MOVE_EFFECT_DEF_MINUS_1;
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
-            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_KNIGHTLY)
          && IsBattlerAlive(battler)
          && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
@@ -26533,6 +26511,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
           && !DoesMonotypeSerumRetainStab(battlerAtk, moveType))
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
+         || GetBattlerCrossTrainingType(battlerAtk, move) == moveType
          || IsLoneFangAttack(battlerAtk, move)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
          || ((HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) || HasBattlerAbility(battlerAtk, ABILITY_EELEVATE)) && moveType == TYPE_FLYING)
@@ -27440,11 +27419,11 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
             if (eclipseStabModifier > stabModifier)
                 stabModifier = eclipseStabModifier;
         }
-        if (IsLoneFangAttack(battlerAtk, move))
+        if (IsLoneFangAttack(battlerAtk, move) || GetBattlerCrossTrainingType(battlerAtk, move) == moveType)
         {
-            uq4_12_t loneFangStab = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
-            if (loneFangStab > stabModifier)
-                stabModifier = loneFangStab;
+            uq4_12_t grantedStab = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
+            if (grantedStab > stabModifier)
+                stabModifier = grantedStab;
         }
         DAMAGE_APPLY_MODIFIER(stabModifier);
     }
