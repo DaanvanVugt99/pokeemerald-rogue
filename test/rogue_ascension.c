@@ -3,9 +3,13 @@
 #include "item.h"
 #include "money.h"
 #include "pokemon.h"
+#include "party_menu.h"
+#include "constants/abilities.h"
+#include "constants/weather.h"
 #include "random.h"
 #include "rogue.h"
 #include "rogue_ascension.h"
+#include "rogue_gifts.h"
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_quest.h"
@@ -39,68 +43,28 @@ static void ResetAscensionTest(void)
     ZeroEnemyPartyMons();
 }
 
-TEST("Ascension: every cumulative threshold and distribution")
+TEST("Ascension: boss IV and party size milestones")
 {
-    // Explicit expected rows keep each step independently reviewable.
-    static const u8 expected[21][5] = {
-        {0,0,0,0,0}, {0,0,0,0,0}, {1,0,0,0,0}, {1,1,0,0,0}, {1,1,1,0,0},
-        {1,1,1,10,0}, {2,1,1,10,0}, {2,2,1,10,0}, {2,2,2,10,0}, {2,2,2,10,10},
-        {2,2,2,10,10}, {3,2,2,10,10}, {3,3,2,10,10}, {3,3,2,20,10}, {3,3,3,20,10},
-        {3,3,3,20,10}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}, {3,3,3,20,20}
-    };
-    struct RogueAscensionRules r;
-    u8 a, d, stage;
-    for (a = 0; a <= 20; ++a)
+    for (u8 level = 0; level <= ASCENSION_MAX; ++level)
     {
-        RogueAscension_Resolve(a, &r);
-        EXPECT_EQ(r.natures, expected[a][0]);
-        EXPECT_EQ(r.moves, expected[a][1]);
-        EXPECT_EQ(r.items, expected[a][2]);
-        EXPECT_EQ(r.bossIvBonus, expected[a][3]);
-        EXPECT_EQ(r.trainerIv, expected[a][4]);
-        EXPECT_EQ(r.expandedParties, a >= 10);
-        EXPECT_EQ(r.diverseTrainers, a >= 15);
-        EXPECT_EQ(r.perfectAces, a >= 17);
-        EXPECT_EQ(r.perfectTeams, a >= 18);
-        EXPECT_EQ(r.limitedSupplies, a >= 19);
-        EXPECT_EQ(r.fullParties, a >= 20);
-        EXPECT_EQ(RogueAscension_PartySize(a, 3, 6, TRUE), a == 20 ? 6 : a >= 10 ? 4 : 3);
-        EXPECT_EQ(RogueAscension_PartySize(a, 3, 6, FALSE), 3);
-        EXPECT_EQ(RogueAscension_PartySize(a, 6, 3, TRUE), 3);
-        EXPECT_LE(RogueAscension_PartySize(a, 6, 9, TRUE), PARTY_SIZE);
-        for (stage = 0; stage < 14; ++stage)
-        {
-            EXPECT_LE(RogueAscension_CalculateIV(a, stage, TRUE, TRUE), 31);
-            EXPECT_GE(RogueAscension_CalculateIV(a, stage, TRUE, TRUE), RogueAscension_CalculateIV(a, stage, TRUE, FALSE));
-        }
+        EXPECT_EQ(RogueAscension_PartySize(level, 3, 6, TRUE), level >= 12 ? 6 : level >= 5 ? 4 : 3);
+        EXPECT_EQ(RogueAscension_PartySize(level, 3, 6, FALSE), 3);
+        EXPECT_EQ(RogueAscension_PartySize(level, 6, 3, TRUE), 3);
+        EXPECT_EQ(RogueAscension_CalculateIV(level, 0, FALSE), 0);
+        EXPECT_EQ(RogueAscension_CalculateIV(level, 0, TRUE), level >= 9 ? 31 : 0);
+        EXPECT_EQ(RogueAscension_CalculateIV(level, 8, TRUE), level >= 9 ? 31 : 5);
+        EXPECT_EQ(RogueAscension_CalculateIV(level, 13, TRUE), level >= 9 ? 31 : 15);
     }
-    for (d = 0; d < 4; ++d)
-    {
-        EXPECT_EQ(RogueAscension_Applies(d, FALSE, TRUE), d == 3);
-        EXPECT_EQ(RogueAscension_Applies(d, TRUE, TRUE), d != 0);
-        EXPECT_EQ(RogueAscension_Applies(d, TRUE, FALSE), d >= 2);
-    }
-    EXPECT_EQ(RogueAscension_CalculateIV(0, 8, TRUE, FALSE), 5);
-    EXPECT_EQ(RogueAscension_CalculateIV(1, 0, TRUE, FALSE), 0);
-    EXPECT_EQ(RogueAscension_CalculateIV(4, 8, TRUE, FALSE), 5);
-    EXPECT_EQ(RogueAscension_CalculateIV(5, 8, TRUE, FALSE), 15);
-    EXPECT_EQ(RogueAscension_CalculateIV(13, 13, TRUE, FALSE), 31);
-    EXPECT_EQ(RogueAscension_CalculateIV(17, 0, TRUE, TRUE), 31);
-    EXPECT_EQ(RogueAscension_CalculateIV(17, 0, TRUE, FALSE), 20);
-    EXPECT_EQ(RogueAscension_CalculateIV(17, 0, FALSE, TRUE), 20);
-    EXPECT_EQ(RogueAscension_CalculateIV(18, 0, FALSE, FALSE), 31);
 }
 
-TEST("Ascension: profile nature is independent from moves Ability and item")
+TEST("Ascension: competitive sets apply together to boss aces then whole boss teams")
 {
     struct Pokemon original, mon;
     struct RogueAdventureConfig config;
     const struct RoguePokemonCompetitiveSet *profile;
     u16 boss, i;
     u8 a, role;
-    static const u8 natureLevels[] = {2, 6, 11};
-    static const u8 moveLevels[] = {3, 7, 12};
-    static const u8 itemLevels[] = {4, 8, 14};
+    static const u8 setLevels[] = {4, 7, ASCENSION_NONE, ASCENSION_NONE};
     ResetAscensionTest();
     Rogue_CopyAdventureConfig(&config);
     for (boss = 1; boss < gRogueTrainerCount; ++boss)
@@ -113,16 +77,16 @@ TEST("Ascension: profile nature is independent from moves Ability and item")
     profile = &gRoguePokemonProfiles[SPECIES_VENUSAUR].competitiveSets[i];
     CreateMon(&original, SPECIES_VENUSAUR, 100, 0, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
     SetNature(&original, NATURE_ADAMANT);
-    for (role = 0; role < 3; ++role)
-    for (a = 0; a <= 20; ++a)
+    for (role = 0; role < 4; ++role)
+    for (a = 0; a <= ASCENSION_MAX; ++a)
     {
         config.ascension = a;
         Rogue_SetRunStartConfigOverride(&config);
         mon = original;
-        RogueTest_ApplyAscensionProfile(boss, &mon, profile, role != 2, role == 0);
-        EXPECT_EQ(GetNature(&mon), a >= natureLevels[role] ? profile->nature : NATURE_ADAMANT);
+        RogueTest_ApplyAscensionProfile(boss, &mon, profile, role < 2, role == 0 || role == 2);
+        EXPECT_EQ(GetNature(&mon), a >= setLevels[role] ? profile->nature : NATURE_ADAMANT);
         EXPECT_EQ(GetMonUniqueAbility(&mon), GetMonUniqueAbility(&original));
-        if (a < moveLevels[role])
+        if (a < setLevels[role])
         {
             EXPECT_EQ(GetMonAbility(&mon), GetMonAbility(&original));
             for (i = 0; i < MAX_MON_MOVES; ++i)
@@ -130,12 +94,12 @@ TEST("Ascension: profile nature is independent from moves Ability and item")
         }
         else
             EXPECT_EQ(GetMonAbility(&mon), profile->ability);
-        EXPECT_EQ(GetMonData(&mon, MON_DATA_HELD_ITEM), a >= itemLevels[role] ? profile->heldItem : ITEM_NONE);
+        EXPECT_EQ(GetMonData(&mon, MON_DATA_HELD_ITEM), a >= setLevels[role] ? profile->heldItem : ITEM_NONE);
     }
     Rogue_ClearRunStartConfigOverride();
 }
 
-TEST("Ascension: generated A0 natures vary and A1 neutralizes bosses and ordinary trainers")
+TEST("Ascension: generated A0 and A1 parties retain their natural natures")
 {
     struct RogueAdventureConfig config;
     u16 trainers[2] = {0};
@@ -169,14 +133,35 @@ TEST("Ascension: generated A0 natures vary and A1 neutralizes bosses and ordinar
             for (i = 0; i < count; ++i)
             {
                 u8 nature = GetNature(&gEnemyParty[i]);
-                if (a == 0)
-                    sawNonNeutral |= nature % 6 != 0;
-                else
-                    EXPECT_EQ(nature, NATURE_HARDY);
+                sawNonNeutral |= nature % 6 != 0;
                 EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_ATK_IV), 0);
             }
         }
         EXPECT(sawNonNeutral);
+    }
+    Rogue_ClearRunStartConfigOverride();
+    RogueTest_UseContentTrainers(FALSE);
+}
+
+TEST("Ascension: broader teams start at A3 and gym fields start at A6")
+{
+    struct RogueAdventureConfig config;
+    u16 boss;
+    ResetAscensionTest();
+    RogueTest_UseContentTrainers(TRUE);
+    Rogue_CopyAdventureConfig(&config);
+    Rogue_SetCurrentDifficulty(ROGUE_ELITE_START_DIFFICULTY);
+    for (boss = 1; boss < gRogueTrainerCount; ++boss)
+        if (Rogue_IsBossTrainer(boss) && Rogue_GetTrainerWeather(boss) != WEATHER_NONE) break;
+    EXPECT_LT(boss, gRogueTrainerCount);
+    u8 preferred = Rogue_GetTrainerWeather(boss);
+    Rogue_SetCurrentDifficulty(0);
+    for (u8 level = 0; level <= ASCENSION_MAX; ++level)
+    {
+        config.ascension = level;
+        Rogue_SetRunStartConfigOverride(&config);
+        EXPECT_EQ(Rogue_GetConfigToggle(CONFIG_TOGGLE_DIVERSE_TRAINERS), level >= 3);
+        EXPECT_EQ(Rogue_GetTrainerWeather(boss), level >= 6 ? preferred : WEATHER_NONE);
     }
     Rogue_ClearRunStartConfigOverride();
     RogueTest_UseContentTrainers(FALSE);
@@ -227,35 +212,35 @@ TEST("Ascension: save round trip preserves active rules progress and replay")
 {
     ResetAscensionTest();
     gRogueSaveBlock->activeAdventureConfig = gRogueSaveBlock->adventureConfig;
-    gRogueSaveBlock->activeAdventureConfig.ascension = 17;
+    gRogueSaveBlock->activeAdventureConfig.ascension = 12;
     gRogueSaveBlock->activeAdventureConfig.battleFormat = BATTLE_FORMAT_MIXED;
-    gRogueSaveBlock->bestAscension[BATTLE_FORMAT_DOUBLES] = 14;
+    gRogueSaveBlock->bestAscension[BATTLE_FORMAT_DOUBLES] = 11;
     gRogueSaveBlock->selectedAscension[BATTLE_FORMAT_DOUBLES] = 12;
-    gRogueSaveBlock->bestTrialAscension[ROGUE_TRIAL_INSANE_MODE][BATTLE_FORMAT_MIXED] = 18;
+    gRogueSaveBlock->bestTrialAscension[ROGUE_TRIAL_INSANE_MODE][BATTLE_FORMAT_MIXED] = 8;
     gRogueSaveBlock->ascensionEligible = TRUE;
     gRogueSaveBlock->ascensionRecorded = TRUE;
     gRogueSaveBlock->adventureReplay[0].rulesVersion = ASCENSION_RULES_VERSION;
     gRogueSaveBlock->adventureReplay[0].adventureConfig = gRogueSaveBlock->activeAdventureConfig;
     RogueSave_FormatForWriting();
     RogueSave_FormatForReading();
-    EXPECT_EQ(gRogueSaveBlock->activeAdventureConfig.ascension, 17);
+    EXPECT_EQ(gRogueSaveBlock->activeAdventureConfig.ascension, 12);
     EXPECT_EQ(gRogueSaveBlock->adventureConfig.ascension, 0);
-    EXPECT_EQ(gRogueSaveBlock->bestAscension[BATTLE_FORMAT_DOUBLES], 14);
+    EXPECT_EQ(gRogueSaveBlock->bestAscension[BATTLE_FORMAT_DOUBLES], 11);
     EXPECT_EQ(gRogueSaveBlock->selectedAscension[BATTLE_FORMAT_DOUBLES], 12);
-    EXPECT_EQ(gRogueSaveBlock->bestTrialAscension[ROGUE_TRIAL_INSANE_MODE][BATTLE_FORMAT_MIXED], 18);
+    EXPECT_EQ(gRogueSaveBlock->bestTrialAscension[ROGUE_TRIAL_INSANE_MODE][BATTLE_FORMAT_MIXED], 8);
     EXPECT(gRogueSaveBlock->ascensionEligible && gRogueSaveBlock->ascensionRecorded);
-    EXPECT_EQ(gRogueSaveBlock->adventureReplay[0].adventureConfig.ascension, 17);
+    EXPECT_EQ(gRogueSaveBlock->adventureReplay[0].adventureConfig.ascension, 12);
     EXPECT_EQ(gRogueSaveBlock->adventureReplay[0].rulesVersion, ASCENSION_RULES_VERSION);
     FlagSet(FLAG_ROGUE_RUN_ACTIVE);
-    EXPECT_EQ(Rogue_GetAscension(), 17);
+    EXPECT_EQ(Rogue_GetAscension(), 12);
     Rogue_SetAscension(0);
-    EXPECT_EQ(Rogue_GetAscension(), 17);
+    EXPECT_EQ(Rogue_GetAscension(), 12);
     FlagClear(FLAG_ROGUE_RUN_ACTIVE);
 }
 
 static void CheckGeneratedBossParty(u8 kind, u8 stage)
 {
-    static const u8 levels[] = {0, 1, 10, 17, 20};
+    static const u8 levels[] = {0, 1, 2, 5, 8, 11, 12};
     struct RogueAdventureConfig config;
     u16 trainers[4] = {0};
     u16 t;
@@ -288,27 +273,112 @@ static void CheckGeneratedBossParty(u8 kind, u8 stage)
                 SeedRng(4321);
                 count = Rogue_CreateTrainerParty(trainers[kind], gEnemyParty, PARTY_SIZE, TRUE);
                 if (levels[a] == 0) baseline = count;
-                EXPECT_EQ(count, levels[a] == 20 ? 6 : levels[a] >= 10 ? min(6, baseline + 1) : baseline);
+                EXPECT_EQ(count, levels[a] == 12 ? 6 : levels[a] >= 5 ? min(6, baseline + 1) : baseline);
+                u8 legends = 0, uniques = 0;
                 for (i = 0; i < count; ++i)
                 {
+                    legends += RoguePokedex_IsSpeciesLegendary(GetMonData(&gEnemyParty[i], MON_DATA_SPECIES));
+                    uniques += RogueGift_GetCustomMonId(&gEnemyParty[i]) != CUSTOM_MON_NONE;
                     EXPECT_NE(GetMonData(&gEnemyParty[i], MON_DATA_SPECIES), SPECIES_NONE);
                     EXPECT_NE(GetMonData(&gEnemyParty[i], MON_DATA_MOVE1), MOVE_NONE);
                     for (stat = 0; stat < NUM_STATS; ++stat)
                     {
-                        EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_HP_IV + stat), RogueAscension_CalculateIV(levels[a], stage, TRUE, i == count - 1));
+                        EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_HP_IV + stat), RogueAscension_CalculateIV(levels[a], stage, TRUE));
                         EXPECT_EQ(GetMonData(&gEnemyParty[i], MON_DATA_HP_EV + stat), 0);
                     }
-                    if (levels[a] == 1)
-                        EXPECT_EQ(GetNature(&gEnemyParty[i]), NATURE_HARDY);
+
                     if (levels[a] <= 1)
                     {
                         u16 item = GetMonData(&gEnemyParty[i], MON_DATA_HELD_ITEM);
-                        EXPECT(item == ITEM_NONE || IS_MEGA_STONE_ITEM(item) || item == ITEM_RED_ORB || item == ITEM_BLUE_ORB || (item >= ITEM_NORMALIUM_Z && item <= ITEM_ULTRANECROZIUM_Z));
+                        if (kind == 0 && stage < 8 && levels[a] == 1 && i == count - 1)
+                            EXPECT_EQ(item, ITEM_SITRUS_BERRY);
+                        else EXPECT(item == ITEM_NONE || IS_MEGA_STONE_ITEM(item) || item == ITEM_RED_ORB || item == ITEM_BLUE_ORB || (item >= ITEM_NORMALIUM_Z && item <= ITEM_ULTRANECROZIUM_Z));
                     }
                 }
+                if (kind == 0 && stage == 8) EXPECT_EQ(legends, levels[a] >= 8);
+                EXPECT_EQ(uniques, (kind == 2 && levels[a] >= 2) || (kind == 0 && levels[a] >= 11));
             }
         }
     }
+    Rogue_ClearRunStartConfigOverride();
+    RogueTest_UseContentTrainers(FALSE);
+}
+
+TEST("Ascension: rival keeps the same Unique partner and coverage through the championship")
+{
+    struct RogueAdventureConfig config;
+    u16 rival;
+    u32 firstGift = 0;
+    ResetAscensionTest();
+    RogueTest_UseContentTrainers(TRUE);
+    Rogue_CopyAdventureConfig(&config);
+    config.ascension = ASCENSION_BOSS_UNIQUE;
+    Rogue_SetRunStartConfigOverride(&config);
+    for (rival = 1; rival < gRogueTrainerCount; ++rival)
+        if (Rogue_IsRivalTrainer(rival)) break;
+    EXPECT_LT(rival, gRogueTrainerCount);
+    gRogueRun.rivalTrainerNum = rival;
+    gRogueRun.baseSeed = 1741;
+    for (u8 battle = 0; battle < 2; ++battle)
+    {
+        u8 count, uniques = 0;
+        Rogue_SetCurrentDifficulty(battle ? ROGUE_FINAL_CHAMP_DIFFICULTY : 0);
+        ZeroEnemyPartyMons();
+        count = Rogue_CreateTrainerParty(rival, gEnemyParty, PARTY_SIZE, TRUE);
+        for (u8 i = 0; i < count; ++i)
+        {
+            u32 gift = RogueGift_GetCustomMonId(&gEnemyParty[i]);
+            if (!gift) continue;
+            ++uniques;
+            if (battle == 0) firstGift = gift;
+            EXPECT_EQ(gift, firstGift);
+            if (RogueGift_GetCustomMonUniqueAbility(gift) != ABILITY_NONE)
+                EXPECT_EQ(GetMonUniqueAbility(&gEnemyParty[i]), RogueGift_GetCustomMonUniqueAbility(gift));
+            for (u8 j = 0; j < RogueGift_GetCustomMonMoveCount(gift); ++j)
+                EXPECT(MonKnowsMove(&gEnemyParty[i], RogueGift_GetCustomMonMove(gift, j)));
+        }
+        EXPECT_EQ(uniques, 1);
+    }
+    Rogue_ClearRunStartConfigOverride();
+    RogueTest_UseContentTrainers(FALSE);
+}
+
+TEST("Ascension: boss Uniques vary party slot, rarity and typing across seeds")
+{
+    struct RogueAdventureConfig config;
+    u16 boss;
+    const u8 allRarities = (1 << UNIQUE_RARITY_COMMON) | (1 << UNIQUE_RARITY_RARE)
+                        | (1 << UNIQUE_RARITY_EPIC) | (1 << UNIQUE_RARITY_LEGENDARY);
+    u8 slots = 0, rarities = 0;
+    bool8 sawTyped = FALSE;
+    ResetAscensionTest();
+    RogueTest_UseContentTrainers(TRUE);
+    Rogue_CopyAdventureConfig(&config);
+    config.ascension = ASCENSION_BOSS_UNIQUE;
+    Rogue_SetRunStartConfigOverride(&config);
+    Rogue_SetCurrentDifficulty(0);
+    for (boss = 1; boss < gRogueTrainerCount; ++boss)
+        if (Rogue_IsBossTrainer(boss)) break;
+    EXPECT_LT(boss, gRogueTrainerCount);
+    for (u16 seed = 0; seed < 64; ++seed)
+    {
+        gRogueRun.baseSeed = seed;
+        ZeroEnemyPartyMons();
+        u8 count = Rogue_CreateTrainerParty(boss, gEnemyParty, PARTY_SIZE, TRUE);
+        for (u8 i = 0; i < count; ++i)
+        {
+            u32 gift = RogueGift_GetCustomMonId(&gEnemyParty[i]);
+            if (!gift) continue;
+            slots |= 1 << i;
+            rarities |= 1 << RogueGift_GetCustomMonRarity(gift);
+            sawTyped |= RogueGift_GetCustomMonType(gift, 0) != TYPE_NONE
+                     || RogueGift_GetCustomMonType(gift, 1) != TYPE_NONE;
+        }
+        if ((slots & (slots - 1)) && sawTyped && rarities == allRarities) break;
+    }
+    EXPECT(slots & (slots - 1));
+    EXPECT(sawTyped);
+    EXPECT_EQ(rarities, allRarities);
     Rogue_ClearRunStartConfigOverride();
     RogueTest_UseContentTrainers(FALSE);
 }
@@ -413,23 +483,23 @@ TEST("Ascension: generated team boss parties at stage 13")
     CheckGeneratedBossParty(3, 13);
 }
 
-TEST("Ascension: A19 supplies retain preparation and override imported inventory")
+TEST("Ascension: A10 supplies retain preparation and override imported inventory")
 {
     struct RogueAdventureConfig config;
     u16 heldItem = ITEM_LEFTOVERS;
     u8 ev = 252;
     ResetAscensionTest();
     Rogue_CopyAdventureConfig(&config);
-    config.ascension = 19;
+    config.ascension = 10;
     ClearBag();
     EXPECT(AddBagItem(ITEM_ULTRA_BALL, 40));
     EXPECT(AddBagItem(ITEM_POTION, 99));
     EXPECT(AddBagItem(ITEM_C_GEAR, 1));
     EXPECT(AddBagItem(ITEM_FLINCH_CHARM, 1));
     RecalcCharmCurseValues();
-    config.ascension = 18;
+    config.ascension = 9;
     EXPECT_EQ(RogueAscension_GetEligibility(&config, RUN_START_SOURCE_NORMAL), ASCENSION_INELIGIBLE_CHARMS);
-    config.ascension = 19;
+    config.ascension = 10;
     CreateMon(&gPlayerParty[0], SPECIES_VENUSAUR, 50, 31, FALSE, 0, OT_ID_PLAYER_ID, 0);
     SetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM, &heldItem);
     SetMonData(&gPlayerParty[0], MON_DATA_SPATK_EV, &ev);
@@ -480,12 +550,12 @@ TEST("Ascension: Trial reward claims remain one-time after improved clears")
     EXPECT(RogueQuest_IsRewardClaimed(quest));
     money = GetMoney(&gSaveBlock1Ptr->money);
     EXPECT(!RogueQuest_TryCollectRewards(quest));
-    config.ascension = 17;
+    config.ascension = 11;
     config.battleFormat = BATTLE_FORMAT_DOUBLES;
     Rogue_SetRunStartConfigOverride(&config);
     Debug_RogueQuest_CompleteQuest(quest);
     EXPECT_EQ(RogueQuest_GetBestAscension(quest, BATTLE_FORMAT_SINGLES), 5);
-    EXPECT_EQ(RogueQuest_GetBestAscension(quest, BATTLE_FORMAT_DOUBLES), 17);
+    EXPECT_EQ(RogueQuest_GetBestAscension(quest, BATTLE_FORMAT_DOUBLES), 11);
     EXPECT_EQ(RogueQuest_GetBestAscension(quest, BATTLE_FORMAT_MIXED), ASCENSION_NONE);
     EXPECT(!RogueQuest_HasPendingRewards(quest));
     EXPECT(!RogueQuest_TryCollectRewards(quest));
@@ -539,7 +609,7 @@ TEST("Ascension: boss ace identity survives profile upgrades")
         SeedRogueRng(1234);
         SeedRng(4321);
         count = Rogue_CreateTrainerParty(boss, gEnemyParty, PARTY_SIZE, TRUE);
-        if (a == 0) ace = GetMonData(&gEnemyParty[count - 1], MON_DATA_SPECIES);
+        if (a == 0 || a == ASCENSION_DIVERSE_TRAINERS) ace = GetMonData(&gEnemyParty[count - 1], MON_DATA_SPECIES);
         EXPECT_EQ(GetMonData(&gEnemyParty[count - 1], MON_DATA_SPECIES), ace);
     }
     RogueTest_UseContentTrainers(FALSE);
@@ -554,7 +624,7 @@ TEST("Ascension: missing profiles retain a legal basic Pokemon with no EVs")
     u8 i;
     ResetAscensionTest();
     Rogue_CopyAdventureConfig(&config);
-    config.ascension = 20;
+    config.ascension = 12;
     Rogue_SetRunStartConfigOverride(&config);
     for (boss = 1; boss < gRogueTrainerCount; ++boss)
         if (Rogue_IsMiniBossTrainer(boss)) break;
@@ -580,12 +650,12 @@ TEST("Ascension: hub payouts use the completed run snapshot")
 {
     ResetAscensionTest();
     gRogueSaveBlock->adventureConfig.ascension = 0;
-    gRogueSaveBlock->activeAdventureConfig.ascension = 20;
+    gRogueSaveBlock->activeAdventureConfig.ascension = 12;
     gRogueRun.enteredRoomCounter = 11;
     gRogueRun.victoryLapTotalWins = 2;
     SetMoney(&gSaveBlock1Ptr->money, 0);
-    EXPECT_EQ(Rogue_PostRunRewardMoney(), 12 * 350);
-    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12 * 350);
+    EXPECT_EQ(Rogue_PostRunRewardMoney(), 12 * 310);
+    EXPECT_EQ(GetMoney(&gSaveBlock1Ptr->money), 12 * 310);
 }
 
 TEST("Ascension: Gauntlet full teams retain A0 profile gates")
@@ -622,7 +692,7 @@ TEST("Ascension: service parties are excluded from adventure scaling")
     ResetAscensionTest();
     RogueTest_UseContentTrainers(TRUE);
     Rogue_CopyAdventureConfig(&config);
-    config.ascension = 20;
+    config.ascension = 12;
     Rogue_SetRunStartConfigOverride(&config);
     CreateMon(&before, SPECIES_VENUSAUR, 50, 7, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
     SetMonData(&before, MON_DATA_SPATK_EV, &ev);
@@ -691,7 +761,7 @@ TEST("Ascension: Trial records require successful final conditions")
     EXPECT_EQ(gRogueSaveBlock->bestTrialAscension[ROGUE_TRIAL_ORRE_STYLE][BATTLE_FORMAT_SINGLES], ASCENSION_NONE);
 
     // A later failed attempt must not improve an already completed Trial.
-    gRogueSaveBlock->activeAdventureConfig.ascension = 17;
+    gRogueSaveBlock->activeAdventureConfig.ascension = 11;
     ZeroMonData(&gPlayerParty[1]);
     CalculatePlayerPartyCount();
     RogueQuest_SetStateFlag(quest, QUEST_STATE_ACTIVE, TRUE);

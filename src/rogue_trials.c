@@ -274,14 +274,6 @@ static const u8 sAscensionNames[][13] =
     _("Ascension 10"),
     _("Ascension 11"),
     _("Ascension 12"),
-    _("Ascension 13"),
-    _("Ascension 14"),
-    _("Ascension 15"),
-    _("Ascension 16"),
-    _("Ascension 17"),
-    _("Ascension 18"),
-    _("Ascension 19"),
-    _("Ascension 20"),
 };
 
 static const u8 *const sPokedexRegionMenuNames[POKEDEX_REGION_COUNT] =

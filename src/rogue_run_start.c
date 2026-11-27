@@ -269,10 +269,10 @@ void RogueRunStart_Refresh(void)
     sRunStartContext.hasPendingQuestRewards = HasPendingQuestRewards();
     sRunStartContext.mainQuestsDisabled = sRunStartContext.source == RUN_START_SOURCE_REPLAY
         || Rogue_GetModeRules()->disableMainQuests
-        || (sRunStartContext.effectiveConfig.ascension < 19 && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
+        || (sRunStartContext.effectiveConfig.ascension < ASCENSION_FRESH_START && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
     sRunStartContext.trialQuestsDisabled = sRunStartContext.source == RUN_START_SOURCE_REPLAY
         || Rogue_GetModeRules()->disableTrialQuests
-        || (sRunStartContext.effectiveConfig.ascension < 19 && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
+        || (sRunStartContext.effectiveConfig.ascension < ASCENSION_FRESH_START && !sRunStartContext.effectiveConfig.trialFreshStart && AnyCharmsInBag());
     sRunStartContext.requiresRandomPartner = FALSE;
     sRunStartContext.canUseCurrentParty = FALSE;
     sRunStartContext.readinessReason = RUN_START_REASON_NONE;

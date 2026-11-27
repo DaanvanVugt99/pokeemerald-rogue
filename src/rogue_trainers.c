@@ -4,6 +4,7 @@
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/weather.h"
+#include "constants/abilities.h"
 #include "gba/isagbprint.h"
 
 #include "battle.h"
@@ -26,6 +27,7 @@
 #include "rogue_settings.h"
 #include "rogue_trainers.h"
 #include "rogue_ascension.h"
+#include "rogue_gifts.h"
 #include "rogue_trials.h"
 
 #define TRAINER_SHINY_PERC 25
@@ -91,6 +93,7 @@ static bool8 UseCompetitiveMoveset(struct TrainerPartyScratch* scratch, u8 monId
 static bool8 SelectNextPreset(struct TrainerPartyScratch* scratch, u16 species, u8 monIdx, struct RoguePokemonCompetitiveSet* outPreset);
 static void ModifyTrainerMonPreset(u16 trainerNum, struct Pokemon* mon, struct RoguePokemonCompetitiveSet* preset, struct RoguePokemonCompetitiveSetRules* presetRules);
 static void ReorderPartyMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
+static void ApplyBossUnique(u16 trainerNum, struct Pokemon *party, u8 count);
 static void AssignAnySpecialMons(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCount);
 static bool8 IsChoiceItem(u16 itemId);
@@ -332,7 +335,8 @@ u8 Rogue_GetTrainerWeather(u16 trainerNum)
     if(Rogue_IsKeyTrainer(trainerNum) && trainer != NULL)
     {
         { // Standard baseline
-            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY)
+            if(Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY
+             || (Rogue_IsBossTrainer(trainerNum) && Rogue_GetAscension() >= ASCENSION_GYM_FIELDS))
                 weatherType = trainer->preferredWeather;
         }
     }
@@ -1674,7 +1678,7 @@ static u8 CalculateMonFixedIV(u16 trainerNum)
 {
     if (Rogue_IsBattleSimTrainer(trainerNum)) return 31;
     if (Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL) return 0;
-    return RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), Rogue_IsKeyTrainer(trainerNum), FALSE);
+    return RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), Rogue_IsKeyTrainer(trainerNum));
 }
 
 #if TESTING
@@ -1907,14 +1911,6 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
     else
         monCount = CreateTrainerPartyInternal(trainerNum, party, 0, monCapacity, firstTrainer, 0);
 
-    // A0 keeps the randomly generated nature; A1+ starts neutral before profile upgrades.
-    if (Rogue_GetAscension() >= 1
-     && !(Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL))
-    {
-        u8 i;
-        for (i = 0; i < monCount; ++i) SetNature(&party[i], NATURE_HARDY);
-    }
-
     // Adjust mons
     {
         // Assign the pokeball based on the trainer
@@ -1952,6 +1948,7 @@ u8 Rogue_CreateTrainerParty(u16 trainerNum, struct Pokemon* party, u8 monCapacit
 
     ReorderPartyMons(trainerNum, party, monCount);
     ApplyAscensionParty(trainerNum, party, monCount);
+    ApplyBossUnique(trainerNum, party, monCount);
     AssignAnySpecialMons(trainerNum, party, monCount);
     
     CalculateEnemyPartyCount();
@@ -2951,6 +2948,10 @@ static u16 SampleNextSpeciesInternal(struct TrainerPartyScratch* scratch)
             RogueQueryScript_Execute(&scriptContext);
         }
 
+        if ((!Rogue_IsKeyTrainer(scratch->trainerNum) && !Rogue_IsBattleSimTrainer(scratch->trainerNum))
+         || (Rogue_IsBossTrainer(scratch->trainerNum) && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY))
+            RogueMonQuery_IsLegendary(QUERY_FUNC_EXCLUDE);
+
         // Trial formats such as Little Cup constrain both teams. Apply their
         // legality after the trainer's configured pool and settings are resolved.
         RogueTrial_FilterOpponentMonQuery();
@@ -3130,10 +3131,42 @@ static u16 TrySelectMiniBossAnchor(struct TrainerPartyScratch* scratch)
     return SPECIES_NONE;
 }
 
+static bool8 HasAscensionEliteLegend(u16 trainerNum)
+{
+    return Rogue_GetAscension() >= ASCENSION_ELITE_LEGEND && Rogue_IsBossTrainer(trainerNum)
+        && Rogue_GetCurrentDifficulty() >= ROGUE_ELITE_START_DIFFICULTY
+        && Rogue_GetCurrentDifficulty() < ROGUE_CHAMP_START_DIFFICULTY;
+}
+
+static u16 SelectEliteLegend(u16 trainerNum)
+{
+    u16 type = Rogue_GetTrainerTypeAssignment(trainerNum);
+    u16 anyLegend;
+    RogueMonQuery_IsSpeciesActive();
+    RogueMonQuery_IsLegendary(QUERY_FUNC_INCLUDE);
+    RogueTrial_FilterOpponentMonQuery();
+    if (!RogueMiscQuery_AnyActiveElements()) return SPECIES_NONE;
+    anyLegend = RogueMiscQuery_SelectRandomElement(RogueRandom());
+    if (IS_STANDARD_TYPE(type))
+    {
+        RogueMonQuery_IsOfType(QUERY_FUNC_INCLUDE, 1u << type);
+        if (!RogueMiscQuery_AnyActiveElements()) return anyLegend;
+        anyLegend = RogueMiscQuery_SelectRandomElement(RogueRandom());
+    }
+    RogueMonQuery_IsLegendaryWithPresetFlags(QUERY_FUNC_EXCLUDE, MON_FLAG_SINGLES_STRONG);
+    return RogueMiscQuery_AnyActiveElements() ? RogueMiscQuery_SelectRandomElement(RogueRandom()) : anyLegend;
+}
+
 static u16 SampleNextSpecies(struct TrainerPartyScratch* scratch)
 {
     u16 species;
     struct RogueTrainer const* trainer = &gRogueTrainers[scratch->trainerNum];
+
+    if (scratch->partyCount == 0 && HasAscensionEliteLegend(scratch->trainerNum))
+    {
+        species = SelectEliteLegend(scratch->trainerNum);
+        if (species != SPECIES_NONE) return species;
+    }
 
     species = TrySelectMiniBossAnchor(scratch);
     if(species != SPECIES_NONE)
@@ -3794,16 +3827,15 @@ static void SwapMons(u8 aIdx, u8 bIdx, struct Pokemon *party)
 // + go to the front - go to the back
 static void ApplyAscensionProfile(u16 trainerNum, struct Pokemon *mon, struct RoguePokemonCompetitiveSet *preset, bool8 boss, bool8 ace)
 {
-    struct RogueAscensionRules rules;
+    bool8 useSet = boss && (Rogue_GetAscension() >= ASCENSION_BOSS_SETS || (ace && Rogue_GetAscension() >= ASCENSION_ACE_SETS));
     struct RoguePokemonCompetitiveSetRules gates = {0};
-    RogueAscension_Resolve(Rogue_GetAscension(), &rules);
     ModifyTrainerMonPreset(trainerNum, mon, preset, &gates);
-    gates.skipMoves = !RogueAscension_Applies(rules.moves, boss, ace);
+    gates.skipMoves = !useSet;
     gates.skipAbility = gates.skipMoves;
-    gates.skipNature = !RogueAscension_Applies(rules.natures, boss, ace);
+    gates.skipNature = !useSet;
     gates.skipHeldItem = IsGimmickItem(preset->heldItem)
         ? !ShouldTrainerUseValidHeldItems(trainerNum, TRUE)
-        : !RogueAscension_Applies(rules.items, boss, ace);
+        : !useSet;
     gates.skipHiddenPowerType = TRUE;
     Rogue_ApplyMonCompetitiveSet(mon, GetMonData(mon, MON_DATA_LEVEL), preset, &gates);
 }
@@ -3816,15 +3848,68 @@ void RogueTest_ApplyAscensionProfile(u16 trainerNum, struct Pokemon *mon, const 
 }
 #endif
 
+// Roll from the planned starter family, so evolving, reordering the team or
+// previewing a later battle cannot change the rival's gift.
+static void ApplyBossUnique(u16 trainerNum, struct Pokemon *party, u8 count)
+{
+    bool8 rival = Rogue_IsRivalTrainer(trainerNum);
+    u16 family = SPECIES_NONE;
+    u32 seed = (u32)gRogueRun.baseSeed * 65599u + trainerNum;
+    if (rival)
+    {
+        if (Rogue_GetAscension() < ASCENSION_RIVAL_UNIQUE || !gRogueRun.rivalSpecies[RIVAL_STARTER_INDEX]) return;
+        family = Rogue_GetEggSpecies(gRogueRun.rivalSpecies[RIVAL_STARTER_INDEX]);
+    }
+    else
+    {
+        if (Rogue_GetAscension() < ASCENSION_BOSS_UNIQUE || !Rogue_IsBossTrainer(trainerNum)) return;
+        seed ^= Rogue_GetCurrentDifficulty() * 0x9e3779b9u;
+    }
+
+    u8 candidates[PARTY_SIZE];
+    u8 candidateCount = 0;
+    for (u8 i = 0; i < count; ++i)
+    {
+        u16 species = GetMonData(&party[i], MON_DATA_SPECIES);
+        if (rival)
+        {
+            if (Rogue_GetEggSpecies(species) != family) continue;
+            candidates[candidateCount++] = i;
+            break;
+        }
+        if (!RoguePokedex_IsSpeciesLegendary(species))
+            candidates[candidateCount++] = i;
+    }
+    if (!candidateCount) return;
+
+    RAND_TYPE savedRng = gRngValue;
+    // Avalanche adjacent run seeds before the first slot and rarity rolls.
+    seed = (seed ^ (seed >> 16)) * 0x85ebca6bu;
+    seed = (seed ^ (seed >> 13)) * 0xc2b2ae35u;
+    SeedRng(seed ^ (seed >> 16));
+    struct Pokemon *mon = &party[candidates[Random() % candidateCount]];
+    u16 eggSpecies = Rogue_GetEggSpecies(GetMonData(mon, MON_DATA_SPECIES));
+    // Like a Unique den encounter, trainer gifts use the full rarity and typing
+    // pools, independent of which gift upgrades the player has in the hub.
+    u8 rarity = RogueGift_RollDynamicUniqueRarity(TRUE);
+    u32 gift = RogueGift_CreateDynamicMonIdRaw(rarity, eggSpecies);
+    SetMonTrainerId(mon, gift);
+    if (RogueGift_GetCustomMonAbilityCount(gift))
+    {
+        u8 slot = RogueGift_GetCustomMonAbility(gift, 1) != ABILITY_NONE ? Random() % 2 : 0;
+        SetMonData(mon, MON_DATA_ABILITY_NUM, &slot);
+    }
+    RogueGift_ApplyCustomMoves(mon, gift);
+    gRngValue = savedRng;
+}
+
 static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCount)
 {
-    struct RogueAscensionRules rules;
     struct TrainerPartyScratch scratch;
     bool8 boss = Rogue_IsKeyTrainer(trainerNum);
     u8 i, stat;
     u16 level = GetTrainerLevel(trainerNum);
     if (Rogue_GetTrainer(trainerNum)->trainerFlags & TRAINER_FLAG_CLASS_SPECIAL) return;
-    RogueAscension_Resolve(Rogue_GetAscension(), &rules);
     memset(&scratch, 0, sizeof(scratch));
     scratch.trainerNum = trainerNum;
     scratch.party = party;
@@ -3836,8 +3921,8 @@ static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCou
     {
         struct RoguePokemonCompetitiveSet preset;
         struct TrainerHeldItemScratch heldBefore = scratch.heldItems;
-        bool8 ace = boss && i == monCount - 1;
-        u8 iv = RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), boss, ace);
+        bool8 ace = i == monCount - 1;
+        u8 iv = RogueAscension_CalculateIV(Rogue_GetAscension(), Rogue_GetCurrentDifficulty(), boss);
         u8 zero = 0;
         scratch.partyCount = i;
         if (SelectNextPreset(&scratch, GetMonData(&party[i], MON_DATA_SPECIES), i, &preset))
@@ -3848,6 +3933,12 @@ static void ApplyAscensionParty(u16 trainerNum, struct Pokemon *party, u8 monCou
         }
         else
             DebugPrintf("[Ascension] No profile for species %d", GetMonData(&party[i], MON_DATA_SPECIES));
+        if (ace && Rogue_IsBossTrainer(trainerNum) && Rogue_GetCurrentDifficulty() < ROGUE_ELITE_START_DIFFICULTY
+         && Rogue_GetAscension() >= ASCENSION_GYM_BERRY && Rogue_GetAscension() < ASCENSION_ACE_SETS)
+        {
+            u16 berry = ITEM_SITRUS_BERRY;
+            SetMonData(&party[i], MON_DATA_HELD_ITEM, &berry);
+        }
         for (stat = 0; stat < NUM_STATS; ++stat)
         {
             SetMonData(&party[i], MON_DATA_HP_IV + stat, &iv);

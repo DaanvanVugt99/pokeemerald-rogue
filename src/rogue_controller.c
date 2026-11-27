@@ -5098,7 +5098,7 @@ static void SetupRogueRunBag()
     u16 itemId;
     u32 quantity;
     bool8 isBasicBagEnabled = Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE);
-    bool8 isExpedition = !isBasicBagEnabled && Rogue_GetAscension() >= 19;
+    bool8 isExpedition = !isBasicBagEnabled && Rogue_GetAscension() >= ASCENSION_FRESH_START;
 #ifdef DEBUG_FEATURE_FRAME_TIMERS
     u32 startClock = RogueDebug_SampleClock();
 #endif
@@ -5275,17 +5275,16 @@ static void BeginRogueRunPhase_Reset(void)
     // Drop the temporary review override before deriving run rules from it.
     RogueRunStart_Clear();
 
-    if (Rogue_GetModeRules()->disableMainQuests || (Rogue_GetAscension() < 19 && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
+    if (Rogue_GetModeRules()->disableMainQuests || (Rogue_GetAscension() < ASCENSION_FRESH_START && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
         FlagSet(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
     else
         FlagClear(FLAG_ROGUE_RUN_MAIN_QUESTS_DISABLED);
 
-    if (Rogue_GetModeRules()->disableTrialQuests || (Rogue_GetAscension() < 19 && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
+    if (Rogue_GetModeRules()->disableTrialQuests || (Rogue_GetAscension() < ASCENSION_FRESH_START && !Rogue_GetConfigToggle(CONFIG_TOGGLE_BAG_WIPE) && AnyCharmsActive()))
         FlagSet(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
     else
         FlagClear(FLAG_ROGUE_RUN_TRIAL_QUESTS_DISABLED);
 
-    gRogueRun.seededStandardPacing = TRUE;
     Rogue_SetCurrentDifficulty(GetStartDifficulty());
     gRogueRun.currentLevelOffset = Rogue_GetModeRules()->initialLevelOffset;
     gRogueRun.adventureRoomId = ADVPATH_INVALID_ROOM_ID;

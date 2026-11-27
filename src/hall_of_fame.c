@@ -1640,7 +1640,7 @@ enum
 
 static void CopyBgTilemapBufferForAscension(u8 ascension)
 {
-    if (ascension >= 20 && ascension <= ASCENSION_MAX)
+    if (ascension == ASCENSION_MAX)
         CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Brutal, 0, 0);
     else if (ascension >= 10 && ascension <= ASCENSION_MAX)
         CopyToBgTilemapBuffer(3, sHallOfFame_TileMap_Hard, 0, 0);

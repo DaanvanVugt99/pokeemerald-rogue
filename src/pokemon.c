@@ -2105,6 +2105,13 @@ static void DecryptBoxMon(struct BoxPokemon *boxMon)
     }
 }
 
+void SetMonTrainerId(struct Pokemon *mon, u32 trainerId)
+{
+    DecryptBoxMon(&mon->box);
+    mon->box.otId = trainerId;
+    EncryptBoxMon(&mon->box);
+}
+
 static const u8 sSubstructOffsets[4][24] =
 {
     [SUBSTRUCT_TYPE_0] = {0, 0, 0, 0, 0, 0, 1, 1, 2, 3, 2, 3, 1, 1, 2, 3, 2, 3, 1, 1, 2, 3, 2, 3},

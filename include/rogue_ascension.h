@@ -3,16 +3,24 @@
 
 #include "global.h"
 
-#define ASCENSION_MAX 20
+#define ASCENSION_MAX 12
 #define ASCENSION_NONE 255
-#define ASCENSION_RULES_VERSION 3
+#define ASCENSION_RULES_VERSION 4
 
-enum RogueUpgradeDistribution
+enum RogueAscensionLevel
 {
-    ASCENSION_UPGRADE_NONE,
-    ASCENSION_UPGRADE_ACES,
-    ASCENSION_UPGRADE_BOSSES,
-    ASCENSION_UPGRADE_TRAINERS,
+    ASCENSION_GYM_BERRY = 1,
+    ASCENSION_RIVAL_UNIQUE,
+    ASCENSION_DIVERSE_TRAINERS,
+    ASCENSION_ACE_SETS,
+    ASCENSION_EXTRA_MON,
+    ASCENSION_GYM_FIELDS,
+    ASCENSION_BOSS_SETS,
+    ASCENSION_ELITE_LEGEND,
+    ASCENSION_PERFECT_BOSSES,
+    ASCENSION_FRESH_START,
+    ASCENSION_BOSS_UNIQUE,
+    ASCENSION_FULL_TEAMS,
 };
 
 enum RogueAscensionEligibility
@@ -27,25 +35,8 @@ enum RogueAscensionEligibility
     ASCENSION_INELIGIBLE_SPECIAL,
 };
 
-struct RogueAscensionRules
-{
-    u8 natures;
-    u8 moves;
-    u8 items;
-    u8 bossIvBonus;
-    u8 trainerIv;
-    bool8 perfectAces;
-    bool8 perfectTeams;
-    bool8 expandedParties;
-    bool8 fullParties;
-    bool8 diverseTrainers;
-    bool8 limitedSupplies;
-};
-
 struct RogueAdventureConfig;
-void RogueAscension_Resolve(u8 level, struct RogueAscensionRules *rules);
-bool8 RogueAscension_Applies(u8 distribution, bool8 boss, bool8 ace);
-u8 RogueAscension_CalculateIV(u8 ascension, u8 stage, bool8 boss, bool8 ace);
+u8 RogueAscension_CalculateIV(u8 ascension, u8 stage, bool8 boss);
 u8 RogueAscension_PartySize(u8 ascension, u8 baseline, u8 capacity, bool8 boss);
 u8 RogueAscension_GetUnlocked(u8 format);
 bool8 RogueAscension_IsRevealed(void);

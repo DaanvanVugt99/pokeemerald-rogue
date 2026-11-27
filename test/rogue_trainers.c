@@ -91,8 +91,8 @@ TEST("Ascension trainer IV curves apply across every run stage")
         for (stage = 0; stage < ROGUE_MAX_BOSS_COUNT; ++stage)
         {
             Rogue_SetCurrentDifficulty(stage);
-            EXPECT_EQ(RogueTest_CalculateMonFixedIV(boss), RogueAscension_CalculateIV(level, stage, TRUE, FALSE));
-            EXPECT_EQ(RogueTest_CalculateMonFixedIV(TRAINER_NONE), RogueAscension_CalculateIV(level, stage, FALSE, FALSE));
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(boss), RogueAscension_CalculateIV(level, stage, TRUE));
+            EXPECT_EQ(RogueTest_CalculateMonFixedIV(TRAINER_NONE), RogueAscension_CalculateIV(level, stage, FALSE));
         }
     }
     Rogue_ClearRunStartConfigOverride();

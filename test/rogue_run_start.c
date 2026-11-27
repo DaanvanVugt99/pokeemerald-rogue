@@ -113,7 +113,7 @@ TEST("Run review: Replay stages its remembered configuration")
     Rogue_SetConfigRange(CONFIG_RANGE_ASCENSION, 0);
     replay = &gRogueSaveBlock->adventureReplay[ROGUE_ADVENTURE_REPLAY_REMEMBERED];
     memcpy(&replay->adventureConfig, &gRogueSaveBlock->adventureConfig, sizeof(replay->adventureConfig));
-    replay->adventureConfig.ascension = 20;
+    replay->adventureConfig.ascension = 12;
     replay->adventureConfig.battleFormat = BATTLE_FORMAT_MIXED;
     replay->isValid = TRUE;
     replay->rulesVersion = ASCENSION_RULES_VERSION;
@@ -127,7 +127,7 @@ TEST("Run review: Replay stages its remembered configuration")
     EXPECT_EQ(context->source, RUN_START_SOURCE_REPLAY);
     EXPECT(!context->canEdit);
     EXPECT(context->mainQuestsDisabled);
-    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_ASCENSION), 20);
+    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_ASCENSION), 12);
     EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_BATTLE_FORMAT), BATTLE_FORMAT_MIXED);
 
     replay->isValid = FALSE;
@@ -161,10 +161,10 @@ TEST("Run review: multiplayer guests stage and refresh the host configuration")
     EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_ASCENSION), 10);
 
     multiplayer.gameState.adventure.isRunActive = TRUE;
-    multiplayer.gameState.hub.adventureConfig.ascension = 20;
+    multiplayer.gameState.hub.adventureConfig.ascension = 12;
     multiplayer.gameState.hub.adventureConfig.pokedexVariant = POKEDEX_VARIANT_HOENN_RSE;
     RogueRunStart_Refresh();
-    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_ASCENSION), 20);
+    EXPECT_EQ(Rogue_GetConfigRange(CONFIG_RANGE_ASCENSION), 12);
     EXPECT_EQ(context->pokedexVariant, POKEDEX_VARIANT_HOENN_RSE);
 
     gRogueMultiplayer = NULL;
@@ -608,17 +608,17 @@ TEST("Run review: Trial editor commits forced rules without overwriting remember
     SelectRunReviewTrial(ROGUE_TRIAL_INSANE_MODE, 10, POKEDEX_VARIANT_NATIONAL_GEN9);
     RogueRunStart_PrepareTrial();
     config = RogueRunStart_GetContext()->effectiveConfig;
-    config.ascension = 17;
+    config.ascension = 11;
     config.mode = ROGUE_GAME_MODE_GAUNTLET;
     config.battleFormat = BATTLE_FORMAT_SINGLES;
     RogueRunStart_UpdateConfig(&config);
-    EXPECT_EQ(RogueRunStart_GetContext()->effectiveConfig.ascension, 17);
+    EXPECT_EQ(RogueRunStart_GetContext()->effectiveConfig.ascension, 11);
     EXPECT_EQ(RogueRunStart_GetContext()->effectiveConfig.mode, ROGUE_GAME_MODE_STANDARD);
     EXPECT_EQ(RogueRunStart_GetContext()->effectiveConfig.battleFormat, BATTLE_FORMAT_MIXED);
     EXPECT_EQ(memcmp(&remembered, &gRogueSaveBlock->adventureConfig, sizeof(remembered)), 0);
     RogueRunStart_Commit();
     EXPECT(gSpecialVar_Result);
-    EXPECT_EQ(gRogueSaveBlock->activeAdventureConfig.ascension, 17);
+    EXPECT_EQ(gRogueSaveBlock->activeAdventureConfig.ascension, 11);
     FinishRunReviewTest();
 }
 

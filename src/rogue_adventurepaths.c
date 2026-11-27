@@ -1002,18 +1002,14 @@ u8 RogueAdv_GetStandardPathLength(u8 difficulty)
 {
     static EWRAM_DATA u8 lengths[ROGUE_CHAMP_START_DIFFICULTY] = {0};
     static EWRAM_DATA u16 cachedSeed = 0;
-    static EWRAM_DATA bool8 cachedBaseAscension = FALSE;
-    bool8 baseAscension = Rogue_GetAscension() == 0;
     u32 seed = gRogueRun.baseSeed ^ 0x50414345u;
     u8 shorts;
     u8 i;
 
     if(difficulty >= ROGUE_CHAMP_START_DIFFICULTY)
         return STANDARD_PATH_MEDIUM;
-    if(!gRogueRun.seededStandardPacing)
-        return difficulty % 2 ? STANDARD_PATH_SHORT : STANDARD_PATH_LONG;
 
-    if(lengths[0] && cachedSeed == gRogueRun.baseSeed && cachedBaseAscension == baseAscension)
+    if(lengths[0] && cachedSeed == gRogueRun.baseSeed)
         return lengths[difficulty];
 
     do
@@ -1021,8 +1017,7 @@ u8 RogueAdv_GetStandardPathLength(u8 difficulty)
         shorts = 0;
         for(i = 0; i < ARRAY_COUNT(lengths); ++i)
             lengths[i] = i % 2 ? STANDARD_PATH_SHORT : STANDARD_PATH_LONG;
-        if(baseAscension)
-            lengths[2] = STANDARD_PATH_MEDIUM;
+        lengths[2] = STANDARD_PATH_MEDIUM;
         ShufflePathLengths(lengths, 1, ROGUE_ELITE_START_DIFFICULTY, &seed);
         ShufflePathLengths(lengths, ROGUE_ELITE_START_DIFFICULTY, ROGUE_CHAMP_START_DIFFICULTY, &seed);
 
@@ -1034,7 +1029,6 @@ u8 RogueAdv_GetStandardPathLength(u8 difficulty)
         }
     } while(shorts == 3);
     cachedSeed = gRogueRun.baseSeed;
-    cachedBaseAscension = baseAscension;
     return lengths[difficulty];
 }
 

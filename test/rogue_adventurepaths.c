@@ -227,7 +227,7 @@ TEST("Adventure island layouts are connected deterministic and RNG neutral")
     EXPECT_GT(totalPairedDebris, 0);
     EXPECT(foundDifferentTemplateOffset);
     // Keep seeded silhouette and edge-autotiling output stable for this matrix.
-    EXPECT_EQ(hashChecksum, 0x82EFF482);
+    EXPECT_EQ(hashChecksum, 0xFBFA04B4);
 
     gRogueAdvPath = *originalPath;
     gRogueRun.baseSeed = originalBaseSeed;
@@ -295,9 +295,9 @@ TEST("Seeded standard paths keep replacement composition bounded")
         u8 emptyCount;
     } cases[] =
     {
-        {13579, 9, 5, 3},
+        {13579, 0, 5, 3},
         {24680, 5, 4, 3},
-        {54321, 5, 3, 2},
+        {54321, 0, 7, 2},
         {65535, 7, 4, 4},
     };
     struct RogueAdvPath originalPath = gRogueAdvPath;
@@ -1423,14 +1423,12 @@ TEST("Standard pacing keeps stage budgets and streak limits across seeds and rel
 {
     struct RogueAdventureConfig config;
     u16 originalSeed = gRogueRun.baseSeed;
-    bool8 originalPacing = gRogueRun.seededStandardPacing;
     RAND_TYPE originalRng = gRngRogueValue;
     u16 firstShorts = 0;
     bool8 varied = FALSE;
 
     Rogue_CopyAdventureConfig(&config);
     config.mode = ROGUE_GAME_MODE_STANDARD;
-    gRogueRun.seededStandardPacing = TRUE;
     for(config.ascension = 0; config.ascension <= 1; ++config.ascension)
     {
         Rogue_SetRunStartConfigOverride(&config);
@@ -1461,7 +1459,7 @@ TEST("Standard pacing keeps stage budgets and streak limits across seeds and rel
                     EXPECT_EQ(length, STANDARD_PATH_MEDIUM);
             }
             EXPECT_EQ(gymShort, 4);
-            EXPECT_EQ(gymMedium, config.ascension == 0);
+            EXPECT_EQ(gymMedium, 1);
             EXPECT_EQ(eliteShort, 2);
             if(seed == 0)
                 firstShorts = shortMask;
@@ -1478,18 +1476,16 @@ TEST("Standard pacing keeps stage budgets and streak limits across seeds and rel
     EXPECT(varied);
     EXPECT_EQ(gRngRogueValue, originalRng);
     Rogue_ClearRunStartConfigOverride();
-    gRogueRun.seededStandardPacing = originalPacing;
     gRogueRun.baseSeed = originalSeed;
 }
 
-TEST("Standard pacing gives the A0 medium gym an ordinary opening route")
+TEST("Standard pacing gives the medium gym an ordinary opening route")
 {
     struct RogueAdvPath *saved = Alloc(sizeof(*saved));
     struct RogueAdventureConfig config;
     u16 originalSeed = gRogueRun.baseSeed;
     u8 originalStage = Rogue_GetCurrentDifficulty();
     u8 originalRoom = gRogueRun.adventureRoomId;
-    bool8 originalPacing = gRogueRun.seededStandardPacing;
     RAND_TYPE originalRng = gRngRogueValue;
 
     EXPECT_NE(saved, NULL);
@@ -1498,7 +1494,6 @@ TEST("Standard pacing gives the A0 medium gym an ordinary opening route")
     config.mode = ROGUE_GAME_MODE_STANDARD;
     config.ascension = 0;
     Rogue_SetRunStartConfigOverride(&config);
-    gRogueRun.seededStandardPacing = TRUE;
     for(u8 seed = 0; seed < 8; ++seed)
     {
         bool8 found = FALSE;
@@ -1519,7 +1514,6 @@ TEST("Standard pacing gives the A0 medium gym an ordinary opening route")
     }
     gRogueAdvPath = *saved;
     Free(saved);
-    gRogueRun.seededStandardPacing = originalPacing;
     gRogueRun.baseSeed = originalSeed;
     gRogueRun.adventureRoomId = originalRoom;
     Rogue_SetCurrentDifficulty(originalStage);

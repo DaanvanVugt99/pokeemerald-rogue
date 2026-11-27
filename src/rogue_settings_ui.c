@@ -232,7 +232,7 @@ static bool8 TrialRecordsDisabled(void)
     if (MenuTrial() == NULL) return FALSE;
     if (Rogue_IsRunActive()) return Rogue_ShouldDisableTrialQuests();
     return sMenu->config.trainerOrder == TRAINER_ORDER_OFFICIAL
-        || (sMenu->config.ascension < 19 && !sMenu->config.trialFreshStart && AnyCharmsInBag());
+        || (sMenu->config.ascension < ASCENSION_FRESH_START && !sMenu->config.trialFreshStart && AnyCharmsInBag());
 }
 
 static bool8 TrialAllowsConfig(const struct RogueAdventureConfig *config)

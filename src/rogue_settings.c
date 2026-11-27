@@ -162,7 +162,7 @@ bool8 Rogue_GetConfigToggleFor(const struct RogueAdventureConfig *config, u16 el
     {
     case CONFIG_TOGGLE_OVERWORLD_MONS: return config->overworldMons;
     case CONFIG_TOGGLE_BAG_WIPE: return config->trialFreshStart;
-    case CONFIG_TOGGLE_DIVERSE_TRAINERS: return config->ascension >= 15;
+    case CONFIG_TOGGLE_DIVERSE_TRAINERS: return config->ascension >= ASCENSION_DIVERSE_TRAINERS;
     case CONFIG_TOGGLE_EXP_ALL:
     case CONFIG_TOGGLE_EV_GAIN:
     case CONFIG_TOGGLE_RELEASE_MONS:

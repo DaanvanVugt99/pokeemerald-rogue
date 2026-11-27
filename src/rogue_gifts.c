@@ -2113,11 +2113,62 @@ u8 const* RogueGift_GetRarityName(u8 rarity)
     return sCustomTrainers[CUSTOM_TRAINER_QUESTS].name;
 }
 
+void RogueGift_ApplyCustomMoves(struct Pokemon *mon, u32 customMonId)
+{
+    u16 customMoveCount = RogueGift_GetCustomMonMoveCount(customMonId);
+    // Default moveset is first 4 moves from custom moveset
+    if(customMoveCount)
+    {
+        u8 m, j;
+        u8 moveCount = 0;
+        u16 moves[MAX_MON_MOVES] = { MOVE_NONE };
+
+        for(m = 0; m < MAX_MON_MOVES && m < customMoveCount; ++m)
+        {
+            u16 move = RogueGift_GetCustomMonMove(customMonId, m);
+            bool8 duplicate = FALSE;
+            u8 k;
+
+            for(k = 0; k < moveCount; ++k)
+            {
+                if(moves[k] == move)
+                    duplicate = TRUE;
+            }
+
+            if(move != MOVE_NONE && !duplicate)
+                moves[moveCount++] = move;
+        }
+
+        // Fill the rest with the existing moveset, skipping custom moves
+        // and duplicates so injected moves always remain at the front.
+        for(j = 0; j < MAX_MON_MOVES && moveCount < MAX_MON_MOVES; ++j)
+        {
+            u16 move = GetMonData(mon, MON_DATA_MOVE1 + j);
+            bool8 duplicate = FALSE;
+            u8 k;
+
+            for(k = 0; k < moveCount; ++k)
+            {
+                if(moves[k] == move)
+                    duplicate = TRUE;
+            }
+
+            if(move != MOVE_NONE && !duplicate)
+                moves[moveCount++] = move;
+        }
+
+        // Give back moves
+        for(m = 0; m < MAX_MON_MOVES; ++m)
+        {
+            SetMonMoveSlot(mon, moves[m], m);
+        }
+    }
+}
+
 void RogueGift_CreateMon(u32 customMonId, struct Pokemon* mon, u16 species, u8 level, u8 fixedIV)
 {
     struct CustomTrainerData const* trainerData = NULL;
     u32 temp = 0;
-    u16 customMoveCount = RogueGift_GetCustomMonMoveCount(customMonId);
     u16 customAbilityCount = RogueGift_GetCustomMonAbilityCount(customMonId);
     
     if(customMonId & OTID_FLAG_DYNAMIC_CUSTOM_MON)
@@ -2171,55 +2222,7 @@ void RogueGift_CreateMon(u32 customMonId, struct Pokemon* mon, u16 species, u8 l
     temp = trainerData->trainerColour;
     SetMonData(mon, MON_DATA_OT_GENDER, &temp);
 
-    // Default moveset is first 4 moves from custom moveset
-    if(customMoveCount)
-    {
-        u8 m, j;
-        u8 moveCount = 0;
-        u16 moves[MAX_MON_MOVES] = { MOVE_NONE };
-
-        for(m = 0; m < MAX_MON_MOVES && m < customMoveCount; ++m)
-        {
-            u16 move = RogueGift_GetCustomMonMove(customMonId, m);
-            bool8 duplicate = FALSE;
-            u8 k;
-
-            for(k = 0; k < moveCount; ++k)
-            {
-                if(moves[k] == move)
-                    duplicate = TRUE;
-            }
-
-            if(move != MOVE_NONE && !duplicate)
-                moves[moveCount++] = move;
-        }
-
-        // Fill the rest with the generated level-up set, skipping custom moves
-        // and duplicates so injected moves always remain at the front.
-        for(j = 0; j < MAX_MON_MOVES && moveCount < MAX_MON_MOVES; ++j)
-        {
-            u16 move = GetMonData(mon, MON_DATA_MOVE1 + j);
-            bool8 duplicate = FALSE;
-            u8 k;
-
-            for(k = 0; k < moveCount; ++k)
-            {
-                if(moves[k] == move)
-                    duplicate = TRUE;
-            }
-
-            if(move != MOVE_NONE && !duplicate)
-                moves[moveCount++] = move;
-        }
-
-        // Give back moves
-        for(m = 0; m < MAX_MON_MOVES; ++m)
-        {
-            temp = moves[m];
-            SetMonData(mon, MON_DATA_MOVE1 + m, &temp);
-            SetMonData(mon, MON_DATA_PP1 + m, &gBattleMoves[temp].pp);
-        }
-    }
+    RogueGift_ApplyCustomMoves(mon, customMonId);
 
     // Default custom ability
     if(customAbilityCount)
