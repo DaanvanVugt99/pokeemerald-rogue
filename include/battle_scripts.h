@@ -30,6 +30,7 @@ extern const u8 BattleScript_VoltBreakActivates[];
 extern const u8 BattleScript_ThermalLiftUsesSkyAttack[];
 extern const u8 BattleScript_AbilityUsesCalledMove[];
 extern const u8 BattleScript_AbilityUsesCalledMoveNoPopup[];
+extern const u8 BattleScript_PassiveIncomeActivates[];
 extern const u8 BattleScript_MetronomeItemUsesCalledMove[];
 extern const u8 BattleScript_FinaleBellUsesCalledMove[];
 extern const u8 BattleScript_EchoScepterUsesCalledMove[];

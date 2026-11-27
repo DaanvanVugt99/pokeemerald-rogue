@@ -16231,20 +16231,23 @@ if (triggeringAbility != ABILITY_NONE)
         }
 
         if (HasBattlerAbility(battler, ABILITY_PASSIVE_INCOME)
-         && moveType == TYPE_NORMAL
-         && DidMoveSucceedForMoveEndEffects(battler)
+         && !IS_MOVE_STATUS(move)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && BATTLER_TURN_DAMAGED(gBattlerTarget)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
          && IsFinalMultiHitStrike()
+         && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseExtraMove(battler, gBattlerTarget))
         {
             SetBattlerTriggeredAbility(battler, ABILITY_PASSIVE_INCOME);
-            gBattleStruct->atkCancellerTracker = 0;
+            SetAtkCancellerForCalledMove();
             gBattlerAttacker = gBattlerAbility = battler;
             gCalledMove = MOVE_PAY_DAY;
             gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
             gProtectStructs[battler].extraMoveUsed = TRUE;
+            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
             VarSet(VAR_EXTRA_MOVE_DAMAGE, 0);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+            StartAbilityCalledMoveScriptAt(BattleScript_PassiveIncomeActivates);
             effect++;
         }
 

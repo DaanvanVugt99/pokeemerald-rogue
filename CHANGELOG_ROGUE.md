@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Passive Income applies Embargo and follows up with Pay Day on the first damaging hit each switch-in.
+
 - Dream Sequence gives Hypnosis 80% accuracy and makes Dream Eater heal for all damage dealt and wake the target. Drowzee and Hypno learn Dream Eater at level 23. Dream Sequence holders can also learn it from the tutor, with a starred Pokédex entry when the Ability grants access.
 
 - Handywork follows the first contact hit each switch-in with 20 BP Covet.

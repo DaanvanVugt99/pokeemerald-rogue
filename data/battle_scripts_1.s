@@ -12877,6 +12877,13 @@ BattleScript_AbilityUsesCalledMoveNoPopup::
 	orword gHitMarker, HITMARKER_ALLOW_NO_PP
 	jumptocalledmove TRUE
 
+BattleScript_PassiveIncomeActivates::
+	call BattleScript_AbilityPopUp
+	setembargo BattleScript_AbilityUsesCalledMoveNoPopup
+	printstring STRINGID_PKMNCANTUSEITEMSANYMORE
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_AbilityUsesCalledMoveNoPopup
+
 BattleScript_MetronomeItemUsesCalledMove::
 	playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT
 	waitanimation
