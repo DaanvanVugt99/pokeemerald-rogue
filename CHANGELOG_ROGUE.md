@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Living Fossil now calls the holder’s lowest-power attack when it first drops below half HP each switch-in. It compares listed power and breaks ties by moveslot order.
+
 - Buneary, Lopunny, and Mega Lopunny gain Cross Training. With exactly one punch and one kick, the moves swap types and both gain STAB. Dynamic gifts pair Blaze Kick with Ice Punch tutor access.
 
 - Druddigon’s Lone Fang grants STAB to its sole attacking move and switches it out after that move hits. Druddigon can also learn Toxic from the move tutor.

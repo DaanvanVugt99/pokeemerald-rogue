@@ -9492,6 +9492,21 @@ static u16 GetStrongestUsableMoveForDisable(u32 battler)
     return strongestMove;
 }
 
+static u16 GetLivingFossilAttack(u32 battler)
+{
+    u16 weakest = MOVE_NONE;
+
+    for (u32 slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        u16 move = gBattleMons[battler].moves[slot];
+        if (move == MOVE_NONE || move >= MOVES_COUNT || IS_MOVE_STATUS(move))
+            continue;
+        if (weakest == MOVE_NONE || gBattleMoves[move].power < gBattleMoves[weakest].power)
+            weakest = move;
+    }
+    return weakest;
+}
+
 static u16 GetLowestPowerUsableMoveForDisable(u32 battler)
 {
     u32 slot;
@@ -15427,17 +15442,21 @@ if (triggeringAbility != ABILITY_NONE)
          && !gDisableStructs[battler].uniqueOncePerSwitchInUsed
          && CanUseExtraMove(battler, moveEndAttacker))
         {
-            SetBattlerTriggeredAbility(battler, ABILITY_LIVING_FOSSIL);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = moveEndAttacker;
-            gCalledMove = MOVE_ANCIENT_POWER;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
+            u16 attack = GetLivingFossilAttack(battler);
+            if (attack != MOVE_NONE)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_LIVING_FOSSIL);
+                gBattleStruct->atkCancellerTracker = 0;
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = moveEndAttacker;
+                gCalledMove = attack;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gDisableStructs[battler].uniqueOncePerSwitchInUsed = TRUE;
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+                effect++;
+            }
         }
 
         if (HasBattlerAbility(battler, ABILITY_MOTHERS_GUARD)
