@@ -4426,11 +4426,13 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
                 if (gBattleMons[gBattlerAttacker].status2 & STATUS2_CONFUSION)
                 {
                      // confusion dmg
-                    if (RandomWeighted(RNG_CONFUSION, IsAbilityOnField(ABILITY_HEADACHE) ? 1 : (B_CONFUSION_SELF_DMG_CHANCE >= GEN_7 ? 2 : 1), IsAbilityOnField(ABILITY_HEADACHE) ? 3 : 1))
+                    if (RandomWeighted(RNG_CONFUSION, B_CONFUSION_SELF_DMG_CHANCE >= GEN_7 ? 2 : 1, 1))
                     {
                         gBattleCommunication[MULTISTRING_CHOOSER] = TRUE;
                         gBattlerTarget = gBattlerAttacker;
                         gBattleMoveDamage = CalculateMoveDamage(MOVE_NONE, gBattlerAttacker, gBattlerAttacker, TYPE_MYSTERY, 40, FALSE, FALSE, TRUE);
+                        if (IsAbilityOnField(ABILITY_SPLITTING_HEAD))
+                            gBattleMoveDamage *= 2;
                         gProtectStructs[gBattlerAttacker].confusionSelfDmg = TRUE;
                         gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
                     }
@@ -9942,6 +9944,32 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 gBattlerAttacker = gBattlerAbility = battler;
                 gBattlerTarget = opposingBattler;
                 gCalledMove = MOVE_LICK;
+                gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+                gProtectStructs[battler].extraMoveUsed = TRUE;
+                gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;
+                gSpecialStatuses[battler].switchInAbilityDone = primaryDone;
+                StartAbilityCalledMoveScript();
+                return 1;
+            }
+        }
+
+        if (HasBattlerAbility(battler, ABILITY_SPLITTING_HEAD) && !uniqueDone)
+        {
+            u32 target = BATTLE_OPPOSITE(battler);
+
+            uniqueDone = TRUE;
+            if (!IsBattlerAlive(target) && IsDoubleBattle())
+                target = BATTLE_PARTNER(target);
+
+            if (IsBattlerAlive(battler) && IsBattlerAlive(target)
+             && !(gBattleMons[battler].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+             && !gProtectStructs[battler].extraMoveUsed)
+            {
+                SetBattlerTriggeredAbility(battler, ABILITY_SPLITTING_HEAD);
+                SetAtkCancellerForCalledMove();
+                gBattlerAttacker = gBattlerAbility = battler;
+                gBattlerTarget = target;
+                gCalledMove = MOVE_PSYCH_UP;
                 gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
                 gProtectStructs[battler].extraMoveUsed = TRUE;
                 gSpecialStatuses[battler].switchInUniqueAbilityDone = uniqueDone;

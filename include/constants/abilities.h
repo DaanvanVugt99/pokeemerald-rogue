@@ -368,7 +368,7 @@
 #define ABILITY_NEUROTOXIN             331
 #define ABILITY_SINKHOLE               332
 #define ABILITY_PASSIVE_INCOME         333
-#define ABILITY_HEADACHE               334
+#define ABILITY_SPLITTING_HEAD               334
 #define ABILITY_TANTRUM                336
 #define ABILITY_IMMOLATE               337
 #define ABILITY_SPIRAL_GAZE            338
