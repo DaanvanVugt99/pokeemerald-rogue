@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Builder, berry, item, and TM purchase lists use charcoal panels, off-white text, and a matching item description background.
+
 - Options uses charcoal panels with an amber bar and lettering on the selected setting.
 
 - The crystal main menu pairs charcoal save and option panels with off-white text and an amber selection jewel against the purple cave.
