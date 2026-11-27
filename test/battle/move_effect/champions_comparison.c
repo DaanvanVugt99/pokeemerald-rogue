@@ -85,7 +85,7 @@ SINGLE_BATTLE_TEST("Adventure balance: contact KO effect timing comparison")
         EXPECT_EQ(opponent->item, (move == MOVE_KNOCK_OFF || move == MOVE_THIEF) ? ITEM_NONE : ITEM_METAL_COAT);
         EXPECT_EQ(!!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_STEALTH_ROCK), move != MOVE_RAPID_SPIN);
         EXPECT_EQ(!!(gFieldStatuses & STATUS_FIELD_ELECTRIC_TERRAIN), move != MOVE_ICE_SPINNER);
-        EXPECT_EQ(!!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SPIKES), move == MOVE_CEASELESS_EDGE);
-        EXPECT_EQ(!!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_STEALTH_ROCK), move == MOVE_STONE_AXE);
+        EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_SPIKES));
+        EXPECT(!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_STEALTH_ROCK));
     }
 }

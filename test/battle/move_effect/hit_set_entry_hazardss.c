@@ -114,3 +114,29 @@ SINGLE_BATTLE_TEST("Stone Axe can set up pointed stones only once")
         MESSAGE("Pointed stones dug into Foe Wynaut!");
     }
 }
+
+SINGLE_BATTLE_TEST("Stone Axe / Ceaseless Edge set hazards only if the user survives Rocky Helmet")
+{
+    u16 move, hp;
+    PARAMETRIZE { move = MOVE_STONE_AXE; hp = 1; }
+    PARAMETRIZE { move = MOVE_STONE_AXE; hp = 100; }
+    PARAMETRIZE { move = MOVE_CEASELESS_EDGE; hp = 1; }
+    PARAMETRIZE { move = MOVE_CEASELESS_EDGE; hp = 100; }
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { HP(hp); MaxHP(100); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Item(ITEM_ROCKY_HELMET); }
+    } WHEN {
+        TURN {
+            MOVE(player, move);
+            if (hp == 1)
+                SEND_OUT(player, 1);
+        }
+    } SCENE {
+        HP_BAR(opponent);
+        HP_BAR(player);
+    } THEN {
+        EXPECT_EQ(!!(gSideStatuses[B_SIDE_OPPONENT] & SIDE_STATUS_STEALTH_ROCK), hp == 100 && move == MOVE_STONE_AXE);
+        EXPECT_EQ(gSideTimers[B_SIDE_OPPONENT].spikesAmount, hp == 100 && move == MOVE_CEASELESS_EDGE);
+    }
+}

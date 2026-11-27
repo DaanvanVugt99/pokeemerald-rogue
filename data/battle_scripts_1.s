@@ -1091,8 +1091,15 @@ BattleScript_EffectDireClaw::
 	goto BattleScript_EffectHit
 
 BattleScript_EffectHitSetEntryHazard::
+	call BattleScript_EffectHitNoEffect_Ret
+	tryfaintmon BS_TARGET
+	moveendto MOVEEND_MOVE_EFFECTS2  @ Resolve contact Abilities and Rocky Helmet first.
+	jumpifhasnohp BS_ATTACKER, BattleScript_HitSetEntryHazardEnd
 	argumenttomoveeffect
-	goto BattleScript_EffectHit
+	seteffectwithchance
+BattleScript_HitSetEntryHazardEnd:
+	moveendfrom MOVEEND_MOVE_EFFECTS2
+	end
 
 BattleScript_SpikesActivates::
 	trysetspikes BattleScript_MoveEnd
