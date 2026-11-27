@@ -809,7 +809,6 @@ script Rogue_RouteEvent_HexedShrineProp
 script Rogue_RouteEvent_HexedShrine
 {
     lock
-    faceplayer
 
     special(RogueRouteEvents_GetInteractionData)
     bufferitemname(STR_VAR_2, VAR_0x8005)
@@ -817,10 +816,12 @@ script Rogue_RouteEvent_HexedShrine
 
     if(var(VAR_ROUTE_EVENT_STATE) == ROGUE_ROUTE_EVENT_STATE_COMPLETED)
     {
+        turnobject(VAR_LAST_TALKED, DIR_WEST)
         msgbox(format("Our pact still binds you. Defeat the next Boss, and the {STR_VAR_2} will fade."))
     }
     else
     {
+        turnobject(VAR_LAST_TALKED, DIR_SOUTH)
         msgbox(format("A small burden... for a handsome reward.\pTake the {STR_VAR_2}, and ¥{STR_VAR_1} is yours. The hex fades when the next Boss falls."))
         copyvar(VAR_0x8004, VAR_0x8005)
         callnative(ScriptMenu_ShowItemDescription)
@@ -832,6 +833,7 @@ script Rogue_RouteEvent_HexedShrine
             special(RogueRouteEvents_TryAcceptHexedShrine)
             if(var(VAR_RESULT) == ROGUE_ROUTE_EVENT_RESULT_SUCCESS)
             {
+                turnobject(VAR_LAST_TALKED, DIR_WEST)
                 call(Rogue_Common_DisplayPopups)
                 msgbox(format("Heh heh...\pThe price has taken hold. Defeat the next Boss, if you wish to be rid of it."))
             }

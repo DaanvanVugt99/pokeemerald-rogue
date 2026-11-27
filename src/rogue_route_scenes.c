@@ -1521,12 +1521,17 @@ static bool8 IsSceneObjectVisible(
 }
 
 static u8 ResolveSceneObjectMovementType(
+    const struct RogueRouteSceneRequest *scene,
     const struct RogueRouteSceneLotDefinition *lotDefinition,
     const struct RogueRouteSceneObjectDefinition *object,
     const struct ObjectEventTemplate *spot)
 {
     if(IsPlantPatchObject(lotDefinition, object))
         return MOVEMENT_TYPE_ROUTE_APRICORN_TREE;
+
+    if(scene->recipeId == ROGUE_ROUTE_SCENE_RECIPE_HEXED_SHRINE && object->propId == 0)
+        return RogueRouteScenes_GetState(scene->sceneSlot) == ROGUE_ROUTE_EVENT_STATE_COMPLETED
+            ? MOVEMENT_TYPE_FACE_LEFT : MOVEMENT_TYPE_FACE_DOWN;
 
     return spot->movementType;
 }
@@ -1729,7 +1734,7 @@ void RogueRouteScenes_RestoreObjectEvents(
                 object))
                 continue;
 
-            movementType = ResolveSceneObjectMovementType(lotDefinition, object, &spot);
+            movementType = ResolveSceneObjectMovementType(&scene, lotDefinition, object, &spot);
             if(!IsSceneObjectVisible(&scene, object))
             {
                 FlagSet(FLAG_ROGUE_ROUTE_EVENT_PROP_A_HIDDEN);
@@ -1869,7 +1874,7 @@ void RogueRouteScenes_ModifyObjectEvents(struct ObjectEventTemplate *objectEvent
                 &spot,
                 localId,
                 ResolveSceneObjectGraphics(&scene, object),
-                ResolveSceneObjectMovementType(lotDefinition, object, &spot),
+                ResolveSceneObjectMovementType(&scene, lotDefinition, object, &spot),
                 object->script,
                 PackSceneObjectData(scene.sceneSlot, scene.lotRole, object->propId),
                 0);

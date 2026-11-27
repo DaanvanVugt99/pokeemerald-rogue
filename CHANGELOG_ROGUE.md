@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Fixed the Hexed Shrine dealmaker shrinking to a dot when spoken to from above. His red eyes appear once the pact succeeds.
+
 - Adventure path route and den markers have a one-pixel dark outline to make pale icons easier to distinguish from the terrain.
 
 - The battle action menu shows L for PKMN INFO (ST when L=A is enabled). Start also opens inspection in either mode. The stat view shows A Info. Both cues slide in after Move Info clears the lower left, with the button and label side by side in the charcoal Move Info style. Select toggles the HP display.
