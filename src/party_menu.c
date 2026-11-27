@@ -2419,6 +2419,8 @@ static u8 CanTeachMove(struct Pokemon *mon, u16 move)
 
 u16 GetUniqueAbilityTutorMove(u16 ability)
 {
+    if (ability == ABILITY_ABYSSAL_MAW)
+        return MOVE_ICE_FANG;
     if (ability == ABILITY_CROSS_TRAINING)
         return MOVE_ICE_PUNCH;
     return ability == ABILITY_DREAM_SEQUENCE ? MOVE_DREAM_EATER : MOVE_NONE;

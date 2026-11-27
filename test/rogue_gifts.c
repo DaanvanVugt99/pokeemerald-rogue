@@ -752,6 +752,20 @@ TEST("Dream Sequence gifts can learn Dream Eater from the tutor and see it in th
     EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_HYPNO, 0), MOVE_NONE);
 }
 
+TEST("Abyssal Maw gifts offer Ice Fang as a second bite through the tutor")
+{
+    struct Pokemon mon;
+    u16 moves[MOVES_COUNT];
+    u32 id = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ABILITY_ABYSSAL_MAW);
+    RogueGift_CreateMon(id, &mon, SPECIES_BULBASAUR, 50, USE_RANDOM_IVS);
+    EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_BULBASAUR, GetMonData(&mon, MON_DATA_OT_ID)), MOVE_ICE_FANG);
+    u16 count = GetTutorMoves(&mon, moves, ARRAY_COUNT(moves));
+    u32 matches = 0;
+    for (u32 i = 0; i < count; i++)
+        matches += moves[i] == MOVE_ICE_FANG;
+    EXPECT_EQ(matches, 1);
+}
+
 TEST("Cross Training gifts pair Blaze Kick with tutor and Pokedex access to Ice Punch")
 {
     struct Pokemon mon;

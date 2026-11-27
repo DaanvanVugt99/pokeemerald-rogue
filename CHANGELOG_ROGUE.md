@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- With exactly two biting moves, Huntail’s Abyssal Maw follows a landed bite with the other at 40% of its base power. Gift recipients can learn Ice Fang from the tutor to complement their bite pairing.
+
 - Living Fossil now calls the holder’s lowest-power attack when it first drops below half HP each switch-in. It compares listed power and breaks ties by moveslot order.
 
 - Buneary, Lopunny, and Mega Lopunny gain Cross Training. With exactly one punch and one kick, the moves swap types and both gain STAB. Dynamic gifts pair Blaze Kick with Ice Punch tutor access.

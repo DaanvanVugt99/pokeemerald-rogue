@@ -1569,7 +1569,6 @@ static void Cmd_attackcanceler(void)
     && (GetBattlerAbility(gBattlerAttacker) == ABILITY_PARENTAL_BOND
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_CHAMPION) && gBattleMoves[gCurrentMove].punchingMove)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_TANDEM) && moveType == TYPE_POISON)
-     || (HasBattlerAbility(gBattlerAttacker, ABILITY_ABYSSAL_MAW) && gBattleMoves[gCurrentMove].bitingMove)
      || HasBattlerAbility(gBattlerAttacker, ABILITY_BRUTAL)
      || (HasBattlerAbility(gBattlerAttacker, ABILITY_IMPACT_PROTOCOL)
       && IsOnlyParadoxInParty(gBattlerAttacker)

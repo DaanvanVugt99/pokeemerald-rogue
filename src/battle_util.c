@@ -6374,6 +6374,45 @@ static bool32 TryUseVicejawCalledMove(u32 battler, u32 target)
     return TRUE;
 }
 
+static bool32 TryUseAbyssalMaw(u32 battler, u32 target, u32 opener)
+{
+    u16 followUp = MOVE_NONE;
+    bool32 knowsOpener = FALSE;
+
+    if (!gBattleMoves[opener].bitingMove || !IsFinalMultiHitStrike()
+     || (gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+     || (gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+     || !(gSpecialStatuses[battler].damagedMons & gBitTable[target])
+     || !CanUseExtraMove(battler, target))
+        return FALSE;
+
+    for (u32 slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        u16 move = gBattleMons[battler].moves[slot];
+        if (move == MOVE_NONE || move >= MOVES_COUNT || !gBattleMoves[move].bitingMove)
+            continue;
+        if (move == opener && !knowsOpener)
+            knowsOpener = TRUE;
+        else if (move != opener && followUp == MOVE_NONE)
+            followUp = move;
+        else
+            return FALSE;
+    }
+    if (!knowsOpener || followUp == MOVE_NONE)
+        return FALSE;
+
+    SetBattlerTriggeredAbility(battler, ABILITY_ABYSSAL_MAW);
+    SetAtkCancellerForCalledMove();
+    gBattlerAttacker = gBattlerAbility = battler;
+    gBattlerTarget = target;
+    gCalledMove = followUp;
+    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
+    VarSet(VAR_EXTRA_MOVE_DAMAGE, gBattleMoves[followUp].power * 2 / 5);
+    StartAbilityCalledMoveScript();
+    return TRUE;
+}
+
 static const u16 sAcidRefluxMoves[] =
 {
     MOVE_ACID,
@@ -17508,6 +17547,9 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
+        if (HasBattlerAbility(battler, ABILITY_ABYSSAL_MAW) && TryUseAbyssalMaw(battler, gBattlerTarget, move))
+            effect++;
+
         if (HasBattlerAbility(battler, ABILITY_HANDYWORK)
          && !IS_MOVE_STATUS(move)
          && IsMoveMakingContact(move, battler)
@@ -26432,9 +26474,6 @@ static inline uq4_12_t GetParentalBondModifier(u32 battlerAtk, u32 move)
         return UQ_4_12(0.25);
     if (HasBattlerAbility(battlerAtk, ABILITY_TOXIC_TANDEM)
      && moveType == TYPE_POISON)
-        return UQ_4_12(0.4);
-    if (HasBattlerAbility(battlerAtk, ABILITY_ABYSSAL_MAW)
-     && gBattleMoves[move].bitingMove)
         return UQ_4_12(0.4);
     if (HasBattlerAbility(battlerAtk, ABILITY_BRUTAL))
         return UQ_4_12(0.25);
