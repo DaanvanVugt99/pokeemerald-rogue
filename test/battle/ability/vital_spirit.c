@@ -59,8 +59,8 @@ SINGLE_BATTLE_TEST("Vital Spirit prevents SetMoveEffect self stat drops without 
     PARAMETRIZE { ability = ABILITY_VITAL_SPIRIT; move = MOVE_HAMMER_ARM; statId = STAT_SPEED; stages = 1; }
     PARAMETRIZE { ability = ABILITY_NONE; move = MOVE_SPIN_OUT; statId = STAT_SPEED; stages = 2; }
     PARAMETRIZE { ability = ABILITY_VITAL_SPIRIT; move = MOVE_SPIN_OUT; statId = STAT_SPEED; stages = 2; }
-    PARAMETRIZE { ability = ABILITY_NONE; move = MOVE_MAKE_IT_RAIN; statId = STAT_SPATK; stages = 1; }
-    PARAMETRIZE { ability = ABILITY_VITAL_SPIRIT; move = MOVE_MAKE_IT_RAIN; statId = STAT_SPATK; stages = 1; }
+    PARAMETRIZE { ability = ABILITY_NONE; move = MOVE_MAKE_IT_RAIN; statId = STAT_SPATK; stages = 2; }
+    PARAMETRIZE { ability = ABILITY_VITAL_SPIRIT; move = MOVE_MAKE_IT_RAIN; statId = STAT_SPATK; stages = 2; }
 
     GIVEN {
         ASSUME(gBattleMoves[move].power != 0);
