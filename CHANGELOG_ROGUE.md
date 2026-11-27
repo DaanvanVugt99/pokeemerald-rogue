@@ -5,6 +5,11 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Unseen Fist deals quarter damage through protection and activates contact shields. Rage Fist keeps its stacks through switching and loses them on fainting. Make It Rain sharply lowers Sp. Atk.
+- Milk Drink can heal a protected ally. Revival Blessing preserves Mega Evolution and Palafin’s Hero Form. Speed Swap survives Mega Evolution, and Encore changes the priority of the move it forces that turn.
+- Increased the power of Gear Grind, Anchor Shot, Revelation Dance, Dragon Hammer, Triple Dive and Hyper Drill. Gear Grind also has 90% accuracy. Reduced the power of Bolt Beak, Fishious Rend, Astral Barrage and Blood Moon.
+- Increased PP for Night Slash, Shell Trap and Spin Out. Metal Claw and Dire Claw count as slicing moves, Clangorous Soul always hits, and Freeze-Dry no longer freezes.
+
 - Screech, Steel Wing, Metal Sound and Frost Breath have 100% accuracy. Rock Slide has 95% accuracy and a 20% flinch chance. Added the December Champions tutor compatibility updates.
 
 - Slash now has 80 power, Meteor Assault has 170 power, and Double Shock counts as a punch. Mega Sol prevents Aurora Veil in snow or hail and requires Electro Shot to charge in rain unless holding Power Herb.

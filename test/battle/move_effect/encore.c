@@ -71,3 +71,30 @@ SINGLE_BATTLE_TEST("Encore overrides the chosen move if it occurs first")
         ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, player);
     }
 }
+
+DOUBLE_BATTLE_TEST("Adventure balance: Encore reorders the remaining actions")
+{
+    GIVEN {
+        PLAYER(SPECIES_WHIMSICOTT) { Ability(ABILITY_PRANKSTER); Speed(500); }
+        PLAYER(SPECIES_WOBBUFFET) { Speed(200); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(2); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(1); }
+    } WHEN {
+        TURN {
+            MOVE(opponentLeft, MOVE_SCRATCH, target: playerRight);
+        }
+        TURN {
+            MOVE(playerLeft, MOVE_ENCORE, target: opponentLeft);
+            MOVE(opponentLeft, MOVE_QUICK_ATTACK, target: playerRight);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, playerLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, playerRight);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, opponentLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_ENCORE, playerLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, playerRight);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, opponentLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponentRight);
+    }
+}

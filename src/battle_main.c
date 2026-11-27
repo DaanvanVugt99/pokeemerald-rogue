@@ -3462,6 +3462,7 @@ const u8* FaintClearSetData(u32 battler)
     gBattleMons[battler].type2 = GetTypeBySpecies(gBattleMons[battler].species, 1, gBattleMons[battler].otId);
     gBattleMons[battler].type3 = TYPE_MYSTERY;
 
+    gBattleStruct->timesGotHit[GetBattlerSide(battler)][gBattlerPartyIndexes[battler]] = 0;
     Ai_UpdateFaintData(battler);
     TryBattleFormChange(battler, FORM_CHANGE_FAINT);
 
@@ -4989,6 +4990,8 @@ s8 GetChosenMovePriority(u32 battler)
     gProtectStructs[battler].pranksterElevated = 0;
     if (gProtectStructs[battler].noValidMoves)
         move = MOVE_STRUGGLE;
+    else if (gDisableStructs[battler].encoredMove != MOVE_NONE)
+        move = gDisableStructs[battler].encoredMove;
     else
         move = gBattleMons[battler].moves[*(gBattleStruct->chosenMovePositions + battler)];
 

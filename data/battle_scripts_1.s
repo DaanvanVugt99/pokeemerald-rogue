@@ -283,11 +283,7 @@ gBattleScriptsForMoveEffects::
 	.4byte BattleScript_EffectHealPulse               @ EFFECT_HEAL_PULSE
 	.4byte BattleScript_EffectQuash                   @ EFFECT_QUASH
 	.4byte BattleScript_EffectIonDeluge               @ EFFECT_ION_DELUGE
-#if 0 @B_USE_FROSTBITE == TRUE
-	.4byte BattleScript_EffectFrostbiteHit            @ EFFECT_FREEZE_DRY
-#else
-	.4byte BattleScript_EffectFreezeHit               @ EFFECT_FREEZE_DRY
-#endif
+	.4byte BattleScript_EffectHit                     @ EFFECT_FREEZE_DRY
 	.4byte BattleScript_EffectTopsyTurvy              @ EFFECT_TOPSY_TURVY
 	.4byte BattleScript_EffectMistyTerrain            @ EFFECT_MISTY_TERRAIN
 	.4byte BattleScript_EffectGrassyTerrain           @ EFFECT_GRASSY_TERRAIN
@@ -1019,7 +1015,7 @@ BattleScript_CorrosiveGasFail:
 BattleScript_EffectMakeItRain::
 	setmoveeffect MOVE_EFFECT_PAYDAY
 	seteffectprimary
-	setmoveeffect MOVE_EFFECT_SP_ATK_MINUS_1 | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN
+	setmoveeffect MOVE_EFFECT_SP_ATK_MINUS_2 | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN
 	seteffectprimary
 	goto BattleScript_SetEffectPrimaryReturn
 

@@ -853,8 +853,8 @@ static const u8 sSwaggerDescription[] = _(
     "sharply raises Attack.");
 
 static const u8 sMilkDrinkDescription[] = _(
-    "Recovers up to half the\n"
-    "user's maximum HP.");
+    "Heals the user or ally by\n"
+    "half its maximum HP.");
 
 static const u8 sSparkDescription[] = _(
     "An electrified tackle that\n"
@@ -2262,7 +2262,7 @@ static const u8 sPetalBlizzardDescription[] = _(
 
 static const u8 sFreezeDryDescription[] = _(
     "Super effective on Water-\n"
-    "types. May cause freezing.");
+    "types.");
 
 static const u8 sShimmerDescription[] = _(
     "Attacks with a strange\n"
@@ -3202,8 +3202,8 @@ static const u8 sRagingBullDescription[] = _(
     "Matches the user's second type.");
 
 static const u8 sMakeItRainDescription[] = _(
-    "Lowers the user's Sp. Atk.\n"
-    "Money is recovered after.");
+    "Sharply cuts Sp. Atk.\n"
+    "Scatters coins.");
 
 static const u8 sRuinationDescription[] = _(
     "Summons a ruinous disaster\n"

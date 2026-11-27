@@ -147,3 +147,29 @@ TO_DO_BATTLE_TEST("Revived battlers still lose their turn");
 //         NOT { MESSAGE("Wynaut used Celebrate!"); }
 //     }
 // }
+
+SINGLE_BATTLE_TEST("Adventure balance: Revival Blessing preserves Mega and Hero forms and clears Rage Fist stacks on faint")
+{
+    u16 species, form;
+    PARAMETRIZE { species = SPECIES_VENUSAUR; form = SPECIES_VENUSAUR_MEGA; }
+    PARAMETRIZE { species = SPECIES_PALAFIN_ZERO; form = SPECIES_PALAFIN_HERO; }
+    GIVEN {
+        PLAYER(species) { Item(ITEM_VENUSAURITE); }
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        if (species == SPECIES_PALAFIN_ZERO) {
+            TURN { SWITCH(player, 1); }
+            TURN { SWITCH(player, 0); }
+        } else {
+            TURN { MOVE(player, MOVE_CELEBRATE, megaEvolve: TRUE); }
+        }
+        TURN { MOVE(opponent, MOVE_TACKLE); }
+        TURN { MOVE(opponent, MOVE_FISSURE); SEND_OUT(player, 1); }
+        TURN { MOVE(player, MOVE_REVIVAL_BLESSING); SEND_OUT(player, 0); }
+        TURN { SWITCH(player, 0); }
+    } THEN {
+        EXPECT_EQ(player->species, form);
+        EXPECT_EQ(gBattleStruct->timesGotHit[B_SIDE_PLAYER][0], 0);
+    }
+}

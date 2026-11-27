@@ -24520,6 +24520,15 @@ static bool32 IsMoveBlockedByProtectLike(u32 battler, u32 move)
         return FALSE;
 }
 
+static bool32 CanPierceShield(u32 battler, u32 move)
+{
+    if (IsMoveInherentlyMakingContact(move) && HasBattlerAbility(battler, ABILITY_UNSEEN_FIST))
+        return TRUE;
+    return IsMoveMakingContact(move, battler)
+        && (HasBattlerAbility(battler, ABILITY_PIERCING_DRILL)
+         || (HasBattlerAbility(battler, ABILITY_SIEGE_INSTINCT) && IsOnlyParadoxInParty(battler)));
+}
+
 bool32 IsBattlerProtected(u32 battler, u32 move)
 {
     // Decorate bypasses protect and detect, but not crafty shield
@@ -24541,22 +24550,12 @@ bool32 IsBattlerProtected(u32 battler, u32 move)
     if (gProtectStructs[battler].maxGuarded && IsMoveBlockedByMaxGuard(move))
         return TRUE;
 
-    // Protective Pads doesn't stop Unseen Fist from bypassing Protect effects, so IsMoveMakingContact() isn't used here.
-    // This means extra logic is needed to handle Shell Side Arm.
-    if (IsMoveMakingContact(move, gBattlerAttacker)
-        && IsMoveBlockedByProtectLike(battler, move)
-        && !gProtectStructs[battler].maxGuarded
-        && (HasBattlerAbility(gBattlerAttacker, ABILITY_PIERCING_DRILL)
-         || (HasBattlerAbility(gBattlerAttacker, ABILITY_SIEGE_INSTINCT)
-          && IsOnlyParadoxInParty(gBattlerAttacker))))
+    if (!gProtectStructs[battler].maxGuarded && IsMoveBlockedByProtectLike(battler, move)
+     && CanPierceShield(gBattlerAttacker, move))
     {
-        gProtectStructs[gBattlerAttacker].touchedProtectLike = TRUE;
+        gProtectStructs[gBattlerAttacker].touchedProtectLike = IsMoveMakingContact(move, gBattlerAttacker);
         return FALSE;
     }
-    else if (HasBattlerAbility(gBattlerAttacker, ABILITY_UNSEEN_FIST)
-        && (gBattleMoves[move].makesContact || (gBattleMoves[move].effect == EFFECT_SHELL_SIDE_ARM && gBattleStruct->swapDamageCategory))
-        && !gProtectStructs[battler].maxGuarded) // Max Guard cannot be bypassed by Unseen Fist
-        return FALSE;
     else if (HasBattlerAbility(gBattlerAttacker, ABILITY_X_RAY_JAWS)
         && gBattleMoves[move].bitingMove
         && !gProtectStructs[battler].maxGuarded)
@@ -26445,12 +26444,8 @@ static inline uq4_12_t GetTargetDamageModifier(u32 move, u32 battlerAtk, u32 bat
 
     if (GetMoveTargetCount(move, battlerAtk, battlerDef) >= 2)
         modifier = uq4_12_multiply(modifier, B_MULTIPLE_TARGETS_DMG >= GEN_4 ? UQ_4_12(0.75) : UQ_4_12(0.5));
-    if (IsMoveMakingContact(move, battlerAtk)
-     && IsMoveBlockedByProtectLike(battlerDef, move)
-     && !gProtectStructs[battlerDef].maxGuarded
-     && (HasBattlerAbility(battlerAtk, ABILITY_PIERCING_DRILL)
-      || (HasBattlerAbility(battlerAtk, ABILITY_SIEGE_INSTINCT)
-       && IsOnlyParadoxInParty(battlerAtk))))
+    if (!gProtectStructs[battlerDef].maxGuarded && IsMoveBlockedByProtectLike(battlerDef, move)
+     && CanPierceShield(battlerAtk, move))
         modifier = uq4_12_multiply(modifier, UQ_4_12(0.25));
 
     return modifier;
@@ -28647,7 +28642,8 @@ bool32 CanBattlerFormChange(u32 battler, u16 method)
     if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED
         && B_TRANSFORM_FORM_CHANGES >= GEN_5)
         return FALSE;
-    // Mega Evolved and Ultra Bursted Pokémon should always revert to normal upon fainting or ending the battle.
+    if (method == FORM_CHANGE_FAINT && IsBattlerMegaEvolved(battler))
+        return FALSE;
     if ((IsBattlerMegaEvolved(battler) || IsBattlerUltraBursted(battler) || IsBattlerInTeraForm(battler)) && (method == FORM_CHANGE_FAINT || method == FORM_CHANGE_END_BATTLE))
         return TRUE;
     else if (IsBattlerPrimalReverted(battler) && (method == FORM_CHANGE_END_BATTLE))
@@ -28693,7 +28689,7 @@ bool32 TryBattleFormChange(u32 battler, u16 method)
     {
         bool32 restoreSpecies = FALSE;
 
-        // Mega Evolved and Ultra Bursted Pokémon should always revert to normal upon fainting or ending the battle, so no need to add it to the form change tables.
+        // These temporary forms share the stored original species.
         if ((IsBattlerMegaEvolved(battler) || IsBattlerUltraBursted(battler) || IsBattlerInTeraForm(battler)) && (method == FORM_CHANGE_FAINT || method == FORM_CHANGE_END_BATTLE))
             restoreSpecies = TRUE;
 
@@ -29652,7 +29648,8 @@ void CopyMonLevelAndBaseStatsToBattleMon(u32 battler, struct Pokemon *mon)
     gBattleMons[battler].maxHP = GetMonData(mon, MON_DATA_MAX_HP);
     gBattleMons[battler].attack = GetMonData(mon, MON_DATA_ATK);
     gBattleMons[battler].defense = GetMonData(mon, MON_DATA_DEF);
-    gBattleMons[battler].speed = GetMonData(mon, MON_DATA_SPEED);
+    if (!(gBattleResources->flags->flags[battler] & RESOURCE_FLAG_SPEED_SWAPPED))
+        gBattleMons[battler].speed = GetMonData(mon, MON_DATA_SPEED);
     gBattleMons[battler].spAttack = GetMonData(mon, MON_DATA_SPATK);
     gBattleMons[battler].spDefense = GetMonData(mon, MON_DATA_SPDEF);
 }

@@ -3782,7 +3782,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .type = TYPE_NORMAL,
         .accuracy = 0,
         .secondaryEffectChance = 0,
-        .target = MOVE_TARGET_USER,
+        .target = MOVE_TARGET_USER | MOVE_TARGET_ALLY,
         .priority = 0,
         .split = SPLIT_STATUS,
         .zMoveEffect = Z_EFFECT_RESET_STATS,
@@ -4192,6 +4192,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
+        .slicingMove = TRUE,
         .sheerForceBoost = TRUE,
     },
 
@@ -7146,7 +7147,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .power = 70,
         .type = TYPE_DARK,
         .accuracy = 100,
-        .pp = 15,
+        .pp = 20,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
@@ -9567,9 +9568,9 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_GEAR_GRIND] =
     {
         .effect = EFFECT_HIT,
-        .power = 50,
+        .power = 60,
         .type = TYPE_STEEL,
-        .accuracy = 85,
+        .accuracy = 90,
         .pp = 15,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
@@ -10079,12 +10080,11 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .type = TYPE_ICE,
         .accuracy = 100,
         .pp = 20,
-        .secondaryEffectChance = 10,
+        .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
         .split = SPLIT_SPECIAL,
         .zMoveEffect = Z_EFFECT_NONE,
-        .sheerForceBoost = TRUE,
     },
 
     [MOVE_DISARMING_VOICE] =
@@ -11215,7 +11215,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_ANCHOR_SHOT] =
     {
         .effect = EFFECT_HIT_PREVENT_ESCAPE,
-        .power = 80,
+        .power = 90,
         .type = TYPE_STEEL,
         .accuracy = 100,
         .pp = 20,
@@ -11360,7 +11360,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_REVELATION_DANCE] =
     {
         .effect = EFFECT_REVELATION_DANCE,
-        .power = 90,
+        .power = 100,
         .type = TYPE_NORMAL,
         .accuracy = 100,
         .pp = 15,
@@ -11472,7 +11472,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_DRAGON_HAMMER] =
     {
         .effect = EFFECT_HIT,
-        .power = 90,
+        .power = 100,
         .type = TYPE_DRAGON,
         .accuracy = 100,
         .pp = 15,
@@ -11522,7 +11522,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .power = 150,
         .type = TYPE_FIRE,
         .accuracy = 100,
-        .pp = 5,
+        .pp = 10,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_BOTH,
         .priority = -3,
@@ -12267,7 +12267,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_BOLT_BEAK] =
     {
         .effect = EFFECT_BOLT_BEAK,
-        .power = 85,
+        .power = 80,
         .type = TYPE_ELECTRIC,
         .accuracy = 100,
         .pp = 10,
@@ -12282,7 +12282,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_FISHIOUS_REND] =
     {
         .effect = EFFECT_BOLT_BEAK,
-        .power = 85,
+        .power = 80,
         .type = TYPE_WATER,
         .accuracy = 100,
         .pp = 10,
@@ -12315,7 +12315,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .effect = EFFECT_CLANGOROUS_SOUL,
         .power = 0,
         .type = TYPE_DRAGON,
-        .accuracy = 100,
+        .accuracy = 0,
         .pp = 5,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_USER,
@@ -13156,7 +13156,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_ASTRAL_BARRAGE] =
     {
         .effect = EFFECT_HIT,
-        .power = 120,
+        .power = 110,
         .type = TYPE_GHOST,
         .accuracy = 100,
         .pp = 5,
@@ -13203,6 +13203,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .split = SPLIT_PHYSICAL,
         .zMoveEffect = Z_EFFECT_NONE,
         .makesContact = TRUE,
+        .slicingMove = TRUE,
         .sheerForceBoost = TRUE,
     },
 
@@ -13781,7 +13782,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
         .power = 100,
         .type = TYPE_STEEL,
         .accuracy = 100,
-        .pp = 5,
+        .pp = 10,
         .secondaryEffectChance = 0,
         .target = MOVE_TARGET_SELECTED,
         .priority = 0,
@@ -13880,7 +13881,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_TRIPLE_DIVE] =
     {
         .effect = EFFECT_HIT,
-        .power = 30,
+        .power = 35,
         .type = TYPE_WATER,
         .accuracy = 95,
         .pp = 10,
@@ -14206,7 +14207,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_HYPER_DRILL] =
     {
         .effect = EFFECT_HIT,
-        .power = 100,
+        .power = 120,
         .type = TYPE_NORMAL,
         .accuracy = 100,
         .pp = 5,
@@ -14509,7 +14510,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT_DYNAMAX] =
     [MOVE_BLOOD_MOON] =
     {
         .effect = EFFECT_HIT,
-        .power = 140,
+        .power = 130,
         .type = TYPE_NORMAL,
         .accuracy = 100,
         .pp = 5,

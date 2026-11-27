@@ -219,3 +219,18 @@ SINGLE_BATTLE_TEST("Victreebel can Mega Evolve holding Victreebelite")
         EXPECT_EQ(player->species, SPECIES_VICTREEBEL_MEGA);
     }
 }
+
+SINGLE_BATTLE_TEST("Adventure balance: Speed Swap survives Mega Evolution")
+{
+    GIVEN {
+        PLAYER(SPECIES_CAMERUPT) { Item(ITEM_CAMERUPTITE); }
+        OPPONENT(SPECIES_PHEROMOSA) {}
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SPEED_SWAP); MOVE(player, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_SCRATCH); MOVE(player, MOVE_SCRATCH, megaEvolve: TRUE); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SPEED_SWAP, opponent);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_SCRATCH, opponent);
+    }
+}

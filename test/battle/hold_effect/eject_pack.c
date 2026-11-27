@@ -39,7 +39,7 @@ SINGLE_BATTLE_TEST("Eject Pack activates after Make It Rain lowers the user's Sp
         HP_BAR(opponent);
         MESSAGE("Coins scattered everywhere!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_STATS_CHANGE, player);
-        MESSAGE("Wobbuffet's Sp. Atk fell!");
+        MESSAGE("Wobbuffet's Sp. Atk harshly fell!");
         ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, player);
         MESSAGE("Wobbuffet is switched out with the Eject Pack!");
         MESSAGE("Go! Wynaut!");

@@ -375,3 +375,41 @@ SINGLE_BATTLE_TEST("Mega Sol makes Electro Shot charge in rain")
         EXPECT(player->status2 & STATUS2_MULTIPLETURNS);
     }
 }
+
+SINGLE_BATTLE_TEST("Adventure balance: Unseen Fist contact moves hit through Protect for quarter damage", s16 damage)
+{
+    u32 protectMove;
+    PARAMETRIZE { protectMove = MOVE_PROTECT; }
+    PARAMETRIZE { protectMove = MOVE_CELEBRATE; }
+    PARAMETRIZE { protectMove = MOVE_QUICK_GUARD; }
+    PARAMETRIZE { protectMove = MOVE_WIDE_GUARD; }
+
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_UNSEEN_FIST); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Moves(MOVE_PROTECT, MOVE_CELEBRATE, MOVE_QUICK_GUARD, MOVE_WIDE_GUARD); }
+    } WHEN {
+        TURN { MOVE(opponent, protectMove); MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent, captureDamage: &results[i].damage);
+    } FINALLY {
+        EXPECT_MUL_EQ(results[0].damage, Q_4_12(4.0), results[1].damage);
+        EXPECT_EQ(results[1].damage, results[2].damage);
+        EXPECT_EQ(results[1].damage, results[3].damage);
+    }
+}
+
+SINGLE_BATTLE_TEST("Adventure balance: Unseen Fist still triggers Spiky Shield side effects")
+{
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET) { Ability(ABILITY_UNSEEN_FIST); HP(80); MaxHP(80); Moves(MOVE_TACKLE); }
+        OPPONENT(SPECIES_WOBBUFFET) { HP(500); MaxHP(500); Moves(MOVE_SPIKY_SHIELD); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SPIKY_SHIELD); MOVE(player, MOVE_TACKLE); }
+    } SCENE {
+        HP_BAR(opponent);
+        HP_BAR(player);
+    } THEN {
+        EXPECT_LT(player->hp, player->maxHP);
+        EXPECT_LT(opponent->hp, opponent->maxHP);
+    }
+}

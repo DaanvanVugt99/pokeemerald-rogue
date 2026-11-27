@@ -7524,7 +7524,8 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_NUM_HITS:
-            if (gBattlerAttacker != gBattlerTarget
+            if (gBattleMons[gBattlerTarget].hp != 0
+                && gBattlerAttacker != gBattlerTarget
                 && gBattleMoves[gCurrentMove].split != SPLIT_STATUS
                 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                 && TARGET_TURN_DAMAGED)
@@ -15263,6 +15264,8 @@ static void Cmd_various(void)
                 SWAP(gBattleMons[gBattlerAttacker].defense, gBattleMons[gBattlerTarget].defense, temp);
                 break;
             case STAT_SPEED:
+                gBattleResources->flags->flags[gBattlerAttacker] |= RESOURCE_FLAG_SPEED_SWAPPED;
+                gBattleResources->flags->flags[gBattlerTarget] |= RESOURCE_FLAG_SPEED_SWAPPED;
                 SWAP(gBattleMons[gBattlerAttacker].speed, gBattleMons[gBattlerTarget].speed, temp);
                 break;
             case STAT_SPATK:
