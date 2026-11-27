@@ -8,6 +8,7 @@
 #include "constants/pokemon.h"
 #include "event_data.h"
 #include "overworld.h"
+#include "party_menu.h"
 #include "pokemon.h"
 #include "random.h"
 #include "rogue.h"
@@ -15,6 +16,7 @@
 #include "rogue_controller.h"
 #include "rogue_followmon.h"
 #include "rogue_gifts.h"
+#include "rogue_pokedex.h"
 #include "rogue_safari.h"
 #include "script.h"
 #include "test/test.h"
@@ -719,6 +721,36 @@ TEST("Dynamic legendary standard ability seed decodes stably")
 }
 
 
+
+TEST("Dream Sequence gifts can learn Dream Eater from the tutor and see it in the Pokedex")
+{
+    struct Pokemon mon;
+    static const u16 abilities[] = { ABILITY_DREAM_SEQUENCE, ABILITY_IMPACT };
+    u16 moves[MOVES_COUNT];
+    u16 count;
+    u16 i;
+    u32 dreamEaterCount;
+
+    for (u16 j = 0; j < ARRAY_COUNT(abilities); ++j)
+    {
+        u16 ability = abilities[j];
+        u32 id = DynamicOriginalUniqueAbilityCustomMonId(1, 2, 1, ability);
+        RogueGift_CreateMon(id, &mon, SPECIES_BULBASAUR, 50, USE_RANDOM_IVS);
+        EXPECT_EQ(GetMonUniqueAbility(&mon), ability);
+        EXPECT(!MonKnowsMove(&mon, MOVE_DREAM_EATER));
+        EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_BULBASAUR, GetMonData(&mon, MON_DATA_OT_ID)),
+                  ability == ABILITY_DREAM_SEQUENCE ? MOVE_DREAM_EATER : MOVE_NONE);
+
+        count = GetTutorMoves(&mon, moves, ARRAY_COUNT(moves));
+        dreamEaterCount = 0;
+        for (i = 0; i < count; ++i)
+            dreamEaterCount += moves[i] == MOVE_DREAM_EATER;
+        EXPECT_EQ(dreamEaterCount, ability == ABILITY_DREAM_SEQUENCE);
+    }
+
+    EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_DROWZEE, 0), MOVE_NONE);
+    EXPECT_EQ(RoguePokedex_GetAddedAbilityTutorMove(SPECIES_HYPNO, 0), MOVE_NONE);
+}
 
 TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
 {

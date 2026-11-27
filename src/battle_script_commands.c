@@ -2063,6 +2063,9 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
      && HasBattlerAbility(battlerAtk, ABILITY_SOOTHING_VOICE))
         moveAcc = 90;
     if (move == MOVE_HYPNOSIS
+     && HasBattlerAbility(battlerAtk, ABILITY_DREAM_SEQUENCE))
+        moveAcc = 80;
+    if (move == MOVE_HYPNOSIS
      && HasBattlerAbility(battlerAtk, ABILITY_SPIRAL_GAZE)
      && gDisableStructs[battlerAtk].isFirstTurn)
         moveAcc = 100;
@@ -16005,7 +16008,9 @@ static void Cmd_setdrainedhp(void)
 {
     CMD_ARGS();
 
-    if (gBattleMoves[gCurrentMove].argument != 0)
+    if (gCurrentMove == MOVE_DREAM_EATER && HasBattlerAbility(gBattlerAttacker, ABILITY_DREAM_SEQUENCE))
+        gBattleMoveDamage = gHpDealt;
+    else if (gBattleMoves[gCurrentMove].argument != 0)
         gBattleMoveDamage = (gHpDealt * gBattleMoves[gCurrentMove].argument / 100);
     else
         gBattleMoveDamage = (gHpDealt / 2);

@@ -2417,6 +2417,11 @@ static u8 CanTeachMove(struct Pokemon *mon, u16 move)
     return CAN_LEARN_MOVE;
 }
 
+u16 GetUniqueAbilityTutorMove(u16 ability)
+{
+    return ability == ABILITY_DREAM_SEQUENCE ? MOVE_DREAM_EATER : MOVE_NONE;
+}
+
 u8 GetTutorMoves(struct Pokemon *pokemon, u16 *tutorMoves, u16 tutorMovesCapacity)
 {
     u16 read = 0;
@@ -2426,6 +2431,9 @@ u8 GetTutorMoves(struct Pokemon *pokemon, u16 *tutorMoves, u16 tutorMovesCapacit
     if(Rogue_IsRunActive() && Rogue_GetModeRules()->forceFullTutorMoves)
         tutorMoveLvlCount = 1;
     u8 tutorMoveLvl = Rogue_IsRunActive() ? pokemon->rogueExtraData.runTutorMoveLvl : GetMonData(pokemon, MON_DATA_TUTOR_MOVE_LVL);
+    u16 abilityTutorMove = GetUniqueAbilityTutorMove(GetMonUniqueAbility(pokemon));
+    bool8 hasAbilityTutorMove = FALSE;
+    bool8 showLockedMoves = tutorMoveLvl + 1 < tutorMoveLvlCount;
     u32 compatValue;
     u32 uniqueMoveSet = Rogue_IsRunActive() ? GetMonData(pokemon, MON_DATA_PERSONALITY) : GetMonData(pokemon, MON_DATA_OT_ID);
     const struct RoguePokemonProfile *pokemonProfile = &gRoguePokemonProfiles[species];
@@ -2446,11 +2454,16 @@ u8 GetTutorMoves(struct Pokemon *pokemon, u16 *tutorMoves, u16 tutorMovesCapacit
             if(BattleMoveIdToItemId(pokemonProfile->tutorMoves[read]) != ITEM_NONE)
                 continue;
 
+            if (pokemonProfile->tutorMoves[read] == abilityTutorMove)
+                hasAbilityTutorMove = TRUE;
             tutorMoves[write++] = pokemonProfile->tutorMoves[read];
         }
     }
 
-    if(tutorMoveLvl + 1 < tutorMoveLvlCount)
+    if (abilityTutorMove != MOVE_NONE && !hasAbilityTutorMove && write + showLockedMoves < tutorMovesCapacity)
+        tutorMoves[write++] = abilityTutorMove;
+
+    if (showLockedMoves)
     {
         if(write >= tutorMovesCapacity)
         {

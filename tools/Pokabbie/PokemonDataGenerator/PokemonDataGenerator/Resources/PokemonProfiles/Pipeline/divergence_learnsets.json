@@ -1545,6 +1545,18 @@
   "removeLevelUp": [{"id":"rebalance-ekans-remove-level-sludge_bomb","species":"SPECIES_EKANS","move":"MOVE_SLUDGE_BOMB"},{"id":"rebalance-arbok-remove-level-sludge_bomb","species":"SPECIES_ARBOK","move":"MOVE_SLUDGE_BOMB"}],
   "levelUp": [
     {
+      "id": "dream-sequence-drowzee-dream_eater",
+      "species": "SPECIES_DROWZEE",
+      "move": "MOVE_DREAM_EATER",
+      "level": 23
+    },
+    {
+      "id": "dream-sequence-hypno-dream_eater",
+      "species": "SPECIES_HYPNO",
+      "move": "MOVE_DREAM_EATER",
+      "level": 23
+    },
+    {
       "id": "rebalance-haxorus-stone_axe",
       "species": "SPECIES_HAXORUS",
       "move": "MOVE_STONE_AXE",
@@ -9712,6 +9724,11 @@
       "species": "SPECIES_DROWZEE"
     },
     {
+      "id": "retained-tutor-drowzee-dream_eater",
+      "move": "MOVE_DREAM_EATER",
+      "species": "SPECIES_DROWZEE"
+    },
+    {
       "id": "retained-tutor-drowzee-eclipse",
       "move": "MOVE_ECLIPSE",
       "species": "SPECIES_DROWZEE"
@@ -10804,6 +10821,11 @@
     {
       "id": "retained-tutor-hypno-brainstorm",
       "move": "MOVE_BRAINSTORM",
+      "species": "SPECIES_HYPNO"
+    },
+    {
+      "id": "retained-tutor-hypno-dream_eater",
+      "move": "MOVE_DREAM_EATER",
       "species": "SPECIES_HYPNO"
     },
     {

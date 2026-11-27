@@ -1691,6 +1691,28 @@ static void DisplayMonUniqueAbilityText(void)
 
 #define MAX_LIST_DISPLAY_COUNT 8
 
+u16 RoguePokedex_GetAddedAbilityTutorMove(u16 species, u32 otId)
+{
+    u16 move;
+
+    if (species == SPECIES_NONE || species >= NUM_SPECIES)
+        return MOVE_NONE;
+
+    move = GetUniqueAbilityTutorMove(GetUniqueAbilityBySpeciesAndOtId(species, otId));
+
+    if (move != MOVE_NONE)
+    {
+        const u16 *tutorMoves = gRoguePokemonProfiles[species].tutorMoves;
+        for (; *tutorMoves != MOVE_NONE; ++tutorMoves)
+        {
+            if (*tutorMoves == move)
+                return MOVE_NONE;
+        }
+    }
+
+    return move;
+}
+
 static u16 GetMaxMoveScrollOffset()
 {
     u8 i;
@@ -1719,6 +1741,9 @@ static u16 GetMaxMoveScrollOffset()
             break;
         ++count;
     }
+
+    if (RoguePokedex_GetAddedAbilityTutorMove(species, sPokedexMenu->viewOtId) != MOVE_NONE)
+        ++count;
 
     return count - min(count, MAX_LIST_DISPLAY_COUNT);
 }
@@ -1799,6 +1824,20 @@ static void DisplayMonMovesText()
                 ++listIndex;
             }
         }
+    }
+
+    // Tutor moves granted by the Pokémon's unique Ability
+    u16 abilityTutorMove = RoguePokedex_GetAddedAbilityTutorMove(species, sPokedexMenu->viewOtId);
+    if (abilityTutorMove != MOVE_NONE)
+    {
+        if (listIndex >= sPokedexMenu->listScrollAmount && displayCount < MAX_LIST_DISPLAY_COUNT)
+        {
+            StringCopy(gStringVar1, gMoveNames[abilityTutorMove]);
+            StringExpandPlaceholders(gStringVar2, gText_PokedexMovesTutor);
+            RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar2, displayCount, TRUE);
+            ++displayCount;
+        }
+        ++listIndex;
     }
 
     // Level moves

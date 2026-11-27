@@ -101,7 +101,6 @@ static u32 GetBattlerUniqueAbilityRaw(u32 battler);
 static bool32 CanUseSelfExtraMove(u32 battlerAttacker);
 static bool32 CanUseSelfExtraMoveAfterMoveEndDamage(u32 battlerAttacker, u32 move);
 static bool32 CanUseExtraMove(u32 battlerAttacker, u32 battlerTarget);
-static bool32 TryUseDreamSequenceCalledMove(u32 battler);
 static bool32 TryUseDistortionCalledMove(u32 battler);
 static bool32 TryUseVicejawCalledMove(u32 battler, u32 target);
 static bool32 TryUseVarietyActCalledMove(u32 battler);
@@ -6307,54 +6306,6 @@ static bool32 TryUseDozingCalledMove(u32 battler, u32 move)
     gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
     gProtectStructs[battler].extraMoveUsed = TRUE;
     gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
-    StartAbilityCalledMoveScript();
-    return TRUE;
-}
-
-static const u16 sDreamSequenceMoves[] =
-{
-    MOVE_DREAM_EATER,
-    MOVE_NIGHTMARE,
-    MOVE_DISABLE,
-    MOVE_MEAN_LOOK,
-    MOVE_CONFUSE_RAY,
-    MOVE_SPITE,
-    MOVE_PSYBEAM,
-    MOVE_CALM_MIND,
-    MOVE_SCARY_FACE,
-    MOVE_ASTONISH,
-};
-
-static bool32 TryUseDreamSequenceCalledMove(u32 battler)
-{
-    u32 target;
-    u16 move;
-
-    gBattlerAttacker = battler;
-    move = RandomFollowUpMove(RNG_ROGUE_DREAM_SEQUENCE, sDreamSequenceMoves, battler);
-    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
-
-    if (target >= gBattlersCount || !IsBattlerAlive(target))
-        return FALSE;
-
-    if (target == battler)
-    {
-        if (!CanUseSelfExtraMove(battler))
-            return FALSE;
-    }
-    else
-    {
-        if (!CanUseExtraMove(battler, target))
-            return FALSE;
-    }
-
-    SetBattlerTriggeredAbility(battler, ABILITY_DREAM_SEQUENCE);
-    SetAtkCancellerForCalledMove();
-    gBattlerAbility = battler;
-    gBattlerTarget = target;
-    gCalledMove = move;
-    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-    gProtectStructs[battler].extraMoveUsed = TRUE;
     StartAbilityCalledMoveScript();
     return TRUE;
 }
@@ -17739,16 +17690,6 @@ if (triggeringAbility != ABILITY_NONE)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_DREAM_SEQUENCE)
-         && move == MOVE_HYPNOSIS
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsFinalMultiHitStrike()
-         && TryUseDreamSequenceCalledMove(battler))
-        {
             effect++;
         }
 

@@ -4135,6 +4135,18 @@ BattleScript_DreamEaterWorked:
 	printstring STRINGID_PKMNDREAMEATEN
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_DreamEaterTryFaintEnd:
+	jumpifmovehadnoeffect BattleScript_DreamEaterEnd
+	jumpiffainted BS_TARGET, TRUE, BattleScript_DreamEaterEnd
+	jumpifstatus BS_TARGET, STATUS1_SLEEP, BattleScript_DreamEaterCheckWake
+	goto BattleScript_DreamEaterEnd
+BattleScript_DreamEaterCheckWake:
+	jumpifability BS_ATTACKER, ABILITY_DREAM_SEQUENCE, BattleScript_DreamEaterWake
+	goto BattleScript_DreamEaterEnd
+BattleScript_DreamEaterWake:
+	call BattleScript_AbilityPopUp
+	curestatus BS_TARGET
+	call BattleScript_TargetWokeUp
+BattleScript_DreamEaterEnd:
 	tryfaintmon BS_TARGET
 	goto BattleScript_MoveEnd
 

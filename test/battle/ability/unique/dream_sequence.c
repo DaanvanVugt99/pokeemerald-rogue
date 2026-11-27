@@ -1,51 +1,57 @@
-#include "constants/moves.h"
 #include "global.h"
 #include "test/battle.h"
 
-ASSUMPTIONS
+SINGLE_BATTLE_TEST("Dream Sequence makes Hypnosis 80 percent accurate without a follow-up")
 {
-    ASSUME(gBattleMoves[MOVE_HYPNOSIS].effect == EFFECT_SLEEP);
-    ASSUME(gBattleMoves[MOVE_HYPNOSIS].accuracy > 0);
-    ASSUME(gBattleMoves[MOVE_DREAM_EATER].power > 0);
-    ASSUME(IS_MOVE_STATUS(MOVE_CALM_MIND));
-    ASSUME(IS_MOVE_STATUS(MOVE_GROWL));
-}
-
-SINGLE_BATTLE_TEST("Dream Sequence uses a random dream move after Hypnosis")
-{
-    s16 damage;
-    PASSES_RANDOMLY(gBattleMoves[MOVE_HYPNOSIS].accuracy, 100, RNG_ACCURACY);
+    PASSES_RANDOMLY(80, 100, RNG_ACCURACY);
 
     GIVEN {
-        PLAYER(SPECIES_HYPNO) { Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_HYPNOSIS); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_HYPNO) { Speed(50); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_HYPNOSIS); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_HYPNOSIS, WITH_RNG(RNG_ROGUE_DREAM_SEQUENCE, MOVE_DREAM_EATER)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(opponent, MOVE_CELEBRATE); MOVE(player, MOVE_HYPNOSIS); }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPNOSIS, player);
-        ABILITY_POPUP(player, ABILITY_DREAM_SEQUENCE);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_DREAM_EATER, player);
-        HP_BAR(opponent, captureDamage: &damage);
-    } THEN {
-        EXPECT_GT(damage, 0);
+        STATUS_ICON(opponent, STATUS1_SLEEP);
+        NOT HP_BAR(opponent);
     }
 }
 
-SINGLE_BATTLE_TEST("Dream Sequence can choose a self-target dream move after Hypnosis")
+SINGLE_BATTLE_TEST("Dream Sequence makes Dream Eater fully drain and wake the target")
 {
-    PASSES_RANDOMLY(gBattleMoves[MOVE_HYPNOSIS].accuracy, 100, RNG_ACCURACY);
+    s16 damage;
+    s16 healing;
 
     GIVEN {
-        PLAYER(SPECIES_HYPNO) { Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_HYPNOSIS); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_HYPNO) { Speed(100); HP(100); MaxHP(500); SpAttack(80); Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_DREAM_EATER); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); HP(500); MaxHP(500); SpDefense(100); Status1(STATUS1_SLEEP_TURN(3)); Moves(MOVE_CELEBRATE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_HYPNOSIS, WITH_RNG(RNG_ROGUE_DREAM_SEQUENCE, MOVE_CALM_MIND)); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN { MOVE(player, MOVE_DREAM_EATER); MOVE(opponent, MOVE_CELEBRATE); }
     } SCENE {
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_HYPNOSIS, player);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_DREAM_EATER, player);
+        HP_BAR(opponent, captureDamage: &damage);
+        HP_BAR(player, captureDamage: &healing);
         ABILITY_POPUP(player, ABILITY_DREAM_SEQUENCE);
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_CALM_MIND, player);
+        MESSAGE("Foe Wobbuffet woke up!");
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_CELEBRATE, opponent);
     } THEN {
-        EXPECT_EQ(player->statStages[STAT_SPATK], DEFAULT_STAT_STAGE + 1);
-        EXPECT_EQ(player->statStages[STAT_SPDEF], DEFAULT_STAT_STAGE + 1);
+        EXPECT_GT(damage, 0);
+        EXPECT_EQ(healing, -damage);
+        EXPECT_EQ(opponent->status1 & STATUS1_SLEEP, 0);
+    }
+}
+
+SINGLE_BATTLE_TEST("Dream Sequence does not let Dream Eater hit an awake foe")
+{
+    GIVEN {
+        PLAYER(SPECIES_HYPNO) { Ability(ABILITY_INSOMNIA); UniqueAbility(ABILITY_DREAM_SEQUENCE); Moves(MOVE_DREAM_EATER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN { MOVE(player, MOVE_DREAM_EATER, hit: FALSE); }
+    } SCENE {
+        NONE_OF {
+            ABILITY_POPUP(player, ABILITY_DREAM_SEQUENCE);
+            HP_BAR(opponent);
+        }
     }
 }
