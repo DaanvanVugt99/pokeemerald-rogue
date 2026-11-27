@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Battle health boxes, action prompts, and move menus use charcoal panels, white lettering, and amber selection arrows. The quick-throw Poké Ball prompt uses the same charcoal frame and amber cycle arrows. The main Pokédex and in-battle Pokémon inspect pages use charcoal panels with white labels, bright navigation arrows and shoulder-button hints, and muted blue values. Pokédex transitions between tilesets wait for the incoming tilemap, fixing a brief grid of digits. Entry tabs reuse their visible background and Pokémon portrait and switch without a black flash. Pokédex overview portraits have light grey backdrops. The Pokédex cover uses off-white lettering, a green eye for seen species, a red Poké Ball for caught species, and a gold Poké Ball for shiny catches. The level-up stat panel has more padding on both sides. Ability pop-ups and the level-up banner use the same charcoal panels and white lettering. Transformation buttons use charcoal backgrounds with colored activation symbols.
+
 - Battle health boxes show each Pokémon’s current held item beside its type icons in singles and doubles. The item hides while that Pokémon’s transformation button is out and returns when it retracts.
 
 - Jirachi’s Wishmaker grants a random follow-up move when its Wish resolves, even at full HP or after Jirachi switches out. The recipient uses the move. Helping Hand leaves the pool because Wish resolves at the end of the turn.

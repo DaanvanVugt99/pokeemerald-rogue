@@ -2268,10 +2268,10 @@ static void UpdateHealthboxItemIcon(struct Sprite *type)
         type->tItemSpritePlusOne = id + 1;
         icon->data[0] = item;
         AlignHealthboxItemIcon(icon, battler);
-        icon->oam.priority = 0;
     }
     if (icon)
     {
+        icon->oam.priority = type->oam.priority;
         icon->invisible = type->invisible || IsHealthboxTriggerVisible(battler);
         icon->x = type->x + icon->data[1];
         icon->y = type->y + icon->data[2];
@@ -2296,6 +2296,8 @@ static void SpriteCb_TypeIndicator(struct Sprite *sprite)
     if (sprite->tTypeSlot == 0)
         TypeIndicator_UpdateTypesIfNeeded(battlerId);
 
+    // Move Info is on BG0. Let its opaque pixels cover the health-box icons.
+    sprite->oam.priority = gBattleStruct->descriptionSubmenu ? 1 : 0;
     sprite->invisible = TypeIndicator_ShouldBeInvisible(sprite);
     sprite->x = gSprites[healthboxSpriteId].x + sprite->tPosX;
     sprite->y = gSprites[healthboxSpriteId].y + sprite->tPosY;
@@ -3720,7 +3722,7 @@ static void PrintBattlerOnAbilityPopUp(u8 battlerId, u8 spriteId1, u8 spriteId2,
                         (void*)(OBJ_VRAM0) + (gSprites[spriteId2].oam.tileNum * 32),
                         5, 12,
                         0,
-                        5, 7, 1);
+                        5, 9, 1);
 }
 
 static void PrintAbilityOnAbilityPopUp(u32 ability, u8 spriteId1, u8 spriteId2)
@@ -4293,12 +4295,12 @@ static const struct OamData sOamData_MoveInfoWindow =
     .objMode = ST_OAM_OBJ_NORMAL,
     .mosaic = FALSE,
     .bpp = ST_OAM_4BPP,
-    .shape = SPRITE_SHAPE(32x32),
+    .shape = SPRITE_SHAPE(32x16),
     .x = 0,
     .matrixNum = 0,
-    .size = SPRITE_SIZE(32x32),
+    .size = SPRITE_SIZE(32x16),
     .tileNum = 0,
-    .priority = 1,
+    .priority = 0,
     .paletteNum = 0,
     .affineParam = 0,
 };
@@ -4306,7 +4308,7 @@ static const struct OamData sOamData_MoveInfoWindow =
 static const struct SpriteTemplate sSpriteTemplate_MoveInfoWindow =
 {
     .tileTag = MOVE_INFO_WINDOW_TAG,
-    .paletteTag = BATTLE_OPTION_WINDOW_PAL_TAG,
+    .paletteTag = TAG_HEALTHBOX_PAL,
     .oam = &sOamData_MoveInfoWindow,
     .anims = gDummySpriteAnimTable,
     .images = NULL,
@@ -4341,26 +4343,18 @@ static const struct SpriteSheet sSpriteSheet_MoveInfoWindow =
 
 static const u16 sLastUsedBallWindowPalette[] =
 {
-    RGB(0, 22, 11),
-    RGB(20, 21, 19),
-    RGB(12, 12, 11),
-    RGB(10, 10, 10),
-    RGB(8, 8, 8),
-    RGB(14, 15, 13),
-    RGB(28, 29, 30),
-    RGB(31, 31, 31),
-    RGB(10, 10, 10),
-    RGB(14, 15, 13),
-    RGB(10, 10, 10),
-    RGB(14, 15, 13),
-    RGB(0, 0, 0),
-    RGB(20, 21, 19),
-    RGB(0, 0, 0),
-    RGB(0, 0, 0),
+    [0] = RGB(0, 0, 0),
+    [1] = RGB(6, 6, 7),       // Charcoal panel
+    [3] = RGB(2, 3, 4),       // Button lettering
+    [4] = RGB(3, 3, 4),       // Frame outline
+    [5] = RGB(10, 11, 12),    // Frame highlight
+    [7] = RGB(30, 30, 29),    // Shoulder button
+    [8] = RGB(6, 6, 7),       // Dynamic cycle arrows, hidden initially
+    [9] = RGB(6, 6, 7),
+    [10] = RGB(30, 23, 13),   // Visible cycle arrows
+    [11] = RGB(30, 30, 29),
 };
 
-// These buttons use the same colors and can overlap while sliding between menus.
-// Sharing their palette leaves room for the dynamically colored move type badge.
 static const struct SpritePalette sSpritePalette_BattleOptionWindow =
 {
     sLastUsedBallWindowPalette, BATTLE_OPTION_WINDOW_PAL_TAG
@@ -4624,7 +4618,7 @@ static bool32 IsLastUsedBallWindowSpriteValid(void)
 
 static void FreeBattleOptionWindowPaletteIfUnused(void)
 {
-    if (!IsLastUsedBallWindowSpriteValid() && !IsMoveInfoSpriteValid())
+    if (!IsLastUsedBallWindowSpriteValid())
         FreeSpritePaletteByTag(BATTLE_OPTION_WINDOW_PAL_TAG);
 }
 
@@ -4764,15 +4758,13 @@ void TryAddMoveInfoWindow(void)
     }
 
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
-    if (LoadBattleOptionWindowPalette() == 0xFF)
-        return;
     if (GetSpriteTileStartByTag(MOVE_INFO_WINDOW_TAG) == 0xFFFF)
         LoadSpriteSheet(&sSpriteSheet_MoveInfoWindow);
 
     spriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow,
-                            LAST_BALL_WIN_X_0,
-                            LAST_USED_WIN_Y + 32,
-                            6);
+                            -16,
+                            104, // Bottom edge aligns with the top of the battle menu.
+                            0);
     if (spriteId < MAX_SPRITES)
     {
         gBattleStruct->moveInfoSpriteId = spriteId;
@@ -4781,7 +4773,6 @@ void TryAddMoveInfoWindow(void)
     else
     {
         FreeSpriteTilesByTag(MOVE_INFO_WINDOW_TAG);
-        FreeBattleOptionWindowPaletteIfUnused();
     }
 }
 
@@ -4798,7 +4789,6 @@ static void DestroyMoveInfoWinGfx(struct Sprite *sprite)
     FreeSpriteTilesByTag(MOVE_INFO_WINDOW_TAG);
     DestroySprite(sprite);
     gBattleStruct->moveInfoSpriteId = MAX_SPRITES;
-    FreeBattleOptionWindowPaletteIfUnused();
 }
 
 static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)
@@ -4840,15 +4830,16 @@ static void SpriteCB_LastUsedBall(struct Sprite *sprite)
 
 static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
 {
+    sprite->invisible = gBattleStruct->descriptionSubmenu;
     if (sprite->sHide)
     {
-        if (sprite->x != LAST_BALL_WIN_X_0)
+        if (sprite->x != -16)
             sprite->x--;
 
-        if (sprite->x == LAST_BALL_WIN_X_0)
+        if (sprite->x == -16)
             DestroyMoveInfoWinGfx(sprite);
     }
-    else if (sprite->x != LAST_BALL_WIN_X_F)
+    else if (sprite->x != 16)
     {
         sprite->x++;
     }
@@ -5007,10 +4998,10 @@ static void SetLastBallCycleArrowPalette(u16 *palette, u16 paletteNum, bool32 sh
 {
     if (!showArrows) //Make invisible
     {
-        palette[paletteNum + 8] = palette[paletteNum + 13]; // Arrow outline becomes background
-        palette[paletteNum + 9] = palette[paletteNum + 13]; // Arrow fill becomes background
+        palette[paletteNum + 8] = palette[paletteNum + 1]; // Arrow outline becomes background
+        palette[paletteNum + 9] = palette[paletteNum + 1]; // Arrow fill becomes background
     }
-    else // Make gray
+    else // Show the cycle arrows
     {
         palette[paletteNum + 8] = palette[paletteNum + 10]; // Arrow outline
         palette[paletteNum + 9] = palette[paletteNum + 11]; // Arrow fill

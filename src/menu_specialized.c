@@ -1564,7 +1564,7 @@ static const u8 *const sLvlUpStatStrings[NUM_STATS] =
     gText_Speed
 };
 
-void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bgClr, u8 fgClr, u8 shadowClr)
+void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bgClr, u8 fgClr, u8 shadowClr, u8 inset)
 {
     u16 i, x;
     s16 statsDiff[NUM_STATS];
@@ -1589,7 +1589,7 @@ void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bg
 
         AddTextPrinterParameterized3(windowId,
                                      FONT_NORMAL,
-                                     0,
+                                     inset,
                                      15 * i,
                                      color,
                                      TEXT_SKIP_DRAW,
@@ -1598,7 +1598,7 @@ void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bg
         StringCopy(text, (statsDiff[i] >= 0) ? gText_Plus : gText_Dash);
         AddTextPrinterParameterized3(windowId,
                                      FONT_NORMAL,
-                                     56,
+                                     56 - inset,
                                      15 * i,
                                      color,
                                      TEXT_SKIP_DRAW,
@@ -1611,7 +1611,7 @@ void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bg
         ConvertIntToDecimalStringN(text, abs(statsDiff[i]), STR_CONV_MODE_LEFT_ALIGN, 2);
         AddTextPrinterParameterized3(windowId,
                                      FONT_NORMAL,
-                                     56 + x,
+                                     56 + x - inset,
                                      15 * i,
                                      color,
                                      TEXT_SKIP_DRAW,
@@ -1619,7 +1619,7 @@ void DrawLevelUpWindowPg1(u16 windowId, u16 *statsBefore, u16 *statsAfter, u8 bg
     }
 }
 
-void DrawLevelUpWindowPg2(u16 windowId, u16 *currStats, u8 bgClr, u8 fgClr, u8 shadowClr)
+void DrawLevelUpWindowPg2(u16 windowId, u16 *currStats, u8 bgClr, u8 fgClr, u8 shadowClr, u8 inset)
 {
     u16 i, numDigits, x;
     s16 stats[NUM_STATS];
@@ -1653,7 +1653,7 @@ void DrawLevelUpWindowPg2(u16 windowId, u16 *currStats, u8 bgClr, u8 fgClr, u8 s
 
         AddTextPrinterParameterized3(windowId,
                                      FONT_NORMAL,
-                                     0,
+                                     inset,
                                      15 * i,
                                      color,
                                      TEXT_SKIP_DRAW,
@@ -1661,7 +1661,7 @@ void DrawLevelUpWindowPg2(u16 windowId, u16 *currStats, u8 bgClr, u8 fgClr, u8 s
 
         AddTextPrinterParameterized3(windowId,
                                      FONT_NORMAL,
-                                     56 + x,
+                                     56 + x - inset,
                                      15 * i,
                                      color,
                                      TEXT_SKIP_DRAW,

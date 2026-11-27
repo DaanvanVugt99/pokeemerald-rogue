@@ -734,7 +734,7 @@ static void TintTeraIndicatorInactivePalette(u16 *palette, u32 count)
     {
         u32 gray = (GET_R(palette[i]) + 16) / 2;
 
-        palette[i] = RGB(gray, gray, gray);
+        palette[i] = RGB(gray - 2, gray - 1, gray + 1);
     }
 }
 

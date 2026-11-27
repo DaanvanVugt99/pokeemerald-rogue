@@ -312,7 +312,7 @@ static void Overview_ApplySafariIconPalette(u8 spriteId, u16 iconSpecies, u8 ent
 
 // MonInfo
 static void MonInfo_CreateSprites(bool8 includeType);
-static void MonInfo_DestroySprites();
+static void MonInfo_DestroySprites(bool8 keepPortrait);
 
 // Mon stats
 static void MonStats_HandleInput(u8);
@@ -408,10 +408,24 @@ static void VBlankCB(void)
     TransferPlttBuffer();
 }
 
-static const u16 sDiplomaPalettes[][16] =
+static const u16 sTitleBallColors[] = { RGB(28, 6, 6), RGB(28, 29, 30) };
+static const u16 sOverviewPortraitBackdrop = RGB(24, 25, 26);
+static const u16 sPokedexLabelInk = RGB(30, 30, 29);
+
+static const u16 sPokedexPalette[16] =
 {
-    INCBIN_U16("graphics/rogue_pokedex/info_screen.gbapal"),
-    INCBIN_U16("graphics/rogue_pokedex/info_screen.gbapal"),
+    RGB(0, 0, 0), RGB(2, 3, 4), RGB(5, 6, 7), RGB(7, 8, 9),
+    RGB(3, 4, 5), RGB(4, 4, 5), RGB(10, 11, 13), RGB(16, 17, 18),
+    RGB(10, 11, 12), RGB(21, 14, 6), RGB(29, 23, 13), RGB(2, 2, 3),
+    RGB(6, 6, 7), RGB(30, 24, 13), RGB(9, 23, 14), RGB(3, 3, 4),
+};
+
+static const u16 sPokedexTextPalette[16] =
+{
+    RGB(0, 0, 0), RGB(4, 4, 5), RGB(30, 30, 29), RGB(3, 3, 4),
+    RGB(31, 16, 15), RGB(9, 4, 4), RGB(14, 27, 17), RGB(3, 8, 5),
+    RGB(22, 26, 30), RGB(4, 6, 8), RGB(0, 0, 0), RGB(0, 0, 0),
+    RGB(30, 23, 13), RGB(9, 7, 4), RGB(30, 30, 29), RGB(3, 3, 4),
 };
 
 // HomePage
@@ -670,17 +684,13 @@ static void CB2_Rogue_ShowPokedex(void)
     ResetSpriteData();
     ResetPaletteFade();
     FreeAllSpritePalettes();
-    LoadPalette(sDiplomaPalettes, 0, 64);
+    LoadPalette(sPokedexPalette, BG_PLTT_ID(0), PLTT_SIZE_4BPP);
+    LoadPalette(sPokedexPalette, BG_PLTT_ID(1), PLTT_SIZE_4BPP);
+    // Navigation glyphs and overview numbers use light ink on the same frame.
+    LoadPalette(&sPokedexLabelInk, BG_PLTT_ID(1) + 3, sizeof(sPokedexLabelInk));
+    LoadPalette(sPokedexPalette, BG_PLTT_ID(3), PLTT_SIZE_4BPP);
+    LoadPalette(sTitleBallColors, BG_PLTT_ID(3) + 9, sizeof(sTitleBallColors));
     sTilemapBufferPtr = Alloc(BG_SCREEN_SIZE);
-
-    InitOverviewBg();
-    ResetTempTileDataBuffers();
-
-    //DecompressAndCopyTileDataToVram(1, &sOverviewTiles, 0, 0, 0);
-    //while (FreeTempTileDataBuffersIfPossible())
-    //    ;
-    //LZDecompressWram(sOverviewTilemap, sTilemapBufferPtr);
-    //CopyBgTilemapBufferToVram(1);
 
     sPokedexMenu->currentPage = sPokedexMenu->desiredPage;
     InitPageResources(PAGE_NONE, sPokedexMenu->currentPage);
@@ -705,25 +715,28 @@ static void MainCB2(void)
     UpdatePaletteFade();
 }
 
+static bool8 IsMonEntryPage(u8 page)
+{
+    return page >= PAGE_MON_FIRST && page <= PAGE_MON_LAST;
+}
+
 static void InitPageResources(u8 fromPage, u8 toPage)
 {
     sPokedexMenu->listScrollAmount = 0;
 
-    InitOverviewBg();
-    ResetTempTileDataBuffers();
-
-    // If we're swapping onto a mon page for the first tile load tiles
-    if(toPage >= PAGE_MON_FIRST && toPage <= PAGE_MON_LAST)
+    // Entry tabs share their tiles, windows and background configuration.
+    if (!IsMonEntryPage(fromPage) || !IsMonEntryPage(toPage))
     {
-        if(fromPage >= PAGE_MON_FIRST && fromPage <= PAGE_MON_LAST)
-        {
-            // No need + causes VRAM issues
-        }
-        else
+        InitOverviewBg();
+        ResetTempTileDataBuffers();
+        LoadPalette(toPage == PAGE_OVERVIEW ? &sOverviewPortraitBackdrop : &sPokedexPalette[3],
+                    BG_PLTT_ID(0) + 3, sizeof(u16));
+        if (IsMonEntryPage(toPage))
         {
             DecompressAndCopyTileDataToVram(1, &sPageTiles, 0, 0, 0);
             while (FreeTempTileDataBuffersIfPossible())
                 ;
+            InitMonEntryWindows();
         }
     }
 
@@ -796,11 +809,6 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             LZDecompressWram(sPageSplitTableTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
 
-            InitMonEntryWindows();
-            // Text printed below
-
-            LoadMonIconPalettes();
-
             MonInfo_CreateSprites(TRUE);
         }
         break;
@@ -814,11 +822,6 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             if (toPage == PAGE_MON_MOVES)
                 MonEvos_OpenMoveQuery();
 
-            InitMonEntryWindows();
-            // Text printed below
-
-            LoadMonIconPalettes();
-
             MonInfo_CreateSprites(FALSE);
         }
         break;
@@ -827,11 +830,6 @@ static void InitPageResources(u8 fromPage, u8 toPage)
         {
             LZDecompressWram(sPageFormsTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
-
-            InitMonEntryWindows();
-            // Text printed below
-
-            LoadMonIconPalettes();
 
             MonInfo_CreateSprites(FALSE);
             MonEvos_CreateSprites();
@@ -843,11 +841,6 @@ static void InitPageResources(u8 fromPage, u8 toPage)
             LZDecompressWram(sPageFormsTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
 
-            InitMonEntryWindows();
-            // Text printed below
-
-            LoadMonIconPalettes();
-
             MonInfo_CreateSprites(FALSE);
             MonForms_CreateSprites();
         }
@@ -857,11 +850,6 @@ static void InitPageResources(u8 fromPage, u8 toPage)
         {
             LZDecompressWram(sPageListsTilemap, sTilemapBufferPtr);
             CopyBgTilemapBufferToVram(1);
-
-            InitMonEntryWindows();
-            // Text printed below
-
-            LoadMonIconPalettes();
 
             MonInfo_CreateSprites(FALSE);
         }
@@ -874,7 +862,8 @@ static void InitPageResources(u8 fromPage, u8 toPage)
 
 static void DestroyPageResources(u8 fromPage, u8 toPage)
 {    
-    // TODO - Could stop sprites from flashing if we didn't destroy them here
+    bool8 keepPortrait = IsMonEntryPage(fromPage) && IsMonEntryPage(toPage)
+        && sPokedexMenu->lastCrySpecies == sPokedexMenu->viewBaseSpecies;
 
     switch (fromPage)
     {
@@ -896,10 +885,12 @@ static void DestroyPageResources(u8 fromPage, u8 toPage)
     case PAGE_MON_FORMS:
     case PAGE_MON_RIDE_STATS:
         {
-            MonInfo_DestroySprites();
-            FreeMonIconPalettes();
+            MonInfo_DestroySprites(keepPortrait);
+            if (!keepPortrait)
+                FreeMonIconPalettes();
 
-            DestroyMonEntryWindows();
+            if (!IsMonEntryPage(toPage))
+                DestroyMonEntryWindows();
         }
         break;
 
@@ -909,10 +900,12 @@ static void DestroyPageResources(u8 fromPage, u8 toPage)
             if (fromPage == PAGE_MON_MOVES)
                 MonEvos_CloseMoveQuery();
 
-            MonInfo_DestroySprites();
-            FreeMonIconPalettes();
+            MonInfo_DestroySprites(keepPortrait);
+            if (!keepPortrait)
+                FreeMonIconPalettes();
 
-            DestroyMonEntryWindows();
+            if (!IsMonEntryPage(toPage))
+                DestroyMonEntryWindows();
         }
         break;
     
@@ -920,15 +913,22 @@ static void DestroyPageResources(u8 fromPage, u8 toPage)
         break;
     }
 
-    ResetSpriteData();
-    FreeAllSpritePalettes();
-    CopyBgTilemapBufferToVram(0);
+    if (!keepPortrait)
+    {
+        ResetSpriteData();
+        FreeAllSpritePalettes();
+    }
+    if (!IsMonEntryPage(toPage))
+        CopyBgTilemapBufferToVram(0);
 }
 
 #define tDoFade data[0]
 
 static void Task_SetupPage(u8 taskId)
 {
+    // The incoming tiles can reinterpret the outgoing map while DMA is pending.
+    if (gTasks[taskId].tDoFade)
+        SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_1D_MAP);
     DestroyPageResources(sPokedexMenu->currentPage, sPokedexMenu->desiredPage);
     InitPageResources(sPokedexMenu->currentPage, sPokedexMenu->desiredPage);
     
@@ -941,23 +941,17 @@ static void Task_SetupPage(u8 taskId)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
     }
 
-    gTasks[taskId].func = Task_PageFadeIn;
+    if (gTasks[taskId].tDoFade)
+        gTasks[taskId].func = Task_PageFadeIn;
+    else
+        Task_PageFadeIn(taskId);
 }
 
 static void Task_SwapToPage2(u8);
 
 static void Task_SwapToPage(u8 taskId)
 {
-    // If we're moving between stats page for the same mon, don't bother doing a fade
-    if(sPokedexMenu->currentPage >= PAGE_MON_FIRST && sPokedexMenu->currentPage <= PAGE_MON_LAST && 
-        sPokedexMenu->desiredPage >= PAGE_MON_FIRST && sPokedexMenu->desiredPage <= PAGE_MON_LAST)
-    {
-        gTasks[taskId].tDoFade = FALSE;//(sPokedexMenu->lastCrySpecies != sPokedexMenu->viewBaseSpecies);
-    }
-    else
-    {
-        gTasks[taskId].tDoFade = TRUE;
-    }
+    gTasks[taskId].tDoFade = !IsMonEntryPage(sPokedexMenu->currentPage) || !IsMonEntryPage(sPokedexMenu->desiredPage);
 
     if(gTasks[taskId].tDoFade)
     {
@@ -1025,6 +1019,16 @@ static void Task_PageFadeIn(u8 taskId)
 
 static void Task_PageFadeIn2(u8 taskId)
 {
+    if (IsDma3ManagerBusyWithBgCopy())
+        return;
+
+    if (!(GetGpuReg(REG_OFFSET_DISPCNT) & DISPCNT_BG1_ON))
+    {
+        SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
+        ShowBg(0);
+        ShowBg(1);
+    }
+
     if (!gPaletteFade.active)
     {
         if(sPokedexMenu->currentPage >= PAGE_MON_FIRST && sPokedexMenu->currentPage <= PAGE_MON_LAST)
@@ -1408,7 +1412,7 @@ static const u8* GetDexVariantName()
 
 static void AddTitleText(u8 const* title)
 {
-    u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY };
+    u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
     u16 offset;
 
     FillWindowPixelBuffer(WIN_MON_PAGE_TITLE, PIXEL_FILL(0));
@@ -2415,7 +2419,7 @@ static const struct BgTemplate sDiplomaBgTemplates[2] =
         .bg = 1,
         .charBaseIndex = 0,
         .mapBaseIndex = 6,
-        .screenSize = 1,
+        .screenSize = 0,
         .paletteMode = 0,
         .priority = 1,
         .baseTile = 0,
@@ -2429,9 +2433,7 @@ static void InitOverviewBg(void)
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sDiplomaBgTemplates, ARRAY_COUNT(sDiplomaBgTemplates));
     SetBgTilemapBuffer(1, sTilemapBufferPtr);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
-    ShowBg(0);
-    ShowBg(1);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_1D_MAP);
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
     SetGpuReg(REG_OFFSET_BLDALPHA, 0);
     SetGpuReg(REG_OFFSET_BLDY, 0);
@@ -2443,7 +2445,7 @@ static void InitMonEntryWindows(void)
 
     InitWindows(sMonEntryWinTemplates);
     DeactivateAllTextPrinters();
-    LoadPalette(gStandardMenuPalette, 0xF0, 0x20);
+    LoadPalette(sPokedexTextPalette, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
     
     for(i = 0; i < WIN_COUNT; ++i)
     {
@@ -3306,9 +3308,9 @@ static void Overview_FillEntryTileCentre_Header(u8 tileX, u8 tileY, u8 entryType
         digits[1] = (numToDisplay / 10) % 10;
         digits[2] = (numToDisplay / 100) % 10;
 
-        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[2]), tileX + 1, tileY + 0, 1, 1);
-        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[1]), tileX + 2, tileY + 0, 1, 1);
-        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[0]), tileX + 3, tileY + 0, 1, 1);
+        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[2]) | (1 << 12), tileX + 1, tileY + 0, 1, 1);
+        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[1]) | (1 << 12), tileX + 2, tileY + 0, 1, 1);
+        FillBgTilemapBufferRect_Palette0(1, Overview_SelectDigitTile(digits[0]) | (1 << 12), tileX + 3, tileY + 0, 1, 1);
     }
 }
 
@@ -3810,30 +3812,34 @@ void DestroyMonTypIcon(u8 spriteId);
 
 static void MonInfo_CreateSprites(bool8 includeType)
 {
-    // display as shiny if we have seen it
-    bool8 isShiny = GetSpeciesDisplayDexFlag(sPokedexMenu->viewBaseSpecies, FLAG_GET_CAUGHT_SHINY);
+    if (sPokedexMenu->pageSprites[MON_SPRITE_FRONT_PIC] == SPRITE_NONE)
+    {
+        // display as shiny if we have seen it
+        bool8 isShiny = GetSpeciesDisplayDexFlag(sPokedexMenu->viewBaseSpecies, FLAG_GET_CAUGHT_SHINY);
 
-    LoadMoveTypesSpritesheetAndPalette(); // TODO - move
+        LoadMonIconPalettes();
+        LoadMoveTypesSpritesheetAndPalette();
 
-    sPokedexMenu->pageSprites[MON_SPRITE_FRONT_PIC] = CreateMonPicSprite_Affine(
-        sPokedexMenu->viewBaseSpecies,
-        NON_SHINY_PLACEHOLDER,
-        GetPokedexMonPersonality(sPokedexMenu->viewBaseSpecies),
+        sPokedexMenu->pageSprites[MON_SPRITE_FRONT_PIC] = CreateMonPicSprite_Affine(
+            sPokedexMenu->viewBaseSpecies,
+            NON_SHINY_PLACEHOLDER,
+            GetPokedexMonPersonality(sPokedexMenu->viewBaseSpecies),
 #ifdef ROGUE_EXPANSION
-        GetGenderForSpecies(sPokedexMenu->viewBaseSpecies, 0),
+            GetGenderForSpecies(sPokedexMenu->viewBaseSpecies, 0),
 #endif
-        isShiny,
-        MON_PIC_AFFINE_FRONT,
-        48, 66, 
-        0,
+            isShiny,
+            MON_PIC_AFFINE_FRONT,
+            48, 66,
+            0,
 #ifdef ROGUE_EXPANSION
-        sPokedexMenu->viewBaseSpecies
+            sPokedexMenu->viewBaseSpecies
 #else
-        isShiny ? gMonShinyPaletteTable[sPokedexMenu->viewBaseSpecies].tag : gMonPaletteTable[sPokedexMenu->viewBaseSpecies].tag
+            isShiny ? gMonShinyPaletteTable[sPokedexMenu->viewBaseSpecies].tag : gMonPaletteTable[sPokedexMenu->viewBaseSpecies].tag
 #endif
-    );
+        );
 
-    sPokedexMenu->pageSprites[MON_SPRITE_ICON] = CreateMonIcon(sPokedexMenu->viewBaseSpecies, SpriteCallbackDummy, 48, 8, 0, 0, MON_MALE);
+        sPokedexMenu->pageSprites[MON_SPRITE_ICON] = CreateMonIcon(sPokedexMenu->viewBaseSpecies, SpriteCallbackDummy, 48, 8, 0, 0, MON_MALE);
+    }
 
     if(includeType)
     {
@@ -3849,17 +3855,21 @@ static void MonInfo_CreateSprites(bool8 includeType)
     }
 }
 
-static void MonInfo_DestroySprites()
+static void MonInfo_DestroySprites(bool8 keepPortrait)
 {
     u8 i;
     u8 spriteId;
 
     for(i = 0; i < ARRAY_COUNT(sPokedexMenu->pageSprites); ++i)
     {
+        if (keepPortrait && (i == MON_SPRITE_FRONT_PIC || i == MON_SPRITE_ICON))
+            continue;
+
         spriteId = sPokedexMenu->pageSprites[i];
 
         if(spriteId != SPRITE_NONE)
         {
+            sPokedexMenu->pageSprites[i] = SPRITE_NONE;
             switch (i)
             {
             case MON_SPRITE_FRONT_PIC:

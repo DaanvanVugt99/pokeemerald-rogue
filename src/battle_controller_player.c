@@ -1768,14 +1768,12 @@ static void PlayerHandleYesNoInput(u32 battler)
     if (JOY_NEW(DPAD_UP) && gMultiUsePlayerCursor != 0)
     {
         PlaySE(SE_SELECT);
-        BattleDestroyYesNoCursorAt(gMultiUsePlayerCursor);
         gMultiUsePlayerCursor = 0;
         BattleCreateYesNoCursorAt(0);
     }
     if (JOY_NEW(DPAD_DOWN) && gMultiUsePlayerCursor == 0)
     {
         PlaySE(SE_SELECT);
-        BattleDestroyYesNoCursorAt(gMultiUsePlayerCursor);
         gMultiUsePlayerCursor = 1;
         BattleCreateYesNoCursorAt(1);
     }
@@ -2160,7 +2158,7 @@ static void MoveSelectionDisplayMoveDescription(u32 battler)
         split = gBattleMoves[baseMove].split;
     }
 
-    LoadMessageBoxAndBorderGfx();
+    LoadDarkMessageBoxAndBorderGfx();
     DrawStdWindowFrame(B_WIN_MOVE_DESCRIPTION, FALSE);
 
     if (power < 2)

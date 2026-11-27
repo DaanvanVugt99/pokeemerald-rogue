@@ -15,6 +15,7 @@
 #include "link.h"
 #include "menu.h"
 #include "palette.h"
+#include "constants/rgb.h"
 #include "recorded_battle.h"
 #include "string_util.h"
 #include "strings.h"
@@ -4190,7 +4191,12 @@ void BattlePutTextOnWindowWithSpeed(const u8 *text, u8 windowId, u8 textSpeed)
 void SetPpNumbersPaletteInMoveSelection(u32 battler)
 {
     struct ChooseMoveStruct *chooseMoveStruct = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
-    const u16 *palPtr = gPPTextPalette;
+    static const u16 ppColors[] = {
+        RGB(31, 26, 11), RGB(3, 3, 4), // Reduced
+        RGB(31, 18, 9),  RGB(3, 3, 4), // Low
+        RGB(31, 12, 11), RGB(3, 3, 4), // Empty
+        RGB(30, 30, 29), RGB(3, 3, 4), // Full or nearly full
+    };
     u8 var;
 
     if (!gBattleStruct->zmove.viewing)
@@ -4199,8 +4205,8 @@ void SetPpNumbersPaletteInMoveSelection(u32 battler)
     else
         var = GetCurrentPpToMaxPpState(chooseMoveStruct->currentPp[gMoveSelectionCursor[battler]], gBattleMoves[gMoveSelectionCursor[battler]].pp);
 
-    gPlttBufferUnfaded[BG_PLTT_ID(5) + 12] = palPtr[(var * 2) + 0];
-    gPlttBufferUnfaded[BG_PLTT_ID(5) + 11] = palPtr[(var * 2) + 1];
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 12] = ppColors[(var * 2) + 0];
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 11] = ppColors[(var * 2) + 1];
 
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 12], &gPlttBufferFaded[BG_PLTT_ID(5) + 12], PLTT_SIZEOF(1));
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 11], &gPlttBufferFaded[BG_PLTT_ID(5) + 11], PLTT_SIZEOF(1));

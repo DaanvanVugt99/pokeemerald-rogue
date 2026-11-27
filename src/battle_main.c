@@ -2264,7 +2264,7 @@ void CB2_InitEndLinkBattle(void)
         gBattle_BG3_Y = 0;
 
         InitBattleBgsVideo();
-        LoadCompressedPalette(gBattleTextboxPalette, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
+        LoadBattleMenuFramePalette();
         LoadBattleMenuWindowGfx();
         ResetSpriteData();
         ResetTasks();
@@ -2552,7 +2552,6 @@ static void AskRecordBattle(void)
             {
                 // Moved cursor onto Yes
                 PlaySE(SE_SELECT);
-                BattleDestroyYesNoCursorAt(gBattleCommunication[CURSOR_POSITION]);
                 gBattleCommunication[CURSOR_POSITION] = 0;
                 BattleCreateYesNoCursorAt(0);
             }
@@ -2563,7 +2562,6 @@ static void AskRecordBattle(void)
             {
                 // Moved cursor onto No
                 PlaySE(SE_SELECT);
-                BattleDestroyYesNoCursorAt(gBattleCommunication[CURSOR_POSITION]);
                 gBattleCommunication[CURSOR_POSITION] = 1;
                 BattleCreateYesNoCursorAt(1);
             }
