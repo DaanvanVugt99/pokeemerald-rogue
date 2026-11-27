@@ -27052,18 +27052,6 @@ static inline uq4_12_t GetDefenderAbilitiesModifier(u32 move, u32 moveType, u32 
         if (!IsMoveMakingContact(move, battlerAtk))
             return UQ_4_12(0.8);
         break;
-    case ABILITY_SAND_VEIL:
-        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
-         && IS_MOVE_PHYSICAL(move)
-         && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SANDSTORM))
-            return UQ_4_12(0.7);
-        break;
-    case ABILITY_SNOW_CLOAK:
-        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
-         && IS_MOVE_SPECIAL(move)
-         && IsBattlerWeatherAffected(battlerDef, B_WEATHER_SNOW))
-            return UQ_4_12(0.7);
-        break;
     case ABILITY_DAMP:
         if (moveType == TYPE_FIRE)
             return UQ_4_12(0.5);

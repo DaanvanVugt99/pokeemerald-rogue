@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Sand Veil grants 20% evasion in sandstorm and Snow Cloak grants 20% evasion in hail or snow. These replace their weather-based damage reductions.
+
 - Umbreon’s Waning Moon switches it out after it sets Eclipse and retains the 20% reduction to incoming move accuracy during Eclipse. Dynamic gifts pair it with Eclipse.
 
 - Breakdance clears allied entry hazards and lowers a flinching foe’s Attack. Glameow and Purugly’s Puffed Up uses Hone Claws when a foe flinches, once per turn. Both dynamic gift pairings grant Fake Out.
