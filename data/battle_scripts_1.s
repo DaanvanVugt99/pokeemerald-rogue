@@ -12681,6 +12681,15 @@ BattleScript_GooeyActivates::
 	swapattackerwithtarget @ kleen: restore the target/attacker, for knock off and I imagine others
 	return
 
+BattleScript_Breakdance::
+	call BattleScript_AbilityPopUp
+	setstatchanger STAT_ATK, 1, TRUE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | STAT_CHANGE_NOT_PROTECT_AFFECTED, BattleScript_BreakdanceEnd
+	printfromtable gStatDownStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_BreakdanceEnd:
+	return
+
 BattleScript_AbilityStatusEffect::
 	waitstate
 	call BattleScript_AbilityPopUp

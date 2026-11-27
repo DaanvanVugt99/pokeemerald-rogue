@@ -190,6 +190,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_STARMOBILE,
     PENDING_UNIQUE_EFFECT_ECHO_SCEPTER,
     PENDING_UNIQUE_EFFECT_RATTLE_OFF,
+    PENDING_UNIQUE_EFFECT_FOE_FLINCHED,
 };
 
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);

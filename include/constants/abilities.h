@@ -530,7 +530,7 @@
 #define ABILITY_SUBMERGE               557
 #define ABILITY_ADAPTIVE_SLIME         543
 #define ABILITY_BALLOON_BURST          544
-#define ABILITY_FATAL_GRACE            546
+#define ABILITY_PUFFED_UP            546
 #define ABILITY_SEPTIC_FUMES           547
 #define ABILITY_TOXIC_TECHNIQUE        555
 #define ABILITY_TRAPPER                556

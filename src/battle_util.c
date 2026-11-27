@@ -143,6 +143,7 @@ static inline bool32 IsFinalMultiHitStrike(void);
 static bool32 TrySetCounterpunchWobbuffetForm(u32 battler, u16 targetSpecies);
 static bool32 TryTriggerCounterpunchAfterCounterMove(u32 battler, u32 move);
 static bool32 TryTriggerCounterpunchAfterPunchingMove(u32 battler, u32 move);
+static bool32 ClearSideEntryHazards(u32 side);
 static void StartAbilityCalledMoveScript(void);
 static void StartAbilityCalledMoveScriptAt(const u8 *script);
 static bool32 ShouldTriggerAdaptiveSlime(u32 battler, u32 move);
@@ -4316,6 +4317,12 @@ u8 AtkCanceller_UnableToUseMove(u32 moveType)
         case CANCELLER_FLINCH: // flinch
             if (gBattleMons[gBattlerAttacker].status2 & STATUS2_FLINCHED)
             {
+                for (u32 holder = 0; holder < gBattlersCount; holder++)
+                {
+                    if (GetBattlerSide(holder) != GetBattlerSide(gBattlerAttacker) && IsBattlerAlive(holder)
+                     && (HasBattlerAbility(holder, ABILITY_BREAKDANCE) || HasBattlerAbility(holder, ABILITY_PUFFED_UP)))
+                        QueuePendingUniqueAbilityEffect(PENDING_UNIQUE_EFFECT_FOE_FLINCHED, holder, holder, gBattlerAttacker);
+                }
                 gProtectStructs[gBattlerAttacker].flinchImmobility = TRUE;
                 CancelMultiTurnMoves(gBattlerAttacker);
                 gBattlescriptCurrInstr = BattleScript_MoveUsedFlinched;
@@ -7098,6 +7105,37 @@ static bool32 TryActivatePendingUniqueAbilityEffectForBattler(u32 battler)
         ClearPendingUniqueAbilityEffect(battler);
         if (TryActivateCounterstep(battler, source, target))
             return TRUE;
+    }
+    else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_FOE_FLINCHED)
+    {
+        u32 target = GetPendingUniqueAbilityTarget(battler);
+
+        ClearPendingUniqueAbilityEffect(battler);
+        if (!IsBattlerAlive(battler) || !IsBattlerAlive(target))
+            return FALSE;
+        if (HasBattlerAbility(battler, ABILITY_BREAKDANCE))
+        {
+            ClearSideEntryHazards(GetBattlerSide(battler));
+            SetBattlerTriggeredAbility(battler, ABILITY_BREAKDANCE);
+            gBattlerAttacker = battler;
+            gBattlerTarget = target;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_Breakdance;
+            return TRUE;
+        }
+        if (HasBattlerAbility(battler, ABILITY_PUFFED_UP) && !gProtectStructs[battler].uniqueAbilityTriggeredThisTurn)
+        {
+            gProtectStructs[battler].uniqueAbilityTriggeredThisTurn = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_PUFFED_UP);
+            SetAtkCancellerForCalledMove();
+            gBattlerAttacker = gBattlerTarget = gBattlerAbility = battler;
+            gCalledMove = MOVE_HONE_CLAWS;
+            gMoveResultFlags = 0;
+            gHitMarker &= ~(HITMARKER_ATTACKSTRING_PRINTED | HITMARKER_UNABLE_TO_USE_MOVE);
+            gProtectStructs[battler].extraMoveUsed = TRUE;
+            StartAbilityCalledMoveScript();
+            return TRUE;
+        }
     }
     else if (GetPendingUniqueAbilityEffect(battler) == PENDING_UNIQUE_EFFECT_RATTLE_OFF)
     {
@@ -19177,22 +19215,6 @@ if (triggeringAbility != ABILITY_NONE)
             SET_STATCHANGER(STAT_SPEED, 1, FALSE);
             BattleScriptPushCursor();
             gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_BREAKDANCE)
-         && gBattleMoves[move].kickingMove
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && TARGET_TURN_DAMAGED
-         && IsFinalMultiHitStrike()
-         && GetBattlerTurnOrderNum(battler) < GetBattlerTurnOrderNum(gBattlerTarget))
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_BREAKDANCE);
-            gEffectBattler = gBattlerTarget;
-            gBattleScripting.moveEffect = MOVE_EFFECT_ATK_MINUS_1;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityStatusEffect;
             effect++;
         }
 

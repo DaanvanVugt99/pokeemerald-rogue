@@ -5331,16 +5331,6 @@ s8 GetMovePriority(u32 battler, u16 move)
         priority++;
     }
 
-    if (HasBattlerAbility(battler, ABILITY_FATAL_GRACE)
-     && !IS_MOVE_STATUS(move)
-     && gBattleStruct->moveTarget[battler] < gBattlersCount
-     && GetBattlerSide(gBattleStruct->moveTarget[battler]) != GetBattlerSide(battler)
-     && IsBattlerAlive(gBattleStruct->moveTarget[battler])
-     && gBattleMons[gBattleStruct->moveTarget[battler]].hp <= (gBattleMons[gBattleStruct->moveTarget[battler]].maxHP / 2))
-    {
-        priority++;
-    }
-
     if (HasBattlerAbility(battler, ABILITY_ONE_MIND)
      && gBattleMoves[move].type == TYPE_PSYCHIC)
     {

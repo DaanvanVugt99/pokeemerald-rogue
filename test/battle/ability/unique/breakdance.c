@@ -1,32 +1,26 @@
 #include "global.h"
 #include "test/battle.h"
 
-ASSUMPTIONS
+DOUBLE_BATTLE_TEST("Breakdance clears hazards and lowers the Attack of a foe flinched by an ally")
 {
-    ASSUME(gBattleMoves[MOVE_BLAZE_KICK].kickingMove);
-    ASSUME(!gBattleMoves[MOVE_TACKLE].kickingMove);
-}
-
-SINGLE_BATTLE_TEST("Breakdance lowers Attack with kicking moves when moving before the target")
-{
+    u16 ability;
+    PARAMETRIZE { ability = ABILITY_NONE; }
+    PARAMETRIZE { ability = ABILITY_CLEAR_BODY; }
+    PARAMETRIZE { ability = ABILITY_INNER_FOCUS; }
     GIVEN {
-        PLAYER(SPECIES_HITMONTOP) { Speed(100); Ability(ABILITY_NO_GUARD); UniqueAbility(ABILITY_BREAKDANCE); Moves(MOVE_BLAZE_KICK); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(50); Moves(MOVE_CELEBRATE); }
+        PLAYER(SPECIES_HITMONTOP) { Ability(ABILITY_TECHNICIAN); UniqueAbility(ABILITY_BREAKDANCE); }
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_WOBBUFFET) { Ability(ability); Speed(20); }
+        OPPONENT(SPECIES_WYNAUT) { Speed(100); }
     } WHEN {
-        TURN { MOVE(player, MOVE_BLAZE_KICK); MOVE(opponent, MOVE_CELEBRATE); }
+        TURN {
+            MOVE(playerRight, MOVE_FAKE_OUT, target: opponentLeft);
+            MOVE(opponentRight, MOVE_SPIKES);
+            MOVE(opponentLeft, MOVE_CELEBRATE);
+            MOVE(playerLeft, MOVE_CELEBRATE);
+        }
     } THEN {
-        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE - 1);
-    }
-}
-
-SINGLE_BATTLE_TEST("Breakdance does not lower Attack if the target moved first")
-{
-    GIVEN {
-        PLAYER(SPECIES_HITMONTOP) { Speed(50); Ability(ABILITY_NO_GUARD); UniqueAbility(ABILITY_BREAKDANCE); Moves(MOVE_BLAZE_KICK); }
-        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_BLAZE_KICK); MOVE(opponent, MOVE_CELEBRATE); }
-    } THEN {
-        EXPECT_EQ(opponent->statStages[STAT_ATK], DEFAULT_STAT_STAGE);
+        EXPECT_EQ(opponentLeft->statStages[STAT_ATK], DEFAULT_STAT_STAGE - (ability == ABILITY_NONE));
+        EXPECT_EQ(!!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_SPIKES), ability == ABILITY_INNER_FOCUS);
     }
 }

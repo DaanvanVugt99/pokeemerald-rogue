@@ -787,7 +787,9 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 5);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 258);
+    EXPECT_EQ(pairedAbilityCount, 259);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_BREAKDANCE, 0), MOVE_FAKE_OUT);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_PUFFED_UP, 0), MOVE_FAKE_OUT);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_RATTLE_OFF, 0), MOVE_SPIKY_SHIELD);
     EXPECT(!RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_RATTLE_OFF, MOVE_SPIKES));
 }
