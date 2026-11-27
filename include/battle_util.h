@@ -193,6 +193,7 @@ enum PendingUniqueAbilityEffect
     PENDING_UNIQUE_EFFECT_FOE_FLINCHED,
 };
 
+bool32 IsLoneFangAttack(u32 battler, u32 move);
 bool32 QueuePendingUniqueAbilityEffect(u32 effect, u32 battler, u32 source, u32 target);
 u32 GetPendingUniqueAbilityEffect(u32 battler);
 void ClearPendingUniqueAbilityEffect(u32 battler);

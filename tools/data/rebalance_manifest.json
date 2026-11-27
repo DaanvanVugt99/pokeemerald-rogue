@@ -5323,7 +5323,8 @@
           },
           "add_tutors": [
             "MOVE_SPIKES",
-            "MOVE_ROOST"
+            "MOVE_ROOST",
+            "MOVE_TOXIC"
           ]
         },
         "SPECIES_BELDUM": {

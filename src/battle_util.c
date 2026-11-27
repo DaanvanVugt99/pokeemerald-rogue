@@ -25388,13 +25388,6 @@ static inline u32 CalcMoveBasePowerAfterModifiers(u32 move, u32 battlerAtk, u32 
         modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
     }
 
-    if (move == MOVE_DRAGON_BREATH
-     && (holdEffectAtk == HOLD_EFFECT_GEMS || gBattleMons[battlerAtk].item == ITEM_AMULET_COIN)
-     && HasBattlerAbility(battlerAtk, ABILITY_TREASURE_HOARD))
-    {
-        modifier = uq4_12_multiply(modifier, UQ_4_12(2.0));
-    }
-
     if (!IS_MOVE_STATUS(move)
      && (gBattleMoves[move].effect == EFFECT_ROAR
       || gBattleMoves[move].effect == EFFECT_HIT_SWITCH_TARGET)
@@ -26495,6 +26488,31 @@ static bool32 IsNaturalStabType(u32 battlerAtk, u32 moveType)
         || (teraType != TYPE_STELLAR && teraType == moveType);
 }
 
+bool32 IsLoneFangAttack(u32 battler, u32 move)
+{
+    bool32 found = FALSE;
+
+    if (!HasBattlerAbility(battler, ABILITY_LONE_FANG))
+        return FALSE;
+    if (IsZMove(move))
+        move = gBattleStruct->zmove.baseMoves[battler];
+    else if (IsMaxMove(move))
+        move = gChosenMoveByBattler[battler];
+    if (move == MOVE_NONE || move == MOVE_STRUGGLE || IS_MOVE_STATUS(move))
+        return FALSE;
+
+    for (u32 slot = 0; slot < MAX_MON_MOVES; slot++)
+    {
+        u32 knownMove = gBattleMons[battler].moves[slot];
+        if (knownMove == MOVE_NONE || IS_MOVE_STATUS(knownMove))
+            continue;
+        if (knownMove != move || found)
+            return FALSE;
+        found = TRUE;
+    }
+    return found;
+}
+
 static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveType, u32 move, u32 abilityAtk, u32 holdEffectAtk)
 {
     bool32 hasAdaptability = HasBattlerAbility(battlerAtk, ABILITY_ADAPTABILITY);
@@ -26515,6 +26533,7 @@ static inline uq4_12_t GetSameTypeAttackBonusModifier(u32 battlerAtk, u32 moveTy
           && !DoesMonotypeSerumRetainStab(battlerAtk, moveType))
     {
         if (HasBattlerAbility(battlerAtk, ABILITY_MYSTIC_POWER)
+         || IsLoneFangAttack(battlerAtk, move)
          || (HasBattlerAbility(battlerAtk, ABILITY_WATER_GLIDE) && moveType == TYPE_FLYING)
          || ((HasBattlerAbility(battlerAtk, ABILITY_LEVITATE) || HasBattlerAbility(battlerAtk, ABILITY_EELEVATE)) && moveType == TYPE_FLYING)
          || (HasBattlerAbility(battlerAtk, ABILITY_MOON_TOTEM) && moveType == TYPE_DARK)
@@ -27420,6 +27439,12 @@ static inline s32 DoMoveDamageCalcVars(u32 move, u32 battlerAtk, u32 battlerDef,
             uq4_12_t eclipseStabModifier = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
             if (eclipseStabModifier > stabModifier)
                 stabModifier = eclipseStabModifier;
+        }
+        if (IsLoneFangAttack(battlerAtk, move))
+        {
+            uq4_12_t loneFangStab = GetSameTypeAttackBonusModifier(battlerAtk, moveType, move, abilityAtk, holdEffectAtk);
+            if (loneFangStab > stabModifier)
+                stabModifier = loneFangStab;
         }
         DAMAGE_APPLY_MODIFIER(stabModifier);
     }

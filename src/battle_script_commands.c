@@ -9172,6 +9172,19 @@ static void Cmd_moveend(void)
             else if (gCurrentMove == gLastResultingMoves[gBattlerAttacker] && gSpecialStatuses[gBattlerAttacker].parentalBondState != PARENTAL_BOND_1ST_HIT)
                 gBattleStruct->sameMoveTurns[gBattlerAttacker]++;
             gBattleScripting.moveendState++;
+            if (gSpecialStatuses[gBattlerAttacker].damagedMons
+             && IsLoneFangAttack(gBattlerAttacker, gCurrentMove != MOVE_NONE ? gCurrentMove : gBattleStruct->successfulForceSwitchMove[gBattlerAttacker])
+             && gBattleMoves[gCurrentMove].effect != EFFECT_HIT_ESCAPE
+             && IsBattlerAlive(gBattlerAttacker)
+             && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
+             && CountUsablePartyMons(gBattlerAttacker) > 0
+             && gBattleOutcome == 0 && !NoAliveMonsForEitherParty())
+            {
+                SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_LONE_FANG);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_UndertowActivates;
+                effect = TRUE;
+            }
             break;
         case MOVEEND_CLEAR_BITS: // Clear/Set bits for things like using a move for all targets and all hits.
             if (gSpecialStatuses[gBattlerAttacker].instructedChosenTarget)
@@ -16807,7 +16820,7 @@ static void Cmd_forcerandomswitch(void)
         else
         {
             gProtectStructs[gBattlerAttacker].targetAffected = TRUE;
-            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR)
+            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR || gBattleScripting.switchCase == B_SWITCH_HIT)
                 gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = gCurrentMove;
             *(gBattleStruct->battlerPartyIndexes + gBattlerTarget) = gBattlerPartyIndexes[gBattlerTarget];
             gBattlescriptCurrInstr = BattleScript_RoarSuccessSwitch;
@@ -16844,7 +16857,7 @@ static void Cmd_forcerandomswitch(void)
         if (gBattleMons[gBattlerAttacker].level >= gBattleMons[gBattlerTarget].level)
         {
             gProtectStructs[gBattlerAttacker].targetAffected = TRUE;
-            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR)
+            if (gBattleMoves[gCurrentMove].effect == EFFECT_ROAR || gBattleScripting.switchCase == B_SWITCH_HIT)
                 gBattleStruct->successfulForceSwitchMove[gBattlerAttacker] = gCurrentMove;
             gBattlescriptCurrInstr = BattleScript_RoarSuccessEndBattle;
             if (gCurrentMove == MOVE_WHIRLWIND

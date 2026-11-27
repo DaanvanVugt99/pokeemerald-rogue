@@ -8538,6 +8538,11 @@
       "move": "MOVE_DAZZLING_GLEAM"
     },
     {
+      "id": "druddigon-toxic",
+      "species": "SPECIES_DRUDDIGON",
+      "move": "MOVE_TOXIC"
+    },
+    {
       "id": "rebalance-druddigon-spikes",
       "species": "SPECIES_DRUDDIGON",
       "move": "MOVE_SPIKES"

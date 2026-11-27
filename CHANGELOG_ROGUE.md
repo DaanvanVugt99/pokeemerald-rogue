@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Druddigon’s Lone Fang grants STAB to its sole attacking move and switches it out after that move hits. Druddigon can also learn Toxic from the move tutor.
+
 - Sand Veil grants 20% evasion in sandstorm and Snow Cloak grants 20% evasion in hail or snow. These replace their weather-based damage reductions.
 
 - Umbreon’s Waning Moon switches it out after it sets Eclipse and retains the 20% reduction to incoming move accuracy during Eclipse. Dynamic gifts pair it with Eclipse.

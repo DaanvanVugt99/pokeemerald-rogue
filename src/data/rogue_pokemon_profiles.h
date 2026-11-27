@@ -86,7 +86,7 @@ u16 const gRoguePokemonMoveUsages[MOVES_COUNT] =
 	[MOVE_GIGA_DRAIN] = 81,
 	[MOVE_LEECH_SEED] = 42,
 	[MOVE_CELEBRATE] = 6,
-	[MOVE_TOXIC] = 37,
+	[MOVE_TOXIC] = 38,
 	[MOVE_KNOCK_OFF] = 254,
 	[MOVE_SYNTHESIS] = 47,
 	[MOVE_WEATHER_BALL] = 22,
@@ -280,7 +280,7 @@ u16 const gRoguePokemonMoveUsages[MOVES_COUNT] =
 	[MOVE_BULK_UP] = 61,
 	[MOVE_WILD_CHARGE] = 27,
 	[MOVE_SNARL] = 20,
-	[MOVE_IRON_HEAD] = 87,
+	[MOVE_IRON_HEAD] = 86,
 	[MOVE_SUNNY_DAY] = 20,
 	[MOVE_BURN_UP] = 2,
 	[MOVE_BULLDOZE] = 13,
@@ -708,7 +708,7 @@ u16 const gRoguePokemonSpecialMoveUsages[MOVES_COUNT] =
 	[MOVE_HIDDEN_POWER] = 202,
 	[MOVE_GIGA_DRAIN] = 43,
 	[MOVE_CELEBRATE] = 6,
-	[MOVE_TOXIC] = 13,
+	[MOVE_TOXIC] = 14,
 	[MOVE_KNOCK_OFF] = 203,
 	[MOVE_WEATHER_BALL] = 21,
 	[MOVE_LEAF_STORM] = 15,
@@ -182864,6 +182864,7 @@ static u16 const sTutorMoves_SPECIES_DRUDDIGON[] =
 	MOVE_TAUNT,
 	MOVE_THUNDER_FANG,
 	MOVE_THUNDER_PUNCH,
+	MOVE_TOXIC,
 	MOVE_NONE,
 };
 
@@ -182954,7 +182955,7 @@ static struct RoguePokemonCompetitiveSet const sCompetitiveSets_SPECIES_DRUDDIGO
 		.moves=
 		{
 			MOVE_STEALTH_ROCK,
-			MOVE_IRON_HEAD,
+			MOVE_TOXIC,
 			MOVE_EARTHQUAKE,
 			MOVE_DRAGON_TAIL,
 		},
@@ -316260,7 +316261,7 @@ static const u8 sMoveAdditions_SPECIES_DRUDDIGON[] = {
 	0x40,
 	0x80,
 	0x00,
-	0x00,
+	0x04,
 };
 static const u8 sMoveAdditions_SPECIES_GOLETT[] = {
 	0x00,

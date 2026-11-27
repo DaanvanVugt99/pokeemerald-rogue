@@ -591,7 +591,7 @@
 #define ABILITY_WHITE_CANOPY           558
 #define ABILITY_MELTDOWN               618
 #define ABILITY_FLASH_FREEZE           633
-#define ABILITY_TREASURE_HOARD         636
+#define ABILITY_LONE_FANG         636
 #define ABILITY_CARRION_HOUR           639
 #define ABILITY_RADIANT                646
 #define ABILITY_GALE_COMMAND           648
