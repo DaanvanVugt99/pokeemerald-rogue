@@ -1508,7 +1508,8 @@ static s32 AI_CheckBadMove(u32 battlerAtk, u32 battlerDef, u32 move, s32 score)
                 ADJUST_SCORE(-10);
             break;
         case EFFECT_AURORA_VEIL:
-            if (gSideStatuses[GetBattlerSide(battlerAtk)] & SIDE_STATUS_AURORA_VEIL
+            if (HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL)
+              || gSideStatuses[GetBattlerSide(battlerAtk)] & SIDE_STATUS_AURORA_VEIL
               || PartnerHasSameMoveEffectWithoutTarget(BATTLE_PARTNER(battlerAtk), move, aiData->partnerMove)
               || !(weather & (B_WEATHER_HAIL | B_WEATHER_SNOW)))
                 ADJUST_SCORE(-10);

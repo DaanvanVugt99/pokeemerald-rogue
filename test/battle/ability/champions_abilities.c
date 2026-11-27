@@ -349,3 +349,29 @@ SINGLE_BATTLE_TEST("Spicy Spray does not trigger from indirect damage")
         EXPECT_EQ(player->status1, STATUS1_NONE);
     }
 }
+
+SINGLE_BATTLE_TEST("Mega Sol prevents Aurora Veil in snow")
+{
+    GIVEN {
+        PLAYER(SPECIES_MEGANIUM_MEGA) { Ability(ABILITY_MEGA_SOL); Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_SNOWSCAPE); MOVE(player, MOVE_AURORA_VEIL); }
+    } THEN {
+        EXPECT(gBattleWeather & B_WEATHER_SNOW);
+        EXPECT(!(gSideStatuses[B_SIDE_PLAYER] & SIDE_STATUS_AURORA_VEIL));
+    }
+}
+
+SINGLE_BATTLE_TEST("Mega Sol makes Electro Shot charge in rain")
+{
+    GIVEN {
+        PLAYER(SPECIES_MEGANIUM_MEGA) { Ability(ABILITY_MEGA_SOL); Speed(1); }
+        OPPONENT(SPECIES_WOBBUFFET) { Speed(100); }
+    } WHEN {
+        TURN { MOVE(opponent, MOVE_RAIN_DANCE); MOVE(player, MOVE_ELECTRO_SHOT); }
+    } THEN {
+        EXPECT_EQ(opponent->hp, opponent->maxHP);
+        EXPECT(player->status2 & STATUS2_MULTIPLETURNS);
+    }
+}

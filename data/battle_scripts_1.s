@@ -1340,7 +1340,9 @@ BattleScript_EffectElectroShot::
 	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_TwoTurnMovesSecondTurn
 	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_ELECTRO_SHOT
 	call BattleScript_FirstChargingTurnElectroShot
+	jumpifability BS_ATTACKER, ABILITY_MEGA_SOL, BattleScript_ElectroShotCheckHerb
 	jumpifweatheraffected BS_ATTACKER, B_WEATHER_RAIN, BattleScript_TwoTurnMovesSecondTurn
+BattleScript_ElectroShotCheckHerb:
 	jumpifnoholdeffect BS_ATTACKER, HOLD_EFFECT_POWER_HERB, BattleScript_MoveEnd
 	call BattleScript_PowerHerbActivation
 	goto BattleScript_TwoTurnMovesSecondTurn

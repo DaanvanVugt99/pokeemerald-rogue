@@ -500,7 +500,8 @@
           "level_moves": {
             "MOVE_BARRIER": 1,
             "MOVE_GLITZY_GLOW": 53
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_MR_MIME_GALARIAN": {
           "stat_delta": [
@@ -886,7 +887,8 @@
             10,
             0,
             0
-          ]
+          ],
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_YAMASK": {
           "level_moves": {
@@ -1725,6 +1727,12 @@
             "MOVE_AROMATHERAPY": 38
           }
         },
+        "SPECIES_STARMIE": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_STARMIE_MEGA": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_ROSERADE": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_LIEPARD": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_AUDINO": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_AUDINO_MEGA": {"add_tutors": ["MOVE_PSYCH_UP"]},
         "SPECIES_GOLISOPOD_MEGA": {
           "abilities": ["ABILITY_TOUGH_CLAWS", "ABILITY_NONE", "ABILITY_NONE"]
         },
@@ -1793,7 +1801,8 @@
             "MOVE_AURA_SPHERE": 49
           },
           "add_tutors": [
-            "MOVE_CHARGE_BEAM"
+            "MOVE_CHARGE_BEAM",
+            "MOVE_PSYCH_UP"
           ]
         },
         "SPECIES_ARCEUS_NORMAL": {
@@ -2194,7 +2203,8 @@
             "MOVE_AURA_SPHERE": 49
           },
           "add_tutors": [
-            "MOVE_CHARGE_BEAM"
+            "MOVE_CHARGE_BEAM",
+            "MOVE_PSYCH_UP"
           ]
         },
         "SPECIES_CLEFABLE_MEGA": {
@@ -2287,7 +2297,7 @@
         "SPECIES_POLIWAG": {},
         "SPECIES_SLOWKING": {},
         "SPECIES_SHUPPET": {},
-        "SPECIES_WEAVILE": {},
+        "SPECIES_WEAVILE": {"add_tutors": ["MOVE_PSYCH_UP"]},
         "SPECIES_DIPPLIN": {},
         "SPECIES_HYDRAPPLE": {},
         "SPECIES_GULPIN": {},
@@ -2365,7 +2375,8 @@
           ],
           "level_moves": {
             "MOVE_COVET": 29
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_SURSKIT": {
           "stat_delta": [
@@ -2536,7 +2547,8 @@
             "ABILITY_FOREWARN",
             "ABILITY_SYNCHRONIZE",
             "ABILITY_COMATOSE"
-          ]
+          ],
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_COMBEE": {
           "abilities": [
@@ -2641,37 +2653,43 @@
             0,
             0,
             10
-          ]
+          ],
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ROTOM_FAN": {
           "level_moves": {
             "MOVE_OMINOUS_WIND": 25,
             "MOVE_HURRICANE": 45
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ROTOM_FROST": {
           "level_moves": {
             "MOVE_OMINOUS_WIND": 25,
             "MOVE_BLIZZARD": 45
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ROTOM_HEAT": {
           "level_moves": {
             "MOVE_OMINOUS_WIND": 25,
             "MOVE_OVERHEAT": 45
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ROTOM_MOW": {
           "level_moves": {
             "MOVE_OMINOUS_WIND": 25,
             "MOVE_LEAF_STORM": 45
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ROTOM_WASH": {
           "level_moves": {
             "MOVE_OMINOUS_WIND": 25,
             "MOVE_HYDRO_PUMP": 45
-          }
+          },
+          "add_tutors": ["MOVE_PSYCH_UP"]
         }
       }
     },
@@ -4014,7 +4032,8 @@
             "ABILITY_DEFIANT",
             "ABILITY_ANGER_POINT",
             "ABILITY_VITAL_SPIRIT"
-          ]
+          ],
+          "add_tutors": ["MOVE_PSYCH_UP"]
         },
         "SPECIES_ARON": {
           "abilities": [
@@ -5368,8 +5387,8 @@
       },
       "species": {
         "SPECIES_SWABLU": {},
-        "SPECIES_ALTARIA": {},
-        "SPECIES_ALTARIA_MEGA": {}
+        "SPECIES_ALTARIA": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_ALTARIA_MEGA": {"add_tutors": ["MOVE_PSYCH_UP"]}
       }
     },
     {
@@ -5483,8 +5502,8 @@
         "Remaining Upstream Revised Pokemon | Mawile": "84658802c729ead9cec3591ec41e2034a256d9d72df0a53516b8b5c8590ff6ba"
       },
       "species": {
-        "SPECIES_MAWILE": {},
-        "SPECIES_MAWILE_MEGA": {}
+        "SPECIES_MAWILE": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_MAWILE_MEGA": {"add_tutors": ["MOVE_PSYCH_UP"]}
       }
     },
     {
@@ -6025,7 +6044,8 @@
           "level_moves": {
             "MOVE_ELECTRO_BALL": 26,
             "MOVE_WILD_CHARGE": 55
-          }
+          },
+          "add_tutors": ["MOVE_TAILWIND"]
         }
       }
     },
@@ -6518,9 +6538,9 @@
         "Remaining Upstream Revised Pokemon | Zweilous": "3b74a247b614b9572157d123041f351ad3f7edeeb94e83f9230c79d3852bba6f"
       },
       "species": {
-        "SPECIES_ABSOL": {},
-        "SPECIES_ABSOL_MEGA": {},
-        "SPECIES_ABSOL_MEGA_Z": {},
+        "SPECIES_ABSOL": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_ABSOL_MEGA": {"add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_ABSOL_MEGA_Z": {"add_tutors": ["MOVE_PSYCH_UP"]},
         "SPECIES_ALOMOMOLA": {},
         "SPECIES_RALTS": {},
         "SPECIES_KIRLIA": {},
@@ -7045,13 +7065,13 @@
       "species": {
         "SPECIES_EEVEE": {},
         "SPECIES_EEVEE_GIGANTAMAX": {},
-        "SPECIES_VAPOREON": {"abilities": ["ABILITY_WATER_ABSORB", "ABILITY_WATER_VEIL", "ABILITY_HYDRATION"], "level_moves": {"MOVE_BOUNCY_BUBBLE": 60}},
-        "SPECIES_JOLTEON": {"abilities": ["ABILITY_VOLT_ABSORB", "ABILITY_STATIC", "ABILITY_QUICK_FEET"], "level_moves": {"MOVE_BUZZY_BUZZ": 60}},
-        "SPECIES_FLAREON": {"abilities": ["ABILITY_FLASH_FIRE", "ABILITY_FLARE_BOOST", "ABILITY_GUTS"]},
-        "SPECIES_ESPEON": {"abilities": ["ABILITY_SYNCHRONIZE", "ABILITY_FOREWARN", "ABILITY_MAGIC_BOUNCE"], "level_moves": {"MOVE_POWER_GEM": 33, "MOVE_GLITZY_GLOW": 60}},
-        "SPECIES_UMBREON": {"abilities": ["ABILITY_SYNCHRONIZE", "ABILITY_INNER_FOCUS", "ABILITY_POISON_TOUCH"], "level_moves": {"MOVE_BADDY_BAD": 60}},
-        "SPECIES_LEAFEON": {"abilities": ["ABILITY_LEAF_GUARD", "ABILITY_SUPER_LUCK", "ABILITY_CHLOROPHYLL"], "level_moves": {"MOVE_NIGHT_SLASH": 26, "MOVE_PSYCHO_CUT": 50}},
-        "SPECIES_GLACEON": {"stat_delta": [0, 0, 0, 0, -30, 30], "abilities": ["ABILITY_SNOW_CLOAK", "ABILITY_SERENE_GRACE", "ABILITY_ICE_BODY"], "level_moves": {"MOVE_FREEZY_FROST": 60}},
+        "SPECIES_VAPOREON": {"abilities": ["ABILITY_WATER_ABSORB", "ABILITY_WATER_VEIL", "ABILITY_HYDRATION"], "level_moves": {"MOVE_BOUNCY_BUBBLE": 60}, "add_tutors": ["MOVE_PLAY_ROUGH"]},
+        "SPECIES_JOLTEON": {"abilities": ["ABILITY_VOLT_ABSORB", "ABILITY_STATIC", "ABILITY_QUICK_FEET"], "level_moves": {"MOVE_BUZZY_BUZZ": 60}, "add_tutors": ["MOVE_PLAY_ROUGH"]},
+        "SPECIES_FLAREON": {"abilities": ["ABILITY_FLASH_FIRE", "ABILITY_FLARE_BOOST", "ABILITY_GUTS"], "add_tutors": ["MOVE_PLAY_ROUGH"]},
+        "SPECIES_ESPEON": {"abilities": ["ABILITY_SYNCHRONIZE", "ABILITY_FOREWARN", "ABILITY_MAGIC_BOUNCE"], "level_moves": {"MOVE_POWER_GEM": 33, "MOVE_GLITZY_GLOW": 60}, "add_tutors": ["MOVE_PLAY_ROUGH"]},
+        "SPECIES_UMBREON": {"abilities": ["ABILITY_SYNCHRONIZE", "ABILITY_INNER_FOCUS", "ABILITY_POISON_TOUCH"], "level_moves": {"MOVE_BADDY_BAD": 60}, "add_tutors": ["MOVE_WONDER_ROOM", "MOVE_PLAY_ROUGH"]},
+        "SPECIES_LEAFEON": {"abilities": ["ABILITY_LEAF_GUARD", "ABILITY_SUPER_LUCK", "ABILITY_CHLOROPHYLL"], "level_moves": {"MOVE_NIGHT_SLASH": 26, "MOVE_PSYCHO_CUT": 50}, "add_tutors": ["MOVE_PLAY_ROUGH"]},
+        "SPECIES_GLACEON": {"stat_delta": [0, 0, 0, 0, -30, 30], "abilities": ["ABILITY_SNOW_CLOAK", "ABILITY_SERENE_GRACE", "ABILITY_ICE_BODY"], "level_moves": {"MOVE_FREEZY_FROST": 60}, "add_tutors": ["MOVE_PLAY_ROUGH"]},
         "SPECIES_SYLVEON": {"abilities": ["ABILITY_CUTE_CHARM", "ABILITY_HEALER", "ABILITY_PIXILATE"], "level_moves": {"MOVE_SPARKLY_SWIRL": 60}}
       }
     },
@@ -7108,8 +7128,8 @@
         "SPECIES_SERPERIOR": {"abilities": ["ABILITY_OVERGROW", "ABILITY_MULTISCALE", "ABILITY_CONTRARY"], "level_moves": {"MOVE_DRAGON_BREATH": 1, "MOVE_DRAGON_PULSE": 0, "MOVE_DRAGON_RUSH": 75}},
         "SPECIES_TEPIG": {"abilities": ["ABILITY_BLAZE", "ABILITY_THICK_FAT", "ABILITY_SHEER_FORCE"]},
         "SPECIES_PIGNITE": {"abilities": ["ABILITY_BLAZE", "ABILITY_THICK_FAT", "ABILITY_SHEER_FORCE"], "types": ["TYPE_FIRE", "TYPE_GROUND"], "level_moves": {"MOVE_MUD_SHOT": 0, "MOVE_ARM_THRUST": 1, "MOVE_ODOR_SLEUTH": 9}, "add_tutors": ["MOVE_EARTHQUAKE"]},
-        "SPECIES_EMBOAR": {"stat_delta": [5, 2, 15, -30, 15, 0], "types": ["TYPE_FIRE", "TYPE_GROUND"], "abilities": ["ABILITY_BLAZE", "ABILITY_THICK_FAT", "ABILITY_MOLD_BREAKER"], "level_moves": {"MOVE_HIGH_HORSEPOWER": 0, "MOVE_MUD_SHOT": 1, "MOVE_HAMMER_ARM": 1, "MOVE_ODOR_SLEUTH": 9, "MOVE_CROSS_CHOP": 68}},
-        "SPECIES_EMBOAR_MEGA": {"stat_delta": [5, 2, 15, -30, 15, 0], "level_moves": {"MOVE_HIGH_HORSEPOWER": 0, "MOVE_MUD_SHOT": 1, "MOVE_HAMMER_ARM": 1, "MOVE_ODOR_SLEUTH": 9, "MOVE_CROSS_CHOP": 68}},
+        "SPECIES_EMBOAR": {"stat_delta": [5, 2, 15, -30, 15, 0], "types": ["TYPE_FIRE", "TYPE_GROUND"], "abilities": ["ABILITY_BLAZE", "ABILITY_THICK_FAT", "ABILITY_MOLD_BREAKER"], "level_moves": {"MOVE_HIGH_HORSEPOWER": 0, "MOVE_MUD_SHOT": 1, "MOVE_HAMMER_ARM": 1, "MOVE_ODOR_SLEUTH": 9, "MOVE_CROSS_CHOP": 68}, "add_tutors": ["MOVE_SLACK_OFF"]},
+        "SPECIES_EMBOAR_MEGA": {"stat_delta": [5, 2, 15, -30, 15, 0], "level_moves": {"MOVE_HIGH_HORSEPOWER": 0, "MOVE_MUD_SHOT": 1, "MOVE_HAMMER_ARM": 1, "MOVE_ODOR_SLEUTH": 9, "MOVE_CROSS_CHOP": 68}, "add_tutors": ["MOVE_SLACK_OFF"]},
         "SPECIES_OSHAWOTT": {"stat_delta": [0, 8, 0, -8, 0, 0], "abilities": ["ABILITY_TORRENT", "ABILITY_SHELL_ARMOR", "ABILITY_SUPER_LUCK"]},
         "SPECIES_DEWOTT": {"stat_delta": [0, 8, 0, -8, 0, 0], "types": ["TYPE_WATER", "TYPE_FIGHTING"], "abilities": ["ABILITY_TORRENT", "ABILITY_SHELL_ARMOR", "ABILITY_SUPER_LUCK"], "level_moves": {"MOVE_LOW_SWEEP": 0, "MOVE_REVENGE": 29}},
         "SPECIES_SAMUROTT": {"stat_delta": [0, 10, 0, -3, 0, 0], "types": ["TYPE_WATER", "TYPE_FIGHTING"], "abilities": ["ABILITY_TORRENT", "ABILITY_SHELL_ARMOR", "ABILITY_SUPER_LUCK"], "level_moves": {"MOVE_SACRED_SWORD": 0, "MOVE_LOW_SWEEP": 1, "MOVE_REVENGE": 29, "MOVE_CLOSE_COMBAT": 68}, "add_tutors": ["MOVE_SWIRLING_BLADE"]},
@@ -7357,8 +7377,8 @@
         "Remaining Upstream Revised Pokemon | Drampa": "71b3ddcf641653ed8df0da21f223e3856f0a46d772858cac42882bbb394887d9"
       },
       "species": {
-        "SPECIES_DRAMPA": {"stat_delta": [25, -15, 0, 0, 0, 0]},
-        "SPECIES_DRAMPA_MEGA": {"stat_delta": [25, -15, 0, 0, 0, 0]}
+        "SPECIES_DRAMPA": {"stat_delta": [25, -15, 0, 0, 0, 0], "add_tutors": ["MOVE_PSYCH_UP"]},
+        "SPECIES_DRAMPA_MEGA": {"stat_delta": [25, -15, 0, 0, 0, 0], "add_tutors": ["MOVE_PSYCH_UP"]}
       }
     },
     {

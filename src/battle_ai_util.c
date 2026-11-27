@@ -2518,10 +2518,11 @@ bool32 IsChargingMove(u32 battlerAtk, u32 effect)
     switch (effect)
     {
     case EFFECT_SOLAR_BEAM:
-        if (AI_GetWeather(AI_DATA) & B_WEATHER_SUN)
+        if (HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL) || (AI_GetWeather(AI_DATA) & B_WEATHER_SUN))
             return FALSE;
+        return AI_DATA->holdEffects[battlerAtk] != HOLD_EFFECT_POWER_HERB;
     case EFFECT_ELECTRO_SHOT:
-        if (AI_GetWeather(AI_DATA) & B_WEATHER_RAIN)
+        if (!HasBattlerAbility(battlerAtk, ABILITY_MEGA_SOL) && (AI_GetWeather(AI_DATA) & B_WEATHER_RAIN))
             return FALSE;
     case EFFECT_SKULL_BASH:
     case EFFECT_METEOR_BEAM:

@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Screech, Steel Wing, Metal Sound and Frost Breath have 100% accuracy. Rock Slide has 95% accuracy and a 20% flinch chance. Added the December Champions tutor compatibility updates.
+
+- Slash now has 80 power, Meteor Assault has 170 power, and Double Shock counts as a punch. Mega Sol prevents Aurora Veil in snow or hail and requires Electro Shot to charge in rain unless holding Power Herb.
+
 - Mega Golisopod now has Tough Claws as its regular Ability.
 
 - Passive Income applies Embargo and follows up with Pay Day on the first damaging hit each switch-in.
