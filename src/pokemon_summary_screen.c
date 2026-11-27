@@ -649,55 +649,6 @@ const struct SpriteTemplate gSpriteTemplate_MoveTypes =
     .callback = SpriteCallbackDummy
 };
 
-static const u8 sMoveTypeToOamPaletteNum[NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT + NUMBER_OF_MON_TYPES] =
-{
-    [TYPE_NORMAL] = 13,
-    [TYPE_FIGHTING] = 13,
-    [TYPE_FLYING] = 14,
-    [TYPE_POISON] = 14,
-    [TYPE_GROUND] = 13,
-    [TYPE_ROCK] = 13,
-    [TYPE_BUG] = 15,
-    [TYPE_GHOST] = 14,
-    [TYPE_STEEL] = 13,
-    [TYPE_MYSTERY] = 15,
-    [TYPE_FIRE] = 13,
-    [TYPE_WATER] = 14,
-    [TYPE_GRASS] = 15,
-    [TYPE_ELECTRIC] = 13,
-    [TYPE_PSYCHIC] = 14,
-    [TYPE_ICE] = 14,
-    [TYPE_DRAGON] = 15,
-    [TYPE_DARK] = 13,
-    [TYPE_FAIRY] = 14,
-    [TYPE_STELLAR] = 15,
-    [NUMBER_OF_MON_TYPES + CONTEST_CATEGORY_COOL] = 13,
-    [NUMBER_OF_MON_TYPES + CONTEST_CATEGORY_BEAUTY] = 14,
-    [NUMBER_OF_MON_TYPES + CONTEST_CATEGORY_CUTE] = 14,
-    [NUMBER_OF_MON_TYPES + CONTEST_CATEGORY_SMART] = 15,
-    [NUMBER_OF_MON_TYPES + CONTEST_CATEGORY_TOUGH] = 13,
-    [TERA_TYPE_OFFSET + TYPE_NORMAL] = 13,
-    [TERA_TYPE_OFFSET + TYPE_FIGHTING] = 13,
-    [TERA_TYPE_OFFSET + TYPE_FLYING] = 14,
-    [TERA_TYPE_OFFSET + TYPE_POISON] = 14,
-    [TERA_TYPE_OFFSET + TYPE_GROUND] = 13,
-    [TERA_TYPE_OFFSET + TYPE_ROCK] = 13,
-    [TERA_TYPE_OFFSET + TYPE_BUG] = 15,
-    [TERA_TYPE_OFFSET + TYPE_GHOST] = 14,
-    [TERA_TYPE_OFFSET + TYPE_STEEL] = 13,
-    [TERA_TYPE_OFFSET + TYPE_MYSTERY] = 15,
-    [TERA_TYPE_OFFSET + TYPE_FIRE] = 13,
-    [TERA_TYPE_OFFSET + TYPE_WATER] = 14,
-    [TERA_TYPE_OFFSET + TYPE_GRASS] = 15,
-    [TERA_TYPE_OFFSET + TYPE_ELECTRIC] = 13,
-    [TERA_TYPE_OFFSET + TYPE_PSYCHIC] = 14,
-    [TERA_TYPE_OFFSET + TYPE_ICE] = 14,
-    [TERA_TYPE_OFFSET + TYPE_DRAGON] = 15,
-    [TERA_TYPE_OFFSET + TYPE_DARK] = 13,
-    [TERA_TYPE_OFFSET + TYPE_FAIRY] = 14,
-    [TERA_TYPE_OFFSET + TYPE_STELLAR] = 15,
-};
-
 // All except left, middle and right are unused
 
 static const struct OamData sOamData_StatusCondition =
@@ -1884,50 +1835,12 @@ static void ResetSpriteIds(void)
 
 static void SetSpriteInvisibility(u8 spriteArrayId, bool8 invisible)
 {
-    gSprites[sMonSummaryScreen->spriteIds[spriteArrayId]].invisible = invisible;
+    u8 id = sMonSummaryScreen->spriteIds[spriteArrayId];
+    if (id < MAX_SPRITES)
+        gSprites[id].invisible = invisible;
 }
 
 // Callbacks for rogue_pokedex
-
-void LoadMoveTypesSpritesheetAndPalette()
-{
-    LoadCompressedPalette(gMoveTypes_Pal, 0x1D0, 0x60);
-    LoadCompressedSpriteSheet(&gSpriteSheet_MoveTypes);
-}
-
-u8 CreateMonTypeIcon(u16 typeId, u8 x, u8 y)
-{
-    u8 spriteId = CreateSprite(&gSpriteTemplate_MoveTypes, 0, 0, 2);
-    if(spriteId != SPRITE_NONE)
-    {
-        struct Sprite *sprite = &gSprites[spriteId];
-        StartSpriteAnim(sprite, typeId);
-        sprite->oam.paletteNum = sMoveTypeToOamPaletteNum[typeId];
-        sprite->x = x + 16;
-        sprite->y = y + 8;
-    }
-
-    return spriteId;
-}
-
-void DestroyMonTypIcon(u8 spriteId)
-{
-    DestroySprite(&gSprites[spriteId]);
-}
-
-void SetTypeSpritePosAndPal(u8 typeId, u8 x, u8 y, u8 spriteArrayId)
-{
-    struct Sprite *sprite;
-    if (sMonSummaryScreen->spriteIds[spriteArrayId] >= MAX_SPRITES)
-        return;
-    sprite = &gSprites[sMonSummaryScreen->spriteIds[spriteArrayId]];
-    sprite->animPaused = FALSE;
-    StartSpriteAnim(sprite, typeId);
-    sprite->oam.paletteNum = sMoveTypeToOamPaletteNum[typeId];
-    sprite->x = x + 16;
-    sprite->y = y + 8;
-    SetSpriteInvisibility(spriteArrayId, FALSE);
-}
 
 static u8 LoadMonGfxAndSprite(struct Pokemon *mon, s16 *state)
 {
@@ -2123,23 +2036,51 @@ static const struct SpritePalette sCompactMoveBadgePalette =
     .tag = TAG_COMPACT_MOVE_BADGES,
 };
 
+static const struct SpriteTemplate sCompactTypeBadgeTemplate =
+{
+    .tileTag = TAG_COMPACT_MOVE_BADGES,
+    .paletteTag = TAG_COMPACT_MOVE_BADGES,
+    .oam = &sOamData_MoveTypes,
+    .anims = sSpriteAnimTable_MoveTypes,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+void LoadCompactTypeBadges(void)
+{
+    if (GetSpriteTileStartByTag(TAG_COMPACT_MOVE_BADGES) == 0xFFFF)
+        LoadSpriteSheet(&sCompactMoveBadgeSheet);
+    if (IndexOfSpritePaletteTag(TAG_COMPACT_MOVE_BADGES) == 0xFF)
+        LoadSpritePalette(&sCompactMoveBadgePalette);
+}
+
+static void SetCompactTypeBadge(u8 id, u8 type, u8 x, u8 y)
+{
+    if (id >= MAX_SPRITES)
+        return;
+    gSprites[id].invisible = type >= NUMBER_OF_MON_TYPES;
+    if (!gSprites[id].invisible)
+    {
+        StartSpriteAnim(&gSprites[id], type);
+        gSprites[id].x = x + 16;
+        gSprites[id].y = y + 8;
+    }
+}
+
+u8 CreateCompactTypeBadge(u8 type, u8 x, u8 y)
+{
+    u8 id;
+    if (type >= NUMBER_OF_MON_TYPES || GetSpriteTileStartByTag(TAG_COMPACT_MOVE_BADGES) == 0xFFFF
+        || IndexOfSpritePaletteTag(TAG_COMPACT_MOVE_BADGES) == 0xFF)
+        return SPRITE_NONE;
+    id = CreateSprite(&sCompactTypeBadgeTemplate, 0, 0, 2);
+    SetCompactTypeBadge(id, type, x, y);
+    return id;
+}
+
 static void ShowCompactTypeBadge(u8 row, u8 type, u8 x, u8 y)
 {
-    u8 id = sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_TYPE + row];
-    u16 start = GetSpriteTileStartByTag(TAG_COMPACT_MOVE_BADGES);
-    u8 palette = IndexOfSpritePaletteTag(TAG_COMPACT_MOVE_BADGES);
-    struct Sprite *sprite;
-
-    if (id >= MAX_SPRITES || type >= NUMBER_OF_MON_TYPES || start == 0xFFFF || palette == 0xFF)
-        return;
-    sprite = &gSprites[id];
-    sprite->animPaused = TRUE;
-    sprite->animBeginning = FALSE;
-    sprite->oam.tileNum = start + type * (COMPACT_MOVE_BADGE_BYTES / TILE_SIZE_4BPP);
-    sprite->oam.paletteNum = palette;
-    sprite->x = x + 16;
-    sprite->y = y + 8;
-    sprite->invisible = FALSE;
+    SetCompactTypeBadge(sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_TYPE + row], type, x, y);
 }
 
 static void LoadSummaryPokemon(void)
@@ -2195,12 +2136,10 @@ static void LoadSummaryPokemon(void)
             gSprites[id].oam.priority = 0;
         }
     }
-    LoadMoveTypesSpritesheetAndPalette();
-    LoadSpriteSheet(&sCompactMoveBadgeSheet);
-    LoadSpritePalette(&sCompactMoveBadgePalette);
+    LoadCompactTypeBadges();
     for (u8 i = SPRITE_ARR_ID_TYPE; i < SPRITE_ARR_ID_COUNT; i++)
     {
-        id = CreateSprite(&gSpriteTemplate_MoveTypes, 0, 0, 2);
+        id = CreateCompactTypeBadge(TYPE_NORMAL, 0, 0);
         sMonSummaryScreen->spriteIds[i] = id;
         if (id < MAX_SPRITES)
         {

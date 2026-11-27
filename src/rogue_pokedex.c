@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_summary_screen.h"
 #include "battle.h"
 #include "battle_main.h"
 #include "battle_util.h"
@@ -3806,9 +3807,6 @@ static u8 Overview_GetMaxScrollAmount()
 //
 u32 GetPokedexMonPersonality(u16 species);
 
-void LoadMoveTypesSpritesheetAndPalette();
-u8 CreateMonTypeIcon(u16 typeId, u8 x, u8 y);
-void DestroyMonTypIcon(u8 spriteId);
 
 static void MonInfo_CreateSprites(bool8 includeType)
 {
@@ -3818,7 +3816,7 @@ static void MonInfo_CreateSprites(bool8 includeType)
         bool8 isShiny = GetSpeciesDisplayDexFlag(sPokedexMenu->viewBaseSpecies, FLAG_GET_CAUGHT_SHINY);
 
         LoadMonIconPalettes();
-        LoadMoveTypesSpritesheetAndPalette();
+        LoadCompactTypeBadges();
 
         sPokedexMenu->pageSprites[MON_SPRITE_FRONT_PIC] = CreateMonPicSprite_Affine(
             sPokedexMenu->viewBaseSpecies,
@@ -3848,10 +3846,10 @@ static void MonInfo_CreateSprites(bool8 includeType)
             && sPokedexMenu->isInspectModeActive && baseline != NULL;
         u8 type1 = inspect ? baseline->types[0] : RoguePokedex_GetSpeciesType(sPokedexMenu->viewBaseSpecies, 0);
         u8 type2 = inspect ? baseline->types[1] : RoguePokedex_GetSpeciesType(sPokedexMenu->viewBaseSpecies, 1);
-        sPokedexMenu->pageSprites[MON_SPRITE_TYPE1] = CreateMonTypeIcon(type1, 138, 24);
+        sPokedexMenu->pageSprites[MON_SPRITE_TYPE1] = CreateCompactTypeBadge(type1, 138, 27);
 
         if(type1 != type2)
-            sPokedexMenu->pageSprites[MON_SPRITE_TYPE2] = CreateMonTypeIcon(type2, 138 + 33, 24);
+            sPokedexMenu->pageSprites[MON_SPRITE_TYPE2] = CreateCompactTypeBadge(type2, 166, 27);
     }
 }
 
@@ -3887,7 +3885,7 @@ static void MonInfo_DestroySprites(bool8 keepPortrait)
 
             case MON_SPRITE_TYPE1:
             case MON_SPRITE_TYPE2:
-                DestroyMonTypIcon(spriteId);
+                DestroySprite(&gSprites[spriteId]);
                 break;
                 
             default:

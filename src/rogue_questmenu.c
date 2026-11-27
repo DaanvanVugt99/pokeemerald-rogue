@@ -202,6 +202,20 @@ static u32 const sLinedTilemap[] = INCBIN_U32("graphics/rogue_quest/lined_page.b
 static u32 const sQuestboardTilemap[] = INCBIN_U32("graphics/rogue_quest/quest_board.bin.lz");
 
 static u32 const sQuestTiles[] = INCBIN_U32("graphics/rogue_quest/tiles.4bpp.lz");
+// Ink for text printed over the journal paper in each book theme.
+static const u16 sJournalTextPalette[16] =
+{
+    [TEXT_COLOR_WHITE] = RGB(31, 30, 28),
+    [TEXT_COLOR_DARK_GRAY] = RGB_BLACK,
+    [TEXT_COLOR_LIGHT_GRAY] = RGB(27, 26, 24),
+    [TEXT_COLOR_RED] = RGB(18, 5, 5),
+    [TEXT_COLOR_LIGHT_RED] = RGB(29, 19, 17),
+    [TEXT_COLOR_GREEN] = RGB(5, 13, 7),
+    [TEXT_COLOR_LIGHT_GREEN] = RGB(19, 25, 18),
+    [TEXT_COLOR_BLUE] = RGB(5, 10, 16),
+    [TEXT_COLOR_LIGHT_BLUE] = RGB(19, 23, 27),
+};
+
 static u16 const sQuestPalette_Blue[] = INCBIN_U16("graphics/rogue_quest/pal_blue.gbapal");
 static u16 const sQuestPalette_Green[] = INCBIN_U16("graphics/rogue_quest/pal_green.gbapal");
 static u16 const sQuestPalette_Gold[] = INCBIN_U16("graphics/rogue_quest/pal_gold.gbapal");
@@ -470,9 +484,9 @@ static u8 const sText_Back[] = _("Back");
 static u8 const sText_ScrollUp[] = _("{UP_ARROW}");
 static u8 const sText_ScrollDown[] = _("{DOWN_ARROW}");
 static u8 const sText_Progress[] = _("Progress");
-static u8 const sText_QuestPageButtonsTop[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{A_BUTTON} Pin  {SELECT_BUTTON} Sort");
-static u8 const sText_QuestPageButtonsRewards[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{START_BUTTON} Rewards");
-static u8 const sText_QuestPageButtonsQuest[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{START_BUTTON} Quest Info");
+static u8 const sText_QuestPageButtonsTop[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}{A_BUTTON} Pin  {SELECT_BUTTON} Sort");
+static u8 const sText_QuestPageButtonsRewards[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}{START_BUTTON} Rewards");
+static u8 const sText_QuestPageButtonsQuest[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}{START_BUTTON} Quest Info");
 
 static u8 const sText_MarkerInProgress[] = _("{COLOR BLUE}·In Progress·");
 static u8 const sText_MarkerInactive[] = _("{COLOR RED}·Inactive·");
@@ -760,7 +774,7 @@ static void InitQuestWindows(void)
     FreeAllWindowBuffers();
     InitWindows(sQuestWinTemplates);
     DeactivateAllTextPrinters();
-    LoadPalette(gStandardMenuPalette, 0xF0, 0x20);
+    LoadPalette(sJournalTextPalette, BG_PLTT_ID(15), sizeof(sJournalTextPalette));
 
     ClearQuestWindows();
 }
@@ -2592,9 +2606,9 @@ static void HandleInput_MasteryTrackerPage(u8 taskId)
 
 extern const u16 gRogueBake_EggSpecies[];
 
-static u8 const sText_PageMarker[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}");
-static u8 const sText_ChangePageLeft[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{DPAD_LEFT} back");
-static u8 const sText_ChangePageRight[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}next {DPAD_RIGHT}");
+static u8 const sText_PageMarker[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}");
+static u8 const sText_ChangePageLeft[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}{DPAD_LEFT} back");
+static u8 const sText_ChangePageRight[] = _("{COLOR DARK_GRAY}{SHADOW LIGHT_GRAY}next {DPAD_RIGHT}");
 
 static void Draw_MasteryTrackerPage()
 {

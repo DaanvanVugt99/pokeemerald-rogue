@@ -132,8 +132,22 @@ static void Empty_DrawChoices(u8 menuOffset, u8 selection);
 
 EWRAM_DATA static bool8 sArrowPressed = FALSE;
 
-//static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/interface/option_menu_text.gbapal");
-static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/interface/option_menu_text2.gbapal"); // <- inserts extra greens
+enum { PAL_OPTIONS = 1, PAL_SELECTED_OPTION };
+enum { INK_SELECTION_BAR = 10 };
+
+// Choice strings use several foreground/shadow pairs for different values.
+static const u16 sOptionPalettes[][16] =
+{
+    { [1] = RGB(6, 6, 7), [2] = RGB(30, 30, 29), [3] = RGB(2, 3, 3),
+      [4] = RGB(2, 3, 3), [5] = RGB(23, 24, 25), [6] = RGB(23, 24, 25),
+      [7] = RGB(2, 3, 3), [8] = RGB(2, 3, 3), [9] = RGB(21, 25, 28),
+      [INK_SELECTION_BAR] = RGB(6, 6, 7) },
+    { [1] = RGB(9, 8, 7), [2] = RGB(30, 24, 14), [3] = RGB(2, 3, 3),
+      [4] = RGB(2, 3, 3), [5] = RGB(30, 24, 14), [6] = RGB(30, 24, 14),
+      [7] = RGB(2, 3, 3), [8] = RGB(2, 3, 3), [9] = RGB(30, 24, 14),
+      [INK_SELECTION_BAR] = RGB(30, 24, 14) },
+};
+
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCBIN_U8("graphics/interface/option_menu_equals_sign.4bpp");
 
@@ -422,7 +436,7 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
         .tilemapTop = 1,
         .width = 26,
         .height = 2,
-        .paletteNum = 1,
+        .paletteNum = PAL_OPTIONS,
         .baseBlock = 2
     },
     {
@@ -431,7 +445,7 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
         .tilemapTop = 5,
         .width = 26,
         .height = 14,
-        .paletteNum = 1,
+        .paletteNum = PAL_OPTIONS,
         .baseBlock = 0x36
     },
     DUMMY_WIN_TEMPLATE
@@ -503,14 +517,8 @@ void CB2_InitOptionMenu(void)
         ChangeBgY(3, 0, BG_COORD_SET);
         InitWindows(sOptionMenuWinTemplates);
         DeactivateAllTextPrinters();
-        SetGpuReg(REG_OFFSET_WIN0H, 0);
-        SetGpuReg(REG_OFFSET_WIN0V, 0);
-        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0);
-        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_CLR);
-        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_DARKEN);
-        SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 4);
-        SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+        SetGpuReg(REG_OFFSET_BLDCNT, 0);
+        SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
         ShowBg(0);
         ShowBg(1);
         gMain.state++;
@@ -531,7 +539,7 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     case 5:
-        LoadPalette(sOptionMenuText_Pal, 16, sizeof(sOptionMenuText_Pal));
+        LoadPalette(sOptionPalettes, BG_PLTT_ID(PAL_OPTIONS), sizeof(sOptionPalettes));
         gMain.state++;
         break;
     case 6:
@@ -730,8 +738,10 @@ static void Task_OptionMenuFadeOut(u8 taskId)
 
 static void HighlightOptionMenuItem(u8 index)
 {
-    SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(16, DISPLAY_WIDTH - 16));
-    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(index * 16 + 40, index * 16 + 56));
+    PutWindowTilemap(WIN_OPTIONS);
+    PutWindowRectTilemapOverridePalette(WIN_OPTIONS, 0, index * 2,
+        sOptionMenuWinTemplates[WIN_OPTIONS].width, 2, PAL_SELECTED_OPTION);
+    CopyWindowToVram(WIN_OPTIONS, COPYWIN_MAP);
 }
 
 static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
@@ -1241,6 +1251,7 @@ static void DrawOptionMenuTexts(u8 submenu, bool8 includeChoices)
 {
     u8 i;
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(INK_SELECTION_BAR), 0, 0, 2, MAX_MENUITEM_COUNT * YPOS_SPACING);
 
     for (i = 0; i < MAX_MENUITEM_COUNT; i++)
     {

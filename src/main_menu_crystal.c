@@ -43,13 +43,13 @@ static const struct WindowTemplate sCrystalWindows[] =
 static const u16 sCrystalTextPalette[] =
 {
     RGB(0, 0, 0),
-    RGB(30, 29, 31), // Text
-    RGB(2, 1, 4), // Shadow
-    RGB(23, 21, 26), // Labels
-    RGB(20, 17, 22), // Footer
-    RGB(13, 21, 22), // Selection jewel
-    RGB(7, 12, 15),  // Jewel facet
-    RGB(25, 30, 29), // Jewel highlight
+    RGB(30, 30, 29), // Text
+    RGB(2, 3, 3), // Shadow
+    RGB(23, 24, 25), // Labels
+    RGB(19, 21, 23), // Footer
+    RGB(30, 24, 14), // Selection jewel
+    RGB(21, 15, 8),  // Jewel facet
+    RGB(31, 28, 21), // Jewel highlight
 };
 
 static const u8 sValueColors[] = {0, 1, 2};

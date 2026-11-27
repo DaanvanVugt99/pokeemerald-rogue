@@ -12,6 +12,8 @@ extern const struct SpriteTemplate gSpriteTemplate_MoveTypes;
 extern const struct CompressedSpriteSheet gSpriteSheet_MoveTypes;
 
 const u8 *GetMoveDescription(u16 move);
+void LoadCompactTypeBadges(void);
+u8 CreateCompactTypeBadge(u8 type, u8 x, u8 y);
 void LoadMoveSplitSpritesheetAndPalette(void);
 u8 CreateMoveSplitIcon(u32 split, u8 x, u8 y);
 void DestroyMoveSplitIcon(u8 spriteId);

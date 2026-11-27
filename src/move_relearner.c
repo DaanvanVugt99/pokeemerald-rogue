@@ -368,9 +368,6 @@ static const struct BgTemplate sMoveRelearnerMenuBackgroundTemplates[] =
     },
 };
 
-void LoadMoveTypesSpritesheetAndPalette();
-u8 CreateMonTypeIcon(u16 typeId, u8 x, u8 y);
-void DestroyMonTypIcon(u8 spriteId);
 
 #ifdef ROGUE_EXPANSION
 void LoadMoveSplitSpritesheetAndPalette();
@@ -631,7 +628,7 @@ void CB2_InitLearnMove(void)
     LoadSpriteSheet(&sMoveRelearnerSpriteSheet);
     LoadSpritePalette(&sMoveRelearnerPalette);
     LoadMonIconPalettes();
-    LoadMoveTypesSpritesheetAndPalette();
+    LoadCompactTypeBadges();
 #ifdef ROGUE_EXPANSION
     LoadMoveSplitSpritesheetAndPalette();
 #endif
@@ -664,7 +661,7 @@ static void CB2_InitLearnMoveReturnFromSelectMove(void)
     LoadSpriteSheet(&sMoveRelearnerSpriteSheet);
     LoadSpritePalette(&sMoveRelearnerPalette);
     LoadMonIconPalettes();
-    LoadMoveTypesSpritesheetAndPalette();
+    LoadCompactTypeBadges();
 #ifdef ROGUE_EXPANSION
     LoadMoveSplitSpritesheetAndPalette();
 #endif
@@ -1505,7 +1502,7 @@ void MoveRelearnerShowHideHearts(s32 moveId)
     // Create type sprites
     if(sMoveRelearnerStruct->typeSpriteIds[0] != SPRITE_NONE)
     {
-        DestroyMonTypIcon(sMoveRelearnerStruct->typeSpriteIds[0]);
+        DestroySprite(&gSprites[sMoveRelearnerStruct->typeSpriteIds[0]]);
         sMoveRelearnerStruct->typeSpriteIds[0] = SPRITE_NONE;
     }
 
@@ -1524,7 +1521,7 @@ void MoveRelearnerShowHideHearts(s32 moveId)
         if(moveId == MOVE_HIDDEN_POWER)
             type = CalcMonHiddenPowerType(&gPlayerParty[sMoveRelearnerStruct->partyMon]);
 
-        sMoveRelearnerStruct->typeSpriteIds[0] = CreateMonTypeIcon(type, 12, GetMoveStatsYOffset(59));
+        sMoveRelearnerStruct->typeSpriteIds[0] = CreateCompactTypeBadge(type, 16, GetMoveStatsYOffset(62));
 #ifdef ROGUE_EXPANSION
         sMoveRelearnerStruct->typeSpriteIds[1] = CreateMoveSplitIcon(gBattleMoves[moveId].split, 44, GetMoveStatsYOffset(59));
 #endif

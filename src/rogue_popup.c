@@ -287,8 +287,8 @@ static const u8 sText_Popup_PokemonChain[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN
 static const u8 sText_Popup_PokemonChainBroke[] = _("{COLOR LIGHT_RED}{SHADOW RED}Broken Chain");
 
 static const u8 sText_Popup_BagFull[] = _("{COLOR LIGHT_RED}{SHADOW RED}Bag too full.");
-static const u8 sText_Popup_SingleItem[] = _("{STR_VAR_1}");
-static const u8 sText_Popup_MultipleItem[] = _("{STR_VAR_1} {COLOR LIGHT_GREEN}{SHADOW GREEN}x{STR_VAR_2}");
+static const u8 sText_Popup_SingleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1}");
+static const u8 sText_Popup_MultipleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1} x{STR_VAR_2}");
 static const u8 sText_Popup_Money[] = _("¥{STR_VAR_1}");
 static const u8 sText_Popup_LostItem[] = _("{COLOR LIGHT_RED}{SHADOW RED}Lost Item.");
 static const u8 sText_Popup_LostMoney[] = _("{COLOR LIGHT_RED}{SHADOW RED}Lost Money.");
