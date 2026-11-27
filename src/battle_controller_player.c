@@ -949,6 +949,7 @@ static void HandleInputChooseMove(u32 battler)
                 gMultiUsePlayerCursor = gMoveSelectionCursor[battler] + 1;
 
             MoveSelectionCreateCursorAt(gMultiUsePlayerCursor, 27);
+            DestroyBattleMoveTypeBadge();
             BattlePutTextOnWindow(gText_BattleSwitchWhich, B_WIN_SWITCH_PROMPT);
             gBattlerControllerFuncs[battler] = HandleMoveSwitching;
         }

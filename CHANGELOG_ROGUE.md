@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- The battle move type badge clears while choosing which move to swap and returns after confirming or cancelling.
+
 - The naming keyboard switches to lowercase after an initial capital and shows a white arrow beside the name.
 
 - L now wraps from Stats to Base on the Pokémon Summary Skills tab, completing the reverse cycle.
