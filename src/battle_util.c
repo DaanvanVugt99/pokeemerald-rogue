@@ -549,6 +549,7 @@ bool32 IsAffectedByFollowMe(u32 battlerAtk, u32 defSide, u32 move)
         || gBattleMons[gSideTimers[defSide].followmeTarget].hp == 0
         || gBattleMoves[move].effect == EFFECT_SNIPE_SHOT
         || gBattleMoves[move].effect == EFFECT_SKY_DROP
+        || (gBattleMoves[move].effect == EFFECT_PURSUIT && gBattleStruct->switchInterceptTarget)
         || ability == ABILITY_PROPELLER_TAIL || ability == ABILITY_STALWART)
         return FALSE;
 
@@ -856,6 +857,15 @@ void HandleAction_UseMove(void)
         gBattlescriptCurrInstr = gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect];
     }
 
+    if (gBattleStruct->switchInterceptTarget
+     && moveType == TYPE_FLYING
+     && HasBattlerAbility(gBattlerAttacker, ABILITY_TERRITORIAL))
+    {
+        SetBattlerTriggeredAbility(gBattlerAttacker, ABILITY_TERRITORIAL);
+        BattleScriptPushCursor();
+        gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
+    }
+
     if (gBattleTypeFlags & BATTLE_TYPE_ARENA)
         BattleArena_AddMindPoints(gBattlerAttacker);
 
@@ -871,6 +881,7 @@ void HandleAction_UseMove(void)
 void HandleAction_Switch(void)
 {
     gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
+
     gBattle_BG0_X = 0;
     gBattle_BG0_Y = 0;
     gActionSelectionCursor[gBattlerAttacker] = 0;
@@ -1224,7 +1235,8 @@ void HandleAction_ActionFinished(void)
     gBattleStruct->dynamax.usingMaxMove[gBattlerAttacker] = 0;
     gProtectStructs[gBattlerAttacker].extraMoveUsed = FALSE;
 
-    if (B_RECALC_TURN_AFTER_ACTIONS >= GEN_8 && !afterYouActive && !gBattleStruct->pledgeMove)
+    if (B_RECALC_TURN_AFTER_ACTIONS >= GEN_8 && !afterYouActive && !gBattleStruct->pledgeMove
+     && !gBattleStruct->switchInterceptTarget)
     {
         // i starts at `gCurrentTurnActionNumber` because we don't want to recalculate turn order for mon that have already
         // taken action. It's been previously increased, which we want in order to not recalculate the turn of the mon that just finished its action
@@ -18223,27 +18235,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_TERRITORIAL)
-         && moveType == TYPE_FLYING
-         && (gFieldStatuses & STATUS_FIELD_PLAIN_TERRAIN)
-         && !(gBattleMons[battler].status2 & STATUS2_FOCUS_ENERGY_ANY)
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && CanUseSelfExtraMoveAfterMoveEndDamage(battler, move)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsFinalMultiHitStrike())
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_TERRITORIAL);
-            gBattleStruct->atkCancellerTracker = 0;
-            gBattlerAttacker = gBattlerAbility = battler;
-            gBattlerTarget = battler;
-            gCalledMove = MOVE_FOCUS_ENERGY;
-            gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-            gProtectStructs[battler].extraMoveUsed = TRUE;
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_WEB_TAILOR)
          && gBattleMoves[move].slicingMove
          && DidMoveSucceedForMoveEndEffects(battler)
@@ -24947,7 +24938,8 @@ static inline u32 CalcMoveBasePower(u32 move, u32 battlerAtk, u32 battlerDef, u3
             basePower *= 2;
         break;
     case EFFECT_PURSUIT:
-        if (gActionsByTurnOrder[GetBattlerTurnOrderNum(battlerDef)] == B_ACTION_SWITCH)
+        if (gBattleStruct->switchInterceptTarget == battlerDef + 1
+         || gActionsByTurnOrder[GetBattlerTurnOrderNum(battlerDef)] == B_ACTION_SWITCH)
             basePower *= 2;
         break;
     case EFFECT_NATURAL_GIFT:
@@ -26762,10 +26754,6 @@ static bool32 IsAnyActiveBattlerBelowHalfHp(void)
 static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerDef, uq4_12_t typeEffectivenessModifier, bool32 isCrit, u32 abilityAtk)
 {
     u32 moveType;
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_TERRITORIAL)
-     && IsBattlerTerrainAffected(battlerDef, STATUS_FIELD_TERRAIN_ANY))
-        return UQ_4_12(2.0);
 
     if (HasBattlerAbility(battlerAtk, ABILITY_INFERNAL_RAGE))
     {

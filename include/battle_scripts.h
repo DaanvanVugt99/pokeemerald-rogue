@@ -190,6 +190,8 @@ extern const u8 BattleScript_PrintFailedToRunString[];
 extern const u8 BattleScript_PrintCantEscapeFromBattle[];
 extern const u8 BattleScript_PrintFullBox[];
 extern const u8 BattleScript_ActionSwitch[];
+extern const u8 BattleScript_PassiveSwitchIntercept[];
+extern const u8 BattleScript_MoveSwitchOpenPartyScreen[];
 extern const u8 BattleScript_UndertowActivates[];
 extern const u8 BattleScript_PinwheelActivates[];
 extern const u8 BattleScript_HoOhPlumeActivates[];

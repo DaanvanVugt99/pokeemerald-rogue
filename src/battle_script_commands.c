@@ -437,6 +437,7 @@ static bool8 IsFinalStrikeEffect(u16 move);
 static void TrySepticFumesPoisonPartyMon(u32 battlerAtk, u32 poisonedBattler);
 static void TryUpdateRoundTurnOrder(void);
 static bool32 ChangeOrderTargetAfterAttacker(void);
+static bool32 QueueNextSwitchInterceptor(u32 target);
 static bool32 AttackerIgnoresRecoil(void);
 static void TryHandleFaintingTargetUniqueAbilities(void);
 void ApplyExperienceMultipliers(s32 *expAmount, u8 expGetterMonId, u8 faintedBattler);
@@ -687,7 +688,7 @@ static void Cmd_settypetoterrain(void);
 static bool32 TryActivateTerraform(const u8 *resumeInstr);
 static bool32 TryActivateCrashProtocol(const u8 *resumeInstr);
 static bool32 TrySetGrafittiTagToxicSpikes(u32 battler);
-static void Cmd_pursuitdoubles(void);
+static void Cmd_jumpifnopassiveswitchintercept(void);
 static void Cmd_snatchsetbattlers(void);
 static void Cmd_removelightscreenreflect(void);
 static void Cmd_handleballthrow(void);
@@ -948,7 +949,7 @@ void (* const gBattleScriptingCommandsTable[])(void) =
     Cmd_jumpifsubstituteblocks,                  //0xE9
     Cmd_tryrecycleitem,                          //0xEA
     Cmd_settypetoterrain,                        //0xEB
-    Cmd_pursuitdoubles,                          //0xEC
+    Cmd_jumpifnopassiveswitchintercept,                          //0xEC
     Cmd_snatchsetbattlers,                       //0xED
     Cmd_removelightscreenreflect,                //0xEE
     Cmd_handleballthrow,                         //0xEF
@@ -2196,6 +2197,12 @@ static void AccuracyCheck(const u8 *nextInstr, const u8 *failInstr, u16 move)
         GET_MOVE_TYPE(move, type);
         if (JumpIfMoveAffectedByProtect(move))
             return;
+        if (gBattleMoves[move].effect == EFFECT_PURSUIT
+         && gBattleStruct->switchInterceptTarget == gBattlerTarget + 1)
+        {
+            gBattlescriptCurrInstr = nextInstr;
+            return;
+        }
         if (AccuracyCalcHelper(move))
             return;
 
@@ -7900,6 +7907,7 @@ static void Cmd_moveend(void)
 
                     // Attacker is the damage-dealer, battler is mon to be switched out
                     if (IsBattlerAlive(battler)
+                      && gBattleStruct->switchInterceptTarget != battler + 1
                       && gBattlerAttacker != battler
                       && (GetBattlerSide(gBattlerAttacker) == B_SIDE_PLAYER
                        || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
@@ -8562,6 +8570,7 @@ static void Cmd_moveend(void)
                     if (IsBattlerAlive(battler)
                      && gProtectStructs[battler].statFell
                      && gProtectStructs[battler].disableEjectPack == 0
+                     && gBattleStruct->switchInterceptTarget != battler + 1
                      && GetBattlerHoldEffect(battler, TRUE) == HOLD_EFFECT_EJECT_PACK
                      && !(gCurrentMove == MOVE_PARTING_SHOT && CanBattlerSwitch(gBattlerAttacker))  // Does not activate if attacker used Parting Shot and can switch out
                      && CountUsablePartyMons(battler) > 0)  // Has mon to switch into
@@ -9049,6 +9058,8 @@ static void Cmd_moveend(void)
                     bool32 fallenSkies = gBattleResources->flags->flags[i] & RESOURCE_FLAG_FALLEN_SKIES;
 
                     gBattleResources->flags->flags[i] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
+                    if (gBattleStruct->switchInterceptTarget == i + 1)
+                        continue;
                     gSpecialStatuses[i].emergencyExited = TRUE;
                     gBattlerTarget = gBattlerAbility = i;
                     if (fallenSkies
@@ -9207,6 +9218,33 @@ static void Cmd_moveend(void)
                 gBattlerAttacker = gBattleStruct->savedMetronomeItemAttacker;
                 gBattlerTarget = gBattleStruct->savedMetronomeItemTarget;
                 gBattleStruct->metronomeItemChainActive = FALSE;
+            }
+            gBattleScripting.moveendState++;
+            break;
+        case MOVEEND_SWITCH_INTERCEPT:
+            if (gBattleStruct->switchInterceptTarget)
+            {
+                u32 target = gBattleStruct->switchInterceptTarget - 1;
+
+                if (!QueueNextSwitchInterceptor(target))
+                {
+                    gBattleStruct->switchInterceptTarget = 0;
+                    if (IsBattlerAlive(target))
+                    {
+                        gBattlerAttacker = target;
+                        gBattleStruct->monToSwitchIntoId[target] = gBattleStruct->switchInterceptPartyIndex;
+                        if (gBattleStruct->switchInterceptByMove)
+                        {
+                            gCurrentMove = gLastMoves[target] < MOVES_COUNT ? gLastMoves[target] : MOVE_NONE;
+                            gBattlescriptCurrInstr = BattleScript_MoveSwitchOpenPartyScreen;
+                        }
+                        else
+                        {
+                            gBattlescriptCurrInstr = BattleScript_PassiveSwitchIntercept;
+                        }
+                        effect = TRUE;
+                    }
+                }
             }
             gBattleScripting.moveendState++;
             break;
@@ -13346,6 +13384,24 @@ static void Cmd_various(void)
             gProtectStructs[battler].extraMoveUsed = TRUE;
             BattleScriptPush(cmd->nextInstr);
             gBattlescriptCurrInstr = raiseSpeed ? BattleScript_VictoryActivatesSpeed : BattleScript_VictoryActivates;
+            return;
+        }
+
+        u8 moveType;
+        GET_MOVE_TYPE(gCurrentMove, moveType);
+        if (HasBattlerAbility(battler, ABILITY_TERRITORIAL)
+         && moveType == TYPE_FLYING
+         && IsBattlerAlive(battler)
+         && GetBattlerSide(battler) != GetBattlerSide(gBattlerTarget)
+         && HasAttackerFaintedTarget()
+         && !NoAliveMonsForEitherParty()
+         && !(gSideStatuses[GetBattlerSide(battler)] & SIDE_STATUS_TAILWIND))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TERRITORIAL);
+            gBattlerAttacker = gBattlerAbility = battler;
+            gBattlerTarget = battler;
+            BattleScriptPush(cmd->nextInstr);
+            gBattlescriptCurrInstr = BattleScript_GaleCommandActivates;
             return;
         }
 
@@ -18401,7 +18457,75 @@ static void Cmd_magnitudedamagecalculation(void)
     gBattlescriptCurrInstr = cmd->nextInstr;
 }
 
+// Like upstream Pursuit, run the full selected move and resume the switch afterward.
+static bool32 QueueNextSwitchInterceptor(u32 target)
+{
+    u32 i;
+
+    if (!IsBattlerAlive(target))
+        return FALSE;
+
+    for (i = gCurrentTurnActionNumber + 1; i < gBattlersCount; i++)
+    {
+        u32 attacker = gBattlerByTurnOrder[i];
+        u32 move = gChosenMoveByBattler[attacker];
+
+        if (gActionsByTurnOrder[i] != B_ACTION_USE_MOVE
+         || !IsBattlerAlive(attacker)
+         || GetBattlerSide(attacker) == GetBattlerSide(target)
+         || gProtectStructs[attacker].noValidMoves
+         || (gBattleMons[attacker].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
+         || gDisableStructs[attacker].truantCounter
+         || gBattleStruct->zmove.toBeUsed[attacker] != MOVE_NONE
+         || IsDynamaxed(attacker)
+         || (gBattleStruct->dynamax.toDynamax & gBitTable[attacker])
+         || move == MOVE_NONE
+         || move >= MOVES_COUNT)
+            continue;
+
+        if (gBattleMoves[move].effect == EFFECT_PURSUIT)
+        {
+            gBattleStruct->moveTarget[attacker] = target;
+        }
+        else if (!HasBattlerAbility(attacker, ABILITY_TERRITORIAL)
+              || IS_MOVE_STATUS(move)
+              || gBattleMoves[move].type != TYPE_FLYING
+              || (gBattleStruct->moveTarget[attacker] != target
+               && !(GetBattlerMoveTargetType(attacker, move) & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY))))
+        {
+            continue;
+        }
+
+        while (i > gCurrentTurnActionNumber + 1)
+        {
+            SwapTurnOrder(i - 1, i);
+            i--;
+        }
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static void Cmd_jumpifnopursuitswitchdmg(void)
+{
+    CMD_ARGS(const u8 *jumpInstr);
+    u32 target = gBattlerAttacker;
+
+    if (!gBattleStruct->switchInterceptTarget && QueueNextSwitchInterceptor(target))
+    {
+        gBattleStruct->switchInterceptTarget = target + 1;
+        gBattleStruct->switchInterceptByMove = gActionsByTurnOrder[gCurrentTurnActionNumber] == B_ACTION_USE_MOVE;
+        gBattleStruct->switchInterceptPartyIndex = gBattleStruct->monToSwitchIntoId[target];
+        gBattlescriptCurrInstr = cmd->nextInstr;
+    }
+    else
+    {
+        gBattlescriptCurrInstr = cmd->jumpInstr;
+    }
+}
+
+static void Cmd_jumpifnopassiveswitchintercept(void)
 {
     CMD_ARGS(const u8 *jumpInstr);
     bool32 doSwitchIntercept = FALSE;
@@ -18421,27 +18545,8 @@ static void Cmd_jumpifnopursuitswitchdmg(void)
             gBattlerTarget = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT);
     }
 
-    if (gChosenActionByBattler[gBattlerTarget] == B_ACTION_USE_MOVE
-        && gBattlerAttacker == *(gBattleStruct->moveTarget + gBattlerTarget)
-        && !(gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
-        && gBattleMons[gBattlerAttacker].hp
-        && !gDisableStructs[gBattlerTarget].truantCounter
-        && gBattleMoves[gChosenMoveByBattler[gBattlerTarget]].effect == EFFECT_PURSUIT)
-    {
-        s32 i;
-
-        for (i = 0; i < gBattlersCount; i++)
-        {
-            if (gBattlerByTurnOrder[i] == gBattlerTarget)
-                gActionsByTurnOrder[i] = B_ACTION_TRY_FINISH;
-        }
-
-        gCurrentMove = gChosenMoveByBattler[gBattlerTarget];
-        gCurrMovePos = gChosenMovePos = *(gBattleStruct->chosenMovePositions + gBattlerTarget);
-        gBattleScripting.battler = 0xFF;
-        doSwitchIntercept = TRUE;
-    }
-    else if (HasBattlerAbility(gBattlerTarget, ABILITY_BOUNTY)
+    if (HasBattlerAbility(gBattlerTarget, ABILITY_BOUNTY)
+     && !(gChosenMoveByBattler[gBattlerTarget] == MOVE_PURSUIT && HasBattlerActedThisTurn(gBattlerTarget))
           && !(gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
           && gBattleMons[gBattlerAttacker].hp
           && gBattleMons[gBattlerTarget].hp
@@ -20011,30 +20116,6 @@ static void Cmd_settypetoterrain(void)
 }
 
 // Unused
-static void Cmd_pursuitdoubles(void)
-{
-    CMD_ARGS(const u8 *failInstr);
-
-    u32 battler = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerAttacker)));
-
-    if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE
-        && !(gAbsentBattlerFlags & gBitTable[battler])
-        && gChosenActionByBattler[battler] == B_ACTION_USE_MOVE
-        && gBattleMoves[gChosenMoveByBattler[battler]].effect == EFFECT_PURSUIT)
-    {
-        gActionsByTurnOrder[battler] = B_ACTION_TRY_FINISH;
-        gCurrentMove = gChosenMoveByBattler[battler];
-        gBattlescriptCurrInstr = cmd->nextInstr;
-        gBattleScripting.animTurn = 1;
-        gBattleScripting.savedBattler = gBattlerAttacker;
-        gBattlerAttacker = battler;
-    }
-    else
-    {
-        gBattlescriptCurrInstr = cmd->failInstr;
-    }
-}
-
 static void Cmd_snatchsetbattlers(void)
 {
     CMD_ARGS();

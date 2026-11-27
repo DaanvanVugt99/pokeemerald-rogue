@@ -675,6 +675,9 @@ struct BattleStruct
     u8 moneyMultiplier:6;
     u8 moneyMultiplierItem:1;
     u8 moneyMultiplierMove:1;
+    u8 switchInterceptTarget:3; // Battler ID plus one, or zero when no switch is pending.
+    u8 switchInterceptPartyIndex:3;
+    u8 switchInterceptByMove:1;
     u8 savedTurnActionNumber;
     u8 switchInAbilitiesCounter;
     u16 switchInTransferFlags[MAX_BATTLERS_COUNT];

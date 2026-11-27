@@ -1217,7 +1217,7 @@
 	.4byte \failInstr
 	.endm
 
-	.macro pursuitdoubles failInstr:req
+	.macro jumpifnopassiveswitchintercept failInstr:req
 	.byte 0xec
 	.4byte \failInstr
 	.endm

@@ -755,7 +755,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 5);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 256);
+    EXPECT_EQ(pairedAbilityCount, 257);
 }
 
 TEST("Newest dynamic unique abilities use their required synergy profiles")
@@ -1106,10 +1106,11 @@ TEST("Dynamic general move index 207 decodes the expanded pool boundary")
 TEST("Dynamic move pools preserve their shared serialized boundary")
 {
     EXPECT_EQ(RogueGift_DebugGetDynamicExoticMoveCount(), 207);
-    EXPECT_EQ(RogueGift_DebugGetDynamicMovePoolCount(), 254);
+    EXPECT_EQ(RogueGift_DebugGetDynamicMovePoolCount(), 255);
     EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(207), MOVE_BRAINSTORM);
     EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(208), MOVE_ACID_ARMOR);
     EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(254), MOVE_SWEET_KISS);
+    EXPECT_EQ(RogueGift_DebugGetDynamicMoveByIndex(255), MOVE_WATER_PULSE);
 }
 
 TEST("Expanded dynamic move selections decode high pairs in every payload format")

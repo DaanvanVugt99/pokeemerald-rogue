@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Territorial lets Flying attacks hit foes before they switch and sets Tailwind after a Flying-move KO. Pursuit and Territorial intercept U-turn, Volt Switch, Flip Turn, and Parting Shot before the replacement enters.
+
 - Curtain Call replaces Sweet Nothings on Jynx and Smoochum. It uses Haze on entry and sets Snow on switch-out, including pivot moves.
 
 - Chatterbox uses Copycat on switch-in when the last move was an eligible status move.

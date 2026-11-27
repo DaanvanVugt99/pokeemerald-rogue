@@ -365,7 +365,8 @@
 #define MOVEEND_SAME_MOVE_TURNS                   44
 #define MOVEEND_CLEAR_BITS                        45
 #define MOVEEND_RESTORE_METRONOME_ITEM_CONTEXT    46
-#define MOVEEND_COUNT                             47
+#define MOVEEND_SWITCH_INTERCEPT                  47
+#define MOVEEND_COUNT                             48
 
 // switch cases
 #define B_SWITCH_NORMAL     0

@@ -5648,6 +5648,9 @@ static bool32 TryDoGimmicksBeforeMoves(void)
         SortBattlersBySpeed(order, FALSE);
         for (i = 0; i < gBattlersCount; i++)
         {
+            if (gBattleStruct->switchInterceptTarget && order[i] != gBattlerByTurnOrder[gCurrentTurnActionNumber])
+                continue;
+
             // Tera Check
             if (gBattleStruct->tera.toTera & gBitTable[order[i]])
             {
@@ -5698,7 +5701,7 @@ static bool32 TryDoGimmicksBeforeMoves(void)
         }
     }
 
-    if (B_MEGA_EVO_TURN_ORDER >= GEN_7)
+    if (B_MEGA_EVO_TURN_ORDER >= GEN_7 && !gBattleStruct->switchInterceptTarget)
         TryChangeTurnOrder(); // This will just do nothing if no mon has mega evolved.
     return FALSE;
 }
@@ -5744,7 +5747,7 @@ static bool32 TryDoMoveEffectsBeforeMoves(void)
 static void TryChangeTurnOrder(void)
 {
     u32 i, j;
-    for (i = 0; i < gBattlersCount - 1; i++)
+    for (i = gCurrentTurnActionNumber; i < gBattlersCount - 1; i++)
     {
         for (j = i + 1; j < gBattlersCount; j++)
         {
@@ -5869,6 +5872,7 @@ static void CheckChangingTurnOrderEffects(void)
 
     // setup stuff before turns/actions
     TryClearRageAndFuryCutter();
+    gBattleStruct->switchInterceptTarget = 0;
     gCurrentTurnActionNumber = 0;
     gCurrentActionFuncId = gActionsByTurnOrder[0];
     gBattleStruct->dynamicMoveType = 0;
@@ -5903,9 +5907,12 @@ static void RunTurnActionsFunctions(void)
     {
         if (TryDoGimmicksBeforeMoves())
             return;
-        else if (TryDoMoveEffectsBeforeMoves())
-            return;
-        gBattleStruct->effectsBeforeUsingMoveDone = TRUE;
+        if (!gBattleStruct->switchInterceptTarget)
+        {
+            if (TryDoMoveEffectsBeforeMoves())
+                return;
+            gBattleStruct->effectsBeforeUsingMoveDone = TRUE;
+        }
     }
 
     *(&gBattleStruct->savedTurnActionNumber) = gCurrentTurnActionNumber;
