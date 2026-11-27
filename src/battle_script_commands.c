@@ -19273,6 +19273,23 @@ static void Cmd_trywish(void)
             gBattlescriptCurrInstr = cmd->nextInstr;
 
         break;
+    case 2: // Wishmaker follow-up after the Wish message and healing
+    {
+        u32 battler = gBattlerTarget;
+
+        if (!TryPrepareWishmakerMove(battler))
+            gBattlescriptCurrInstr = cmd->failInstr;
+        else if (gWishFutureKnock.wishPartyId[battler] == gBattlerPartyIndexes[battler])
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_WISHMAKER);
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMove;
+        }
+        else
+        {
+            gBattlescriptCurrInstr = BattleScript_AbilityUsesCalledMoveNoPopup;
+        }
+        break;
+    }
     }
 }
 

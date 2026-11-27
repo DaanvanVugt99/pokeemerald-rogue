@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Jirachi’s Wishmaker grants a random follow-up move when its Wish resolves, even at full HP or after Jirachi switches out. The recipient uses the move. Helping Hand leaves the pool because Wish resolves at the end of the turn.
+
 - Rebuilt Ascension as twelve milestones. Gym aces start with Sitrus Berries, the rival raises a persistent Unique Pokémon, and later runs introduce gym fields, Elite Four legendaries, fixed starting supplies and Unique Pokémon on League teams. Trainer Uniques roll gift rarity and typing, and League bosses upgrade a random non-Legendary party member. A12 bosses field six Pokémon where capacity allows. This development build requires a new game.
 
 - New Standard Adventures shuffle short and long approaches by run seed. Gym 1 opens long, at most two short approaches occur in succession, and both championship approaches stay medium. At every Ascension, one gym approach is medium with a guaranteed opening route.

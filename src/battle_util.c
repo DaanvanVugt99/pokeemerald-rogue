@@ -108,7 +108,6 @@ static bool32 TryUseAcidRefluxCalledMove(u32 battler);
 static bool32 TryUseWebTrapCalledMove(u32 battler, u32 target);
 static bool32 TryUseBrutalChargeCalledMove(u32 battler, u32 target);
 static bool32 TryUseDeliveryBagCalledMove(u32 battler);
-static bool32 TryUseWishmakerCalledMove(u32 battler);
 static bool32 TryUseBloomBurstCalledMove(u32 battler);
 static bool32 TryUseDebugCalledMove(u32 battler);
 static bool32 TryUseTimeRiftCalledMove(u32 battler);
@@ -5524,6 +5523,19 @@ bool32 TryChangeBattleWeather(u32 battler, u32 weatherEnumId, bool32 viaAbility)
     return FALSE;
 }
 
+static const u16 sWishmakerMoves[] =
+{
+    MOVE_LIFE_DEW,
+    MOVE_HEAL_BELL,
+    MOVE_SAFEGUARD,
+    MOVE_COSMIC_POWER,
+    MOVE_SWIFT,
+    MOVE_DOOM_DESIRE,
+    MOVE_LUCKY_CHANT,
+    MOVE_REFLECT,
+    MOVE_LIGHT_SCREEN,
+};
+
 bool32 TrySetWish(u32 battler)
 {
     if (gWishFutureKnock.wishCounter[battler] != 0)
@@ -5531,6 +5543,38 @@ bool32 TrySetWish(u32 battler)
 
     gWishFutureKnock.wishCounter[battler] = 2;
     gWishFutureKnock.wishPartyId[battler] = gBattlerPartyIndexes[battler];
+    gWishFutureKnock.wishmakerMove[battler] = HasBattlerAbility(battler, ABILITY_WISHMAKER)
+        ? *(const u16 *)RandomElementArray(RNG_ROGUE_WISHMAKER, sWishmakerMoves,
+                                          sizeof(sWishmakerMoves[0]), ARRAY_COUNT(sWishmakerMoves))
+        : MOVE_NONE;
+    return TRUE;
+}
+
+bool32 TryPrepareWishmakerMove(u32 battler)
+{
+    u32 target;
+    u16 move = gWishFutureKnock.wishmakerMove[battler];
+
+    if (move == MOVE_NONE || NoAliveMonsForEitherParty())
+        return FALSE;
+
+    gWishFutureKnock.wishmakerMove[battler] = MOVE_NONE;
+    gBattlerAttacker = battler;
+    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
+    if (target >= gBattlersCount || !IsBattlerAlive(target))
+        return FALSE;
+
+    SetAtkCancellerForCalledMove();
+    gBattlerTarget = target;
+    gCalledMove = move;
+    gChosenMove = MOVE_UNAVAILABLE;
+    gMoveResultFlags = 0;
+    gBattleScripting.moveendState = 0;
+    gHitMarker &= ~(HITMARKER_ATTACKSTRING_PRINTED | HITMARKER_NO_ATTACKSTRING
+                  | HITMARKER_UNABLE_TO_USE_MOVE | HITMARKER_PASSIVE_DAMAGE
+                  | HITMARKER_IGNORE_SUBSTITUTE);
+    gHitMarker |= HITMARKER_NO_PPDEDUCT;
+    gProtectStructs[battler].extraMoveUsed = TRUE;
     return TRUE;
 }
 
@@ -7402,54 +7446,6 @@ bool32 TryUseTrickyBoxCopycatOnStatusMove(void)
     }
 
     return FALSE;
-}
-
-static const u16 sWishmakerMoves[] =
-{
-    MOVE_LIFE_DEW,
-    MOVE_HEAL_BELL,
-    MOVE_SAFEGUARD,
-    MOVE_COSMIC_POWER,
-    MOVE_SWIFT,
-    MOVE_DOOM_DESIRE,
-    MOVE_LUCKY_CHANT,
-    MOVE_REFLECT,
-    MOVE_LIGHT_SCREEN,
-    MOVE_HELPING_HAND,
-};
-
-static bool32 TryUseWishmakerCalledMove(u32 battler)
-{
-    u32 target;
-    u16 move;
-
-    gBattlerAttacker = battler;
-    move = RandomFollowUpMove(RNG_ROGUE_WISHMAKER, sWishmakerMoves, battler);
-    target = GetMoveTarget(move, NO_TARGET_OVERRIDE);
-
-    if (target >= gBattlersCount || !IsBattlerAlive(target))
-        return FALSE;
-
-    if (target == battler)
-    {
-        if (move == MOVE_HELPING_HAND || !CanUseSelfExtraMove(battler))
-            return FALSE;
-    }
-    else
-    {
-        if (!CanUseExtraMove(battler, target))
-            return FALSE;
-    }
-
-    SetBattlerTriggeredAbility(battler, ABILITY_WISHMAKER);
-    SetAtkCancellerForCalledMove();
-    gBattlerAbility = battler;
-    gBattlerTarget = target;
-    gCalledMove = move;
-    gHitMarker &= ~HITMARKER_ATTACKSTRING_PRINTED;
-    gProtectStructs[battler].extraMoveUsed = TRUE;
-    StartAbilityCalledMoveScript();
-    return TRUE;
 }
 
 static const u16 sBloomBurstMoves[] =
@@ -19039,19 +19035,6 @@ if (triggeringAbility != ABILITY_NONE)
          && !gProtectStructs[battler].confusionSelfDmg
          && IsFinalMultiHitStrike()
          && TryUseFormationCalledMove(battler))
-        {
-            effect++;
-        }
-
-        if (HasBattlerAbility(battler, ABILITY_WISHMAKER)
-         && move == MOVE_WISH
-         && DidMoveSucceedForMoveEndEffects(battler)
-         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
-         && IsBattlerAlive(battler)
-         && !gProtectStructs[gBattlerAttacker].confusionSelfDmg
-         && !gProtectStructs[battler].extraMoveUsed
-         && IsFinalMultiHitStrike()
-         && TryUseWishmakerCalledMove(battler))
         {
             effect++;
         }

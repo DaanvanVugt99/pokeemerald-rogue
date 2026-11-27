@@ -8964,7 +8964,7 @@ BattleScript_WishComesTrue::
 	datahpupdate BS_TARGET
 	printstring STRINGID_PKMNREGAINEDHEALTH
 	waitmessage B_WAIT_TIME_LONG
-	end2
+	goto BattleScript_WishmakerFollowUp
 
 BattleScript_WishButFullHp::
 	printstring STRINGID_PKMNWISHCAMETRUE
@@ -8972,6 +8972,9 @@ BattleScript_WishButFullHp::
 	pause B_WAIT_TIME_SHORT
 	printstring STRINGID_PKMNHPFULL
 	waitmessage B_WAIT_TIME_LONG
+BattleScript_WishmakerFollowUp:
+	trywish 2, BattleScript_WishEnd
+BattleScript_WishEnd:
 	end2
 
 BattleScript_IngrainTurnHeal::
