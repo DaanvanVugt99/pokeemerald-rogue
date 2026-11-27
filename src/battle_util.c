@@ -14260,7 +14260,6 @@ if (triggeringAbility != ABILITY_NONE)
             // Had more than half of hp before, now has less
              && HadMoreThanHalfHpNowHasLess(battler)
              && (gMultiHitCounter == 0 || gMultiHitCounter == 1)
-             && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
              && (CanBattlerSwitch(battler) || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
              && GET_COMMANDER_FORM(battler) == COMMANDER_FORM_NONE
              && !(gBattleTypeFlags & BATTLE_TYPE_ARENA)
@@ -22525,7 +22524,6 @@ static bool32 ShouldDelayWhiteHerbAtMoveEnd(u32 battler)
      && IsBattlerAlive(gBattlerAttacker)
      && gBattleMons[gBattlerAttacker].item != ITEM_NONE
      && !(gWishFutureKnock.knockedOffMons[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]])
-     && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
      && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)
      && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
     {
@@ -23672,7 +23670,8 @@ u8 ItemBattleEffects(u8 caseID, u32 battler, bool32 moveTurn)
         switch (atkHoldEffect)
         {
         case HOLD_EFFECT_SHELL_BELL:
-            if (gSpecialStatuses[gBattlerAttacker].damagedMons  // Need to have done damage
+            if (!TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
+                && gSpecialStatuses[gBattlerAttacker].damagedMons  // Need to have done damage
                 && gBattlerAttacker != gBattlerTarget
                 && gBattleMons[gBattlerAttacker].hp != gBattleMons[gBattlerAttacker].maxHP
                 && gBattleMons[gBattlerAttacker].hp != 0

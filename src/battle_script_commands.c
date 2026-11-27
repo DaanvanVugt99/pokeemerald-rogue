@@ -7903,8 +7903,7 @@ static void Cmd_moveend(void)
         }
         case MOVEEND_EJECT_BUTTON:
             if (gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET
-              && IsBattlerAlive(gBattlerAttacker)
-              && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove))
+              && IsBattlerAlive(gBattlerAttacker))
             {
                 // Since we check if battler was damaged, we don't need to check move result.
                 // In fact, doing so actually prevents multi-target moves from activating eject button properly
@@ -7926,6 +7925,7 @@ static void Cmd_moveend(void)
                        || (GetBattlerSide(battler) == B_SIDE_PLAYER && holdEffect == HOLD_EFFECT_JESTER_SWITCH))
                       && (holdEffect == HOLD_EFFECT_EJECT_BUTTON
                        || (holdEffect == HOLD_EFFECT_JESTER_SWITCH
+                        && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
                         && !(gBattleStruct->jesterSwitchUsed[side] & partyBit)))
                       && BATTLER_TURN_DAMAGED(battler)
                       && CanBattlerSwitch(battler)
@@ -7952,7 +7952,6 @@ static void Cmd_moveend(void)
         case MOVEEND_RED_CARD:
             if ((gBattleMoves[gCurrentMove].effect != EFFECT_HIT_SWITCH_TARGET || gBattleStruct->hitSwitchTargetFailed)
               && IsBattlerAlive(gBattlerAttacker)
-              && !TestSheerForceFlag(gBattlerAttacker, gCurrentMove)
               && !HasBattlerAbility(gBattlerAttacker, ABILITY_GUARD_DOG))
             {
                 // Since we check if battler was damaged, we don't need to check move result.
@@ -8639,7 +8638,6 @@ static void Cmd_moveend(void)
             if (IsBattlerAlive(gBattlerAttacker)
               && gBattleMons[gBattlerAttacker].item != ITEM_NONE        // Attacker must be holding an item
               && !(gWishFutureKnock.knockedOffMons[GetBattlerSide(gBattlerAttacker)] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]])   // But not knocked off
-              && !(TestSheerForceFlag(gBattlerAttacker, gCurrentMove))  // Pickpocket doesn't activate for sheer force
               && IsMoveMakingContact(gCurrentMove, gBattlerAttacker)    // Pickpocket requires contact
               && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))           // Obviously attack needs to have worked
             {
@@ -9054,6 +9052,8 @@ static void Cmd_moveend(void)
             gBattleScripting.moveendState++;
             break;
         case MOVEEND_EMERGENCY_EXIT: // Special case, because moves hitting multiple opponents stop after switching out
+        {
+            u32 fastest = MAX_BATTLERS_COUNT;
             for (i = 0; i < gBattlersCount; i++)
             {
                 if (gBattleResources->flags->flags[i] & RESOURCE_FLAG_STEADFAST_PENDING)
@@ -9065,41 +9065,50 @@ static void Cmd_moveend(void)
                     return;
                 }
 
-                if (gBattleResources->flags->flags[i] & RESOURCE_FLAG_EMERGENCY_EXIT)
+                if (!(gBattleResources->flags->flags[i] & RESOURCE_FLAG_EMERGENCY_EXIT))
+                    continue;
+                if (gBattleStruct->switchInterceptTarget == i + 1 || !IsBattlerAlive(i)
+                 || (((gBattleTypeFlags & BATTLE_TYPE_TRAINER) || GetBattlerSide(i) == B_SIDE_PLAYER) && !CanBattlerSwitch(i)))
                 {
-                    bool32 fallenSkies = gBattleResources->flags->flags[i] & RESOURCE_FLAG_FALLEN_SKIES;
-
                     gBattleResources->flags->flags[i] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
-                    if (gBattleStruct->switchInterceptTarget == i + 1)
-                        continue;
-                    gSpecialStatuses[i].emergencyExited = TRUE;
-                    gBattlerTarget = gBattlerAbility = i;
-                    if (fallenSkies
-                     && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] & gBitTable[gBattlerPartyIndexes[i]]))
-                    {
-                        SetBattlerTriggeredAbility(i, ABILITY_FALLEN_SKIES);
-                        gBattleStruct->uniqueAbilityUsed[GetBattlerSide(i)] |= gBitTable[gBattlerPartyIndexes[i]];
-                    }
-                    BattleScriptPushCursor();
-                    if (gBattleTypeFlags & BATTLE_TYPE_TRAINER || GetBattlerSide(i) == B_SIDE_PLAYER)
-                    {
-                        if (B_ABILITY_POP_UP == TRUE)
-                            gBattlescriptCurrInstr = BattleScript_EmergencyExit;
-                        else
-                            gBattlescriptCurrInstr = BattleScript_EmergencyExitNoPopUp;
-                    }
-                    else
-                    {
-                        if (B_ABILITY_POP_UP == TRUE)
-                            gBattlescriptCurrInstr = BattleScript_EmergencyExitWild;
-                        else
-                            gBattlescriptCurrInstr = BattleScript_EmergencyExitWildNoPopUp;
-                    }
-                    return;
+                    continue;
                 }
+                if (fastest == MAX_BATTLERS_COUNT || GetBattlerTotalSpeedStat(i) > GetBattlerTotalSpeedStat(fastest))
+                    fastest = i;
+            }
+            if (fastest != MAX_BATTLERS_COUNT)
+            {
+                bool32 fallenSkies = gBattleResources->flags->flags[fastest] & RESOURCE_FLAG_FALLEN_SKIES;
+
+                gBattleResources->flags->flags[fastest] &= ~(RESOURCE_FLAG_EMERGENCY_EXIT | RESOURCE_FLAG_FALLEN_SKIES);
+                gSpecialStatuses[fastest].emergencyExited = TRUE;
+                gBattlerTarget = gBattlerAbility = fastest;
+                if (fallenSkies
+                 && !(gBattleStruct->uniqueAbilityUsed[GetBattlerSide(fastest)] & gBitTable[gBattlerPartyIndexes[fastest]]))
+                {
+                    SetBattlerTriggeredAbility(fastest, ABILITY_FALLEN_SKIES);
+                    gBattleStruct->uniqueAbilityUsed[GetBattlerSide(fastest)] |= gBitTable[gBattlerPartyIndexes[fastest]];
+                }
+                BattleScriptPushCursor();
+                if (gBattleTypeFlags & BATTLE_TYPE_TRAINER || GetBattlerSide(fastest) == B_SIDE_PLAYER)
+                {
+                    if (B_ABILITY_POP_UP == TRUE)
+                        gBattlescriptCurrInstr = BattleScript_EmergencyExit;
+                    else
+                        gBattlescriptCurrInstr = BattleScript_EmergencyExitNoPopUp;
+                }
+                else
+                {
+                    if (B_ABILITY_POP_UP == TRUE)
+                        gBattlescriptCurrInstr = BattleScript_EmergencyExitWild;
+                    else
+                        gBattlescriptCurrInstr = BattleScript_EmergencyExitWildNoPopUp;
+                }
+                return;
             }
             gBattleScripting.moveendState++;
             break;
+        }
         case MOVEEND_SYMBIOSIS:
             for (i = 0; i < gBattlersCount; i++)
             {

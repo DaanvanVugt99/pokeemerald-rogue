@@ -27,7 +27,7 @@ SINGLE_BATTLE_TEST("Eject Button is not triggered when there is nothing to switc
     }
 }
 
-SINGLE_BATTLE_TEST("Eject Button is not activated by a Sheer Force boosted move")
+SINGLE_BATTLE_TEST("Eject Button is activated by a Sheer Force boosted move")
 {
     GIVEN {
         PLAYER(SPECIES_NIDOKING) { Ability(ABILITY_SHEER_FORCE); }
@@ -36,15 +36,13 @@ SINGLE_BATTLE_TEST("Eject Button is not activated by a Sheer Force boosted move"
     } WHEN {
         TURN {
             MOVE(player, MOVE_FLAMETHROWER);
-            MOVE(opponent, MOVE_TACKLE);
+            SEND_OUT(opponent, 1);
         }
     } SCENE {
         ANIMATION(ANIM_TYPE_MOVE, MOVE_FLAMETHROWER, player);
-        NONE_OF {
-            ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, opponent);
-            MESSAGE("Foe Wobbuffet is switched out with the Eject Button!");
-        }
-        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, opponent);
+        ANIMATION(ANIM_TYPE_GENERAL, B_ANIM_HELD_ITEM_EFFECT, opponent);
+        MESSAGE("Foe Wobbuffet is switched out with the Eject Button!");
+        MESSAGE("2 sent out Wobbuffet!");
     }
 }
 

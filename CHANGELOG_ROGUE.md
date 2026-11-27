@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Sheer Force-boosted hits now trigger Pickpocket, Wimp Out, Emergency Exit, Eject Button and Red Card. Multiple Emergency Exit or Wimp Out users switch in descending Speed order after a spread hit. Sheer Force suppresses Shell Bell healing and Life Orb recoil on boosted hits.
+
 - Eject Button and Emergency Exit allow U-turn, Volt Switch and other damaging pivots to complete after the defender switches. Fake Out, First Impression, Spit Up, Burn Up, Double Shock and Last Resort require their conditions at move selection. Belch and Stuff Cheeks check their Berry requirements on use.
 
 - Unseen Fist deals quarter damage through protection and activates contact shields. Rage Fist keeps its stacks through switching and loses them on fainting. Make It Rain sharply lowers Sp. Atk.
