@@ -42,7 +42,7 @@ bool8 RogueGift_DebugDoesMoveMatchCreationSynergy(u8 type, u16 move);
 u16 RogueGift_DebugGetDynamicMovePoolCount(void);
 u16 RogueGift_DebugGetDynamicExoticMoveCount(void);
 u16 RogueGift_DebugGetDynamicMoveByIndex(u16 index);
-bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move);
+bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move, u16 uniqueAbility);
 bool8 RogueGift_DebugIsMoveExotic(u16 move);
 bool8 RogueGift_DebugIsMoveNativeToEvolutionFamily(u16 species, u16 move);
 bool8 RogueGift_DebugIsStandardAbilityNativeToEvolutionFamily(u16 species, u16 ability);

@@ -777,7 +777,7 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
 
             EXPECT_LT(moves[i], MOVES_COUNT);
             EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ability, moves[i]));
-            EXPECT(RogueGift_DebugIsMoveInDynamicPool(moves[i]));
+            EXPECT(RogueGift_DebugIsMoveInDynamicPool(moves[i], ability));
             ++moveCount;
             for(j = 0; j < i; ++j)
                 EXPECT_NE(moves[i], moves[j]);
@@ -787,7 +787,8 @@ TEST("Dynamic unique ability synergy profiles preserve all audited pairings")
         EXPECT_LE(moveCount, 5);
     }
 
-    EXPECT_EQ(pairedAbilityCount, 259);
+    EXPECT_EQ(pairedAbilityCount, 260);
+    EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_WANING_MOON, 0), MOVE_ECLIPSE);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_BREAKDANCE, 0), MOVE_FAKE_OUT);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_PUFFED_UP, 0), MOVE_FAKE_OUT);
     EXPECT_EQ(RogueGift_DebugGetDynamicSynergyMove(ABILITY_RATTLE_OFF, 0), MOVE_SPIKY_SHIELD);
@@ -1124,11 +1125,11 @@ TEST("Standalone synergy moves are eligible as exotics")
 
     for(i = 0; i < ARRAY_COUNT(sSynergyOnlyMoves); ++i)
     {
-        EXPECT(RogueGift_DebugIsMoveInDynamicPool(sSynergyOnlyMoves[i]));
+        EXPECT(RogueGift_DebugIsMoveInDynamicPool(sSynergyOnlyMoves[i], ABILITY_NONE));
         EXPECT(!RogueGift_DebugIsMoveExotic(sSynergyOnlyMoves[i]));
     }
 
-    EXPECT(!RogueGift_DebugIsMoveInDynamicPool(MOVE_MIRROR_COAT));
+    EXPECT(!RogueGift_DebugIsMoveInDynamicPool(MOVE_MIRROR_COAT, ABILITY_NONE));
 }
 
 TEST("Dynamic general move index 207 decodes the expanded pool boundary")
@@ -1137,6 +1138,14 @@ TEST("Dynamic general move index 207 decodes the expanded pool boundary")
 
     EXPECT_EQ(RogueGift_GetCustomMonMoveCount(customMonId), 1);
     EXPECT_EQ(RogueGift_GetCustomMonMove(customMonId, 0), MOVE_BRAINSTORM);
+}
+
+TEST("Waning Moon gifts decode Eclipse in both legendary formats")
+{
+    u32 original = DynamicOriginalUniqueAbilityCustomMonId(1, 208, 1, ABILITY_WANING_MOON);
+    u32 typed = DynamicTypeUniqueAbilityCustomMonId(TYPE_FIRE, 0, 1, 208, 1, ABILITY_WANING_MOON);
+    EXPECT_EQ(RogueGift_GetCustomMonMove(original, 1), MOVE_ECLIPSE);
+    EXPECT_EQ(RogueGift_GetCustomMonMove(typed, 1), MOVE_ECLIPSE);
 }
 
 TEST("Dynamic move pools preserve their shared serialized boundary")

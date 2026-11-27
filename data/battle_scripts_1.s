@@ -6108,7 +6108,17 @@ BattleScript_EffectEclipse::
 	ppreduce
 	call BattleScript_CheckPrimalWeather
 	seteclipse
-	goto BattleScript_MoveWeatherChange
+	jumpifmovehadnoeffect BattleScript_MoveWeatherChange
+	attackanimation
+	waitanimation
+	call BattleScript_MoveWeatherChangeRet
+	jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_MoveEnd
+	jumpifcantswitch SWITCH_IGNORE_ESCAPE_PREVENTION | BS_ATTACKER, BattleScript_MoveEnd
+	jumpifability BS_ATTACKER, ABILITY_WANING_MOON, BattleScript_WaningMoonSwitch
+	goto BattleScript_MoveEnd
+BattleScript_WaningMoonSwitch:
+	call BattleScript_AbilityPopUp
+	goto BattleScript_MoveSwitchIntercept
 
 BattleScript_ExtremelyHarshSunlightWasNotLessened:
 	pause B_WAIT_TIME_SHORT

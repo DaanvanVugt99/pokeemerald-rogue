@@ -423,7 +423,7 @@
 #define ABILITY_IONIZE                 384
 #define ABILITY_SMOLDER                385
 #define ABILITY_PRECOGNITION           416
-#define ABILITY_SHADOW_CARAPACE        417
+#define ABILITY_WANING_MOON            417
 #define ABILITY_SYLVAN_SURGE           559
 #define ABILITY_BITING_COLD            560
 #define ABILITY_DEBUG                  386

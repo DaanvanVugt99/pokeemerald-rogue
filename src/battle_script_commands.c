@@ -2119,7 +2119,7 @@ u32 GetTotalAccuracy(u32 battlerAtk, u32 battlerDef, u32 move, u32 atkAbility, u
         break;
     }
 
-    if (HasBattlerAbility(battlerDef, ABILITY_SHADOW_CARAPACE)
+    if (HasBattlerAbility(battlerDef, ABILITY_WANING_MOON)
      && IsBattlerWeatherAffected(battlerDef, B_WEATHER_ECLIPSE))
         calc = (calc * 80) / 100;
 

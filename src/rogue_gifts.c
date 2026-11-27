@@ -537,6 +537,16 @@ static u16 GetDynamicMoveByIndex(u16 moveIndex)
     return MOVE_NONE;
 }
 
+// The shared 8-bit pool is full. Shadow Carapace had no synergy profile, so
+// its gifts could never roll a synergy-only index. Reuse the first such
+// index for Eclipse only when decoding its successor, Waning Moon.
+static u16 GetDynamicGiftMove(u16 index, u16 uniqueAbility)
+{
+    if(uniqueAbility == ABILITY_WANING_MOON && index == DYNAMIC_EXOTIC_MOVE_COUNT + 1)
+        return MOVE_ECLIPSE;
+    return GetDynamicMoveByIndex(index);
+}
+
 #define DYNAMIC_UNIQUE_ABILITY_MIN ABILITY_STRONG_WINDS
 #define DYNAMIC_UNIQUE_ABILITY_MAX ABILITY_GLACIAL_FORTRESS
 
@@ -942,6 +952,7 @@ static const u16 sDynamicUniqueAbilitySynergyProfiles[ABILITIES_COUNT] =
     [ABILITY_BUNNY_EARS] = DYNAMIC_SYNERGY_PROFILE_CONTACT,
     [ABILITY_SANDMAN] = DYNAMIC_SYNERGY_PROFILE_TYPE_ANY(TYPE_GROUND),
     [ABILITY_KOMBO] = DYNAMIC_SYNERGY_PROFILE_TYPE_ANY(TYPE_POISON),
+    [ABILITY_WANING_MOON] = DYNAMIC_SYNERGY_PROFILE_EXACT(MOVE_ECLIPSE),
     [ABILITY_SUBMERGE] = DYNAMIC_SYNERGY_PROFILE_EXACT(MOVE_DIVE),
     [ABILITY_SYLVAN_SURGE] = DYNAMIC_SYNERGY_PROFILE_TYPE_ANY(TYPE_GRASS),
     [ABILITY_SHORT_CIRCUIT] = DYNAMIC_SYNERGY_PROFILE_TYPE_ANY(TYPE_ELECTRIC),
@@ -1647,7 +1658,7 @@ static void AppendDynamicMoveByIndex(struct DynamicMonData* outData, u16 moveInd
     if(moveIndex != 0 && moveIndex <= DYNAMIC_MOVE_POOL_COUNT)
     {
         AGB_ASSERT(outData->movesCount < ARRAY_COUNT(outData->moves));
-        outData->moves[outData->movesCount++] = GetDynamicMoveByIndex(moveIndex);
+        outData->moves[outData->movesCount++] = GetDynamicGiftMove(moveIndex, outData->uniqueAbility);
     }
     else
     {
@@ -2241,13 +2252,13 @@ static u32 SelectNextMoveIndex(u16 species)
     return 0;
 }
 
-static u16 GetDynamicMoveIndex(u16 move)
+static u16 GetDynamicMoveIndex(u16 move, u16 uniqueAbility)
 {
     u16 i;
 
     for(i = 1; i <= DYNAMIC_MOVE_POOL_COUNT; ++i)
     {
-        if(GetDynamicMoveByIndex(i) == move)
+        if(GetDynamicGiftMove(i, uniqueAbility) == move)
             return i;
     }
 
@@ -2693,13 +2704,13 @@ u16 RogueGift_DebugGetDynamicMoveByIndex(u16 index)
     return GetDynamicMoveByIndex(index);
 }
 
-bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move)
+bool8 RogueGift_DebugIsMoveInDynamicPool(u16 move, u16 uniqueAbility)
 {
     u16 i;
 
     for(i = 1; i <= DYNAMIC_MOVE_POOL_COUNT; ++i)
     {
-        if(GetDynamicMoveByIndex(i) == move)
+        if(GetDynamicGiftMove(i, uniqueAbility) == move)
             return TRUE;
     }
 
@@ -2826,7 +2837,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
                     synergy = SelectDynamicUniqueAbilitySynergy(species, compressedData->uniqueAbility, moves, ARRAY_COUNT(moves));
 
                 if(synergy.move != MOVE_NONE)
-                    moveIndices[Random() & 1] = GetDynamicMoveIndex(synergy.move);
+                    moveIndices[Random() & 1] = GetDynamicMoveIndex(synergy.move, compressedData->uniqueAbility);
 
                 compressedData->moveSelection = EncodeDynamicMoveSelection(moveIndices[0], moveIndices[1]);
                 generated = TrySelectLegendaryAbilitySeed(&family, compressedData->moveSelection, compressedData->uniqueAbility, compressedData->format, &abilitySeed);
@@ -2911,7 +2922,7 @@ static u32 CreateDynamicMonId(u8 rarity, u16 species, bool8 ignoreTypingUnlockGa
                     synergy = SelectDynamicUniqueAbilitySynergy(species, compressedData->uniqueAbility, moves, ARRAY_COUNT(moves));
 
                 if(synergy.move != MOVE_NONE)
-                    compressedData->moveIndex = GetDynamicMoveIndex(synergy.move);
+                    compressedData->moveIndex = GetDynamicMoveIndex(synergy.move, compressedData->uniqueAbility);
 
                 abilitySelection = compressedData->moveIndex
                     | (compressedData->typeMoveChoice << 8)

@@ -16040,25 +16040,6 @@ if (triggeringAbility != ABILITY_NONE)
             effect++;
         }
 
-        if (HasBattlerAbility(battler, ABILITY_SHADOW_CARAPACE)
-         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
-         && BATTLER_TURN_DAMAGED(moveEndTarget)
-         && IsBattlerAlive(moveEndAttacker)
-         && gBattleMoves[move].split == SPLIT_SPECIAL
-         && (CompareStat(moveEndAttacker, STAT_SPDEF, MIN_STAT_STAGE, CMP_GREATER_THAN)
-          || GetBattlerAbility(moveEndAttacker) == ABILITY_MIRROR_ARMOR)
-         && !gProtectStructs[moveEndAttacker].confusionSelfDmg)
-        {
-            SetBattlerTriggeredAbility(battler, ABILITY_SHADOW_CARAPACE);
-            SET_STATCHANGER(STAT_SPDEF, 1, TRUE);
-            gBattleScripting.moveEffect = MOVE_EFFECT_SP_DEF_MINUS_1;
-            PREPARE_ABILITY_BUFFER(gBattleTextBuff1, gLastUsedAbility);
-            BattleScriptPushCursor();
-            gBattlescriptCurrInstr = BattleScript_GooeyActivates;
-            gHitMarker |= HITMARKER_STATUS_ABILITY_EFFECT;
-            effect++;
-        }
-
         if (HasBattlerAbility(battler, ABILITY_FORCEFIELD)
          && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
          && BATTLER_TURN_DAMAGED(moveEndTarget)
