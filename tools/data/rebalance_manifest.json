@@ -1725,6 +1725,9 @@
             "MOVE_AROMATHERAPY": 38
           }
         },
+        "SPECIES_GOLISOPOD_MEGA": {
+          "abilities": ["ABILITY_TOUGH_CLAWS", "ABILITY_NONE", "ABILITY_NONE"]
+        },
         "SPECIES_SABLEYE_MEGA": {},
         "SPECIES_SHELMET": {},
         "SPECIES_RIOLU": {},
@@ -6672,8 +6675,14 @@
         "SPECIES_FALINKS_MEGA": {},
         "SPECIES_SNOM": {},
         "SPECIES_FROSMOTH": {},
-        "SPECIES_DROWZEE": {},
-        "SPECIES_HYPNO": {},
+        "SPECIES_DROWZEE": {
+          "level_moves": {"MOVE_DREAM_EATER": 23},
+          "add_tutors": ["MOVE_DREAM_EATER"]
+        },
+        "SPECIES_HYPNO": {
+          "level_moves": {"MOVE_DREAM_EATER": 23},
+          "add_tutors": ["MOVE_DREAM_EATER"]
+        },
         "SPECIES_KECLEON": {},
         "SPECIES_LECHONK": {},
         "SPECIES_OINKOLOGNE_MALE": {},
