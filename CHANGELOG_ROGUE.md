@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Restored original text and accent colors for gift Pokémon and other transparent overworld notifications.
+
 - Fixed the Hexed Shrine dealmaker shrinking to a dot when spoken to from above. His red eyes appear once the pact succeeds.
 
 - Adventure path route and den markers have a one-pixel dark outline to make pale icons easier to distinguish from the terrain.

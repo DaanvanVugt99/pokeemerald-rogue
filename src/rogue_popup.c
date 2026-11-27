@@ -19,10 +19,12 @@
 #include "sound.h"
 #include "task.h"
 #include "text.h"
+#include "text_window.h"
 #include "constants/battle_frontier.h"
 #include "constants/items.h"
 #include "constants/layouts.h"
 #include "constants/region_map_sections.h"
+#include "constants/rgb.h"
 #include "constants/weather.h"
 #include "constants/songs.h"
 
@@ -287,11 +289,8 @@ static const u8 sText_Popup_PokemonChain[] = _("{COLOR LIGHT_GREEN}{SHADOW GREEN
 static const u8 sText_Popup_PokemonChainBroke[] = _("{COLOR LIGHT_RED}{SHADOW RED}Broken Chain");
 
 static const u8 sText_Popup_BagFull[] = _("{COLOR LIGHT_RED}{SHADOW RED}Bag too full.");
-// The overworld message palette reserves dynamic colors 1, 2, 3 and 6 for pickup ink.
-static const u8 sText_PickupItem[] = _("{COLOR DYNAMIC_COLOR1}{SHADOW DYNAMIC_COLOR2}{STR_VAR_1}");
-static const u8 sText_PickupStack[] = _("{COLOR DYNAMIC_COLOR1}{SHADOW DYNAMIC_COLOR2}{STR_VAR_1} {COLOR DYNAMIC_COLOR3}{SHADOW DYNAMIC_COLOR6}x{STR_VAR_2}");
-static const u8 sText_Popup_SingleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1}");
-static const u8 sText_Popup_MultipleItem[] = _("{COLOR LIGHT_GRAY}{SHADOW DARK_GRAY}{STR_VAR_1} x{STR_VAR_2}");
+static const u8 sText_Popup_SingleItem[] = _("{STR_VAR_1}");
+static const u8 sText_Popup_MultipleItem[] = _("{STR_VAR_1} {COLOR LIGHT_GREEN}{SHADOW GREEN}x{STR_VAR_2}");
 static const u8 sText_Popup_Money[] = _("¥{STR_VAR_1}");
 static const u8 sText_Popup_LostItem[] = _("{COLOR LIGHT_RED}{SHADOW RED}Lost Item.");
 static const u8 sText_Popup_LostMoney[] = _("{COLOR LIGHT_RED}{SHADOW RED}Lost Money.");
@@ -631,6 +630,8 @@ static void RemoveQuestPopUpWindow(void)
 {
     if (sRoguePopups.windowId != WINDOW_NONE)
     {
+        LoadPalette(GetOverworldTextboxPalettePtr() + TEXT_DYNAMIC_COLOR_3,
+            BG_PLTT_ID(15) + TEXT_DYNAMIC_COLOR_3, PLTT_SIZEOF(4));
         RemoveWindow(sRoguePopups.windowId);
         sRoguePopups.windowId = WINDOW_NONE;
     }
@@ -1237,7 +1238,46 @@ static void DropPopupRequest(u8 taskId)
 //    }
 //}
 
-static void PrintPopupText( struct PopupRequest* popupRequest, u8 font, u8 const* text, u8 textCapacity, u8 x, u8 y)
+// Transparent field notices share palette 15 with dialogue. The two lines
+// can each use a different accent alongside the common white and gray ink.
+static const u16 sPopupAccentColors[] =
+{
+    RGB(28, 1, 1), RGB(31, 23, 14), // red
+    RGB(4, 19, 1), RGB(18, 30, 18), // green
+    RGB(6, 10, 25), RGB(20, 24, 30), // blue
+};
+
+static void ApplyPopupAccentColors(u8 *text, u8 *accentSlots)
+{
+    while (*text != EOS)
+    {
+        if (*text++ == EXT_CTRL_CODE_BEGIN)
+        {
+            if ((*text == EXT_CTRL_CODE_COLOR || *text == EXT_CTRL_CODE_SHADOW)
+                && text[1] >= TEXT_COLOR_RED && text[1] <= TEXT_COLOR_LIGHT_BLUE)
+            {
+                u8 accent = (text[1] - TEXT_COLOR_RED) / 2;
+                if (accentSlots[accent] == 0)
+                {
+                    u8 used = (accentSlots[0] != 0) + (accentSlots[1] != 0) + (accentSlots[2] != 0);
+                    if (used < 2)
+                    {
+                        accentSlots[accent] = TEXT_DYNAMIC_COLOR_3 + 2 * used;
+                        LoadPalette(&sPopupAccentColors[accent * 2],
+                            BG_PLTT_ID(15) + accentSlots[accent], PLTT_SIZEOF(2));
+                    }
+                }
+                if (accentSlots[accent])
+                    text[1] = accentSlots[accent] + ((text[1] - TEXT_COLOR_RED) % 2);
+                else
+                    text[1] ^= 1; // A third accent can use the field palette's reversed light/dark pair.
+            }
+            text += GetExtCtrlCodeLength(*text);
+        }
+    }
+}
+
+static void PrintPopupText( struct PopupRequest* popupRequest, u8 font, u8 const* text, u8 textCapacity, u8 x, u8 y, u8 *accentSlots)
 {
     struct PopupRequestTemplate const* template = &sPopupRequestTemplates[popupRequest->templateId];
 
@@ -1251,8 +1291,8 @@ static void PrintPopupText( struct PopupRequest* popupRequest, u8 font, u8 const
     if(template->transparentText)
     {
         colours[0] = TEXT_COLOR_TRANSPARENT;
-        colours[1] = TEXT_COLOR_WHITE;
-        colours[2] = TEXT_COLOR_DARK_GRAY;
+        colours[1] = TEXT_DYNAMIC_COLOR_1;
+        colours[2] = TEXT_DYNAMIC_COLOR_2;
     }
 
     if(textCapacity == 0)
@@ -1269,6 +1309,9 @@ static void PrintPopupText( struct PopupRequest* popupRequest, u8 font, u8 const
         *ptr = EOS;
         StringExpandPlaceholders(gStringVar4, buffer);
     }
+
+    if (template->transparentText)
+        ApplyPopupAccentColors(gStringVar4, accentSlots);
 
     x += GetStringCenterAlignXOffset(FONT_NARROW, gStringVar4, template->width * 8);
     AddTextPrinterParameterized3(GetQuestPopUpWindowId(), font, x, y, colours, TEXT_SKIP_DRAW, gStringVar4);
@@ -1321,6 +1364,7 @@ static void ShowQuestPopUpWindow(void)
 {
     struct PopupRequest* popupRequest = GetCurrentPopup();
     struct PopupRequestTemplate const* template;
+    u8 accentSlots[3] = {0};
 
     if(!ValidatePopupRequest(popupRequest))
     {
@@ -1351,10 +1395,10 @@ static void ShowQuestPopUpWindow(void)
     ExpandPopupText(popupRequest);
 
     if(popupRequest->titleText != NULL)
-        PrintPopupText(popupRequest, FONT_NARROW, popupRequest->titleText, popupRequest->titleTextCapacity, 0, 1);
+        PrintPopupText(popupRequest, FONT_NARROW, popupRequest->titleText, popupRequest->titleTextCapacity, 0, 1, accentSlots);
 
     if(popupRequest->subtitleText != NULL)
-        PrintPopupText(popupRequest, FONT_SMALL, popupRequest->subtitleText, 0, 0, 14);
+        PrintPopupText(popupRequest, FONT_SMALL, popupRequest->subtitleText, 0, 0, 14, accentSlots);
 
 
     CopyWindowToVram(GetQuestPopUpWindowId(), COPYWIN_FULL);
@@ -1684,12 +1728,12 @@ void Rogue_PushPopup_AddItem(u16 itemId, u16 amount)
 
     if(amount == 1)
     {
-        popup->titleText = sText_PickupItem;
+        popup->titleText = sText_Popup_SingleItem;
         popup->subtitleText = NULL;
     }
     else
     {
-        popup->titleText = sText_PickupStack;
+        popup->titleText = sText_Popup_MultipleItem;
         popup->subtitleText = NULL;
     }
 
