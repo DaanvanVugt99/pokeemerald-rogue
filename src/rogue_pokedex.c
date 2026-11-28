@@ -410,7 +410,8 @@ static void VBlankCB(void)
 }
 
 static const u16 sTitleBallColors[] = { RGB(28, 6, 6), RGB(28, 29, 30) };
-static const u16 sOverviewPortraitBackdrop = RGB(24, 25, 26);
+static const u16 sPortraitStripe = RGB(22, 24, 25);
+static const u16 sPortraitBackdrop = RGB(24, 25, 26);
 static const u16 sPokedexLabelInk = RGB(30, 30, 29);
 
 static const u16 sPokedexPalette[16] =
@@ -730,8 +731,12 @@ static void InitPageResources(u8 fromPage, u8 toPage)
     {
         InitOverviewBg();
         ResetTempTileDataBuffers();
-        LoadPalette(toPage == PAGE_OVERVIEW ? &sOverviewPortraitBackdrop : &sPokedexPalette[3],
+        LoadPalette(toPage == PAGE_OVERVIEW ? &sPortraitBackdrop : &sPokedexPalette[3],
                     BG_PLTT_ID(0) + 3, sizeof(u16));
+        LoadPalette(toPage == PAGE_OVERVIEW || IsMonEntryPage(toPage) ? &sPortraitStripe : &sPokedexPalette[6],
+                    BG_PLTT_ID(0) + 6, sizeof(u16));
+        LoadPalette(IsMonEntryPage(toPage) ? &sPortraitBackdrop : &sPokedexPalette[9],
+                    BG_PLTT_ID(0) + 9, sizeof(u16));
         if (IsMonEntryPage(toPage))
         {
             DecompressAndCopyTileDataToVram(1, &sPageTiles, 0, 0, 0);

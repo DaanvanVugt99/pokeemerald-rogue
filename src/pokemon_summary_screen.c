@@ -878,6 +878,9 @@ static bool8 LoadGraphics(void)
     ShowBg(0);
     LoadSummaryPokemon();
     PutWindowTilemap(0);
+    // Each marker shares its two background tiles with the surrounding panel.
+    for (u8 row = 0; row < MAX_MON_MOVES; row++)
+        SetBgTilemapPalette(0, 89 / 8, (39 + row * 24) / 8, 1, 2, 2 + row);
     CopyWindowToVram(0, COPYWIN_MAP);
     DrawSummary(PSS_PAGE_COUNT, FALSE);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
@@ -2013,13 +2016,15 @@ static void CreateSetStatusSprite(void)
 
 enum SummaryInk {
     INK_BG = 1, INK_PANEL, INK_EDGE, INK_RULE, INK_PAPER, INK_MUTED, INK_GOLD,
-    INK_BLUE, INK_PORTRAIT, INK_SELECTED, INK_GREEN, INK_RED,
+    INK_BLUE, INK_PORTRAIT, INK_SELECTED, INK_GREEN, INK_RED, INK_MOVE_MARKER, INK_HEART, INK_PORTRAIT_STRIPE,
 };
 
 static const u16 sSummaryPalette[16] = {
     RGB(0,0,0), RGB(4,5,5), RGB(6,7,8), RGB(2,3,3), RGB(10,11,12),
     RGB(30,30,29), RGB(23,24,25), RGB(30,24,14), RGB(21,25,28), RGB(24,25,26),
     RGB(9,8,7), RGB(20,26,20), RGB(27,18,19),
+    [INK_HEART] = RGB(31, 11, 13),
+    [INK_PORTRAIT_STRIPE] = RGB(22, 24, 25),
 };
 enum { MOVE_BROWSE, MOVE_DETAILS, MOVE_REORDER, MOVE_HM_MESSAGE };
 
@@ -2106,8 +2111,8 @@ static void LoadSummaryPokemon(void)
     gSprites[id].y = 68;
     CreateCaughtBallSprite(mon);
     id = sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL];
-    gSprites[id].x = 64;
-    gSprites[id].y = 131;
+    gSprites[id].x = 67;
+    gSprites[id].y = 92;
     gSprites[id].oam.priority = 0;
     CreateMonMarkingsSprite(mon);
     if (sMonSummaryScreen->markingsSprite != NULL)
@@ -2147,7 +2152,8 @@ static void LoadSummaryPokemon(void)
             gSprites[id].oam.priority = 0;
         }
     }
-    LoadPalette(sSummaryPalette, BG_PLTT_ID(1), sizeof(sSummaryPalette));
+    for (u8 bank = 1; bank < 2 + MAX_MON_MOVES; bank++)
+        LoadPalette(sSummaryPalette, BG_PLTT_ID(bank), sizeof(sSummaryPalette));
 }
 
 static void SummaryRect(u8 x, u8 y, u8 w, u8 h, u8 color)
@@ -2199,7 +2205,9 @@ static void DrawSummaryIdentity(bool8 detail)
     struct Pokemon *mon = &sMonSummaryScreen->currentMon;
     u16 dex = SpeciesToPokedexNum(s->species);
     SummaryFrame(3,33,76,112);
-    SummaryRect(7,37,68,63,INK_PORTRAIT);
+    SummaryRect(7, 37, 68, 63, INK_PORTRAIT);
+    for (u8 y = 40; y < 63; y += 2)
+        SummaryRect(7, 37 + y, 68, 1, INK_PORTRAIT_STRIPE);
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL]].invisible = detail || s->isEgg;
     if (detail)
         return;
@@ -2292,15 +2300,18 @@ static void DrawSummarySkills(void)
     u32 end = s->level == MAX_LEVEL ? start : Rogue_ModifyExperienceTables(gSpeciesInfo[s->species].growthRate,s->level+1);
     const u8 thresholds[] = {80,130,180,220,255};
     CopyItemName(s->item,gStringVar1);
-    Label(108,36,s->item ? gStringVar1 : gText_None,INK_PAPER);
+    Label(108,36,s->item ? gStringVar1 : COMPOUND_STRING("No item"),INK_PAPER);
     for (i = 0; i < ARRAY_COUNT(thresholds); i++)
     {
-        static const u8 star[] = {0x08,0x08,0x7F,0x3E,0x1C,0x36,0x22};
+        static const u8 heart[] = {0x36, 0x7F, 0x7F, 0x7F, 0x3E, 0x1C, 0x08};
+        static const u8 outline[] = {0x36, 0x49, 0x41, 0x41, 0x22, 0x14, 0x08};
+        bool32 filled = s->friendship >= thresholds[i];
+        const u8 *shape = filled ? heart : outline;
         u8 row, col;
-        for (row = 0; row < ARRAY_COUNT(star); row++)
+        for (row = 0; row < ARRAY_COUNT(heart); row++)
             for (col = 0; col < 7; col++)
-                if (star[row] & (1 << col))
-                    SummaryRect(185 + 9*i + col, 41 + row, 1, 1, s->friendship >= thresholds[i] ? INK_GOLD : INK_RULE);
+                if (shape[row] & (1 << col))
+                    SummaryRect(185 + 9*i + col, 41 + row, 1, 1, filled ? INK_HEART : INK_MUTED);
     }
     SummaryRect(88,59,142,1,INK_RULE);
     SummaryText(88,60,views[tab],INK_GOLD,FONT_NORMAL);
@@ -2366,8 +2377,12 @@ static void DrawSummaryMoves(bool8 detail)
         }
         else
         {
-            SummaryRect(89, y + 4, 3, 6, INK_BLUE);
-            Label(95,y+10,gTypeNames[GetMonMoveType(move,&screen->currentMon)],INK_BLUE);
+            u8 type = GetMonMoveType(move, &screen->currentMon);
+            // Sample the badge fill at (0, 4), before its lettering.
+            u8 fill = gCompactMoveBadges[type * (COMPACT_MOVE_BADGE_BYTES / sizeof(u32)) + 4] & 0xF;
+            LoadPalette(&gCompactMoveBadgePalette[fill], BG_PLTT_ID(2 + i) + INK_MOVE_MARKER, sizeof(u16));
+            SummaryRect(89, y + 4, 3, 6, INK_MOVE_MARKER);
+            Label(95,y+10,gTypeNames[type],INK_BLUE);
             RightLabel(230,y+10,COMPOUND_STRING("PP"),INK_MUTED);
         }
         SummaryText(detail ? 116 : 95, y-1, gMoveNames[move], color,

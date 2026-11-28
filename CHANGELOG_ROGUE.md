@@ -5,6 +5,9 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Pokédex grid cards and the large Pokémon inspection portraits use subtle full-height horizontal stripes. A thin charcoal and grey frame surrounds the large portrait.
+- The Summary portrait has a striped blue-grey horizon. The Summary shows the caught ball in the lower-right portrait corner, labels empty held-item slots “No item”, and displays friendship as hearts.
+- Move markers on the Summary Moves tab now use the matching type badge color.
 - Restored the white Pokémon name and category text on the starter bag.
 - The first return reassures players about their team and Bag before rewards. The builder gives three Building Supplies and introduces Starter Choice as an optional first upgrade.
 - Shortened Birch’s post-catch briefing, moved extra advice into optional topics, and clarified how catches reach the Safari Lab. The assistant now gives directions after the follower choice.
