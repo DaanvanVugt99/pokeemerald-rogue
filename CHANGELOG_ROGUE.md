@@ -5,6 +5,7 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Fixed overlapping names and numbers when switching Pokémon with L/R in the Pokédex.
 - Fixed garbled Quick Heal messages for healthy Pokémon and when the Bag has no suitable medicine.
 - Fixed Eternal Flower Floette qualifying for the minor legendary slot instead of the box legendary slot.
 - The Pokédex Moves tab uses blue level-up labels, coral TM labels, and an amber star for move access added in Divergence.

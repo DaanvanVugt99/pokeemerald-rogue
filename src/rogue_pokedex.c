@@ -1468,6 +1468,7 @@ static void DisplayMonEntryText(void)
     ConvertUIntToDecimalStringN(gStringVar1, speciesNum, STR_CONV_MODE_LEADING_ZEROS, speciesNum > 999 ? 4 : 3);
     StringExpandPlaceholders(gStringVar3, gText_NumberStr1);
 
+    FillWindowPixelBuffer(WIN_MON_SPECIES_NAME_NO, PIXEL_FILL(0));
     AddTextPrinterParameterized4(WIN_MON_SPECIES_NAME_NO, FONT_NARROW, 4, 1, 0, 0, color, TEXT_SKIP_DRAW, RoguePokedex_GetSpeciesName(sPokedexMenu->viewBaseSpecies));
     AddTextPrinterParameterized4(WIN_MON_SPECIES_NAME_NO, FONT_NARROW, 4, 17, 0, 0, color, TEXT_SKIP_DRAW, gStringVar3);
 
