@@ -5,6 +5,7 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Quick Heal compares available medicine for one Pokémon, previews the dose count and resulting HP, and consumes only effective doses.
 - Refreshed the GEEF boot splash with chamfered mint lettering and a shorter shadow.
 - Pokédex grid cards and the large Pokémon inspection portraits use subtle full-height horizontal stripes. A thin charcoal and grey frame surrounds the large portrait.
 - The Summary portrait has a striped blue-grey horizon. The Summary shows the caught ball in the lower-right portrait corner, labels empty held-item slots “No item”, and displays friendship as hearts.

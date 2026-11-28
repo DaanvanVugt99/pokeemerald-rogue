@@ -48,6 +48,10 @@ void CB2_ReturnToPartyMenuFromFlyMap(void);
 void LoadHeldItemIcons(void);
 void DrawHeldItemIconsForTrade(u8 *partyCounts, u8 *partySpriteIds, u8 whichParty);
 void LoadPartyMenuAilmentGfx(void);
+#if TESTING
+u16 RogueTest_QuickHealOffer(u16 hp, u16 maxHp, u32 status, u16 *doses, u16 *hpAfter);
+u32 RogueTest_ApplyQuickHeal(u32 doses);
+#endif
 void CB2_ShowPartyMenuForItemUse(void);
 void ItemUseCB_BattleScript(u8 taskId, TaskFunc task);
 void ItemUseCB_BattleChooseMove(u8 taskId, TaskFunc task);

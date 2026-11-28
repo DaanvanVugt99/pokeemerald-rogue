@@ -566,7 +566,8 @@ static void ShowMoveSelectWindow(u8 slot);
 static void Task_HandleWhichMoveInput(u8 taskId);
 static bool32 CannotUsePartyBattleItem(u16 itemId, struct Pokemon* mon);
 static void UseMedicineInternal(u8 taskId, TaskFunc task, u32 itemCount, bool8 forceStayInPartyMenu);
-static u32 GetMedicineItemHealAmount(u16 item, u32 maxHp);
+static u32 GetMedicineItemHealAmount(const u8 *effect, u32 maxHp);
+static bool8 IsItemFlute(u16 item);
 
 // static const data
 #include "data/party_menu.h"
@@ -4116,214 +4117,141 @@ static void Task_ReleaseSelectedMonYesNoInput(u8 taskId)
 static void Task_QuickHealSelectedMonYesNo(u8 taskId);
 static void Task_QuickHealSelectedMonYesNoInput(u8 taskId);
 
-static bool8 IsQuickHealMedicineItem(u16 itemId)
+struct QuickHealOffer
 {
-    return ItemId_GetFieldFunc(itemId) == ItemUseOutOfBattle_Medicine;
+    u16 item;
+    u16 doses;
+    u16 hpAfter;
+    u16 overheal;
+    u32 cost;
+    bool8 curesStatus;
+    bool8 wastesEffect;
+    bool8 bitter;
+};
+
+static bool8 PreferQuickHealOffer(const struct QuickHealOffer *offer, const struct QuickHealOffer *best, bool8 reviving)
+{
+    if (best->item == ITEM_NONE)
+        return TRUE;
+    // Save full revives when an ordinary Revive is available.
+    if (reviving && (offer->item == ITEM_REVIVE || best->item == ITEM_REVIVE))
+        return offer->item == ITEM_REVIVE;
+    if (offer->hpAfter != best->hpAfter)
+        return offer->hpAfter > best->hpAfter;
+    if (offer->curesStatus != best->curesStatus)
+        return offer->curesStatus;
+    if (offer->bitter != best->bitter)
+        return !offer->bitter;
+    if (offer->wastesEffect != best->wastesEffect)
+        return !offer->wastesEffect;
+    if (offer->cost != best->cost)
+        return offer->cost < best->cost;
+    if (offer->overheal != best->overheal)
+        return offer->overheal < best->overheal;
+    if (offer->doses != best->doses)
+        return offer->doses < best->doses;
+    return offer->item < best->item;
 }
 
-static bool8 IsQuickHealReviveItem(u16 itemId)
+static struct QuickHealOffer FindQuickHealOffer(u16 hp, u16 maxHp, u32 status)
 {
-    const u8 *effect = GetItemEffect(itemId);
+    struct QuickHealOffer best = {0};
+    u16 *stock;
+    u32 pocket, slot;
 
-    return IsQuickHealMedicineItem(itemId)
-        && effect != NULL
-        && (effect[4] & ITEM4_REVIVE)
-        && (effect[4] & ITEM4_HEAL_HP);
-}
+    if (hp == maxHp && !status)
+        return best;
 
-static bool8 IsQuickHealHpItem(u16 itemId)
-{
-    const u8 *effect = GetItemEffect(itemId);
-
-    return IsQuickHealMedicineItem(itemId)
-        && effect != NULL
-        && (effect[4] & ITEM4_HEAL_HP)
-        && !(effect[4] & ITEM4_REVIVE);
-}
-
-static bool8 IsQuickHealStatusItem(u16 itemId)
-{
-    const u8 *effect = GetItemEffect(itemId);
-
-    return IsQuickHealMedicineItem(itemId)
-        && effect != NULL
-        && GetItemStatus1Mask(itemId) != 0;
-}
-
-static u16 GetQuickHealRevivePriority(u16 itemId)
-{
-    switch (itemId)
+    // Items can span several slots. Accumulate the available doses as we visit each slot.
+    stock = AllocZeroed(sizeof(*stock) * ITEMS_COUNT);
+    if (stock == NULL)
+        return best;
+    for (pocket = 0; pocket < POCKETS_COUNT; pocket++)
     {
-    case ITEM_REVIVE:
-        return 0;
-    case ITEM_REVIVAL_HERB:
-        return 1;
-    case ITEM_MAX_REVIVE:
-        return 2;
-    default:
-        return 3;
-    }
-}
-
-static u16 FindQuickHealReviveItem(void)
-{
-    u16 bestItem = ITEM_NONE;
-    u16 bestPriority = 0xFFFF;
-    u16 itemId;
-
-    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
-    {
-        u16 priority;
-
-        if (!CheckBagHasItem(itemId, 1))
-            continue;
-        if (!IsQuickHealReviveItem(itemId))
-            continue;
-
-        priority = GetQuickHealRevivePriority(itemId);
-        if (priority < bestPriority || (priority == bestPriority && itemId < bestItem))
+        struct BagPocket *bag = &gBagPockets[pocket];
+        for (slot = 0; slot < bag->capacity; slot++)
         {
-            bestPriority = priority;
-            bestItem = itemId;
+            u16 item = bag->itemSlots[slot].itemId;
+            const u8 *effect;
+            u32 heal, statusMask, restored;
+            struct QuickHealOffer offer = {0};
+
+            if (item == ITEM_NONE || ItemId_GetFieldFunc(item) != ItemUseOutOfBattle_Medicine || !Rogue_AllowItemUse(item))
+                continue;
+            effect = GetItemEffect(item);
+            if (!effect || ((effect[4] & ITEM4_REVIVE) != 0) != (hp == 0))
+                continue;
+            heal = GetMedicineItemHealAmount(effect, maxHp);
+            statusMask = GetItemStatus1Mask(item);
+            offer.curesStatus = (statusMask & status) != 0;
+            if (!(heal && hp < maxHp) && !offer.curesStatus)
+                continue;
+            stock[item] = min(maxHp, stock[item] + GetBagItemQuantity(&bag->itemSlots[slot].quantity));
+            if (!stock[item])
+                continue;
+            offer.item = item;
+            offer.doses = 1;
+            if (hp && heal && hp < maxHp)
+                offer.doses = min(stock[item], (maxHp - hp + heal - 1) / heal);
+            restored = hp + heal * offer.doses;
+            offer.hpAfter = min(restored, maxHp);
+            offer.overheal = restored - offer.hpAfter;
+            offer.cost = IsItemFlute(item) ? 0 : offer.doses * (u32)ItemId_GetPrice(item);
+            offer.wastesEffect = (statusMask && !offer.curesStatus) || (heal && hp == maxHp);
+            offer.bitter = item == ITEM_ENERGY_POWDER || item == ITEM_ENERGY_ROOT || item == ITEM_HEAL_POWDER || item == ITEM_REVIVAL_HERB;
+            if (PreferQuickHealOffer(&offer, &best, hp == 0))
+                best = offer;
         }
     }
-
-    return bestItem;
-}
-
-static u16 FindQuickHealHpItem(u32 maxHp)
-{
-    u16 bestItem = ITEM_NONE;
-    u32 bestHeal = 0xFFFFFFFF;
-    u16 itemId;
-
-    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
-    {
-        u32 healAmount;
-
-        if (!CheckBagHasItem(itemId, 1))
-            continue;
-
-        if (!IsQuickHealHpItem(itemId))
-            continue;
-
-        healAmount = GetMedicineItemHealAmount(itemId, maxHp);
-        if (healAmount == 0)
-            continue;
-
-        // Prefer low-heal/low-waste medicine first.
-        if (healAmount < bestHeal
-            || (healAmount == bestHeal && ItemId_GetPrice(itemId) < ItemId_GetPrice(bestItem))
-            || (healAmount == bestHeal && ItemId_GetPrice(itemId) == ItemId_GetPrice(bestItem) && itemId < bestItem))
-        {
-            bestHeal = healAmount;
-            bestItem = itemId;
-        }
-    }
-
-    return bestItem;
-}
-
-static u16 FindQuickHealStatusItem(u32 status1)
-{
-    u16 bestItem = ITEM_NONE;
-    u16 bestPrice = 0xFFFF;
-    u16 itemId;
-
-    for (itemId = ITEM_NONE + 1; itemId < ITEMS_COUNT; ++itemId)
-    {
-        u32 statusMask;
-        u16 price;
-
-        if (!CheckBagHasItem(itemId, 1))
-            continue;
-
-        if (!IsQuickHealStatusItem(itemId))
-            continue;
-
-        statusMask = GetItemStatus1Mask(itemId);
-        if ((status1 & statusMask) == 0)
-            continue;
-
-        price = ItemId_GetPrice(itemId);
-        if (price < bestPrice || (price == bestPrice && itemId < bestItem))
-        {
-            bestPrice = price;
-            bestItem = itemId;
-        }
-    }
-
-    return bestItem;
+    Free(stock);
+    return best;
 }
 
 static void CursorCb_QuickHeal(u8 taskId)
 {
-    u16 healingItemId = ITEM_NONE;
-    u32 healingItemCount = 0;
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
-    u32 hp = GetMonData(mon, MON_DATA_HP);
-    u32 maxHp = GetMonData(mon, MON_DATA_MAX_HP);
-    u32 status = GetMonData(mon, MON_DATA_STATUS);
+    u16 hp = GetMonData(mon, MON_DATA_HP);
+    u16 maxHp = GetMonData(mon, MON_DATA_MAX_HP);
+    u32 status = GetMonData(mon, MON_DATA_STATUS) & STATUS1_ANY;
+    struct QuickHealOffer offer = FindQuickHealOffer(hp, maxHp, status);
+    u8 *end;
 
-    if (hp == 0)
-    {
-        healingItemId = FindQuickHealReviveItem();
-        healingItemCount = healingItemId != ITEM_NONE;
-    }
-    else if (hp < maxHp)
-    {
-        healingItemId = FindQuickHealHpItem(maxHp);
-
-        if (healingItemId != ITEM_NONE)
-        {
-            u32 healAmount = GetMedicineItemHealAmount(healingItemId, maxHp);
-
-            if (healAmount == 0)
-                healingItemCount = 0;
-            else if (healAmount >= maxHp)
-                healingItemCount = 1;
-            else
-                healingItemCount = 1 + ((maxHp - hp - 1) / healAmount);
-        }
-    }
-    if (hp != 0 && healingItemId == ITEM_NONE)
-    {
-        healingItemId = FindQuickHealStatusItem(status);
-        healingItemCount = healingItemId != ITEM_NONE;
-    }
-
-    if (healingItemId == ITEM_NONE || healingItemCount == 0)
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    if (!offer.item)
     {
         PlaySE(SE_FAILURE);
-        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
-        gTasks[taskId].func = Task_TryCreateSelectionWindow;
+        DisplayPartyMenuMessage(hp == maxHp && !status ? COMPOUND_STRING("Already healthy.\p") :
+            COMPOUND_STRING("No suitable medicine in the Bag.\p"), FALSE);
+        gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+        return;
     }
-    else
-    {
-        u32 numInBag = GetItemCountInBag(healingItemId);
 
-        gSpecialVar_ItemId = healingItemId;
-        gSpecialVar_0x8000 = min(healingItemCount, numInBag);
+    gSpecialVar_ItemId = offer.item;
+    gSpecialVar_0x8000 = offer.doses;
+    CopyItemName(offer.item, gStringVar1);
+    end = StringAppend(gStringVar1, COMPOUND_STRING(" ×"));
+    ConvertUIntToDecimalStringN(end, offer.doses, STR_CONV_MODE_LEFT_ALIGN, 4);
+    ConvertUIntToDecimalStringN(gStringVar2, hp, STR_CONV_MODE_LEFT_ALIGN, 4);
+    end = ConvertUIntToDecimalStringN(gStringVar3, offer.hpAfter, STR_CONV_MODE_LEFT_ALIGN, 4);
+    end = StringCopy(end, COMPOUND_STRING("/"));
+    ConvertUIntToDecimalStringN(end, maxHp, STR_CONV_MODE_LEFT_ALIGN, 4);
+    StringExpandPlaceholders(gStringVar4, gText_UseItemToQuickHeal);
+    if (offer.curesStatus)
+        StringAppend(gStringVar4, COMPOUND_STRING("  Cures status"));
+    if (offer.bitter)
+        StringAppend(gStringVar4, COMPOUND_STRING("  Friendship{DOWN_ARROW}"));
 
-        CopyItemNameHandlePlural(gSpecialVar_ItemId, gStringVar1, gSpecialVar_0x8000);
-        ConvertUIntToDecimalStringN(gStringVar2, numInBag, STR_CONV_MODE_LEFT_ALIGN, BAG_ITEM_CAPACITY_DIGITS);
-        StringExpandPlaceholders(gStringVar4, gText_UseItemToQuickHeal);
-
-        PlaySE(SE_SELECT);
-        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
-        PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
-        DisplayPartyMenuMessage(gStringVar4, TRUE);
-        gTasks[taskId].func = Task_QuickHealSelectedMonYesNo;
-    }
+    PlaySE(SE_SELECT);
+    DisplayPartyMenuMessage(gStringVar4, TRUE);
+    gTasks[taskId].func = Task_QuickHealSelectedMonYesNo;
 }
 
-static u32 GetMedicineItemHealAmount(u16 item, u32 maxHp)
+static u32 GetMedicineItemHealAmount(const u8 *effect, u32 maxHp)
 {
     u32 healAmount;
-    const u8 *effect = GetItemEffect(item);
 
-    if (effect == NULL || !(effect[4] & ITEM4_HEAL_HP))
+    if (!(effect[4] & ITEM4_HEAL_HP))
         return 0;
 
     healAmount = effect[6];
@@ -5779,6 +5707,37 @@ void ItemUseCB_BattleChooseMove(u8 taskId, TaskFunc task)
     gTasks[taskId].func = Task_HandleWhichMoveInput;
 }
 
+static u32 ApplyMedicineDoses(struct Pokemon *mon, u16 item, u32 requested, bool8 fromQuickHeal)
+{
+    u32 used = 0;
+    if (fromQuickHeal)
+    {
+        u32 available = GetItemCountInBag(item);
+        requested = min(requested, available);
+    }
+    while (used < requested && !ExecuteTableBasedItemEffectInternal(mon, item, gPartyMenu.slotId, 0))
+        used++;
+
+    if (used && !IsItemFlute(item) && gPartyMenu.action != PARTY_ACTION_REUSABLE_ITEM)
+        RemoveBagItem(item, used);
+    return used;
+}
+
+#if TESTING
+u16 RogueTest_QuickHealOffer(u16 hp, u16 maxHp, u32 status, u16 *doses, u16 *hpAfter)
+{
+    struct QuickHealOffer offer = FindQuickHealOffer(hp, maxHp, status);
+    *doses = offer.doses;
+    *hpAfter = offer.hpAfter;
+    return offer.item;
+}
+
+u32 RogueTest_ApplyQuickHeal(u32 doses)
+{
+    return ApplyMedicineDoses(&gPlayerParty[gPartyMenu.slotId], gSpecialVar_ItemId, doses, TRUE);
+}
+#endif
+
 static void UseMedicineInternal(u8 taskId, TaskFunc task, u32 itemCount, bool8 forceStayInPartyMenu)
 {
     u16 hp = 0;
@@ -5793,10 +5752,7 @@ static void UseMedicineInternal(u8 taskId, TaskFunc task, u32 itemCount, bool8 f
     }
     else
     {
-        u32 i;
-
         canHeal = IsHPRecoveryItem(item);
-        cannotUse = TRUE;
 
         if (canHeal == TRUE)
         {
@@ -5805,13 +5761,7 @@ static void UseMedicineInternal(u8 taskId, TaskFunc task, u32 itemCount, bool8 f
                 canHeal = FALSE;
         }
 
-        for (i = 0; i < itemCount; ++i)
-        {
-            if (i == 0)
-                cannotUse = ExecuteTableBasedItemEffectInternal(mon, item, gPartyMenu.slotId, 0);
-            else
-                ExecuteTableBasedItemEffectInternal(mon, item, gPartyMenu.slotId, 0);
-        }
+        cannotUse = ApplyMedicineDoses(mon, item, itemCount, forceStayInPartyMenu) == 0;
     }
 
     if (cannotUse != FALSE)
@@ -5838,8 +5788,6 @@ static void UseMedicineInternal(u8 taskId, TaskFunc task, u32 itemCount, bool8 f
         if (!IsItemFlute(item))
         {
             PlaySE(SE_USE_ITEM);
-            if (gPartyMenu.action != PARTY_ACTION_REUSABLE_ITEM)
-                RemoveBagItem(item, itemCount);
         }
         else
         {
