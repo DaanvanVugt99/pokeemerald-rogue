@@ -2137,7 +2137,7 @@ static void LoadSummaryPokemon(void)
         if (id < MAX_SPRITES)
         {
             gSprites[id].x = 97;
-            gSprites[id].y = 47;
+            gSprites[id].y = 51;
             gSprites[id].oam.priority = 0;
         }
     }
@@ -2300,7 +2300,7 @@ static void DrawSummarySkills(void)
     u32 end = s->level == MAX_LEVEL ? start : Rogue_ModifyExperienceTables(gSpeciesInfo[s->species].growthRate,s->level+1);
     const u8 thresholds[] = {80,130,180,220,255};
     CopyItemName(s->item,gStringVar1);
-    Label(108,36,s->item ? gStringVar1 : COMPOUND_STRING("No item"),INK_PAPER);
+    Label(108,40,s->item ? gStringVar1 : COMPOUND_STRING("No item"),INK_PAPER);
     for (i = 0; i < ARRAY_COUNT(thresholds); i++)
     {
         static const u8 heart[] = {0x36, 0x7F, 0x7F, 0x7F, 0x3E, 0x1C, 0x08};
@@ -2311,7 +2311,7 @@ static void DrawSummarySkills(void)
         for (row = 0; row < ARRAY_COUNT(heart); row++)
             for (col = 0; col < 7; col++)
                 if (shape[row] & (1 << col))
-                    SummaryRect(185 + 9*i + col, 41 + row, 1, 1, filled ? INK_HEART : INK_MUTED);
+                    SummaryRect(185 + 9*i + col, 45 + row, 1, 1, filled ? INK_HEART : INK_MUTED);
     }
     SummaryRect(88,59,142,1,INK_RULE);
     SummaryText(88,60,views[tab],INK_GOLD,FONT_NORMAL);
