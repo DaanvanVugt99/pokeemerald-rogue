@@ -1971,24 +1971,11 @@ static bool32 AccuracyCalcHelper(u16 move)
 
     if (WEATHER_HAS_EFFECT)
     {
-        if (HasBattlerAbility(gBattlerAttacker, ABILITY_TOXIC_DELUGE)
-         && IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_ACID_RAIN)
-         && moveType == TYPE_POISON)
-        {
-            JumpIfMoveFailed(7, move);
-            return TRUE;
-        }
-        else if (IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_RAIN) &&
+        if (IsBattlerWeatherAffected(gBattlerTarget, B_WEATHER_RAIN) &&
             (gBattleMoves[move].effect == EFFECT_THUNDER || gBattleMoves[move].effect == EFFECT_HURRICANE ||
             move == MOVE_BLEAKWIND_STORM || move == MOVE_WILDBOLT_STORM || move == MOVE_SANDSEAR_STORM))
         {
             // thunder/hurricane/genie moves ignore acc checks in rain unless target is holding utility umbrella
-            JumpIfMoveFailed(7, move);
-            return TRUE;
-        }
-        else if (HasBattlerAbility(gBattlerAttacker, ABILITY_MONSOON)
-              && IsBattlerWeatherAffected(gBattlerAttacker, B_WEATHER_RAIN))
-        {
             JumpIfMoveFailed(7, move);
             return TRUE;
         }
@@ -19743,6 +19730,23 @@ static void Cmd_switchoutabilities(void)
             SetBattlerTriggeredAbility(battler, ABILITY_CURTAIN_CALL);
             BattleScriptPush(gBattlescriptCurrInstr);
             gBattlescriptCurrInstr = BattleScript_CurtainCallSnow;
+            return;
+        }
+
+        if (!gSpecialStatuses[battler].switchOutAbilityDone
+         && IsBattlerAlive(battler)
+         && HasBattlerAbility(battler, ABILITY_MONSOON)
+         && IsBattlerWeatherAffected(battler, B_WEATHER_RAIN_TEMPORARY)
+         && !(gBattleWeather & (B_WEATHER_RAIN_PERMANENT | B_WEATHER_PRIMAL_ANY))
+         && gWishFutureKnock.weatherDuration > 0
+         && gWishFutureKnock.weatherDuration < 0xFF)
+        {
+            ++gWishFutureKnock.weatherDuration;
+            gSpecialStatuses[battler].switchOutAbilityDone = TRUE;
+            SetBattlerTriggeredAbility(battler, ABILITY_MONSOON);
+            gBattlerAbility = battler;
+            BattleScriptPush(gBattlescriptCurrInstr);
+            gBattlescriptCurrInstr = BattleScript_AbilityPopupReturn;
             return;
         }
 

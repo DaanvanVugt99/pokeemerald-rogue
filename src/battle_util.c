@@ -20304,6 +20304,21 @@ if (triggeringAbility != ABILITY_NONE)
             }
         }
 
+        if (HasBattlerAbility(battler, ABILITY_TOXIC_DELUGE)
+         && moveType == TYPE_POISON && !IS_MOVE_STATUS(move)
+         && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
+         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+         && IsBattlerWeatherAffected(battler, B_WEATHER_ACID_RAIN)
+         && IsFinalMultiHitStrikeAndTarget() && gBattleScripting.savedDmg > 0
+         && IsBattlerAlive(battler) && !BATTLER_MAX_HP(battler) && !IsBattlerHealBlocked(battler))
+        {
+            SetBattlerTriggeredAbility(battler, ABILITY_TOXIC_DELUGE);
+            gBattleMoveDamage = -max(1, gBattleScripting.savedDmg / 4);
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_VampiricActivates;
+            effect++;
+        }
+
         if (HasBattlerAbility(battler, ABILITY_SPIRIT_FEAST)
          && gDisableStructs[battler].uniquePersistentStateActive
          && moveType == TYPE_DARK
@@ -26749,12 +26764,6 @@ static inline uq4_12_t GetAttackerAbilitiesModifier(u32 battlerAtk, u32 battlerD
         GET_MOVE_TYPE(gCurrentMove, moveType);
         if (moveType == TYPE_FIRE)
             return UQ_4_12(1.3);
-    }
-
-    if (HasBattlerAbility(battlerAtk, ABILITY_MONSOON)
-     && IsBattlerWeatherAffected(battlerAtk, B_WEATHER_RAIN))
-    {
-        return UQ_4_12(0.9);
     }
 
     if (HasBattlerAbility(battlerAtk, ABILITY_TROPICAL_CANOPY)

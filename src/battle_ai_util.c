@@ -1678,8 +1678,6 @@ bool32 IsMoveEncouragedToHit(u32 battlerAtk, u32 battlerDef, u32 move)
 
     // discouraged from hitting
     weather = AI_GetWeather(AI_DATA);
-    if (AI_DATA->abilities[battlerAtk] == ABILITY_MONSOON && (weather & B_WEATHER_RAIN))
-        return TRUE;
 
     if (AI_HasAbility(battlerAtk, ABILITY_ROLLING_START)
      && (move == MOVE_ROLLOUT || move == MOVE_ICE_BALL))

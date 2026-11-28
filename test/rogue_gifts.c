@@ -897,7 +897,7 @@ TEST("Direct move synergy uses battle semantics instead of learnability")
 
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TANTRUM, MOVE_FOCUS_BLAST));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_MARKSMAN, MOVE_ZAP_CANNON));
-    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_MONSOON, MOVE_INFERNO));
+    EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_MONSOON, MOVE_U_TURN));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_INTENT, MOVE_DYNAMIC_PUNCH));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TOXIC_DELUGE, MOVE_GUNK_SHOT));
     EXPECT(RogueGift_DebugDoesMoveMatchDynamicSynergy(ABILITY_TOXIC_DELUGE, MOVE_TOXIC));
