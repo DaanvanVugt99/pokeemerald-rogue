@@ -175,7 +175,7 @@ static const struct WindowTemplate sMonEntryWinTemplates[WIN_COUNT + 1] =
 #ifdef ROGUE_EXPANSION
 static const u8 sTitle_Stats[] = _("Stats");
 static const u8 sTitle_UniqueAbility[] = _("Unique");
-static const u8 sTitle_Moves[] = _("Moves {STAR_ICON}=New");
+static const u8 sTitle_Moves[] = _("Moves");
 static const u8 sTitle_Evolutions[] = _("Evolutions");
 static const u8 sTitle_Forms[] = _("Forms");
 static const u8 sTitle_Riding[] = _("Poké Ride");
@@ -216,7 +216,7 @@ static const u8 sText_NoFormData[] = _("{COLOR RED}{SHADOW LIGHT_RED}No Form dat
 #else
 static const u8 sTitle_Stats[] = _("STATS");
 static const u8 sTitle_UniqueAbility[] = _("UNIQUE");
-static const u8 sTitle_Moves[] = _("MOVES {STAR_ICON}=New");
+static const u8 sTitle_Moves[] = _("MOVES");
 static const u8 sTitle_Evolutions[] = _("EVOLUTIONS");
 static const u8 sTitle_Forms[] = _("FORMS");
 static const u8 sTitle_Riding[] = _("POKé RIDE");
@@ -1416,6 +1416,18 @@ static const u8* GetDexVariantName()
     return gText_ThreeMarks;
 }
 
+// Palette 15 uses entry 12 for amber on the charcoal inspection panels.
+enum { MOVE_STAR_WIDTH = 5, MOVE_STAR_INK = 12 };
+
+static void DrawAddedMoveStar(u8 windowId, u8 left, u8 top)
+{
+    static const u8 rows[] = {0x04, 0x0E, 0x1F, 0x0E, 0x1B};
+    for (u32 y = 0; y < ARRAY_COUNT(rows); y++)
+        for (u32 x = 0; x < MOVE_STAR_WIDTH; x++)
+            if (rows[y] & (1 << x))
+                FillWindowPixelRect(windowId, PIXEL_FILL(MOVE_STAR_INK), left + x, top + y, 1, 1);
+}
+
 static void AddTitleText(u8 const* title)
 {
     u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
@@ -1782,21 +1794,16 @@ bool8 RoguePokedex_IsMoveAddition(u16 species, u16 moveIndex, bool8 tutor)
 
 void RoguePokedex_PrintMoveLine(u8 windowId, const u8 *text, u8 row, bool8 added)
 {
-    // FONT_SMALL_NARROW has no visible STAR_ICON glyph. Keep this 7x7 marker
-    // independent of font coverage, and within the reserved eight-pixel gutter.
-    static const u8 starRows[] = { 0x08, 0x1C, 0x7F, 0x3E, 0x1C, 0x36, 0x63 };
+    // Reserve a trailing column so every row and its marker align while scrolling.
     const u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
-    u8 font = GetStringWidth(FONT_NARROW, text, 0) <= 128 ? FONT_NARROW : FONT_SMALL_NARROW;
-    FillWindowPixelRect(windowId, PIXEL_FILL(0), 0, 16 * row, 8, 16);
-    AddTextPrinterParameterized4(windowId, font, 8, 16 * row,
+    u8 width = GetWindowAttribute(windowId, WINDOW_WIDTH) * 8;
+    u8 markerX = width - MOVE_STAR_WIDTH - 7;
+    u8 font = GetStringWidth(FONT_NARROW, text, 0) <= markerX - 5 ? FONT_NARROW : FONT_SMALL_NARROW;
+    FillWindowPixelRect(windowId, PIXEL_FILL(0), markerX, 16 * row, 5, 16);
+    AddTextPrinterParameterized4(windowId, font, 3, 16 * row,
         0, 0, color, TEXT_SKIP_DRAW, text);
     if (added)
-    {
-        for (u32 y = 0; y < ARRAY_COUNT(starRows); ++y)
-            for (u32 x = 0; x < 7; ++x)
-                if (starRows[y] & (1 << x))
-                    FillWindowPixelRect(windowId, PIXEL_FILL(TEXT_COLOR_GREEN), 1 + x, 16 * row + 4 + y, 1, 1);
-    }
+        DrawAddedMoveStar(windowId, markerX, 16 * row + 5);
 }
 
 static void DisplayMonMovesText()
@@ -1804,8 +1811,6 @@ static void DisplayMonMovesText()
     u8 i;
     u8 listIndex = 0;
     u8 displayCount = 0;
-    const u8 ySpacing = 16;
-    u8 color[3] = { TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY };
     u16 species = sPokedexMenu->viewBaseSpecies;
 
     AddTitleText(sTitle_Moves);
@@ -1828,7 +1833,7 @@ static void DisplayMonMovesText()
                 
                 if(listIndex >= sPokedexMenu->listScrollAmount)
                 {
-                    AddTextPrinterParameterized4(WIN_MON_PAGE_CONTENT, FONT_NARROW, 4, ySpacing * displayCount, 0, 0, color, TEXT_SKIP_DRAW, gStringVar3);
+                    RoguePokedex_PrintMoveLine(WIN_MON_PAGE_CONTENT, gStringVar3, displayCount, FALSE);
                     ++displayCount;
                 }
                 ++listIndex;

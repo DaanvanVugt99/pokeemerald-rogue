@@ -468,9 +468,9 @@ TEST("Pokedex move markers follow shared form profiles and reject invalid indice
     EXPECT(!RoguePokedex_IsMoveAddition(SPECIES_PONYTA, 0xFFFF, TRUE));
 }
 
-TEST("Pokedex move marker legend and move lines fit their windows")
+TEST("Pokedex move marker title and move lines fit their windows")
 {
-    static const u8 title[] = _("MOVES {STAR_ICON}=New");
+    static const u8 title[] = _("MOVES");
     extern const u8 gMoveNames[MOVES_COUNT][MOVE_NAME_LENGTH + 1];
     static const u8 prefix[] = _("Tutor ");
     u8 text[MOVE_NAME_LENGTH + 16];
@@ -479,8 +479,8 @@ TEST("Pokedex move marker legend and move lines fit their windows")
     {
         StringCopy(text, prefix);
         StringAppend(text, gMoveNames[move]);
-        EXPECT(GetStringWidth(FONT_NARROW, text, 0) <= 128
-            || GetStringWidth(FONT_SMALL_NARROW, text, 0) <= 128);
+        EXPECT(GetStringWidth(FONT_NARROW, text, 0) <= 119
+            || GetStringWidth(FONT_SMALL_NARROW, text, 0) <= 119);
     }
 }
 
@@ -497,9 +497,9 @@ TEST("Pokedex move markers render visible pixels and clear when scrolling to an 
         { .bg = 0, .width = 17, .height = 16, .paletteNum = 15, .baseBlock = 0 },
         DUMMY_WIN_TEMPLATE,
     };
-    static const u8 airSlash[] = _("{COLOR RED}{LV}30 {COLOR DARK_GRAY}Air Slash");
-    static const u8 needleArm[] = _("{COLOR RED}{LV}43 {COLOR DARK_GRAY}Needle Arm");
-    static const u8 gigaDrain[] = _("{COLOR RED}{LV}32 {COLOR DARK_GRAY}Giga Drain");
+    static const u8 airSlash[] = _("{COLOR BLUE}{LV}30 {COLOR DARK_GRAY}Air Slash");
+    static const u8 needleArm[] = _("{COLOR BLUE}{LV}43 {COLOR DARK_GRAY}Needle Arm");
+    static const u8 gigaDrain[] = _("{COLOR BLUE}{LV}32 {COLOR DARK_GRAY}Giga Drain");
     u32 markedPixels[2] = {0};
     u32 textPixels = 0;
     EXPECT(InitWindows(windows));
@@ -510,15 +510,15 @@ TEST("Pokedex move markers render visible pixels and clear when scrolling to an 
     RoguePokedex_PrintMoveLine(0, gigaDrain, 2, FALSE);
     for (u32 y = 0; y < 48; ++y)
     {
-        for (u32 x = 0; x < 8; ++x)
+        for (u32 x = 124; x < 129; ++x)
         {
             u8 pixel = GetPokedexTestPixel(0, x, y);
             if (y < 32)
-                markedPixels[y / 16] += pixel == TEXT_COLOR_GREEN;
+                markedPixels[y / 16] += pixel == 12;
             else
                 EXPECT_EQ(pixel, 0);
         }
-        for (u32 x = 8; x < 136; ++x)
+        for (u32 x = 3; x < 122; ++x)
             textPixels += GetPokedexTestPixel(0, x, y) != 0;
     }
     EXPECT_GT(markedPixels[0], 0);
@@ -526,7 +526,7 @@ TEST("Pokedex move markers render visible pixels and clear when scrolling to an 
     EXPECT_GT(textPixels, 0);
     RoguePokedex_PrintMoveLine(0, gigaDrain, 0, FALSE);
     for (u32 y = 0; y < 16; ++y)
-        for (u32 x = 0; x < 8; ++x)
+        for (u32 x = 124; x < 129; ++x)
             EXPECT_EQ(GetPokedexTestPixel(0, x, y), 0);
     FreeAllWindowBuffers();
 }
