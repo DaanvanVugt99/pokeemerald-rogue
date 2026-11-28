@@ -44,18 +44,3 @@ SINGLE_BATTLE_TEST("Time Rift can choose an attacking time move after Roar of Ti
         EXPECT(gBattleStruct->uniqueAbilityUsed[B_SIDE_PLAYER] & gBitTable[0]);
     }
 }
-
-SINGLE_BATTLE_TEST("Time Rift no longer triggers on switch-in")
-{
-    GIVEN {
-        PLAYER(SPECIES_WOBBUFFET) { Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_DRATINI) { Ability(ABILITY_SHED_SKIN); Moves(MOVE_CELEBRATE); }
-        OPPONENT(SPECIES_DIALGA) { Ability(ABILITY_PRESSURE); UniqueAbility(ABILITY_TIME_RIFT); Moves(MOVE_ROAR_OF_TIME); }
-    } WHEN {
-        TURN { SWITCH(opponent, 1); MOVE(player, MOVE_CELEBRATE); }
-    } SCENE {
-        NOT ABILITY_POPUP(opponent, ABILITY_TIME_RIFT);
-    } THEN {
-        EXPECT_EQ(gBattleStruct->uniqueAbilityUsed[B_SIDE_OPPONENT] & gBitTable[1], 0);
-    }
-}

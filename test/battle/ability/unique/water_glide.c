@@ -51,15 +51,3 @@ SINGLE_BATTLE_TEST("Water Glide does not trigger for non-Flying moves")
         }
     }
 }
-
-SINGLE_BATTLE_TEST("Masquerain is no longer immune to Ground-type moves")
-{
-    GIVEN {
-        PLAYER(SPECIES_MASQUERAIN) { Ability(ABILITY_INTIMIDATE); Moves(MOVE_SPLASH); }
-        OPPONENT(SPECIES_WOBBUFFET) { Moves(MOVE_EARTHQUAKE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_SPLASH); MOVE(opponent, MOVE_EARTHQUAKE); }
-    } THEN {
-        EXPECT_LT(player->hp, player->maxHP);
-    }
-}

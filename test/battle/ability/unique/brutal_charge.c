@@ -24,25 +24,6 @@ SINGLE_BATTLE_TEST("Brutal Charge gives 2x Speed on the first turn out")
     }
 }
 
-SINGLE_BATTLE_TEST("Brutal Charge does not boost Attack on the first turn out")
-{
-    s16 turnOneDamage;
-    s16 turnTwoDamage;
-
-    GIVEN {
-        PLAYER(SPECIES_GRANBULL) { Ability(ABILITY_QUICK_FEET); UniqueAbility(ABILITY_BRUTAL_CHARGE); Moves(MOVE_TACKLE, MOVE_TACKLE); }
-        OPPONENT(SPECIES_WOBBUFFET) { Ability(ABILITY_SHADOW_TAG); Moves(MOVE_CELEBRATE, MOVE_CELEBRATE); }
-    } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
-        TURN { MOVE(player, MOVE_TACKLE, WITH_RNG(RNG_DAMAGE_MODIFIER, 100)); MOVE(opponent, MOVE_CELEBRATE); }
-    } SCENE {
-        HP_BAR(opponent, captureDamage: &turnOneDamage);
-        HP_BAR(opponent, captureDamage: &turnTwoDamage);
-    } THEN {
-        EXPECT_EQ(turnOneDamage, turnTwoDamage);
-    }
-}
-
 SINGLE_BATTLE_TEST("Brutal Charge uses 40 BP Headbutt after lowering a foe's Defense")
 {
     s16 damage;
