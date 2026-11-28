@@ -5,6 +5,7 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Limited new-game Pokédex selection to Champions and Gen III National with left/right controls. Becoming Champion unlocks the full selector.
 - Set Champions (Special) as the default starting Pokédex for new games with Mega Evolution: 488 species from Regulation M-C, the announced December additions Heatran, Dondozo and Tatsugiri, and their pre-evolutions.
 
 - Fixed Birch blocking his lab entrance after the new-game introduction.

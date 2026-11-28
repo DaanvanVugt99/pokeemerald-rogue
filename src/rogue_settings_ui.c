@@ -203,12 +203,13 @@ static const u8 sGeneration[] = _("Generation ");
 static const u8 sPoolGimmick[] = _("Starting gimmick");
 static const u8 sUsePool[] = _("Use this Pokédex");
 static const u8 sPoolCount[] = _(" Pokémon");
+static const u8 sPoolSeparator[] = _("  /  ");
 static const u8 sPoolStart[] = _("Start: ");
 static const u8 sContinue[] = _("Continue");
 static const u8 sIntroHelp[] = _("Choose Continue when you're ready.");
 static const u8 sEditDexCue[] = _("{A_BUTTON} Change");
 static const u8 sViewCue[] = _("{A_BUTTON} View");
-static const u8 sIntroPoolHelp[] = _("Can't change until you become Champion.");
+static const u8 sIntroPoolHelp[] = _("Become Champion to unlock the full dex list.");
 static const u8 sPoolContextLocked[] = _("Change this in your own hub.");
 static const u8 sIntroConfirmTitle[] = _("Your Starting Pokédex");
 static const u8 sIntroConfirmQuestion[] = _("Begin with this Pokédex?");
@@ -637,7 +638,7 @@ static void DrawSetupFooter(void)
     SetupText(8, 128, help, INK_MUTED, GetFontIdToFit(help, FONT_SMALL, 0, 224));
     SetupText(8, 146, sSelectCue, INK_MUTED, FONT_SMALL);
     if (row == ROW_DEX && !IsPoolEditingLocked())
-        SetupText(82, 146, sMenu->readOnly ? sViewCue : sEditDexCue, INK_PAPER, FONT_SMALL);
+        SetupText(82, 146, sMenu->intro ? sChangeCue : sMenu->readOnly ? sViewCue : sEditDexCue, INK_PAPER, FONT_SMALL);
     else if (row == ROW_DONE || row == ROW_RULES || row == ROW_ASCENSION || row == ROW_TRAINERS || row == ROW_TRIAL)
         SetupText(82, 146, sOkCue, INK_PAPER, FONT_SMALL);
     else if (!sMenu->readOnly && row != ROW_DEX)
@@ -850,7 +851,11 @@ static void Draw(void)
         }
         if (sMenu->intro && sMenu->page == PAGE_SETUP)
         {
-            StringCopy(StringCopy(text, sPoolStart), RogueDexSelection_GetGimmickName(sMenu->startingGimmick));
+            u8 *end = ConvertIntToDecimalStringN(text, gPokedexVariants[sMenu->config.pokedexVariant].speciesCount,
+                STR_CONV_MODE_LEFT_ALIGN, 3);
+            end = StringCopy(end, sPoolCount);
+            if (sMenu->startingGimmick != ITEM_NONE)
+                StringCopy(StringCopy(end, sPoolSeparator), RogueDexSelection_GetGimmickName(sMenu->startingGimmick));
             SetupRect(10, 108, 220, 1, INK_RULE);
             SetupText(12, 110, text, INK_BLUE, FONT_SMALL);
         }
@@ -1042,6 +1047,7 @@ static void HandleSetupAction(u8 taskId, u8 row)
         sMenu->rulesPage = row == ROW_RULES ? 2 : 0;
         break;
     case ROW_DEX:
+        if (sMenu->intro) return;
         BeginPool();
         break;
     case ROW_TRAINERS:
@@ -1086,6 +1092,12 @@ static void HandleSetupValue(u8 row, s8 direction)
     }
     switch (row)
     {
+    case ROW_DEX:
+        if (!sMenu->intro) return;
+        sMenu->config.pokedexVariant = sMenu->config.pokedexVariant == POKEDEX_VARIANT_INITIAL_DEFAULT
+            ? POKEDEX_VARIANT_NATIONAL_GEN3 : POKEDEX_VARIANT_INITIAL_DEFAULT;
+        sMenu->startingGimmick = RoguePokedex_GetNativeGimmickItem(sMenu->config.pokedexVariant);
+        break;
     case ROW_MODE:
         sMenu->config.mode = sMenu->config.mode != ROGUE_GAME_MODE_GAUNTLET
             && Rogue_IsAdventureModeAvailable(ROGUE_GAME_MODE_GAUNTLET)
@@ -1218,7 +1230,7 @@ bool8 RogueTest_AdventureControlScenario(u8 scenario)
     bool8 ok = TRUE;
     u8 i;
     const u8 values[] = { ROW_FORMAT, ROW_ENCOUNTERS, ROW_TEAM };
-    const u8 submenus[] = { ROW_DEX, ROW_TRAINERS, ROW_RULES, ROW_ASCENSION };
+    const u8 submenus[] = { ROW_TRAINERS, ROW_RULES, ROW_ASCENSION };
     Rogue_CopyAdventureConfig(&menu.config);
     menu.intro = scenario != 7;
     menu.entrance = scenario == 7;
@@ -1273,6 +1285,16 @@ bool8 RogueTest_AdventureControlScenario(u8 scenario)
     }
     else if (scenario == 3)
     {
+        menu.rowCount = 1;
+        menu.rows[0] = ROW_DEX;
+        menu.config.pokedexVariant = POKEDEX_VARIANT_INITIAL_DEFAULT;
+        TestPressMenuKey(DPAD_RIGHT);
+        ok &= menu.config.pokedexVariant == POKEDEX_VARIANT_NATIONAL_GEN3 && menu.startingGimmick == ITEM_NONE;
+        TestPressMenuKey(A_BUTTON);
+        ok &= menu.page == PAGE_SETUP;
+        TestPressMenuKey(DPAD_LEFT);
+        ok &= menu.config.pokedexVariant == POKEDEX_VARIANT_INITIAL_DEFAULT && menu.startingGimmick == ITEM_MEGA_RING;
+        before = menu.config;
         for (i = 0; i < ARRAY_COUNT(submenus); ++i)
         {
             menu.page = PAGE_SETUP; menu.row = 0; menu.rowCount = 1; menu.rows[0] = submenus[i];
@@ -1367,11 +1389,8 @@ static void InitAdventureConfigMenu(u8 mode)
     if (sMenu->intro)
     {
         sMenu->readOnly = FALSE;
-        RogueDexSelection_Init(&sMenu->pool, PoolAvailability(), sMenu->config.pokedexVariant,
-            VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), TRUE);
-        sMenu->config.pokedexVariant = sMenu->pool.variant;
-        sMenu->startingGimmick = RogueDexSelection_GetGimmick(&sMenu->pool);
-        sMenu->nationalGimmick = sMenu->pool.nationalGimmick;
+        sMenu->config.pokedexVariant = POKEDEX_VARIANT_INITIAL_DEFAULT;
+        sMenu->startingGimmick = RoguePokedex_GetNativeGimmickItem(sMenu->config.pokedexVariant);
     }
     BuildRows(PAGE_SETUP);
     if (sMenu->poolOnly && !BeginPool())
