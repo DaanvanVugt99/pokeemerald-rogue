@@ -48,14 +48,14 @@ static const u8 sAscensionText45[] = _("Unlocked: A");
 static const u8 sAscensionText46[] = _("Left/Right: level  L/R: page  A: OK  B: back");
 static const u8 sAscensionText47[] = _("ADVENTURE RULES");
 static const u8 sAscensionText48[] = _("TRAINERS");
-static const u8 sAscensionText49[] = _("SET UP ADVENTURE");
+static const u8 sAscensionText49[] = _("Set Up Adventure");
 static const u8 sAscensionText50[] = _("Order");
 static const u8 sAscensionText51[] = _("On");
 static const u8 sAscensionText52[] = _("Off");
 static const u8 sAscensionText53[] = _("Begin Adventure");
 static const u8 sAscensionText54[] = _("Close");
 static const u8 sAscensionText55[] = _("Left/Right: change  A: OK  B: back");
-static const u8 sConfirmControls[] = _("Left/Right: choose  A: OK  B: back");
+static const u8 sConfirmControls[] = _("{DPAD_LEFTRIGHT} Choose    {A_BUTTON} OK    {B_BUTTON} Back");
 static const u8 sAscensionText56[] = _("Select at least one trainer region.");
 static const u8 sAscensionText57[] = _("Check starting team and requirements.");
 static const u8 sAscensionText58[] = _("Clear the preceding level to unlock.");
@@ -99,6 +99,24 @@ enum { PAGE_SETUP, PAGE_ASCENSION, PAGE_TRAINERS, PAGE_POOL, PAGE_INTRO_CONFIRM 
 enum { MENU_ADVENTURE, MENU_INTRO, MENU_CURATED_POOL, MENU_TRIAL_POOL };
 enum { ROW_ASCENSION, ROW_MODE, ROW_FORMAT, ROW_DEX, ROW_TRAINERS, ROW_ENCOUNTERS,
        ROW_TEAM, ROW_RULES, ROW_DONE, ROW_TRIAL, ROW_COUNT };
+// Keep the previous frame's primitives so shared menu pages can describe their
+// layout normally without painting or uploading unchanged regions.
+#define MENU_DRAW_COMMANDS 64
+#define MENU_TEXT_BYTES 1536
+struct MenuDrawCommand
+{
+    u8 x, y, w, h, ink, font;
+    u16 textOffset; // zero for a filled rectangle
+};
+
+struct MenuDrawing
+{
+    struct MenuDrawCommand commands[MENU_DRAW_COMMANDS];
+    u8 text[MENU_TEXT_BYTES];
+    u16 used;
+    u8 count;
+};
+
 struct AdventureMenu
 {
     struct RogueAdventureConfig config;
@@ -124,6 +142,9 @@ struct AdventureMenu
     bool8 introCommitted;
     u8 confirmChoice;
     const u8 *message;
+    u8 drawingIndex;
+    bool8 hasDrawing;
+    struct MenuDrawing drawings[];
 };
 static EWRAM_DATA struct AdventureMenu *sMenu;
 #if TESTING
@@ -131,12 +152,19 @@ static bool8 sTestSkipDraw;
 #endif
 static const struct BgTemplate sBg[] = {{ .bg = 0, .charBaseIndex = 0, .mapBaseIndex = 31, .screenSize = 0, .paletteMode = 0 }};
 static const struct WindowTemplate sWindows[] = {
-    {.bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 28, .height = 18, .paletteNum = 15, .baseBlock = 1},
+    {.bg = 0, .tilemapLeft = 0, .tilemapTop = 0, .width = 30, .height = 20, .paletteNum = 15, .baseBlock = 1},
     DUMMY_WIN_TEMPLATE
 };
-static const u16 sPalette[16] = {RGB(2,3,7), RGB_WHITE, RGB(8,9,12), RGB(31,25,8), RGB(14,18,24)};
-static const u8 sColors[] = {0, 1, 2};
-static const u8 sSelectedColors[] = {0, 3, 2};
+enum { INK_PAPER = 1, INK_EDGE, INK_MUTED, INK_RULE, INK_BG, INK_PANEL, INK_GOLD, INK_BLUE, INK_SELECTED };
+static const u16 sPalette[16] = {
+    RGB_BLACK, RGB(30,30,29), RGB(2,3,3), RGB(23,24,25), RGB(10,11,12),
+    RGB(4,5,5), RGB(6,7,8), RGB(30,24,14), RGB(21,25,28), RGB(9,8,7)
+};
+static const u8 sGameSetup[] = _("Game Setup");
+static const u8 sSelectCue[] = _("{DPAD_UPDOWN} Select");
+static const u8 sChangeCue[] = _("{DPAD_LEFTRIGHT} Change");
+static const u8 sOkCue[] = _("{A_BUTTON} OK");
+static const u8 sBackCue[] = _("{B_BUTTON} Back");
 static const u8 *const sRows[] = {sAscensionText0, sAscensionText1, sAscensionText2, sAscensionText3,
     sAscensionText4, sAscensionText5, sAscensionText6, sAscensionText7, sAscensionText8, sChooseTrial};
 static const u8 *const sFormats[] = {sAscensionText9, sAscensionText10, sAscensionText11};
@@ -158,14 +186,14 @@ static const u8 *const sDescriptions[] = {
 static const u8 sTrialRestriction[] = _("This choice is fixed by the Trial.");
 static const u8 sTrialDisabled[] = _("Trial records/rewards disabled");
 static const u8 sTrialMinimum[] = _("Trial minimum: A");
-static const u8 sBasePage[] = _("BASE RULES");
+static const u8 sBasePage[] = _("Base Rules");
 static const u8 sFixedRules[] = _("These settings cannot be changed.");
 static const u8 sCumulativePage[] = _("ACTIVE RULES");
 static const u8 sTrialTeam[] = _("Trial team");
 static const u8 sModeBeforeAscension[] = _("Choose your adventure style.");
 static const u8 sFormatBeforeAscension[] = _("Choose Singles, Doubles or Mixed.");
-static const u8 sBaseControls[] = _("L/R: page  B: back");
-static const u8 sPoolTitle[] = _("POKÉDEX");
+static const u8 sBaseControls[] = _("{L_BUTTON}{R_BUTTON} Page");
+static const u8 sPoolTitle[] = _("Pokédex");
 static const u8 sPoolType[] = _("Pokédex type");
 static const u8 sPoolRegion[] = _("Region");
 static const u8 sPoolGame[] = _("Game");
@@ -174,14 +202,15 @@ static const u8 sPoolGeneration[] = _("Through gen.");
 static const u8 sGeneration[] = _("Generation ");
 static const u8 sPoolGimmick[] = _("Starting gimmick");
 static const u8 sUsePool[] = _("Use this Pokédex");
-static const u8 sPoolCount[] = _(" Pokemon");
+static const u8 sPoolCount[] = _(" Pokémon");
 static const u8 sPoolStart[] = _("Start: ");
 static const u8 sContinue[] = _("Continue");
 static const u8 sIntroHelp[] = _("Choose Continue when you're ready.");
-static const u8 sPoolReadOnly[] = _("B: back");
+static const u8 sEditDexCue[] = _("{A_BUTTON} Change");
+static const u8 sViewCue[] = _("{A_BUTTON} View");
 static const u8 sIntroPoolHelp[] = _("Can't change until you become Champion.");
 static const u8 sPoolContextLocked[] = _("Change this in your own hub.");
-static const u8 sIntroConfirmTitle[] = _("YOUR STARTING POKÉDEX");
+static const u8 sIntroConfirmTitle[] = _("Your Starting Pokédex");
 static const u8 sIntroConfirmQuestion[] = _("Begin with this Pokédex?");
 static const u8 sIntroConfirmEffect[] = _("Sets encounters and first partners.");
 static const u8 sIntroConfirmLock[] = _("You can't change it until\nyou become Champion.");
@@ -357,10 +386,10 @@ static void BuildRows(u8 page)
         sMenu->config.mode = ROGUE_GAME_MODE_STANDARD;
     sMenu->page = page;
     sMenu->row = sMenu->top = sMenu->rowCount = 0;
-    if (page == PAGE_SETUP && sMenu->entrance)
+    if (page == PAGE_SETUP && (sMenu->entrance || sMenu->intro))
     {
         sMenu->rows[sMenu->rowCount++] = ROW_DONE;
-        if (SetupRowAvailable(ROW_TRIAL))
+        if (sMenu->entrance && SetupRowAvailable(ROW_TRIAL))
             sMenu->rows[sMenu->rowCount++] = ROW_TRIAL;
     }
     for (row = 0; row < (page == PAGE_SETUP ? ROW_COUNT : ARRAY_COUNT(sRegions) + 1); ++row)
@@ -368,7 +397,7 @@ static void BuildRows(u8 page)
         bool8 available = page == PAGE_SETUP ? SetupRowAvailable(row)
             : sMenu->readOnly || trial == NULL || (row == 0 ? !trial->hasForcedTrainerOrder
                 : trial->forcedTrainerToggle == ROGUE_TRIAL_NO_TRAINER_TOGGLE && !trial->enableAllRegionalTrainers);
-        if (available && !(page == PAGE_SETUP && sMenu->entrance && (row == ROW_DONE || row == ROW_TRIAL)))
+        if (available && !(page == PAGE_SETUP && (sMenu->entrance || sMenu->intro) && (row == ROW_DONE || row == ROW_TRIAL)))
             sMenu->rows[sMenu->rowCount++] = row;
     }
 }
@@ -407,9 +436,47 @@ bool8 RogueTest_AdventurePokedexCanOpen(void)
 }
 #endif
 
+static void SetupText(u8 x, u8 y, const u8 *str, u8 ink, u8 font)
+{
+    struct MenuDrawing *d = &sMenu->drawings[sMenu->drawingIndex];
+    u16 length = StringLength(str) + 1;
+    struct MenuDrawCommand *cmd;
+    if (length == 1) return;
+    AGB_ASSERT(d->count < MENU_DRAW_COMMANDS && d->used + length <= MENU_TEXT_BYTES);
+    if (d->count >= MENU_DRAW_COMMANDS || d->used + length > MENU_TEXT_BYTES) return;
+    cmd = &d->commands[d->count++];
+    *cmd = (struct MenuDrawCommand){x, y, 0, 16, ink, font, d->used + 1};
+    memcpy(d->text + d->used, str, length);
+    d->used += length;
+}
+
 static void Print(u8 x, u8 y, const u8 *str, bool8 selected)
 {
-    AddTextPrinterParameterized4(0, FONT_SMALL_NARROW, x, y, 0, 0, selected ? sSelectedColors : sColors, TEXT_SKIP_DRAW, str);
+    SetupText(x + 8, y + 8, str, selected ? INK_GOLD : INK_PAPER, FONT_SMALL_NARROW);
+}
+
+static void SetupRect(u8 x, u8 y, u8 w, u8 h, u8 ink)
+{
+    struct MenuDrawing *d = &sMenu->drawings[sMenu->drawingIndex];
+    AGB_ASSERT(d->count < MENU_DRAW_COMMANDS);
+    if (d->count < MENU_DRAW_COMMANDS)
+        d->commands[d->count++] = (struct MenuDrawCommand){x, y, w, h, ink, 0, 0};
+
+}
+
+static void SetupPanel(void)
+{
+    SetupRect(3, 20, 234, 108, INK_EDGE);
+    SetupRect(4, 21, 232, 1, INK_RULE);
+    SetupRect(4, 22, 232, 105, INK_PANEL);
+    SetupRect(5, 145, 230, 1, INK_RULE);
+}
+
+static void SelectedRow(u8 x, u8 y, u8 w, u8 h)
+{
+    SetupRect(x, y, w, h, INK_SELECTED);
+    SetupRect(x, y, 1, h, INK_GOLD);
+    SetupText(x + 3, y, gText_SelectorArrow, INK_GOLD, FONT_SMALL);
 }
 
 static void PrintSelectable(u8 x, u8 y, const u8 *str, bool8 selected)
@@ -447,61 +514,231 @@ static void ValueForRow(u8 row, u8 *text)
         break;
     default: text[0] = EOS; break;
     }
-    while (GetStringWidth(FONT_SMALL_NARROW, text, 0) > 107 && StringLength(text) > 0)
-        text[StringLength(text) - 1] = EOS;
+}
+
+static void DrawPoolRow(u8 i)
+{
+    u8 text[160];
+    u8 type = RogueDexSelection_GetType(sMenu->pool.variant);
+    u8 y = 24 + 16 * i;
+    u8 font;
+    bool8 selected = i == sMenu->row;
+    const u8 *label = sUsePool;
+    u8 field = sMenu->rows[i];
+    text[0] = EOS;
+    switch (field)
+    {
+    case DEX_FIELD_TYPE:
+        label = sPoolType;
+        StringCopy(text, RogueDexSelection_GetTypeName(type)); break;
+    case DEX_FIELD_REGION:
+        label = sPoolRegion;
+        StringCopy(text, RogueDexSelection_GetRegionName(RogueDexSelection_GetRegion(sMenu->pool.variant))); break;
+    case DEX_FIELD_VARIANT:
+        label = type == DEX_POOL_NATIONAL ? sPoolGeneration : type == DEX_POOL_SPECIAL ? sPoolRoster : sPoolGame;
+        if (type == DEX_POOL_NATIONAL)
+            ConvertIntToDecimalStringN(StringCopy(text, sGeneration), sMenu->pool.variant - POKEDEX_VARIANT_NATIONAL_GEN1 + 1, STR_CONV_MODE_LEFT_ALIGN, 1);
+        else StringCopy(text, gPokedexVariants[sMenu->pool.variant].displayName);
+        break;
+    case DEX_FIELD_GIMMICK:
+        label = sPoolGimmick;
+        StringCopy(text, RogueDexSelection_GetGimmickName(RogueDexSelection_GetGimmick(&sMenu->pool))); break;
+    case DEX_FIELD_DONE:
+        if (sMenu->readOnly) label = sAscensionText54;
+        break;
+    }
+    if (selected)
+        SelectedRow(6, y, 228, 16);
+    else
+        SetupRect(6, y, 228, 16, INK_PANEL);
+    SetupText(18, y, label, selected ? INK_GOLD : INK_PAPER, FONT_SMALL);
+    font = GetFontIdToFit(text, FONT_SMALL, 0, 206 - GetStringWidth(FONT_SMALL, label, 0));
+    SetupText(229 - GetStringWidth(font, text, 0), y, text, selected ? INK_GOLD : INK_MUTED, font);
+}
+
+static void DrawPoolControls(void)
+{
+    if (!sMenu->readOnly && sMenu->rows[sMenu->row] != DEX_FIELD_DONE)
+        SetupText(65, 146, sChangeCue, INK_PAPER, FONT_SMALL);
+    SetupText(151, 146, sOkCue, INK_PAPER, FONT_SMALL);
+    SetupText(194, 146, sBackCue, INK_MUTED, FONT_SMALL);
 }
 
 static void DrawPool(void)
 {
-    u8 i, field, text[160], type = RogueDexSelection_GetType(sMenu->pool.variant);
-    Print(0, 0, sPoolTitle, TRUE);
-    Print(0, 13, gPokedexVariants[sMenu->pool.variant].displayName, FALSE);
+    u8 i, text[160];
+    const u8 *name = gPokedexVariants[sMenu->pool.variant].displayName;
+    u8 font = GetFontIdToFit(name, FONT_SMALL, 0, 164);
+    SetupPanel();
+    SetupText(7, 0, sPoolTitle, INK_PAPER, FONT_NORMAL);
+    SetupText(232 - GetStringWidth(font, name, 0), 1, name, INK_MUTED, font);
     for (i = 0; i < sMenu->rowCount; ++i)
-    {
-        const u8 *label = sUsePool;
-        field = sMenu->rows[i];
-        text[0] = EOS;
-        switch (field)
-        {
-        case DEX_FIELD_TYPE:
-            label = sPoolType;
-            StringCopy(text, RogueDexSelection_GetTypeName(type)); break;
-        case DEX_FIELD_REGION:
-            label = sPoolRegion;
-            StringCopy(text, RogueDexSelection_GetRegionName(RogueDexSelection_GetRegion(sMenu->pool.variant))); break;
-        case DEX_FIELD_VARIANT:
-            label = type == DEX_POOL_NATIONAL ? sPoolGeneration : type == DEX_POOL_SPECIAL ? sPoolRoster : sPoolGame;
-            if (type == DEX_POOL_NATIONAL)
-                ConvertIntToDecimalStringN(StringCopy(text, sGeneration), sMenu->pool.variant - POKEDEX_VARIANT_NATIONAL_GEN1 + 1, STR_CONV_MODE_LEFT_ALIGN, 1);
-            else StringCopy(text, gPokedexVariants[sMenu->pool.variant].displayName);
-            break;
-        case DEX_FIELD_GIMMICK:
-            label = sPoolGimmick;
-            StringCopy(text, RogueDexSelection_GetGimmickName(RogueDexSelection_GetGimmick(&sMenu->pool))); break;
-        case DEX_FIELD_DONE:
-            if (sMenu->readOnly) label = sAscensionText54;
-            break;
-        }
-        PrintSelectable(0, 28 + i * 14, label, i == sMenu->row);
-        Print(90, 28 + i * 14, text, i == sMenu->row);
-    }
+        DrawPoolRow(i);
+    SetupRect(10, 106, 220, 1, INK_RULE);
     StringCopy(ConvertIntToDecimalStringN(text, gPokedexVariants[sMenu->pool.variant].speciesCount,
         STR_CONV_MODE_LEFT_ALIGN, 4), sPoolCount);
-    Print(0, 100, text, FALSE);
+    SetupText(12, 110, text, INK_BLUE, FONT_SMALL);
     if (sMenu->intro)
     {
         StringCopy(StringCopy(text, sPoolStart), RogueDexSelection_GetGimmickName(RogueDexSelection_GetGimmick(&sMenu->pool)));
-        Print(82, 100, text, FALSE);
+        SetupText(94, 110, text, INK_BLUE, GetFontIdToFit(text, FONT_SMALL, 0, 137));
     }
     RogueDexSelection_Describe(&sMenu->pool, text);
-    Print(0, 114, text, FALSE);
-    Print(0, 132, sMenu->message != NULL ? sMenu->message : sMenu->readOnly ? sPoolReadOnly : sAscensionText55, FALSE);
+    name = sMenu->message != NULL ? sMenu->message : text;
+    SetupText(8, 128, name, INK_MUTED, GetFontIdToFit(name, FONT_SMALL, 0, 224));
+    SetupText(8, 146, sSelectCue, INK_MUTED, FONT_SMALL);
+    DrawPoolControls();
 }
 
 static u8 BaseRulePageCount(void)
 {
     u8 text[160];
     return RogueAscension_GetBaseLine(6, text) ? 2 : 1;
+}
+
+static u8 SetupRowHeight(void)
+{
+    return sMenu->rowCount > 5 ? 14 : 17;
+}
+
+static void DrawSetupRow(u8 visibleIndex)
+{
+    u8 index = sMenu->top + visibleIndex;
+    u8 row = sMenu->rows[index];
+    bool8 selected = index == sMenu->row;
+    u8 height = SetupRowHeight();
+    u8 text[160];
+    const u8 *label = LabelForRow(row);
+    u8 y = 23 + visibleIndex * height;
+    u8 valueFont;
+    if (selected)
+        SelectedRow(6, y, 228, height);
+    else
+        SetupRect(6, y, 228, height, INK_PANEL);
+    SetupText(18, y, label, selected ? INK_GOLD : INK_PAPER, FONT_SMALL);
+    ValueForRow(row, text);
+    if (row == ROW_RULES)
+        StringCopy(text, gText_SelectorArrow);
+    valueFont = GetFontIdToFit(text, FONT_SMALL, 0, 206 - GetStringWidth(FONT_SMALL, label, 0));
+    SetupText(229 - GetStringWidth(valueFont, text, 0), y, text,
+        selected ? INK_GOLD : INK_MUTED, valueFont);
+}
+
+static void DrawSetupFooter(void)
+{
+    u8 text[160];
+    u8 row = sMenu->rows[sMenu->row];
+    const u8 *help = sMenu->message != NULL ? sMenu->message : DescriptionForRow(row);
+    if (RogueAscension_IsRevealed() && MenuTrial() != NULL && sMenu->message == NULL)
+    {
+        ConvertIntToDecimalStringN(StringCopy(text, sTrialMinimum), MenuTrial()->minimumAscension, STR_CONV_MODE_LEFT_ALIGN, 2);
+        help = text;
+    }
+    SetupText(8, 128, help, INK_MUTED, GetFontIdToFit(help, FONT_SMALL, 0, 224));
+    SetupText(8, 146, sSelectCue, INK_MUTED, FONT_SMALL);
+    if (row == ROW_DEX && !IsPoolEditingLocked())
+        SetupText(82, 146, sMenu->readOnly ? sViewCue : sEditDexCue, INK_PAPER, FONT_SMALL);
+    else if (row == ROW_DONE || row == ROW_RULES || row == ROW_ASCENSION || row == ROW_TRAINERS || row == ROW_TRIAL)
+        SetupText(82, 146, sOkCue, INK_PAPER, FONT_SMALL);
+    else if (!sMenu->readOnly && row != ROW_DEX)
+        SetupText(82, 146, sChangeCue, INK_PAPER, FONT_SMALL);
+    if (!sMenu->intro)
+        SetupText(230 - GetStringWidth(FONT_SMALL, sBackCue, 0), 146, sBackCue, INK_MUTED, FONT_SMALL);
+}
+
+// One bit per eight-pixel tile row. Copy contiguous runs in a single DMA request.
+static u32 TileRows(const struct MenuDrawCommand *c, const struct MenuDrawing *d)
+{
+    u32 bottom = c->y + c->h;
+    if (c->textOffset)
+    {
+        const u8 *p = d->text + c->textOffset - 1;
+        while (*p != EOS)
+            if (*p++ == CHAR_NEWLINE) bottom += 16;
+    }
+    return ((1u << ((min(bottom, DISPLAY_HEIGHT) + 7) / 8)) - 1)
+        & ~((1u << (c->y / 8)) - 1);
+}
+
+static bool8 SameCommand(const struct MenuDrawCommand *a, const struct MenuDrawing *ad,
+                         const struct MenuDrawCommand *b, const struct MenuDrawing *bd)
+{
+    if (a->x != b->x || a->y != b->y || a->w != b->w || a->h != b->h
+        || a->ink != b->ink || a->font != b->font || !!a->textOffset != !!b->textOffset)
+        return FALSE;
+    return !a->textOffset || StringCompare(ad->text + a->textOffset - 1, bd->text + b->textOffset - 1) == 0;
+}
+
+static void PaintDrawing(bool8 full)
+{
+    const struct MenuDrawing *now = &sMenu->drawings[sMenu->drawingIndex], *old = &sMenu->drawings[sMenu->drawingIndex ^ 1];
+    u32 dirty = 0;
+    u8 i, j;
+    u8 prefix = 0, end = now->count, oldEnd = old->count;
+    if (full)
+        dirty = (1u << 20) - 1;
+    else
+    {
+        while (prefix < end && prefix < oldEnd
+            && SameCommand(&now->commands[prefix], now, &old->commands[prefix], old)) ++prefix;
+        while (end > prefix && oldEnd > prefix
+            && SameCommand(&now->commands[end-1], now, &old->commands[oldEnd-1], old))
+        {
+            --end;
+            --oldEnd;
+        }
+        for (i = prefix; i < max(end, oldEnd); ++i)
+        {
+            if (end == oldEnd && SameCommand(&now->commands[i], now, &old->commands[i], old)) continue;
+            if (i < end) dirty |= TileRows(&now->commands[i], now);
+            if (i < oldEnd) dirty |= TileRows(&old->commands[i], old);
+        }
+    }
+    if (!dirty) return;
+    if (full)
+        FillWindowPixelBuffer(0, PIXEL_FILL(INK_BG));
+    else
+        for (i = 0; i < 20; ++i)
+            if (dirty & (1u << i))
+                CpuFastFill(PIXEL_FILL(INK_BG) * 0x01010101u, gWindows[0].tileData + i * 30 * 32, 30 * 32);
+
+    for (i = 0; i < now->count; ++i)
+    {
+        const struct MenuDrawCommand *c = &now->commands[i];
+        u32 rows = TileRows(c, now);
+        if (!(rows & dirty)) continue;
+        if (c->textOffset)
+        {
+            const u8 colors[] = {TEXT_COLOR_TRANSPARENT, c->ink, INK_BG};
+            AddTextPrinterParameterized4(0, c->font, c->x, c->y, 0, 0, colors, TEXT_SKIP_DRAW, now->text + c->textOffset - 1);
+            // A glyph may extend across a band boundary. Replay subsequent layers there too.
+            dirty |= rows;
+        }
+        else
+        {
+            for (j = c->y / 8; j * 8 < c->y + c->h;)
+            {
+                u8 start = j++;
+                if (!(dirty & (1u << start))) continue;
+                while (j * 8 < c->y + c->h && (dirty & (1u << j))) ++j;
+                u8 y = max(c->y, start * 8);
+                FillWindowPixelRectFast(0, c->ink, c->x, y, c->w, min(c->y + c->h, j * 8) - y);
+            }
+        }
+    }
+    if (full)
+    {
+        PutWindowTilemap(0);
+        CopyWindowToVram(0, COPYWIN_FULL);
+    }
+    else
+        for (i = 0; i < 20;)
+        {
+            u8 start = i++;
+            if (!(dirty & (1u << start))) continue;
+            while (i < 20 && (dirty & (1u << i))) ++i;
+            CopyWindowRectToVram(0, COPYWIN_GFX, 0, start, 30, i - start);
+        }
 }
 
 static void Draw(void)
@@ -513,17 +750,32 @@ static void Draw(void)
     if (sTestSkipDraw) return;
 #endif
     preview.ascension = sMenu->candidate;
-    FillWindowPixelBuffer(0, PIXEL_FILL(0));
+    sMenu->drawingIndex ^= 1;
+    sMenu->drawings[sMenu->drawingIndex].count = 0;
+    sMenu->drawings[sMenu->drawingIndex].used = 0;
     if (sMenu->page == PAGE_INTRO_CONFIRM)
     {
-        Print(0, 0, sIntroConfirmTitle, TRUE);
-        Print(0, 20, gPokedexVariants[sMenu->config.pokedexVariant].displayName, TRUE);
-        Print(0, 38, sIntroConfirmQuestion, FALSE);
-        Print(0, 54, sIntroConfirmEffect, FALSE);
-        Print(0, 72, sIntroConfirmLock, FALSE);
-        PrintSelectable(0, 110, sContinue, sMenu->confirmChoice == 0);
-        PrintSelectable(112, 110, sGoBack, sMenu->confirmChoice == 1);
-        Print(0, 132, sMenu->message != NULL ? sMenu->message : sConfirmControls, FALSE);
+        const u8 *name = gPokedexVariants[sMenu->config.pokedexVariant].displayName;
+        SetupPanel();
+        SetupText(7, 0, sIntroConfirmTitle, INK_PAPER, FONT_NORMAL);
+        SetupText(12, 24, name, INK_GOLD, GetFontIdToFit(name, FONT_NORMAL, 0, 216));
+        SetupRect(12, 44, 216, 1, INK_RULE);
+        SetupText(12, 45, sIntroConfirmQuestion, INK_PAPER, FONT_SMALL);
+        SetupText(12, 60, sIntroConfirmEffect, INK_MUTED, FONT_SMALL);
+        SetupText(12, 75, sIntroConfirmLock, INK_MUTED, FONT_SMALL);
+        for (i = 0; i < 2; ++i)
+        {
+            u8 x = 10 + 112 * i;
+            SetupRect(x, 106, 105, 18, INK_RULE);
+            SetupRect(x + 1, 107, 103, 16, INK_PANEL);
+            if (i == sMenu->confirmChoice)
+                SelectedRow(x + 1, 107, 103, 16);
+            SetupText(x + 16, 107, i ? sGoBack : sContinue,
+                i == sMenu->confirmChoice ? INK_GOLD : INK_PAPER, FONT_SMALL);
+        }
+        if (sMenu->message != NULL)
+            SetupText(8, 128, sMenu->message, INK_PAPER, FONT_SMALL);
+        SetupText(8, 146, sConfirmControls, INK_MUTED, FONT_SMALL);
     }
     else if (sMenu->page == PAGE_POOL)
         DrawPool();
@@ -533,28 +785,53 @@ static void Draw(void)
         u8 *end = ConvertIntToDecimalStringN(StringCopy(text, sAscensionText43), sMenu->candidate, STR_CONV_MODE_LEFT_ALIGN, 2);
         if (!RogueAscension_IsUnlocked(sMenu->candidate, sMenu->config.battleFormat)) StringCopy(end, sAscensionText44);
         if (baseOnly)
-            Print(0, 0, sBasePage, TRUE);
+        {
+            SetupPanel();
+            SetupText(7, 0, sBasePage, INK_PAPER, FONT_NORMAL);
+            SetupText(12, 23, sFixedRules, INK_MUTED, FONT_SMALL);
+            SetupRect(11, 41, 218, 1, INK_RULE);
+        }
         else
             PrintSelectable(0, 0, text, TRUE);
         ConvertIntToDecimalStringN(StringCopy(text, sAscensionText45), RogueAscension_GetUnlocked(sMenu->config.battleFormat), STR_CONV_MODE_LEFT_ALIGN, 2);
         if (!baseOnly) Print(120, 13, text, FALSE);
-        Print(0, 13, baseOnly ? sFixedRules : sMenu->rulesPage >= 2 ? sBasePage : sCumulativePage, FALSE);
+        if (!baseOnly) Print(0, 13, sMenu->rulesPage >= 2 ? sBasePage : sCumulativePage, FALSE);
         for (i = 0; i < 6; ++i)
         {
             bool8 hasLine = sMenu->rulesPage < 2
                 ? RogueAscension_GetConfigRuleLine(&preview, sMenu->rulesPage * 6 + i, text)
                 : RogueAscension_GetBaseLine((sMenu->rulesPage - 2) * 6 + i, text);
-            if (hasLine) Print(0, 29 + i * 12, text, FALSE);
+            if (hasLine && baseOnly)
+                SetupText(12, 42 + i * 14, text, INK_PAPER, GetFontIdToFit(text, FONT_SMALL, 0, 216));
+            else if (hasLine) Print(0, 29 + i * 12, text, FALSE);
         }
         if (!baseOnly) Print(0, 103, RogueAscension_GetAddition(sMenu->candidate), TRUE);
-        Print(0, 132, sMenu->message != NULL ? sMenu->message : baseOnly ? (BaseRulePageCount() > 1 ? sBaseControls : sPoolReadOnly) : sAscensionText46, FALSE);
+        if (baseOnly)
+        {
+            if (sMenu->message != NULL)
+                SetupText(8, 128, sMenu->message, INK_MUTED, FONT_SMALL);
+            if (BaseRulePageCount() > 1)
+                SetupText(8, 146, sBaseControls, INK_PAPER, FONT_SMALL);
+            SetupText(194, 146, sBackCue, INK_MUTED, FONT_SMALL);
+        }
+        else Print(0, 132, sMenu->message != NULL ? sMenu->message : sAscensionText46, FALSE);
     }
     else
     {
         u8 count = sMenu->rowCount;
-        Print(0, 0, sMenu->readOnly ? sAscensionText47 : sMenu->page == PAGE_TRAINERS ? sAscensionText48 : sAscensionText49, TRUE);
-        if (sMenu->page == PAGE_SETUP && MenuTrial() != NULL)
-            Print(0, 10, MenuTrial()->name, FALSE);
+        if (sMenu->page == PAGE_SETUP)
+        {
+            SetupPanel();
+            SetupText(7, 0, sMenu->intro ? sGameSetup : sMenu->readOnly ? sAscensionText47 : sAscensionText49, INK_PAPER, FONT_NORMAL);
+            if (MenuTrial() != NULL)
+            {
+                const u8 *name = MenuTrial()->name;
+                u8 font = GetFontIdToFit(name, FONT_SMALL, 0, 118);
+                SetupText(232 - GetStringWidth(font, name, 0), 1, name, INK_MUTED, font);
+            }
+        }
+        else
+            Print(0, 0, sAscensionText48, TRUE);
         if (sMenu->row < sMenu->top) sMenu->top = sMenu->row;
         if (sMenu->row >= sMenu->top + 6) sMenu->top = sMenu->row - 5;
         for (i = 0; i < 6 && i + sMenu->top < count; ++i)
@@ -568,28 +845,26 @@ static void Draw(void)
             }
             else
             {
-                const u8 *label = LabelForRow(row);
-                PrintSelectable(0, 22 + 14*i, label, selected);
-                ValueForRow(row, text);
-                Print(112, 22 + 14*i, text, selected);
+                DrawSetupRow(i);
             }
         }
         if (sMenu->intro && sMenu->page == PAGE_SETUP)
         {
             StringCopy(StringCopy(text, sPoolStart), RogueDexSelection_GetGimmickName(sMenu->startingGimmick));
-            Print(0, 111, text, FALSE);
+            SetupRect(10, 108, 220, 1, INK_RULE);
+            SetupText(12, 110, text, INK_BLUE, FONT_SMALL);
         }
         else if (sMenu->page == PAGE_SETUP && RogueAscension_IsRevealed())
-            Print(0, 111, TrialRecordsDisabled() ? sTrialDisabled : RogueAscension_EligibilityText(Rogue_IsRunActive() ? gRogueSaveBlock->ascensionEligibilityReason : RogueAscension_GetEligibility(&sMenu->config, RogueRunStart_GetContext() != NULL ? RogueRunStart_GetContext()->source : RUN_START_SOURCE_NORMAL)), FALSE);
-        if (RogueAscension_IsRevealed() && MenuTrial() != NULL && sMenu->message == NULL)
+            SetupText(12, 110, TrialRecordsDisabled() ? sTrialDisabled : RogueAscension_EligibilityText(Rogue_IsRunActive() ? gRogueSaveBlock->ascensionEligibilityReason : RogueAscension_GetEligibility(&sMenu->config, RogueRunStart_GetContext() != NULL ? RogueRunStart_GetContext()->source : RUN_START_SOURCE_NORMAL)), INK_MUTED, FONT_SMALL_NARROW);
+        if (sMenu->page == PAGE_TRAINERS)
+            Print(0, 123, sMenu->message != NULL ? sMenu->message : sAscensionText55, FALSE);
+        else
         {
-            ConvertIntToDecimalStringN(StringCopy(text, sTrialMinimum), MenuTrial()->minimumAscension, STR_CONV_MODE_LEFT_ALIGN, 2);
-            Print(0, 123, text, FALSE);
+            DrawSetupFooter();
         }
-        else Print(0, 123, sMenu->message != NULL ? sMenu->message : sMenu->page == PAGE_TRAINERS ? sAscensionText55 : DescriptionForRow(sMenu->rows[sMenu->row]), FALSE);
     }
-    PutWindowTilemap(0);
-    CopyWindowToVram(0, COPYWIN_FULL);
+    PaintDrawing(!sMenu->hasDrawing);
+    sMenu->hasDrawing = TRUE;
 }
 
 static void CloseMenu(u16 result)
@@ -726,7 +1001,9 @@ static void HandlePoolInput(u8 taskId, s8 direction)
         else ReturnToSetup(ROW_DEX);
     }
     else if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
+    {
         sMenu->row = Cycle(sMenu->row, sMenu->rowCount, JOY_REPEAT(DPAD_UP) ? -1 : 1);
+    }
     else if (JOY_NEW(A_BUTTON))
     {
         if (sMenu->poolOnly) ExitMenu(taskId, !sMenu->readOnly, FALSE);
@@ -750,6 +1027,7 @@ static void HandlePoolInput(u8 taskId, s8 direction)
         BuildPoolRows();
         while (sMenu->row + 1 < sMenu->rowCount && sMenu->rows[sMenu->row] != field) ++sMenu->row;
     }
+    else return;
     Draw();
 }
 
@@ -853,8 +1131,9 @@ static void Task_Input(u8 taskId)
         else if (JOY_NEW(A_BUTTON))
         {
             ResolveIntroConfirmation(sMenu->confirmChoice == 0);
-            if (sMenu->introConfirmed) ExitMenu(taskId, TRUE, FALSE);
+            if (sMenu->introConfirmed) { ExitMenu(taskId, TRUE, FALSE); return; }
         }
+        else return;
         Draw();
         return;
     }
@@ -874,6 +1153,7 @@ static void Task_Input(u8 taskId)
             { sMenu->config.ascension = sMenu->candidate; sMenu->page = PAGE_SETUP; sMenu->message = NULL; }
             else sMenu->message = RogueAscension_IsUnlocked(sMenu->candidate, sMenu->config.battleFormat) ? sTrialRestriction : sAscensionText58;
         }
+        else return;
         Draw(); return;
     }
     if (JOY_NEW(B_BUTTON))
@@ -889,8 +1169,11 @@ static void Task_Input(u8 taskId)
     }
     if (JOY_REPEAT(DPAD_UP | DPAD_DOWN))
     {
-        sMenu->row = Cycle(sMenu->row, sMenu->rowCount, JOY_REPEAT(DPAD_UP) ? -1 : 1);
-        sMenu->message = NULL; Draw(); return;
+        u8 previous = sMenu->row;
+        sMenu->row = Cycle(previous, sMenu->rowCount, JOY_REPEAT(DPAD_UP) ? -1 : 1);
+        sMenu->message = NULL;
+        Draw();
+        return;
     }
     if (!dir && !JOY_NEW(A_BUTTON)) return;
     if (sMenu->page == PAGE_TRAINERS)
@@ -1069,7 +1352,7 @@ static void InitAdventureConfigMenu(u8 mode)
     InitWindows(sWindows);
     DeactivateAllTextPrinters();
     ResetPaletteFade(); ResetTasks(); ResetSpriteData();
-    sMenu = AllocZeroed(sizeof(*sMenu));
+    sMenu = AllocZeroed(sizeof(*sMenu) + 2 * sizeof(struct MenuDrawing));
     if (sMenu == NULL)
     { FreeAllWindowBuffers(); gSpecialVar_Result = RUN_REVIEW_ACTION_BACK; SetMainCallback2(gMain.savedCallback); return; }
     sMenu->intro = mode == MENU_INTRO;
@@ -1096,6 +1379,7 @@ static void InitAdventureConfigMenu(u8 mode)
         FreeAllWindowBuffers(); Free(sMenu); sMenu = NULL;
         gSpecialVar_Result = FALSE; SetMainCallback2(gMain.savedCallback); return;
     }
+    sMenu->hasDrawing = FALSE;
     LoadPalette(sPalette, 240, sizeof(sPalette));
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_BG0_ON);

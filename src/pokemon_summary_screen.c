@@ -2152,39 +2152,7 @@ static void LoadSummaryPokemon(void)
 
 static void SummaryRect(u8 x, u8 y, u8 w, u8 h, u8 color)
 {
-    // A 4bpp tile row fits in one word. Only the end tiles need masking.
-    u32 *tiles = (u32 *)GetWindowAttribute(0, WINDOW_TILE_DATA);
-    u32 fill = color * 0x11111111u;
-    u32 right = min(x + w, DISPLAY_WIDTH);
-    u32 bottom = min(y + h, DISPLAY_HEIGHT);
-    u32 tileX, tileY;
-    for (tileY = y / 8; tileY * 8 < bottom; tileY++)
-    {
-        u32 firstRow = max(y, tileY * 8) - tileY * 8;
-        u32 endRow = min(bottom - tileY * 8, 8);
-        for (tileX = x / 8; tileX * 8 < right; tileX++)
-        {
-            // Clear complete tiles as one BIOS fill per horizontal strip.
-            if (firstRow == 0 && endRow == 8 && tileX * 8 >= x && tileX < right / 8)
-            {
-                u32 count = right / 8 - tileX;
-                CpuFastFill(fill, tiles + (tileY * (DISPLAY_WIDTH / 8) + tileX) * 8, count * 32);
-                tileX += count - 1;
-                continue;
-            }
-            u32 firstPixel = max(x, tileX * 8) - tileX * 8;
-            u32 endPixel = min(right - tileX * 8, 8);
-            u32 mask = (~0u << (4 * firstPixel)) & (~0u >> (4 * (8 - endPixel)));
-            u32 *tile = tiles + (tileY * (DISPLAY_WIDTH / 8) + tileX) * 8;
-            u32 row;
-            if (mask == ~0u)
-                for (row = firstRow; row < endRow; row++)
-                    tile[row] = fill;
-            else
-                for (row = firstRow; row < endRow; row++)
-                    tile[row] = (tile[row] & ~mask) | (fill & mask);
-        }
-    }
+    FillWindowPixelRectFast(0, color, x, y, w, h);
 }
 
 static void SummaryFrame(u8 x, u8 y, u8 w, u8 h)

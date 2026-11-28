@@ -57,6 +57,9 @@ def main():
     labs = 'Rogue_Area_Labs'
     assert walk(labs, 'BirchStartGame1', (8, 7), {(19, 10), (9, 7)})[0] == (9, 5)
     assert walk(labs, 'BirchStartGame2', (9, 5), {(19, 10)})[0] == (9, 4)
+    # A hidden but active NPC on this step-on warp blocks the player.
+    script = (ROOT / f'data/maps/{labs}/scripts.pory').read_text()
+    assert re.search(r'applymovement\(OBJ_EVENT_BIRCH, BirchStartGame2\)\s+waitmovement\(0\)\s+removeobject\(OBJ_EVENT_BIRCH\)', script), 'Birch must vacate the lab entrance'
     for direction, end in [('North', (14, 1)), ('East', (26, 9)), ('South', (14, 20)), ('West', (2, 9))]:
         assert walk(labs, 'BirchTutorialGuide' + direction, (9, 6), {(19, 10), (9, 5)})[0] == end
     lab = 'Rogue_Interior_ProfLab'

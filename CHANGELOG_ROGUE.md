@@ -5,6 +5,12 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Fixed Birch blocking his lab entrance after the new-game introduction.
+
+- The outfit menu uses light grey for the missing back sprites notice.
+
+- Game Setup, Set Up Adventure, the Pokédex selector, Base Rules, and the starting Pokédex confirmation now use charcoal panels, native Summary fonts, and a compact button legend. Setup pages update changed graphics on input, including the starting Pokédex confirmation buttons.
+
 - Restored original text and accent colors for gift Pokémon and other transparent overworld notifications.
 
 - Fixed the Hexed Shrine dealmaker shrinking to a dot when spoken to from above. His red eyes appear once the pact succeeds.

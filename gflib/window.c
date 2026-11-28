@@ -448,6 +448,45 @@ static void UNUSED BlitBitmapRectToWindowWithColorKey(u8 windowId, const u8 *pix
     BlitBitmapRect4Bit(&sourceRect, &destRect, srcX, srcY, destX, destY, rectWidth, rectHeight, colorKey);
 }
 
+void FillWindowPixelRectFast(u8 windowId, u8 color, u8 x, u8 y, u8 w, u8 h)
+{
+    // A 4bpp tile row fits in one word. Only the end tiles need masking.
+    struct Window *window = &gWindows[windowId];
+    u32 *tiles = (u32 *)window->tileData;
+    u32 stride = window->window.width;
+    u32 fill = color * 0x11111111u;
+    u32 right = min(x + w, stride * 8);
+    u32 bottom = min(y + h, window->window.height * 8);
+    u32 tileX, tileY;
+    for (tileY = y / 8; tileY * 8 < bottom; tileY++)
+    {
+        u32 firstRow = max(y, tileY * 8) - tileY * 8;
+        u32 endRow = min(bottom - tileY * 8, 8);
+        for (tileX = x / 8; tileX * 8 < right; tileX++)
+        {
+            // Clear complete tiles as one BIOS fill per horizontal strip.
+            if (firstRow == 0 && endRow == 8 && tileX * 8 >= x && tileX < right / 8)
+            {
+                u32 count = right / 8 - tileX;
+                CpuFastFill(fill, tiles + (tileY * (stride) + tileX) * 8, count * 32);
+                tileX += count - 1;
+                continue;
+            }
+            u32 firstPixel = max(x, tileX * 8) - tileX * 8;
+            u32 endPixel = min(right - tileX * 8, 8);
+            u32 mask = (~0u << (4 * firstPixel)) & (~0u >> (4 * (8 - endPixel)));
+            u32 *tile = tiles + (tileY * (stride) + tileX) * 8;
+            u32 row;
+            if (mask == ~0u)
+                for (row = firstRow; row < endRow; row++)
+                    tile[row] = fill;
+            else
+                for (row = firstRow; row < endRow; row++)
+                    tile[row] = (tile[row] & ~mask) | (fill & mask);
+        }
+    }
+}
+
 void FillWindowPixelRect(u8 windowId, u8 fillValue, u16 x, u16 y, u16 width, u16 height)
 {
     struct Bitmap pixelRect;

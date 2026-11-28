@@ -940,6 +940,7 @@ static bool8 RoguePlayerUI_LoadGraphics(void)
         LoadPalette(sRoguePlayerUIPalette, BG_PLTT_ID(BG_PAL_ID_BACKGROUND), PLTT_SIZE_4BPP);
         LoadPalette(gMessageBox_Pal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
         FillPalette(RGB(31, 24, 12), BG_PLTT_ID(15) + TEXT_DYNAMIC_COLOR_1, sizeof(u16));
+        FillPalette(RGB(23, 24, 25), BG_PLTT_ID(15) + TEXT_DYNAMIC_COLOR_2, sizeof(u16));
         sPlayerOutfitUIState->loadState++;
     default:
         sPlayerOutfitUIState->loadState = 0;
@@ -1030,7 +1031,7 @@ static void AddMenuValueText(u8 menuOffset, s8 offset, const u8* text)
 static const u8 sText_RoguePlayerUIEditFast[] = _("Fast");
 static const u8 sText_RoguePlayerUIEditAccurate[] = _("Accurate");
 static const u8 sText_RoguePlayerUIEditPrompt[] = _("{R_BUTTON} Mode: {STR_VAR_1}");
-static const u8 sText_RoguePlayerMissingBacksprites[] = _("{COLOR LIGHT_BLUE}{SHADOW LIGHT_GRAY}(Missing back sprites)");
+static const u8 sText_RoguePlayerMissingBacksprites[] = _("{COLOR DYNAMIC_COLOR2}{SHADOW LIGHT_GRAY}(Missing back sprites)");
 
 static void RoguePlayerUI_PrintMenuText()
 {

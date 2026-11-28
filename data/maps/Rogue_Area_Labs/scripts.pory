@@ -60,7 +60,7 @@ script Rogue_Area_Labs_StartGame
 
     applymovement(OBJ_EVENT_BIRCH, BirchStartGame2)
     waitmovement(0)
-    hideobjectat(OBJ_EVENT_BIRCH, MAP_ROGUE_AREA_LABS)
+    removeobject(OBJ_EVENT_BIRCH)
     setflag(FLAG_HIDE_BIRCH)
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
