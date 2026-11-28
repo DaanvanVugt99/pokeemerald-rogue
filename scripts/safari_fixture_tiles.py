@@ -53,6 +53,22 @@ def habitat_vents():
     return image
 
 
+def shattered_front(palette, right):
+    # Draw outward from the intact plinth, then mirror the right-hand end.
+    pane = Image.new('P', (8, 16), 0)
+    draw = ImageDraw.Draw(pane)
+    glass, glint, shadow, steel, ink = (palette.index(color) for color in
+                                       (LIGHT, GLASS_HIGHLIGHT, SHADE, STEEL, INK))
+    # Short ledges and recessed pockets give the sill a crumbled profile.
+    depths = (4, 4, 3, 2, 2, 3, 3, 3, 2, 1, 1, 2, 2) if right else (5, 5, 4, 4, 3, 2, 2, 2, 3, 3, 2, 2, 1)
+    for y, depth in enumerate(depths):
+        fill = glass if y < 3 else ink if 5 <= y <= 9 else shadow
+        draw.line((0, y, depth, y), fill=fill)
+        if y in (0, 3, 7, 10):
+            draw.line((depth - 1, y, depth, y), fill=glint if y == 0 else steel)
+    return pane.transpose(Image.Transpose.FLIP_LEFT_RIGHT) if right else pane
+
+
 def append_safari_fixture_art(cat):
     from hub_medallions import InlayTiles, flipped_tiles
 
@@ -60,7 +76,7 @@ def append_safari_fixture_art(cat):
     # and base colors. Other quadrants can use the existing steel palette.
     assert cat.pals[11][9:] == [(0, 0, 0)] * 7
     cat.pals[11][9:] = [INK, SHADE, STEEL, LIGHT, AMBER, GLASS_HIGHLIGHT, (0, 0, 0)]
-    protected = set(range(512, 548)) | set(range(1004, 1024)) | cat.capsule_original_tiles.keys()
+    protected = set(range(512, 548)) | set(range(1008, 1024)) | cat.capsule_original_tiles.keys()
     used = {word & 1023 for meta in cat.metas for word in meta}
     free = sorted(set(range(1, 1024)) - used - protected)
     pool = InlayTiles(cat.tiles, free, 0, sorted(used - protected))
@@ -97,3 +113,14 @@ def append_safari_fixture_art(cat):
         # The tutorial habitats have two shattered center panels.
         if x not in (2, 3):
             paint_front(cat.terrariums[f'BrokenHabitat_{x}'], vents, x)
+
+    for x in (2, 3):
+        right = x == 3
+        pane = shattered_front(cat.pals[11], right)
+        foreground = [0] * 4
+        for row in range(2):
+            raw = pane.crop((0, 8 * row, 8, 8 * row + 8)).tobytes()
+            foreground[row * 2 + int(right)] = pool.word(raw) | (11 << 12)
+        mid = cat.terrariums[f'BrokenHabitat_{x}']
+        cat.safari_fixture_originals[mid] = cat.metas[mid][:]
+        cat.metas[mid][4:] = foreground
