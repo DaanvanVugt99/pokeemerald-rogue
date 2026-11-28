@@ -4207,6 +4207,9 @@ static struct QuickHealOffer FindQuickHealOffer(u16 hp, u16 maxHp, u32 status)
     return best;
 }
 
+static const u8 sText_QuickHealAlreadyHealthy[] = _("Already healthy.{PAUSE_UNTIL_PRESS}");
+static const u8 sText_QuickHealNoMedicine[] = _("No suitable medicine in the Bag.{PAUSE_UNTIL_PRESS}");
+
 static void CursorCb_QuickHeal(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
@@ -4221,8 +4224,8 @@ static void CursorCb_QuickHeal(u8 taskId)
     if (!offer.item)
     {
         PlaySE(SE_FAILURE);
-        DisplayPartyMenuMessage(hp == maxHp && !status ? COMPOUND_STRING("Already healthy.\p") :
-            COMPOUND_STRING("No suitable medicine in the Bag.\p"), FALSE);
+        DisplayPartyMenuMessage(hp == maxHp && !status ? sText_QuickHealAlreadyHealthy :
+            sText_QuickHealNoMedicine, FALSE);
         gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
         return;
     }
