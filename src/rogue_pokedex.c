@@ -4847,6 +4847,8 @@ bool8 RoguePokedex_IsSpeciesLegendary(u16 species)
 bool8 RoguePokedex_IsSpeciesValidBoxLegendary(u16 species)
 {
 #ifdef ROGUE_EXPANSION
+    if (species == SPECIES_FLOETTE_ETERNAL_FLOWER)
+        return TRUE;
     species = GET_BASE_SPECIES_ID(species);
 #endif
 
@@ -4877,7 +4879,6 @@ bool8 RoguePokedex_IsSpeciesValidBoxLegendary(u16 species)
         case SPECIES_XERNEAS:
         case SPECIES_YVELTAL:
         case SPECIES_ZYGARDE:
-        case SPECIES_FLOETTE_ETERNAL_FLOWER:
 
         case SPECIES_COSMOEM:
         case SPECIES_SOLGALEO:

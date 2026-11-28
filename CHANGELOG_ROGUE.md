@@ -5,6 +5,7 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Fixed Eternal Flower Floette qualifying for the minor legendary slot instead of the box legendary slot.
 - The Pokédex Moves tab uses blue level-up labels, coral TM labels, and an amber star for move access added in Divergence.
 - Quick Heal compares available medicine for one Pokémon, previews the dose count and resulting HP, and consumes only effective doses.
 - Refreshed the GEEF boot splash with chamfered mint lettering and a shorter shadow.

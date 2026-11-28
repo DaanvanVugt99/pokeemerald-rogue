@@ -110,6 +110,15 @@ TEST("Pokemon pool: every roster is reachable under its category")
     }
 }
 
+TEST("Pokemon pool: Eternal Flower Floette qualifies for the Champions box legendary slot")
+{
+    EXPECT(RoguePokedex_IsSpeciesLegendary(SPECIES_FLOETTE_ETERNAL_FLOWER));
+    EXPECT(RoguePokedex_IsSpeciesValidBoxLegendary(SPECIES_FLOETTE_ETERNAL_FLOWER));
+    EXPECT(!RoguePokedex_IsSpeciesValidBoxLegendary(SPECIES_FLOETTE));
+    EXPECT(!RoguePokedex_IsSpeciesValidBoxLegendary(SPECIES_FLOETTE_WHITE_FLOWER));
+    EXPECT(!RoguePokedex_IsSpeciesValidBoxLegendary(SPECIES_HEATRAN));
+}
+
 TEST("Pokemon pool: Champions starter dex includes confirmed lines and excludes sibling branches")
 {
     const u8 variant = POKEDEX_VARIANT_EXTRAS_CHAMPIONS;
