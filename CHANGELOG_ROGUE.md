@@ -5,6 +5,7 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Darkened the naming-screen portrait shadow and gave the selected keyboard action a steady amber frame. Added spacing between button icons and labels in the top legend.
 - Limited new-game Pokédex selection to Champions and Gen III National with left/right controls. Becoming Champion unlocks the full selector.
 - Set Champions (Special) as the default starting Pokédex for new games with Mega Evolution: 488 species from Regulation M-C, the announced December additions Heatran, Dondozo and Tatsugiri, and their pre-evolutions.
 

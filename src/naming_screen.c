@@ -345,11 +345,9 @@ static bool8 MainState_WaitPageSwap(void);
 static void StartPageSwapAnim(void);
 static void Task_HandlePageSwapAnim(u8);
 static bool8 IsPageSwapAnimNotInProgress(void);
-static void TryStartButtonFlash(u8, bool8, bool8);
-static void Task_UpdateButtonFlash(u8);
-static u16 GetButtonPalOffset(u8);
-static void RestoreButtonColor(u8);
-static void StartButtonFlash(struct Task *, u8, bool8);
+static void SetButtonHighlight(u8 button, bool8 transient);
+static void Task_ButtonHighlight(u8 taskId);
+static u8 GetKeyRoleAtCursorPos(void);
 static void CreateSprites(void);
 static void CreateCursorSprite(void);
 static void SetCursorPos(s16, s16);
@@ -670,7 +668,7 @@ static bool8 MainState_PressedOKButton(void)
     SaveInputText();
     SetInputState(INPUT_STATE_DISABLED);
     SetCursorFlashing(FALSE);
-    TryStartButtonFlash(BUTTON_COUNT, FALSE, TRUE);
+    SetButtonHighlight(BUTTON_COUNT, FALSE);
     if (sNamingScreen->templateNum == NAMING_SCREEN_CAUGHT_MON
         && CalculatePlayerPartyCount() >= PARTY_SIZE)
     {
@@ -748,7 +746,7 @@ static bool8 MainState_StartPageSwap(void)
     StartPageSwapButtonAnim();
     StartPageSwapAnim();
     SetCursorInvisibility(TRUE);
-    TryStartButtonFlash(BUTTON_PAGE, FALSE, TRUE);
+    SetButtonHighlight(BUTTON_PAGE, GetKeyRoleAtCursorPos() != KEY_ROLE_PAGE);
     PlaySE(SE_WIN_OPEN);
     sNamingScreen->state = STATE_WAIT_PAGE_SWAP;
     return FALSE;
@@ -894,117 +892,45 @@ static bool8 PageSwapAnimState_Done(struct Task *task)
 //
 //--------------------------------------------------
 
-#define tButtonId     data[0]
-#define tKeepFlashing data[1]
-#define tAllowFlash   data[2]
-#define tColor        data[3]
-#define tColorIncr    data[4]
-#define tColorDelay   data[5]
-#define tColorDelta   data[6]
+#define tButtonId data[0]
+#define tFeedbackFrames data[1]
 
-static void CreateButtonFlashTask(void)
+static void ApplyButtonPalette(u8 button, bool8 selected)
 {
-    u8 taskId;
-
-    taskId = CreateTask(Task_UpdateButtonFlash, 3);
-    gTasks[taskId].tButtonId = BUTTON_COUNT;
+    static const u16 tags[] = { [BUTTON_PAGE] = PALTAG_PAGE_SWAP,
+        [BUTTON_BACK] = PALTAG_BACK_BUTTON, [BUTTON_OK] = PALTAG_OK_BUTTON };
+    const u16 *idle = gNamingScreenMenu_Pal[4];
+    u16 base = OBJ_PLTT_ID(IndexOfSpritePaletteTag(tags[button]));
+    u16 border = selected ? RGB(31, 24, 12) : idle[14];
+    LoadPalette(&border, base + 14, sizeof(border));
 }
 
-static void TryStartButtonFlash(u8 button, bool8 keepFlashing, bool8 interruptCurFlash)
-{
-    struct Task *task = &gTasks[FindTaskIdByFunc(Task_UpdateButtonFlash)];
-
-    if (button == task->tButtonId && !interruptCurFlash)
-    {
-        task->tKeepFlashing = keepFlashing;
-        task->tAllowFlash = TRUE;
-        return;
-    }
-    if (button == BUTTON_COUNT && !task->tKeepFlashing && !interruptCurFlash)
-        return;
-
-    if (task->tButtonId != BUTTON_COUNT)
-        RestoreButtonColor(task->tButtonId);
-
-    StartButtonFlash(task, button, keepFlashing);
-}
-
-static void Task_UpdateButtonFlash(u8 taskId)
+static void Task_ButtonHighlight(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
-
-    if (task->tButtonId == BUTTON_COUNT || !task->tAllowFlash)
-        return;
-
-    MultiplyInvertedPaletteRGBComponents(GetButtonPalOffset(task->tButtonId), task->tColor, task->tColor, task->tColor);
-
-    if (task->tColorDelay && --task->tColorDelay)
-        return;
-
-    task->tColorDelay = 2;
-    if (task->tColorIncr >= 0)
+    if (task->tFeedbackFrames && --task->tFeedbackFrames == 0)
     {
-        if (task->tColor < 14)
-        {
-            task->tColor += task->tColorIncr;
-            task->tColorDelta += task->tColorIncr;
-        }
-        else
-        {
-            task->tColor = 16;
-            task->tColorDelta++;
-        }
-    }
-    else
-    {
-        task->tColor += task->tColorIncr;
-        task->tColorDelta += task->tColorIncr;
-    }
-
-    if (task->tColor == 16 && task->tColorDelta == 22)
-    {
-        task->tColorIncr = -4;
-    }
-    else if (task->tColor == 0)
-    {
-        task->tAllowFlash = task->tKeepFlashing;
-        task->tColorIncr = 2;
-        task->tColorDelta = 0;
+        ApplyButtonPalette(task->tButtonId, FALSE);
+        task->tButtonId = BUTTON_COUNT;
     }
 }
 
-static u16 GetButtonPalOffset(u8 button)
+static void SetButtonHighlight(u8 button, bool8 transient)
 {
-    const u16 palOffsets[BUTTON_COUNT + 1] =
+    struct Task *task = &gTasks[FindTaskIdByFunc(Task_ButtonHighlight)];
+    if (task->tButtonId != button)
     {
-        [BUTTON_PAGE]  = OBJ_PLTT_ID(IndexOfSpritePaletteTag(PALTAG_PAGE_SWAP)) + 14,
-        [BUTTON_BACK]  = OBJ_PLTT_ID(IndexOfSpritePaletteTag(PALTAG_BACK_BUTTON)) + 14,
-        [BUTTON_OK]    = OBJ_PLTT_ID(IndexOfSpritePaletteTag(PALTAG_OK_BUTTON)) + 14,
-        [BUTTON_COUNT] = OBJ_PLTT_ID(IndexOfSpritePaletteTag(PALTAG_OK_BUTTON)) + 1,
-    };
-
-    return palOffsets[button];
-}
-
-static void RestoreButtonColor(u8 button)
-{
-    u16 index = GetButtonPalOffset(button);
-    gPlttBufferFaded[index] = gPlttBufferUnfaded[index];
-}
-
-static void StartButtonFlash(struct Task *task, u8 button, bool8 keepFlashing)
-{
-    task->tButtonId = button;
-    task->tKeepFlashing = keepFlashing;
-    task->tAllowFlash = TRUE;
-    task->tColor = 4;
-    task->tColorIncr = 2;
-    task->tColorDelay = 0;
-    task->tColorDelta = 4;
+        if (task->tButtonId != BUTTON_COUNT)
+            ApplyButtonPalette(task->tButtonId, FALSE);
+        if (button != BUTTON_COUNT)
+            ApplyButtonPalette(button, TRUE);
+        task->tButtonId = button;
+    }
+    task->tFeedbackFrames = transient ? 8 : 0;
 }
 
 #undef tButtonId
-#undef tColor
+#undef tFeedbackFrames
 
 // Sprite data for the the cursor
 #define sX          data[0]
@@ -1484,7 +1410,8 @@ static bool8 HandleKeyboardEvent(void)
 
 static bool8 KeyboardKeyHandler_Character(u8 input)
 {
-    TryStartButtonFlash(BUTTON_COUNT, FALSE, FALSE);
+    if (!gTasks[FindTaskIdByFunc(Task_ButtonHighlight)].data[1])
+        SetButtonHighlight(BUTTON_COUNT, FALSE);
     if (input == INPUT_A_BUTTON)
     {
         bool8 firstCharacter = sNamingScreen->textBuffer[0] == EOS;
@@ -1506,7 +1433,7 @@ static bool8 KeyboardKeyHandler_Character(u8 input)
 
 static bool8 KeyboardKeyHandler_Page(u8 input)
 {
-    TryStartButtonFlash(BUTTON_PAGE, TRUE, FALSE);
+    SetButtonHighlight(BUTTON_PAGE, FALSE);
     if (input == INPUT_A_BUTTON)
         return SwapKeyboardPage();
     else
@@ -1515,7 +1442,7 @@ static bool8 KeyboardKeyHandler_Page(u8 input)
 
 static bool8 KeyboardKeyHandler_Backspace(u8 input)
 {
-    TryStartButtonFlash(BUTTON_BACK, TRUE, FALSE);
+    SetButtonHighlight(BUTTON_BACK, FALSE);
     if (input == INPUT_A_BUTTON)
         DeleteTextCharacter();
     return FALSE;
@@ -1523,7 +1450,7 @@ static bool8 KeyboardKeyHandler_Backspace(u8 input)
 
 static bool8 KeyboardKeyHandler_OK(u8 input)
 {
-    TryStartButtonFlash(BUTTON_OK, TRUE, FALSE);
+    SetButtonHighlight(BUTTON_OK, FALSE);
     if (input == INPUT_A_BUTTON)
     {
         PlaySE(SE_SELECT);
@@ -1832,10 +1759,8 @@ static void DeleteTextCharacter(void)
     sNamingScreen->textBuffer[index] = EOS;
     keyRole = GetKeyRoleAtCursorPos();
 
-    // The below flashes the Back key once on delete
-    // It incorrectly leaves the Back key 1 shade lighter than its default
     if (keyRole == KEY_ROLE_CHAR || keyRole == KEY_ROLE_BACKSPACE)
-        TryStartButtonFlash(BUTTON_BACK, FALSE, TRUE);
+        SetButtonHighlight(BUTTON_BACK, keyRole == KEY_ROLE_CHAR);
     PlaySE(SE_BALL);
 }
 
@@ -1890,7 +1815,7 @@ static void LoadGfx(void)
 static void CreateHelperTasks(void)
 {
     CreateInputHandlerTask();
-    CreateButtonFlashTask();
+    gTasks[CreateTask(Task_ButtonHighlight, 3)].data[0] = BUTTON_COUNT;
 }
 
 static void LoadPalettes(void)
