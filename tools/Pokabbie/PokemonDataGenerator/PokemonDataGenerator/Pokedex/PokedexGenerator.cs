@@ -97,6 +97,9 @@ namespace PokemonDataGenerator.Pokedex
 
 				fullDexes.Add(GatherDexData("legends_za", "Legends Z-A", 9, "lumiose-city"));
 				fullDexes.Add(GatherDexData("legends_zafulldlc", "Legends Z-A + DLC", 9, "lumiose-city", "hyperspace"));
+				// National species from M-C plus announced M-D additions, closed over pre-evolutions.
+				// https://news.pokemon-home.com/en/page/816.html and /en/page/878.html
+				fullDexes.Add(GatherResourceDexData("extras_champions", "Champions", 9, "Champions.csv"));
 			}
 
 			Dictionary<string, List<PokedexData>> regionVariants = new Dictionary<string, List<PokedexData>>();

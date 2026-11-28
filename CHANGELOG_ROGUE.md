@@ -5,6 +5,8 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Set Champions (Special) as the default starting Pokédex for new games with Mega Evolution: 488 species from Regulation M-C, the announced December additions Heatran, Dondozo and Tatsugiri, and their pre-evolutions.
+
 - Fixed Birch blocking his lab entrance after the new-game introduction.
 
 - The outfit menu uses light grey for the missing back sprites notice.

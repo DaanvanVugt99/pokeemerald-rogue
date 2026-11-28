@@ -27,7 +27,8 @@ u8 RogueDexSelection_GetType(u8 variant)
     if (variant >= POKEDEX_VARIANT_NATIONAL_GEN1 && variant <= POKEDEX_VARIANT_NATIONAL_GEN9)
         return DEX_POOL_NATIONAL;
     if (variant == POKEDEX_VARIANT_ROGUE_MODERN || variant == POKEDEX_VARIANT_ROGUE_CLASSICPLUS
-     || variant == POKEDEX_VARIANT_EXTRAS_CONQUEST || variant == POKEDEX_VARIANT_EXTRAS_COLOSSEUM)
+     || variant == POKEDEX_VARIANT_EXTRAS_CONQUEST || variant == POKEDEX_VARIANT_EXTRAS_COLOSSEUM
+     || variant == POKEDEX_VARIANT_EXTRAS_CHAMPIONS)
         return DEX_POOL_SPECIAL;
     return DEX_POOL_REGIONAL;
 }
@@ -78,7 +79,7 @@ bool8 RogueDexSelection_Init(struct RoguePokedexSelection *selection, u64 allowe
     selection->allowed = allowed & (~0ULL >> (64 - POKEDEX_VARIANT_COUNT));
     if (intro)
         for (i = 0; i < POKEDEX_VARIANT_COUNT; ++i)
-            if (RogueDexSelection_GetType(i) == DEX_POOL_SPECIAL
+            if ((RogueDexSelection_GetType(i) == DEX_POOL_SPECIAL && i != POKEDEX_VARIANT_EXTRAS_CHAMPIONS)
              || RogueDexSelection_GetRegion(i) == DEX_REGION_HISUI)
                 selection->allowed &= ~(1ULL << i);
     selection->intro = intro;

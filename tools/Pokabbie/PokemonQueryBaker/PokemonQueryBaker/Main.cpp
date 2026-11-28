@@ -473,6 +473,15 @@ int main()
 #ifdef ROGUE_EXPANSION
 				familyRoot = GET_BASE_SPECIES_ID(familyRoot);
 
+				// Champions lists its pre-evolutions explicitly. A shared egg species
+				// must not admit unrelated branches (e.g. Bellossom via Oddish).
+				if (i == POKEDEX_VARIANT_EXTRAS_CHAMPIONS)
+				{
+				    if (VariantContainsSpecies(i, GET_BASE_SPECIES_ID(species)))
+				        SetBitFlag(species, TRUE, &bitFlags[0]);
+				    continue;
+				}
+
 				if (!IsRegionalFamilyApprovedForVariant(species, eggSpecies, i))
 					continue;
 #endif

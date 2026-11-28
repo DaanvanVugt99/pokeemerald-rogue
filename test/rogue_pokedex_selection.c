@@ -60,7 +60,7 @@ TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Cont
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), initialVariant);
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), initialItem);
     // Keep the default Pokédex and its native gimmick when accepting the revised draft.
-    EXPECT_EQ(before.pokedexVariant, POKEDEX_VARIANT_HOENN_ORAS);
+    EXPECT_EQ(before.pokedexVariant, POKEDEX_VARIANT_EXTRAS_CHAMPIONS);
     EXPECT(RogueDexSelection_Init(&selection, ALL_POOLS, before.pokedexVariant, ITEM_NONE, TRUE));
     EXPECT_EQ(RogueDexSelection_GetGimmick(&selection), ITEM_MEGA_RING);
     draft.pokedexVariant = selection.variant;
@@ -69,9 +69,9 @@ TEST("Pokemon pool: intro confirmation preserves drafts and commits only on Cont
     EXPECT(defaultBack);
     EXPECT(unchanged);
     EXPECT(duplicateRejected);
-    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_HOENN_ORAS);
+    EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_DEX_SELECTION), POKEDEX_VARIANT_EXTRAS_CHAMPIONS);
     EXPECT_EQ(VarGet(VAR_ROGUE_INITIAL_GIMMICK_ITEM), ITEM_MEGA_RING);
-    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_HOENN_ORAS);
+    EXPECT_EQ(RoguePokedex_GetDexVariant(), POKEDEX_VARIANT_EXTRAS_CHAMPIONS);
     Rogue_CopyAdventureConfig(&after);
     EXPECT_EQ(after.overworldMons, draft.overworldMons);
     EXPECT_EQ(after.battleFormat, draft.battleFormat);
@@ -110,6 +110,26 @@ TEST("Pokemon pool: every roster is reachable under its category")
     }
 }
 
+TEST("Pokemon pool: Champions starter dex includes confirmed lines and excludes sibling branches")
+{
+    const u8 variant = POKEDEX_VARIANT_EXTRAS_CHAMPIONS;
+    struct RoguePokedexSelection selection;
+    EXPECT(RogueDexSelection_Init(&selection, CuratedPools(), variant, ITEM_NONE, TRUE));
+    EXPECT_EQ(selection.variant, variant);
+    EXPECT_EQ(RogueDexSelection_GetType(variant), DEX_POOL_SPECIAL);
+    EXPECT_EQ(RogueDexSelection_GetGimmick(&selection), ITEM_MEGA_RING);
+    EXPECT_EQ(gPokedexVariants[variant].speciesCount, 488);
+    RoguePokedex_SetDexVariant(variant);
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_BULBASAUR));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_IVYSAUR));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_VENUSAUR));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_MEOWTH_GALARIAN));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_HEATRAN));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_DONDOZO));
+    EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_TATSUGIRI));
+    EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_BELLOSSOM));
+}
+
 TEST("Pokemon pool: curated navigation never exposes excluded rosters")
 {
     struct RoguePokedexSelection selection;
@@ -127,14 +147,15 @@ TEST("Pokemon pool: curated navigation never exposes excluded rosters")
                 {
                     RogueDexSelection_Cycle(&selection, field, direction);
                     EXPECT(allowed & POOL_BIT(selection.variant));
-                    EXPECT_NE(RogueDexSelection_GetType(selection.variant), DEX_POOL_SPECIAL);
+                    if (RogueDexSelection_GetType(selection.variant) == DEX_POOL_SPECIAL)
+                        EXPECT_EQ(selection.variant, POKEDEX_VARIANT_EXTRAS_CHAMPIONS);
                     EXPECT_NE(RogueDexSelection_GetRegion(selection.variant), DEX_REGION_HISUI);
                 }
             }
     }
     EXPECT(RogueDexSelection_Init(&selection, allowed, POKEDEX_VARIANT_NONE, ITEM_NONE, TRUE));
     EXPECT_EQ(selection.variant, POKEDEX_VARIANT_KANTO_RBY);
-    EXPECT_EQ(RogueDexSelection_GetChoices(&selection, DEX_FIELD_TYPE, choices), 2);
+    EXPECT_EQ(RogueDexSelection_GetChoices(&selection, DEX_FIELD_TYPE, choices), 3);
     EXPECT(RogueDexSelection_Init(&selection, allowed, POKEDEX_VARIANT_EXTRAS_COLOSSEUM, ITEM_NONE, FALSE));
     EXPECT_EQ(selection.variant, POKEDEX_VARIANT_EXTRAS_COLOSSEUM);
     EXPECT_EQ(RogueDexSelection_GetChoices(&selection, DEX_FIELD_TYPE, choices), 3);
@@ -196,7 +217,7 @@ TEST("Pokemon pool: every intro choice saves the previewed pool and gimmick")
     Rogue_CopyAdventureConfig(&before);
     for (v = 0; v < POKEDEX_VARIANT_COUNT; ++v)
     {
-        if (!RoguePokedex_IsCuratedVariant(v) || RogueDexSelection_GetType(v) == DEX_POOL_SPECIAL
+        if (!RoguePokedex_IsCuratedVariant(v) || (RogueDexSelection_GetType(v) == DEX_POOL_SPECIAL && v != POKEDEX_VARIANT_EXTRAS_CHAMPIONS)
          || RogueDexSelection_GetRegion(v) == DEX_REGION_HISUI) continue;
         EXPECT(RogueDexSelection_Init(&selection, CuratedPools(), v, ITEM_NONE, TRUE));
         for (gimmick = 0; gimmick < 5; ++gimmick)

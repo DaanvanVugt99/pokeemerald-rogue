@@ -5397,6 +5397,7 @@ static const u8 sCuratedPokedexPaldea[] =
 static const u8 sCuratedPokedexExtras[] =
 {
     POKEDEX_VARIANT_EXTRAS_COLOSSEUM,
+    POKEDEX_VARIANT_EXTRAS_CHAMPIONS,
 };
 
 static const u8 sCuratedPokedexNational[] =
@@ -5451,6 +5452,7 @@ bool8 RoguePokedex_IsCuratedVariant(u8 variant)
     case POKEDEX_VARIANT_PALDEA_SCVI:
     case POKEDEX_VARIANT_PALDEA_FULLDLC:
     case POKEDEX_VARIANT_EXTRAS_LEGENDSARCEUS:
+    case POKEDEX_VARIANT_EXTRAS_CHAMPIONS:
     case POKEDEX_VARIANT_EXTRAS_COLOSSEUM:
     case POKEDEX_VARIANT_NATIONAL_GEN1:
     case POKEDEX_VARIANT_NATIONAL_GEN2:
@@ -5482,6 +5484,7 @@ u16 RoguePokedex_GetNativeGimmickItem(u8 variant)
     case POKEDEX_VARIANT_KALOS:
     case POKEDEX_VARIANT_LEGENDS_ZA:
     case POKEDEX_VARIANT_LEGENDS_ZAFULLDLC:
+    case POKEDEX_VARIANT_EXTRAS_CHAMPIONS:
         return ITEM_MEGA_RING;
     case POKEDEX_VARIANT_ALOLA_SM:
     case POKEDEX_VARIANT_ALOLA_USUM:
@@ -5604,8 +5607,8 @@ void RoguePokedex_ApplyTrainerPoolForVariant(u8 variant)
     ClearTrainerPool();
 
 #ifdef ROGUE_EXPANSION
-    if (variant >= POKEDEX_VARIANT_NATIONAL_GEN1
-        && variant <= POKEDEX_VARIANT_NATIONAL_GEN9)
+    if (POKEDEX_VARIANT_EXTRAS_CHAMPIONS == variant || (variant >= POKEDEX_VARIANT_NATIONAL_GEN1
+        && variant <= POKEDEX_VARIANT_NATIONAL_GEN9))
     {
         u8 genLimit = GetVariantGenLimit(variant);
 

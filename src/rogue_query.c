@@ -1112,6 +1112,8 @@ static bool8 Query_IsSpeciesEnabledInternal(u16 species, bool32 forceDexCheck)
 
             if(species == SPECIES_FLOETTE_ETERNAL_FLOWER)
             {
+                if(RoguePokedex_GetDexVariant() == POKEDEX_VARIANT_EXTRAS_CHAMPIONS)
+                    return TRUE;
                 if(RoguePokedex_GetDexRegion() == POKEDEX_REGION_LEGENDS
                     && (RoguePokedex_GetDexVariant() == POKEDEX_VARIANT_LEGENDS_ZA
                         || RoguePokedex_GetDexVariant() == POKEDEX_VARIANT_LEGENDS_ZAFULLDLC))
