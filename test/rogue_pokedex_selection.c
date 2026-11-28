@@ -4,6 +4,7 @@
 #include "rogue_controller.h"
 #include "rogue_pokedex.h"
 #include "rogue_pokedex_selection.h"
+#include "rogue_query.h"
 #include "rogue_run_start.h"
 #include "rogue_settings.h"
 #include "rogue_trials.h"
@@ -127,7 +128,7 @@ TEST("Pokemon pool: Champions starter dex includes confirmed lines and excludes 
     EXPECT_EQ(selection.variant, variant);
     EXPECT_EQ(RogueDexSelection_GetType(variant), DEX_POOL_SPECIAL);
     EXPECT_EQ(RogueDexSelection_GetGimmick(&selection), ITEM_MEGA_RING);
-    EXPECT_EQ(gPokedexVariants[variant].speciesCount, 488);
+    EXPECT_EQ(gPokedexVariants[variant].speciesCount, 496);
     RoguePokedex_SetDexVariant(variant);
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_BULBASAUR));
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_IVYSAUR));
@@ -137,6 +138,31 @@ TEST("Pokemon pool: Champions starter dex includes confirmed lines and excludes 
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_DONDOZO));
     EXPECT(RoguePokedex_IsSpeciesEnabled(SPECIES_TATSUGIRI));
     EXPECT(!RoguePokedex_IsSpeciesEnabled(SPECIES_BELLOSSOM));
+}
+
+TEST("Pokemon pool: Champions legendary encounters have three box, seven minor and five roamer candidates")
+{
+    static const u16 guests[] = { SPECIES_MEWTWO, SPECIES_ZYGARDE, SPECIES_LATIAS, SPECIES_LATIOS,
+        SPECIES_DIANCIE, SPECIES_DARKRAI, SPECIES_ZERAORA, SPECIES_VOLCANION };
+    u32 i, box = 0, minor = 0, roamers = 0;
+    RoguePokedex_SetDexVariant(POKEDEX_VARIANT_EXTRAS_CHAMPIONS);
+    for (i = 0; i < ARRAY_COUNT(guests); ++i)
+        EXPECT(Query_IsSpeciesEnabledForceDexChecking(guests[i]));
+    for (i = 0; i < gRogueLegendaryEncounterInfo.mapCount; ++i)
+    {
+        u16 species = gRogueLegendaryEncounterInfo.mapTable[i].encounterId;
+        if (!Query_IsSpeciesEnabledForceDexChecking(species))
+            continue;
+        if (RoguePokedex_IsSpeciesValidBoxLegendary(species))
+            ++box;
+        else
+            ++minor;
+        if (RoguePokedex_IsSpeciesValidRoamerLegendary(species))
+            ++roamers;
+    }
+    EXPECT_EQ(box, 3);
+    EXPECT_EQ(minor, 7);
+    EXPECT_EQ(roamers, 5);
 }
 
 TEST("Pokemon pool: curated navigation never exposes excluded rosters")
