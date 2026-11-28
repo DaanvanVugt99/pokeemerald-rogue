@@ -1229,7 +1229,7 @@ text gHubUpgradeDesc_Lab_UniqueMonTyping
 
 text gHubUpgradeDesc_AdventureEntrance_RandomStarter
 {
-    format("Starter {PKMN} can be randomised when embarking on Runs.")
+    format("Choose a random partner for your next run.")
 }
 
 text gHubUpgradeDesc_AdventureEntrance_AdventureReplay

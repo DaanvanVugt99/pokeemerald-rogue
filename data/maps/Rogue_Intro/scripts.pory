@@ -200,9 +200,7 @@ script Rogue_PreIntro
     bufferstring(STR_VAR_1, gText_RogueVersion)
     bufferstring(STR_VAR_3, gText_RogueVersionSuffix)
 
-    msgbox(format("{COLOR BLUE}Welcome to Emerald Rogue:\nDivergence!\p{STR_VAR_1} {STR_VAR_3}\pLet's get your Adventure set up!"))
-
-    msgbox(format("{COLOR BLUE}Choose your starting settings. You can change these later, except your Pokédex.\pYour Pokédex determines which Pokémon you can encounter and choose as your first partner. You can't change it until you become Champion."))
+    msgbox(format("{COLOR BLUE}Welcome to Emerald Rogue:\nDivergence!\p{STR_VAR_1} {STR_VAR_3}"))
     setvar(VAR_RESULT, NO)
     while(var(VAR_RESULT) == NO)
     {

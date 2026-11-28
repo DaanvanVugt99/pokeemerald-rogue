@@ -829,7 +829,11 @@ script Rogue_ReturnAdventureInternal
     lockall
     turnobject(OBJ_EVENT_ID_PLAYER, DIR_NORTH)
 
-    msgbox(format("Welcome back {PLAYER}!"), MSGBOX_DEFAULT)
+    if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
+    {
+        msgbox(format("There you are, {PLAYER}! Your hub team is safe, and your Bag is just as you packed it."))
+    }
+    else { msgbox(format("Welcome back {PLAYER}!"), MSGBOX_DEFAULT) }
 
     special(Rogue_RunRewardMoney)
     copyvar(VAR_0x8000, VAR_RESULT)
@@ -900,7 +904,7 @@ script Rogue_ReturnAdventureInternal
             waitfanfare
         }
     }
-    else
+    elif(var(VAR_ROGUE_INTRO_STATE) != ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
         msgbox(format("No Adventure rewards this time.\pStill, it's good to have you back."))
     }
@@ -945,8 +949,7 @@ script Rogue_ReturnAdventureInternal
 
     if(var(VAR_ROGUE_INTRO_STATE) == ROGUE_INTRO_STATE_LEARN_TO_BUILD)
     {
-        msgbox(format("Your hub team and Bag are back as you left them, with any rewards added.\pDon't forget the Quest Board—you can collect rewards there for Quests you've finished."))
-        msgbox(format("The builder's waiting for you in the Main Hall. Go and see him next.\pHe's saved you some Building Supplies and wants to show you how to build new rooms."))
+        msgbox(format("The builder's waiting for you in the Main Hall. He's set aside some supplies for your first project."))
     }
     else
     {

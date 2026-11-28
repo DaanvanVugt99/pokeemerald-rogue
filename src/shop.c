@@ -120,6 +120,7 @@ struct MartInfo
     u8 windowId;
     u8 martType;
     bool8 anythingBought;
+    bool8 builtStarterChoice;
     bool8 usesRecipeCurrency;
     bool8 skipInitialMenu;
     bool8 closeOnBuyMenuExit;
@@ -557,6 +558,7 @@ static void ResetMartInfo()
     sMartInfo.closeOnBuyMenuExit = FALSE;
     sMartInfo.minPrice = 0;
     sMartInfo.anythingBought = FALSE;
+    sMartInfo.builtStarterChoice = FALSE;
     sMartInfo.listItemCallback = NULL;
     sMartInfo.listItemData = NULL;
     sMartInfo.prevShopItemBits = NULL;
@@ -681,7 +683,9 @@ static void Task_HandleShopMenuQuit(u8 taskId)
         RogueQuest_OnTrigger(QUEST_TRIGGER_MISC_UPDATE);
     }
 
-    if(sMartInfo.anythingBought)
+    if (sMartInfo.dynamicMartCategory == ROGUE_SHOP_TUTORIAL_WORKBENCH && sMartInfo.builtStarterChoice)
+        VarSet(VAR_RESULT, WORKBENCH_BUILT_STARTER_CHOICE);
+    else if(sMartInfo.anythingBought)
         VarSet(VAR_RESULT, TRUE);
     else
         VarSet(VAR_RESULT, FALSE);
@@ -774,6 +778,19 @@ static void CB2_InitBuyMenu(void)
         sShopData->itemSpriteIds[0] = SPRITE_NONE;
         sShopData->itemSpriteIds[1] = SPRITE_NONE;
         BuyMenuBuildListMenuTemplate();
+        if (sMartInfo.dynamicMartCategory == ROGUE_SHOP_TUTORIAL_WORKBENCH)
+        {
+            u16 i;
+            for (i = 0; i < sMartInfo.itemCount; ++i)
+            {
+                if (sListMenuItems[i].id == HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER)
+                {
+                    sShopData->selectedRow = min(i, sShopData->itemsShowed - 1);
+                    sShopData->scrollOffset = i - sShopData->selectedRow;
+                    break;
+                }
+            }
+        }
         BuyMenuInitBgs();
         FillBgTilemapBufferRect_Palette0(0, 0, 0, 0, 0x20, 0x20);
         FillBgTilemapBufferRect_Palette0(1, 0, 0, 0, 0x20, 0x20);
@@ -791,7 +808,7 @@ static void CB2_InitBuyMenu(void)
         BuyMenuDrawGraphics();
         BuyMenuAddScrollIndicatorArrows();
         taskId = CreateTask(Task_BuyMenu, 8);
-        gTasks[taskId].tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, 0, 0);
+        gTasks[taskId].tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, sShopData->scrollOffset, sShopData->selectedRow);
         BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
         SetVBlankCallback(VBlankCB_BuyMenu);
@@ -2128,8 +2145,10 @@ void CreateDynamicPokemartMenu(const u16 category)
     CheckPokemartState();
     ResetMartInfo();
 
-    if(category == ROGUE_SHOP_HUB_UPGRADES)
+    if(ROGUE_SHOP_GET_CATEGORY(category) == ROGUE_SHOP_HUB_UPGRADES)
     {
+        sMartInfo.skipInitialMenu = category == ROGUE_SHOP_TUTORIAL_WORKBENCH;
+        sMartInfo.closeOnBuyMenuExit = sMartInfo.skipInitialMenu;
         CreateShopMenu(MART_TYPE_HUB_UPGRADES, TRUE);
         SetShopItemsFromCallback(HubUpgradeShopItemListCallback, HUB_UPGRADE_NONE, NULL);
         sMartInfo.dynamicMartCategory = category;
@@ -2420,6 +2439,8 @@ static bool8 BuyShopItem(u16 item, u16 count)
     else if (sMartInfo.martType == MART_TYPE_HUB_UPGRADES)
     {
         RogueHub_SetUpgrade(item, TRUE);
+        if (item == HUB_UPGRADE_ADVENTURE_ENTRANCE_RANDOM_STARTER)
+            sMartInfo.builtStarterChoice = TRUE;
         return TRUE;
     }
     else

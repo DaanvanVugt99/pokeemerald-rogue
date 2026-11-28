@@ -53,21 +53,9 @@ script Rogue_Interior_ProfLab_FrameState0
     applymovement(OBJ_EVENT_ID_PLAYER, Common_Movement_FaceUp)
     waitmovement(0)
 
-    msgbox(format("BIRCH: Well, that wasn't how I planned to find you a partner!\pBut look at you two. I think you'll make a fine team out there."))
-    call(Rogue_Interior_ProfLab_ExplainDiscoveries)
-    msgbox(format("Now, look after that team. Under the base rules, fainted Pokémon leave your party. If they all faint, the Adventure ends.\pWhen you return, you'll have your hub team and Bag back, with any Adventure rewards added.\pYou can read Base rules at the Adventure Console before you set off."))
-    msgbox(format("Shall I explain a little more about what happens to your Pokémon and Bag when you return?"), MSGBOX_YESNO)
-
-    if(var(VAR_RESULT) == YES)
-    {
-        call(Rogue_Interior_ProfLab_TalkBirch_AdventureExplain)
-    }
-    else
-    {
-        msgbox(format("Another time, then. Come and ask me about Adventures whenever you like."))
-    }
-
-    msgbox(format("Oh, before I forget!\nYou'll want these for the road."))
+    msgbox(format("BIRCH: Well, that wasn't how I planned to find you a partner! You two did look out for each other, though.\pThe routes beyond our portal keep changing. That's what we're here to study. I'd like you and your new partner to explore them for us!"))
+    msgbox(format("If a Pokémon faints out there, it leaves your party. If your whole team faints, the Adventure ends.\pWhen you come home, you'll have your hub team and Bag back, along with any rewards you earned."))
+    msgbox(format("Here. A few things for the road!"))
     giveitem(ITEM_POKE_BALL, 10)
     giveitem(ITEM_POTION, 5)
 
@@ -75,25 +63,22 @@ script Rogue_Interior_ProfLab_FrameState0
 
     if(var(VAR_RESULT) != ITEM_NONE)
     {
-        msgbox(format("Oh, and take this along, too!\pIt might come in handy on your Adventures."), MSGBOX_DEFAULT)
         call(Rogue_Common_DisplayPopups)
     }
 
-    msgbox(format("And there's one more thing...\nYour very own Pokédex!"))
-    
     if(flag(FLAG_SYS_POKEDEX_GET))
     {
         msgbox(format("Oh? Pokabbie gave you one already?\pHmhm! One step ahead of me!"))
     }
     else
     {
+        msgbox(format("And this is your Pokédex! If you're curious about a Pokémon you meet, have a look in here."))
         callnative(Rogue_PushPopup_UnlockPokedex)
         call(Rogue_Common_DisplayPopups)
         setflag(FLAG_SYS_POKEDEX_GET)
     }
     setflag(FLAG_SYS_POKEMON_GET)
 
-    msgbox(format("There's plenty to read in that Pokédex—stats, moves, even how your Pokémon evolve.\pGo and see the nurse at the Adventure Gate next. She's got a Quest Book for you."))
     closemessage
 
     addvar(VAR_ROGUE_INTRO_STATE, 1)
@@ -112,17 +97,16 @@ script Rogue_Interior_ProfLab_FrameState0
         setflag(FLAG_SYS_SHOW_POKE_FOLLOWER)
         special(Rogue_SetupFollowParterMonObjectEvent)
 
-        setvar(VAR_0x8004, 0)
-        special(BufferMonNickname)
-        msgbox(format("{STR_VAR_1} looks so happy!"))
+        msgbox(format("I think you two are going to get along."))
     }
     else
     {
         clearflag(FLAG_SYS_SHOW_POKE_FOLLOWER)
         special(Rogue_SetupFollowParterMonObjectEvent)
 
-        msgbox(format("Oh…\nIf you change your mind, just let me know."))
+        msgbox(format("Of course. If you change your mind, come see me."))
     }
+    msgbox(format("The nurse at the Adventure Gate has your Quest Book. Go see her when you're ready to set off!"))
     closemessage
 
     applymovement(OBJ_EVENT_ASSISTANT, IntroAssistant1)
@@ -148,15 +132,26 @@ script Rogue_Interior_ProfLab_TalkBirch
 {
     lock
     faceplayer
-    msgbox(format("BIRCH: Ah, {PLAYER}!\nGood to see you!\pWould you like to hear about Adventures?"), MSGBOX_YESNO)
+    begindynamicmultichoice
+    appenddynamicmultichoice("My team and Bag", 0)
+    appenddynamicmultichoice("Unique Pokémon", 1)
+    appenddynamicmultichoice("Treasure rooms", 2)
+    appenddynamicmultichoice("Nothing for now", MULTI_B_PRESSED)
+    message(format("BIRCH: Ah, {PLAYER}! What would you like to know?"))
+    waitmessage
+    enddynamicmultichoice(1, 0, 4, TRUE)
 
-    if(var(VAR_RESULT) == YES)
+    switch(var(VAR_RESULT))
     {
-        call(Rogue_Interior_ProfLab_ExplainDiscoveries)
-        call(Rogue_Interior_ProfLab_TalkBirch_AdventureExplain)
+        case 0:
+            call(Rogue_Interior_ProfLab_TalkBirch_AdventureExplain)
+        case 1:
+            msgbox(format("Some Pokémon out there have moves or Abilities I'd never expect from their species. We call them Unique Pokémon. Keep an eye out for their habitats on the Adventure map!"))
+        case 2:
+            msgbox(format("If you find a Treasure room, read the pedestal before you take the item. Some treasures give you an advantage, but ask you to give something up in return."))
+        default:
+            msgbox(format("Good luck out there, {PLAYER}!"))
     }
-
-
     release
 }
 
@@ -195,18 +190,12 @@ script Rogue_Interior_ProfLab_TalkAssistant
     release
 }
 
-script Rogue_Interior_ProfLab_ExplainDiscoveries
-{
-    msgbox(format("Some Pokémon beyond the portal have moves or Abilities I'd never expect from their species. We call them Unique Pokémon!\pLook for their habitats on the Adventure map. I'd love to see what you find."))
-    msgbox(format("And don't walk past the Treasure rooms! Their items can be a real help in battle.\pOne boosts attacking moves but stops you using status moves. Read the pedestal's description before you take anything."))
-}
-
 script Rogue_Interior_ProfLab_TalkBirch_AdventureExplain
 {
     setvar(VAR_0x8004, STARTER_MON_LEVEL)
     buffernumberstring(STR_VAR_1, VAR_0x8004)
     msgbox(format("Here's an odd thing: on Standard Adventures, your Pokémon start at Lv.{STR_VAR_1}, but remember their moves!\pBack home, they'll have their original levels and moves again, plus any level rewards."))
-    msgbox(format("The Pokémon you catch can join the Safari Lab—just bring them back in your party.\pYour Bag goes back to what was in it before you left. The Adventure rewards are added on top."))
+    msgbox(format("Pokémon you catch on an Adventure can appear in the Safari Lab, even if it leaves your party before you come home.\pYour Bag goes back to what was in it before you left. The Adventure rewards are added on top."))
 }
 
 script Rogue_Interior_ProfLab_TriggerIntro0

@@ -5,6 +5,10 @@ This file tracks project-specific work on this fork. Keep upstream
 
 Format follows Keep a Changelog loosely:
 
+- Restored the white Pokémon name and category text on the starter bag.
+- The first return reassures players about their team and Bag before rewards. The builder gives three Building Supplies and introduces Starter Choice as an optional first upgrade.
+- Shortened Birch’s post-catch briefing, moved extra advice into optional topics, and clarified how catches reach the Safari Lab. The assistant now gives directions after the follower choice.
+- New games open Game Setup directly after the welcome and version.
 - Darkened the naming-screen portrait shadow and gave the selected keyboard action a steady amber frame. Added spacing between button icons and labels in the top legend.
 - Limited new-game Pokédex selection to Champions and Gen III National with left/right controls. Becoming Champion unlocks the full selector.
 - Set Champions (Special) as the default starting Pokédex for new games with Mega Evolution: 488 species from Regulation M-C, the announced December additions Heatran, Dondozo and Tatsugiri, and their pre-evolutions.

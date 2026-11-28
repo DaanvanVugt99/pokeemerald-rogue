@@ -97,7 +97,7 @@ static const struct WindowTemplate sWindowTemplate_StarterLabel =
     .tilemapTop = 0,
     .width = 13,
     .height = 4,
-    .paletteNum = 14,
+    .paletteNum = 12,
     .baseBlock = 0x0274
 };
 
@@ -144,6 +144,13 @@ static const struct BgTemplate sBgTemplates[3] =
         .priority = 1,
         .baseTile = 0
     },
+};
+
+// Original label colors, independent of the dialogue window theme.
+static const u16 sStarterLabelPalette[] =
+{
+    [TEXT_COLOR_WHITE] = RGB(31, 31, 31),
+    [TEXT_COLOR_LIGHT_GRAY] = RGB(26, 26, 25),
 };
 
 static const u8 sTextColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_LIGHT_GRAY};
@@ -426,6 +433,7 @@ void CB2_ChooseStarter(void)
     LoadPalette(gBirchBagGrass_Pal, BG_PLTT_ID(0), sizeof(gBirchBagGrass_Pal));
     LoadCompressedSpriteSheet(&sSpriteSheet_PokeballSelect[0]);
     LoadCompressedSpriteSheet(&sSpriteSheet_StarterCircle[0]);
+    LoadPalette(sStarterLabelPalette, BG_PLTT_ID(sWindowTemplate_StarterLabel.paletteNum), sizeof(sStarterLabelPalette));
     LoadSpritePalettes(sSpritePalettes_StarterChoose);
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_BLACK);
 
